@@ -1,0 +1,17 @@
+[package]
+name = "cap-std"
+version = "0.0.0"
+description = "Capability-based version of the Rust standard library"
+authors = ["Dan Gohman <sunfish@mozilla.com>"]
+license = "Apache-2.0 WITH LLVM-exception"
+keywords = ["std"]
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+
+[target.'cfg(unix)'.dependencies]
+yanix = "0.16.0"
+
+[target.'cfg(windows)'.dependencies]
+winx = "0.16.0"
