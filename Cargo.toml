@@ -9,6 +9,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
+ipnet = "2.3.0"
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.16.0"

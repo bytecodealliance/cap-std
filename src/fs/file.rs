@@ -1,7 +1,7 @@
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::unix::io::{AsRawHandle, FromRawHandle, RawHandle};
+use std::os::unix::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{fs, io, process};
 
 /// A reference to an open file on the filesystem.
@@ -93,7 +93,21 @@ impl AsRawFd for File {
 #[cfg(windows)]
 impl AsRawHandle for File {
     fn as_raw_handle(&self) -> RawHandle {
-        self.fd.as_raw_handle()
+        self.file.as_raw_handle()
+    }
+}
+
+#[cfg(unix)]
+impl IntoRawFd for File {
+    fn into_raw_fd(self) -> RawFd {
+        self.file.into_raw_fd()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandle for File {
+    fn into_raw_handle(self) -> RawHandle {
+        self.file.into_raw_handle()
     }
 }
 

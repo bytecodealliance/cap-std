@@ -17,3 +17,8 @@
 #![allow(unused_variables, dead_code)]
 
 pub mod fs;
+pub mod net;
+
+// TODO: ChildStderr, ChildStdout, Stdin, StdinLock
+
+// TODO: ChildStdin, Stdout, Stderr

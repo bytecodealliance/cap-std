@@ -13,7 +13,7 @@
 //!
 //! [`std::fs`]: https://doc.rust-lang.org/std/fs/index.html
 //! [`std::fs`'s free functions]: https://doc.rust-lang.org/std/fs/index.html#functions
-//! [`DIR`]: struct.Dir.html
+//! [`Dir`]: struct.Dir.html
 
 mod dir;
 mod dir_builder;

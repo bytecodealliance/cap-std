@@ -1,8 +1,8 @@
 use crate::fs::{File, Metadata, OpenOptions, Permissions, ReadDir};
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::unix::io::{AsRawHandle, FromRawHandle, RawHandle};
+use std::os::unix::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -334,6 +334,20 @@ impl AsRawFd for Dir {
 impl AsRawHandle for Dir {
     fn as_raw_handle(&self) -> RawHandle {
         self.file.as_raw_handle()
+    }
+}
+
+#[cfg(unix)]
+impl IntoRawFd for Dir {
+    fn into_raw_fd(self) -> RawFd {
+        self.file.into_raw_fd()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandle for Dir {
+    fn into_raw_handle(self) -> RawHandle {
+        self.file.into_raw_handle()
     }
 }
 
