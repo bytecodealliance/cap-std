@@ -13,6 +13,7 @@ pub struct Incoming<'a> {
 
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::Incoming`.
+    #[inline]
     pub fn from_ambient(incoming: unix::net::Incoming<'a>) -> Self {
         Self { incoming }
     }
@@ -21,12 +22,14 @@ impl<'a> Incoming<'a> {
 impl<'a> Iterator for Incoming<'a> {
     type Item = io::Result<UnixStream>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.incoming
             .next()
             .map(|result| result.map(UnixStream::from_ambient))
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.incoming.size_hint()
     }

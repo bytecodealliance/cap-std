@@ -19,17 +19,15 @@ mod dir;
 mod dir_builder;
 mod dir_entry;
 mod file;
-mod file_type;
 mod open_options;
-mod readdir;
+mod read_dir;
 
 pub use dir::*;
 pub use dir_builder::*;
 pub use dir_entry::*;
 pub use file::*;
-pub use file_type::*;
 pub use open_options::*;
-pub use readdir::*;
+pub use read_dir::*;
 
 // Re-export things from std::fs that we can use as-is.
-pub use std::fs::{Metadata, Permissions};
+pub use std::fs::{FileType, Metadata, Permissions};

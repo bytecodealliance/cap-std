@@ -22,6 +22,7 @@ pub struct TcpListener {
 
 impl TcpListener {
     /// Constructs a new instance of `Self` from the given `std::net::TcpListener`.
+    #[inline]
     pub fn from_ambient(tcp_listener: net::TcpListener) -> Self {
         Self { tcp_listener }
     }
@@ -31,6 +32,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::local_addr`].
     ///
     /// [`std::net::TcpListener::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.local_addr
+    #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.tcp_listener.local_addr()
     }
@@ -40,6 +42,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::try_clone`].
     ///
     /// [`std::net::TcpListener::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.try_clone
+    #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         Ok(Self::from_ambient(self.tcp_listener.try_clone()?))
     }
@@ -49,6 +52,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::accept`].
     ///
     /// [`std::net::TcpListener::accept`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.accept
+    #[inline]
     pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
         self.tcp_listener
             .accept()
@@ -60,6 +64,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::incoming`].
     ///
     /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
+    #[inline]
     pub fn incoming(&self) -> Incoming {
         Incoming::from_ambient(self.tcp_listener.incoming())
     }
@@ -69,6 +74,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::set_ttl`].
     ///
     /// [`std::net::TcpListener::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_ttl
+    #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.tcp_listener.set_ttl(ttl)
     }
@@ -78,6 +84,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::ttl`].
     ///
     /// [`std::net::TcpListener::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.ttl
+    #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
         self.tcp_listener.ttl()
     }
@@ -87,6 +94,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::take_error`].
     ///
     /// [`std::net::TcpListener::take_error`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.take_error
+    #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.tcp_listener.take_error()
     }
@@ -96,6 +104,7 @@ impl TcpListener {
     /// This corresponds to [`std::net::TcpListener::set_nonblocking`].
     ///
     /// [`std::net::TcpListener::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_nonblocking
+    #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
         self.tcp_listener.set_nonblocking(nonblocking)
     }

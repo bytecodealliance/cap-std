@@ -11,12 +11,17 @@
 //! TODO: should try_clone methods require a capability?
 //! TODO: `std::process::Command`
 //!
+//! TODO: Rust's `Path` has several ambient-authority methods: `metadata`,
+//! `read_link`, `read_dir`, `symlink_metadata`, `canonicalize`. Is it
+//! worth having our own version of `Path` just to exclude those? Such a
+//! thing could also exclude absolute paths.
+//!
 //! On WASI, use of this library more closely reflects the underlying
 //! system API, so it avoids the absolute-path compatibility layers.
 //!
 //! [`std`]: https://doc.rust-lang.org/std/index.html
 
-#![allow(unused_variables, dead_code)] // TODO: When more things are implemented, remove these.
+#![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
 
 pub mod fs;

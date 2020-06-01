@@ -9,13 +9,14 @@
 /// [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::open_file_with`]: struct.Dir.html#method.open_file_with
+#[derive(Debug)]
 pub struct OpenOptions {
-    pub(crate) read: bool,
-    pub(crate) write: bool,
-    pub(crate) append: bool,
-    pub(crate) truncate: bool,
-    pub(crate) create: bool,
-    pub(crate) create_new: bool,
+    read: bool,
+    write: bool,
+    append: bool,
+    truncate: bool,
+    create: bool,
+    create_new: bool,
 }
 
 impl OpenOptions {
@@ -25,6 +26,7 @@ impl OpenOptions {
     ///
     /// [`std::fs::OpenOptions::new`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.new
     #[allow(clippy::new_without_default)]
+    #[inline]
     pub fn new() -> Self {
         Self {
             read: false,
@@ -41,6 +43,7 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::read`].
     ///
     /// [`std::fs::OpenOptions::read`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.read
+    #[inline]
     pub fn read(&mut self, read: bool) -> &mut Self {
         self.read = read;
         self
@@ -51,6 +54,7 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::write`].
     ///
     /// [`std::fs::OpenOptions::write`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.write
+    #[inline]
     pub fn write(&mut self, write: bool) -> &mut Self {
         self.write = write;
         self
@@ -61,6 +65,7 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::append`].
     ///
     /// [`std::fs::OpenOptions::append`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.append
+    #[inline]
     pub fn append(&mut self, append: bool) -> &mut Self {
         self.append = append;
         self
@@ -71,6 +76,7 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::truncate`].
     ///
     /// [`std::fs::OpenOptions::truncate`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.truncate
+    #[inline]
     pub fn truncate(&mut self, truncate: bool) -> &mut Self {
         self.truncate = truncate;
         self
@@ -81,6 +87,7 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::create`].
     ///
     /// [`std::fs::OpenOptions::create`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.create
+    #[inline]
     pub fn create(&mut self, create: bool) -> &mut Self {
         self.create = create;
         self
@@ -91,10 +98,11 @@ impl OpenOptions {
     /// This corresponds to [`std::fs::OpenOptions::create_new`].
     ///
     /// [`std::fs::OpenOptions::create_new`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.create_new
+    #[inline]
     pub fn create_new(&mut self, create_new: bool) -> &mut Self {
         self.create_new = create_new;
         self
     }
 }
 
-// TODO: Functions from OpenOptionsExt?
+// TODO: impl OpenOptionsExt for OpenOptions

@@ -4,7 +4,8 @@ version = "0.0.0"
 description = "Capability-based version of the Rust standard library"
 authors = ["Dan Gohman <sunfish@mozilla.com>"]
 license = "Apache-2.0 WITH LLVM-exception"
-keywords = ["std"]
+keywords = ["std", "api", "network", "file"]
+categories = ["filesystem", "network-programming"]
 edition = "2018"
 readme = "README.md"
 
@@ -16,3 +17,6 @@ yanix = "0.16.0"
 
 [target.'cfg(windows)'.dependencies]
 winx = "0.16.0"
+
+[badges]
+maintenance = { status = "actively-developed" }

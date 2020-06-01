@@ -22,6 +22,7 @@ pub struct File {
 
 impl File {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    #[inline]
     pub fn from_ambient(file: fs::File) -> Self {
         Self { file }
     }
@@ -31,6 +32,7 @@ impl File {
     /// This corresponds to [`std::fs::File::sync_all`].
     ///
     /// [`std::fs::File::sync_all`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_all
+    #[inline]
     pub fn sync_all(&self) -> io::Result<()> {
         self.file.sync_all()
     }
@@ -41,6 +43,7 @@ impl File {
     /// This corresponds to [`std::fs::File::sync_data`].
     ///
     /// [`std::fs::File::sync_data`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_data
+    #[inline]
     pub fn sync_data(&self) -> io::Result<()> {
         self.file.sync_data()
     }
@@ -51,6 +54,7 @@ impl File {
     /// This corresponds to [`std::fs::File::set_len`].
     ///
     /// [`std::fs::File::set_len`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_len
+    #[inline]
     pub fn set_len(&self, size: u64) -> io::Result<()> {
         self.file.set_len(size)
     }
@@ -60,6 +64,7 @@ impl File {
     /// This corresponds to [`std::fs::File::metadata`].
     ///
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
+    #[inline]
     pub fn metadata(&self) -> io::Result<fs::Metadata> {
         self.file.metadata()
     }
@@ -67,6 +72,7 @@ impl File {
 
 #[cfg(unix)]
 impl FromRawFd for File {
+    #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self::from_ambient(fs::File::from_raw_fd(fd))
     }
@@ -74,6 +80,7 @@ impl FromRawFd for File {
 
 #[cfg(windows)]
 impl FromRawHandle for File {
+    #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_ambient(fs::File::from_raw_handle(handle))
     }
@@ -81,6 +88,7 @@ impl FromRawHandle for File {
 
 #[cfg(unix)]
 impl AsRawFd for File {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.file.as_raw_fd()
     }
@@ -88,6 +96,7 @@ impl AsRawFd for File {
 
 #[cfg(windows)]
 impl AsRawHandle for File {
+    #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.file.as_raw_handle()
     }
@@ -95,6 +104,7 @@ impl AsRawHandle for File {
 
 #[cfg(unix)]
 impl IntoRawFd for File {
+    #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.file.into_raw_fd()
     }
@@ -102,50 +112,65 @@ impl IntoRawFd for File {
 
 #[cfg(windows)]
 impl IntoRawHandle for File {
+    #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.file.into_raw_handle()
     }
 }
 
 impl io::Read for File {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.file.read(buf)
     }
 
+    #[inline]
     fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut]) -> io::Result<usize> {
         self.file.read_vectored(bufs)
     }
 
+    #[inline]
     fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
         self.file.read_exact(buf)
     }
 
+    #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
         self.file.read_to_end(buf)
+    }
+
+    #[inline]
+    fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
+        self.file.read_to_string(buf)
     }
 
     // TODO: nightly-only APIs initializer?
 }
 
 impl io::Write for File {
+    #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.file.write(buf)
     }
 
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         self.file.flush()
     }
 
+    #[inline]
     fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
         self.file.write_vectored(bufs)
     }
 
+    #[inline]
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         self.file.write_all(buf)
     }
 }
 
 impl io::Seek for File {
+    #[inline]
     fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
         self.file.seek(pos)
     }
@@ -154,12 +179,47 @@ impl io::Seek for File {
 }
 
 impl From<File> for process::Stdio {
+    #[inline]
     fn from(file: File) -> Self {
         From::<fs::File>::from(file.file)
     }
 }
 
-// TODO: functions from FileExt?
+#[cfg(unix)]
+impl std::os::unix::fs::FileExt for File {
+    #[inline]
+    fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
+        self.file.read_at(buf, offset)
+    }
+
+    #[inline]
+    fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
+        self.file.write_at(buf, offset)
+    }
+
+    #[inline]
+    fn read_exact_at(&self, buf: &mut [u8], offset: u64) -> io::Result<()> {
+        self.file.read_exact_at(buf, offset)
+    }
+
+    #[inline]
+    fn write_all_at(&self, buf: &[u8], offset: u64) -> io::Result<()> {
+        self.file.write_all_at(buf, offset)
+    }
+}
+
+#[cfg(windows)]
+impl std::os::windows::fs::FileExt for File {
+    #[inline]
+    fn seek_read(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
+        self.file.seek_read(buf, offset)
+    }
+
+    #[inline]
+    fn seek_write(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
+        self.file.seek_write(buf, offset)
+    }
+}
 
 // TODO: Use winx to implement "unix" FileExt api on Windows?
 

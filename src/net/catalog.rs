@@ -2,8 +2,7 @@
 
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use ipnet::IpNet;
-use std::time::Duration;
-use std::{io, net};
+use std::{io, net, time::Duration};
 
 // FIXME: lots more to do here
 
@@ -86,7 +85,11 @@ impl Catalog {
         buf: &[u8],
         addr: A,
     ) -> io::Result<usize> {
-        unimplemented!("Catalog::send_to_udp_socket_addr")
+        unimplemented!(
+            "Catalog::send_to_udp_socket_addr({:?}, {:?}",
+            buf,
+            addr.to_socket_addrs()?.collect::<Vec<_>>()
+        )
     }
 
     pub fn connect_udp_socket<A: ToSocketAddrs>(
@@ -94,11 +97,17 @@ impl Catalog {
         udp_socket: &UdpSocket,
         addr: A,
     ) -> io::Result<()> {
-        unimplemented!("Catalog::connect_udp_socket")
+        unimplemented!(
+            "Catalog::connect_udp_socket({:?})",
+            addr.to_socket_addrs()?.collect::<Vec<_>>()
+        )
     }
 
     fn check_addr(&self, addr: &SocketAddr) -> io::Result<()> {
-        unimplemented!("Catalog::check_addr")
+        unimplemented!(
+            "Catalog::check_addr({:?})",
+            addr.to_socket_addrs()?.collect::<Vec<_>>()
+        )
         //self.grants.iter().any(|grant| grant.
         //PermissionDenied
     }
