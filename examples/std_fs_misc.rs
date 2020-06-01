@@ -59,16 +59,13 @@ fn main() {
         println!("! {:?}", why.kind());
     });
 
-    // TODO: implement `symlink`
-    /*
     println!("`ln -s ../b.txt a/c/b.txt`");
     // Create a symbolic link, returns `io::Result<()>`
     if cfg!(target_family = "unix") {
-        cap_std::fs::unix::symlink("../b.txt", "a/c/b.txt").unwrap_or_else(|why| {
+        cwd.symlink("../b.txt", "a/c/b.txt").unwrap_or_else(|why| {
             println!("! {:?}", why.kind());
         });
     }
-    */
 
     println!("`cat a/c/b.txt`");
     match cat(&mut cwd, &Path::new("a/c/b.txt")) {

@@ -10,19 +10,21 @@
 //! [`Catalog`]: struct.Catalog.html
 
 mod catalog;
+mod incoming;
 mod tcp_listener;
 mod tcp_stream;
 mod udp_socket;
 
 pub use catalog::*;
+pub use incoming::*;
 pub use tcp_listener::*;
 pub use tcp_stream::*;
 pub use udp_socket::*;
 
 // Re-export things from std::net that we can use as-is.
 pub use std::net::{
-    AddrParseError, Incoming, IpAddr, Ipv4Addr, Ipv6Addr, Shutdown, SocketAddr, SocketAddrV4,
-    SocketAddrV6, ToSocketAddrs,
+    AddrParseError, IpAddr, Ipv4Addr, Ipv6Addr, Shutdown, SocketAddr, SocketAddrV4, SocketAddrV6,
+    ToSocketAddrs,
 };
 
 // TODO: re-export experimental Ipv6MulticastScope?

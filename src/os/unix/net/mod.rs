@@ -4,12 +4,14 @@
 //!
 //! [`std::os::unix::net`]: https://doc.rust-lang.org/std/os/unix/net/
 
+mod incoming;
 mod unix_datagram;
 mod unix_listener;
 mod unix_stream;
 
+pub use incoming::*;
 pub use unix_datagram::*;
 pub use unix_listener::*;
 pub use unix_stream::*;
 
-pub use std::os::unix::net::{Incoming, SocketAddr};
+pub use std::os::unix::net::SocketAddr;

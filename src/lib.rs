@@ -9,6 +9,7 @@
 //! TODO: say more
 //!
 //! TODO: should try_clone methods require a capability?
+//! TODO: `std::process::Command`
 //!
 //! On WASI, use of this library more closely reflects the underlying
 //! system API, so it avoids the absolute-path compatibility layers.

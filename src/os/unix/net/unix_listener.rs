@@ -76,7 +76,7 @@ impl UnixListener {
     ///
     /// [`std::os::unix::net::UnixListener::incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.incoming
     pub fn incoming(&self) -> Incoming {
-        self.unix_listener.incoming()
+        Incoming::from_ambient(self.unix_listener.incoming())
     }
 }
 
@@ -98,6 +98,14 @@ impl IntoRawFd for UnixListener {
     }
 }
 
-// TODO: impl Debug for UnixListener?
+impl<'a> IntoIterator for &'a UnixListener {
+    type Item = io::Result<UnixStream>;
 
-// TODO: impl IntoIterator for UnixListener
+    type IntoIter = Incoming<'a>;
+
+    fn into_iter(self) -> Incoming<'a> {
+        Incoming::from_ambient(self.unix_listener.into_iter())
+    }
+}
+
+// TODO: impl Debug for UnixListener?

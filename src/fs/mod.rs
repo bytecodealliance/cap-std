@@ -4,7 +4,7 @@
 //!
 //! Instead of [`std::fs`'s free functions] which operate on paths, this
 //! crate has methods on [`Dir`] which operate on paths which must be
-//! relative to and within the directory.
+//! relative to the directory.
 //!
 //! Since all functions which expose raw file descriptors are `unsafe`,
 //! I/O handles in this API are unforgeable (unsafe code notwithstanding).

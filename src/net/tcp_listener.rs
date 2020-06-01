@@ -61,7 +61,7 @@ impl TcpListener {
     ///
     /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
     pub fn incoming(&self) -> Incoming {
-        self.tcp_listener.incoming()
+        Incoming::from_ambient(self.tcp_listener.incoming())
     }
 
     /// Sets the value for the `IP_TTL` option on this socket.
