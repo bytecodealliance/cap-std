@@ -26,7 +26,7 @@ impl TcpStream {
     }
 
     pub fn try_clone(&self) -> io::Result<TcpStream> {
-        Ok(Self::from_net_tcp_stream(self.tcp_stream.try_clone()?))
+        Ok(TcpStream::from_net_tcp_stream(self.tcp_stream.try_clone()?))
     }
 
     pub fn set_read_timeout(&self, dur: Option<Duration>) -> io::Result<()> {

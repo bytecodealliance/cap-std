@@ -26,5 +26,3 @@ pub use std::net::{
 };
 
 // TODO: re-export experimental Ipv6MulticastScope?
-
-// TODO: UnixStream

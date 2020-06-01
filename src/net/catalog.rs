@@ -17,6 +17,7 @@ struct IpGrant {
 
 // TODO: rename this?
 pub struct Catalog {
+    // TODO: when compiling for WASI, use WASI-specific handle instead
     grants: Vec<IpGrant>,
 }
 
@@ -29,6 +30,7 @@ impl Catalog {
         let mut last_err = None;
         for addr in addr.to_socket_addrs()? {
             self.check_addr(&addr)?;
+            // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr) {
                 Ok(tcp_listener) => return Ok(TcpListener::from_net_tcp_listener(tcp_listener)),
                 Err(e) => last_err = Some(e),
@@ -74,13 +76,6 @@ impl Catalog {
             Some(e) => Err(e),
             None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
         }
-    }
-
-    fn check_addrs<A: ToSocketAddrs>(&self, addr: A) -> io::Result<()> {
-        for addr in addr.to_socket_addrs()? {
-            self.check_addr(&addr)?;
-        }
-        Ok(())
     }
 
     fn check_addr(&self, addr: &SocketAddr) -> io::Result<()> {

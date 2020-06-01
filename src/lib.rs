@@ -18,7 +18,4 @@
 
 pub mod fs;
 pub mod net;
-
-// TODO: ChildStderr, ChildStdout, Stdin, StdinLock
-
-// TODO: ChildStdin, Stdout, Stderr
+pub mod os;
