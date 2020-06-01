@@ -24,6 +24,8 @@
 #![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
 
+mod sys;
+
 pub mod fs;
 pub mod net;
 pub mod os;

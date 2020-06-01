@@ -1,6 +1,9 @@
-use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
+use crate::{
+    fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
+    sys,
+};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -19,14 +22,16 @@ use std::{
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model.
 pub struct Dir {
-    file: fs::File,
+    inner: sys::fs::Dir,
 }
 
 impl Dir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
     pub fn from_ambient(file: fs::File) -> Self {
-        Self { file }
+        Self {
+            inner: sys::fs::Dir::from_ambient(file),
+        }
     }
 
     /// Attempts to open a file in read-only mode.
@@ -35,17 +40,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
-    pub fn open_file<P: AsRef<Path>>(&mut self, path: P) -> io::Result<File> {
-        let path = path.as_ref();
-
-        #[cfg(unix)]
-        {
-            use yanix::file::{openat, Mode, OFlag};
-            unsafe {
-                let fd = openat(self.file.as_raw_fd(), path, OFlag::RDONLY, Mode::empty())?;
-                Ok(File::from_raw_fd(fd))
-            }
-        }
+    #[inline]
+    pub fn open_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+        self.inner.open_file(path.as_ref())
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -56,35 +53,19 @@ impl Dir {
     /// and it only accesses functions relative to `self`.
     ///
     /// [`std::fs::OpenOptions::open`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.open
+    #[inline]
     pub fn open_file_with<P: AsRef<Path>>(
-        &mut self,
+        &self,
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        unimplemented!(
-            "Dir::open_file_with({}, {:?})",
-            path.as_ref().display(),
-            options
-        );
+        self.inner.open_file_with(path.as_ref(), options)
     }
 
     /// Attempts to open a directory.
-    pub fn open_dir<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Self> {
-        let path = path.as_ref();
-
-        #[cfg(unix)]
-        {
-            use yanix::file::{openat, Mode, OFlag};
-            unsafe {
-                let fd = openat(
-                    self.file.as_raw_fd(),
-                    path,
-                    OFlag::RDONLY | OFlag::DIRECTORY,
-                    Mode::empty(),
-                )?;
-                Ok(Self::from_raw_fd(fd))
-            }
-        }
+    #[inline]
+    pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
+        self.inner.open_dir(path.as_ref())
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -93,8 +74,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
-    pub fn create_dir<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
-        unimplemented!("Dir::create_dir({})", path.as_ref().display())
+    #[inline]
+    pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.inner.create_dir(path.as_ref())
     }
 
     /// Recursively create a directory and all of its parent components if they are missing.
@@ -103,8 +85,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::create_dir_all`]: https://doc.rust-lang.org/std/fs/fn.create_dir_all.html
-    pub fn create_dir_all<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
-        unimplemented!("Dir::create_dir_all({})", path.as_ref().display())
+    #[inline]
+    pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.inner.create_dir_all(path.as_ref())
     }
 
     /// Opens a file in write-only mode.
@@ -113,24 +96,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::File::create`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.create
-    pub fn create_file<P: AsRef<Path>>(&mut self, path: P) -> io::Result<File> {
-        let path = path.as_ref();
-
-        #[cfg(unix)]
-        {
-            use yanix::file::{openat, Mode, OFlag};
-            unsafe {
-                let fd = openat(
-                    self.file.as_raw_fd(),
-                    path,
-                    OFlag::WRONLY | OFlag::CREAT | OFlag::TRUNC,
-                    Mode::from_bits(0o666).ok_or_else(|| {
-                        io::Error::new(io::ErrorKind::InvalidInput, "unrecognized mode flags")
-                    })?,
-                )?;
-                Ok(File::from_raw_fd(fd))
-            }
-        }
+    #[inline]
+    pub fn create_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+        self.inner.create_file(path.as_ref())
     }
 
     /// Returns the canonical form of a path with all intermediate components normalized
@@ -140,9 +108,9 @@ impl Dir {
     /// absolute path, returns a path relative to the directory represented by `self`.
     ///
     /// [`std::fs::canonicalize`]: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
-    pub fn canonicalize<P: AsRef<Path>>(&mut self, path: P) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({})", path.as_ref().display())
+    #[inline]
+    pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
+        self.inner.canonicalize(path.as_ref())
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission
@@ -152,12 +120,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::copy`]: https://doc.rust-lang.org/std/fs/fn.copy.html
-    pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> io::Result<u64> {
-        unimplemented!(
-            "Dir::copy({}, {})",
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
+    #[inline]
+    pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<u64> {
+        self.inner.copy(from.as_ref(), to.as_ref())
     }
 
     /// Creates a new hard link on the filesystem.
@@ -166,12 +131,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::hard_link`]: https://doc.rust-lang.org/std/fs/fn.hard_link.html
-    pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Result<()> {
-        unimplemented!(
-            "Dir::hard_link({}, {})",
-            src.as_ref().display(),
-            dst.as_ref().display()
-        )
+    #[inline]
+    pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
+        self.inner.hard_link(src.as_ref(), dst.as_ref())
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.
@@ -180,8 +142,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::metadata`]: https://doc.rust-lang.org/std/fs/fn.metadata.html
-    pub fn metadata<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({})", path.as_ref().display())
+    #[inline]
+    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+        self.inner.metadata(path.as_ref())
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -190,8 +153,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
-    pub fn read_dir<P: AsRef<Path>>(&mut self, path: P) -> io::Result<ReadDir> {
-        fs::read_dir(path).map(ReadDir::from_ambient)
+    #[inline]
+    pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
+        self.inner.read_dir(path.as_ref())
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -200,7 +164,8 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::read`]: https://doc.rust-lang.org/std/fs/fn.read.html
-    pub fn read_file<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Vec<u8>> {
+    #[inline]
+    pub fn read_file<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
         use io::Read;
         let mut file = self.open_file(path)?;
         let mut bytes = Vec::with_capacity(initial_buffer_size(&file));
@@ -214,8 +179,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
-    pub fn read_link<P: AsRef<Path>>(&mut self, path: P) -> io::Result<PathBuf> {
-        unimplemented!("Dir::read_link({})", path.as_ref().display())
+    #[inline]
+    pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
+        self.inner.read_link(path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
@@ -224,8 +190,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::read_to_string`]: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
-    pub fn read_to_string<P: AsRef<Path>>(&mut self, path: P) -> io::Result<String> {
-        unimplemented!("Dir::read_to_string({})", path.as_ref().display())
+    #[inline]
+    pub fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
+        self.inner.read_to_string(path.as_ref())
     }
 
     /// Removes an existing, empty directory.
@@ -234,8 +201,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
-    pub fn remove_dir<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
-        unimplemented!("Dir::remove_dir({})", path.as_ref().display())
+    #[inline]
+    pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.inner.remove_dir(path.as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -244,8 +212,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
-    pub fn remove_dir_all<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
-        unimplemented!("Dir::remove_dir_all({})", path.as_ref().display())
+    #[inline]
+    pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.inner.remove_dir_all(path.as_ref())
     }
 
     /// Removes a file from the filesystem.
@@ -254,8 +223,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
-    pub fn remove_file<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
-        unimplemented!("Dir::remove_file({})", path.as_ref().display())
+    #[inline]
+    pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.inner.remove_file(path.as_ref())
     }
 
     /// Rename a file or directory to a new name, replacing the original file if to already exists.
@@ -264,12 +234,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> io::Result<()> {
-        unimplemented!(
-            "Dir::rename({}, {})",
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
+    #[inline]
+    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
+        self.inner.rename(from.as_ref(), to.as_ref())
     }
 
     /// Changes the permissions found on a file or a directory.
@@ -278,16 +245,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
-    pub fn set_permissions<P: AsRef<Path>>(
-        &mut self,
-        path: P,
-        perm: Permissions,
-    ) -> io::Result<()> {
-        unimplemented!(
-            "Dir::set_permissions({}, {:?})",
-            path.as_ref().display(),
-            perm
-        )
+    #[inline]
+    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
+        self.inner.set_permissions(path.as_ref(), perm)
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -296,8 +256,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::symlink_metadata`]: https://doc.rust-lang.org/std/fs/fn.symlink_metadata.html
-    pub fn symlink_metadata<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Metadata> {
-        unimplemented!("Dir::symlink_metadata({:?}", path.as_ref().display())
+    #[inline]
+    pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+        self.inner.symlink_metadata(path.as_ref())
     }
 
     /// Write a slice as the entire contents of a file.
@@ -306,8 +267,9 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
+    #[inline]
     pub fn write_file<P: AsRef<Path>, C: AsRef<[u8]>>(
-        &mut self,
+        &self,
         path: P,
         contents: C,
     ) -> io::Result<()> {
@@ -327,7 +289,8 @@ impl Dir {
         dir_builder: &DirBuilder,
         path: P,
     ) -> io::Result<()> {
-        unimplemented!("Dir::create_with_dir_builder({})", path.as_ref().display())
+        self.inner
+            .create_with_dir_builder(dir_builder, path.as_ref())
     }
 
     /// Creates a new symbolic link on the filesystem.
@@ -337,12 +300,9 @@ impl Dir {
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     #[cfg(unix)]
-    pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&mut self, src: P, dst: Q) -> io::Result<()> {
-        unimplemented!(
-            "Dir::symlink({}, {})",
-            src.as_ref().display(),
-            dst.as_ref().display()
-        )
+    #[inline]
+    pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
+        self.inner.symlink(src.as_ref(), dst.as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -352,8 +312,9 @@ impl Dir {
     ///
     /// [`std::os::unix::net::UnixListener::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.bind
     #[cfg(unix)]
-    pub fn bind_unix_listener<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixListener> {
-        unimplemented!("Dir::bind_unix_listener({})", path.as_ref().display())
+    #[inline]
+    pub fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
+        self.inner.bind_unix_listener(path.as_ref())
     }
 
     /// Connects to the socket named by path.
@@ -363,8 +324,9 @@ impl Dir {
     ///
     /// [`std::os::unix::net::UnixStream::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.connect
     #[cfg(unix)]
-    pub fn connect_unix_stream<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixStream> {
-        unimplemented!("Dir::connect_unix_stream({})", path.as_ref().display())
+    #[inline]
+    pub fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
+        self.inner.connect_unix_stream(path.as_ref())
     }
 
     /// Creates a Unix datagram socket bound to the given path.
@@ -374,8 +336,9 @@ impl Dir {
     ///
     /// [`std::os::unix::net::UnixDatagram::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.bind
     #[cfg(unix)]
-    pub fn bind_unix_datagram<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixDatagram> {
-        unimplemented!("Dir::bind_unix_datagram({})", path.as_ref().display())
+    #[inline]
+    pub fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
+        self.inner.bind_unix_datagram(path.as_ref())
     }
 
     /// Connects the socket to the specified address.
@@ -385,12 +348,14 @@ impl Dir {
     ///
     /// [`std::os::unix::net::UnixDatagram::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.connect
     #[cfg(unix)]
+    #[inline]
     pub fn connect_unix_datagram<P: AsRef<Path>>(
-        &mut self,
+        &self,
         unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        unimplemented!("Dir::connect_unix_datagram({})", path.as_ref().display())
+        self.inner
+            .connect_unix_datagram(unix_datagram, path.as_ref())
     }
 
     /// Sends data on the socket to the specified address.
@@ -400,17 +365,15 @@ impl Dir {
     ///
     /// [`std::os::unix::net::UnixDatagram::send_to`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send_to
     #[cfg(unix)]
+    #[inline]
     pub fn send_to_unix_datagram_addr<P: AsRef<Path>>(
-        &mut self,
+        &self,
         unix_datagram: &UnixDatagram,
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        unimplemented!(
-            "Dir::send_to_unix_datagram_addr({:?}, {})",
-            buf,
-            path.as_ref().display()
-        )
+        self.inner
+            .send_to_unix_datagram_addr(unix_datagram, buf, path.as_ref())
     }
 }
 
@@ -431,28 +394,28 @@ impl FromRawHandle for Dir {
 #[cfg(unix)]
 impl AsRawFd for Dir {
     fn as_raw_fd(&self) -> RawFd {
-        self.file.as_raw_fd()
+        self.inner.as_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl AsRawHandle for Dir {
     fn as_raw_handle(&self) -> RawHandle {
-        self.file.as_raw_handle()
+        self.inner.as_raw_handle()
     }
 }
 
 #[cfg(unix)]
 impl IntoRawFd for Dir {
     fn into_raw_fd(self) -> RawFd {
-        self.file.into_raw_fd()
+        self.inner.into_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl IntoRawHandle for Dir {
     fn into_raw_handle(self) -> RawHandle {
-        self.file.into_raw_handle()
+        self.inner.into_raw_handle()
     }
 }
 
