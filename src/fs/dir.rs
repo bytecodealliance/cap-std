@@ -17,8 +17,7 @@ use std::{
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability-oriented security
-/// model.
+/// absolute paths don't interoperate well with the capability model.
 pub struct Dir {
     file: fs::File,
 }

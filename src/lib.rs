@@ -2,7 +2,7 @@
 //!
 //! This corresponds to [`std`].
 //!
-//! Capability-based security represents access to external resources as
+//! Capability-based APIs represent access to external resources as
 //! objects which can be passed around between different parts of a
 //! program.
 //!

@@ -6,8 +6,7 @@ use std::{ffi, fs, io};
 /// This corresponds to [`std::fs::DirEntry`].
 ///
 /// Unlike `std::fs::DirEntry`, this API has no `DirEntry::path`, because
-/// absolute paths don't interoperate well with the capability-oriented
-/// security model.
+/// absolute paths don't interoperate well with the capability model.
 ///
 /// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry {
