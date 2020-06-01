@@ -17,14 +17,14 @@ use std::{fs, io, process};
 /// [`Dir::open_file`]: struct.Dir.html#method.open_file
 /// [`Dir::create_file`]: struct.Dir.html#method.create_file
 pub struct File {
-    file: fs::File,
+    std: fs::File,
 }
 
 impl File {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(file: fs::File) -> Self {
-        Self { file }
+    pub fn from_ambient(std: fs::File) -> Self {
+        Self { std }
     }
 
     /// Attempts to sync all OS-internal metadata to disk.
@@ -34,7 +34,7 @@ impl File {
     /// [`std::fs::File::sync_all`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_all
     #[inline]
     pub fn sync_all(&self) -> io::Result<()> {
-        self.file.sync_all()
+        self.std.sync_all()
     }
 
     /// This function is similar to `sync_all`, except that it may not synchronize
@@ -45,7 +45,7 @@ impl File {
     /// [`std::fs::File::sync_data`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_data
     #[inline]
     pub fn sync_data(&self) -> io::Result<()> {
-        self.file.sync_data()
+        self.std.sync_data()
     }
 
     /// Truncates or extends the underlying file, updating the size of this file
@@ -56,7 +56,7 @@ impl File {
     /// [`std::fs::File::set_len`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_len
     #[inline]
     pub fn set_len(&self, size: u64) -> io::Result<()> {
-        self.file.set_len(size)
+        self.std.set_len(size)
     }
 
     /// Queries metadata about the underlying file.
@@ -66,7 +66,7 @@ impl File {
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<fs::Metadata> {
-        self.file.metadata()
+        self.std.metadata()
     }
 }
 
@@ -90,7 +90,7 @@ impl FromRawHandle for File {
 impl AsRawFd for File {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
-        self.file.as_raw_fd()
+        self.std.as_raw_fd()
     }
 }
 
@@ -98,7 +98,7 @@ impl AsRawFd for File {
 impl AsRawHandle for File {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
-        self.file.as_raw_handle()
+        self.std.as_raw_handle()
     }
 }
 
@@ -106,7 +106,7 @@ impl AsRawHandle for File {
 impl IntoRawFd for File {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
-        self.file.into_raw_fd()
+        self.std.into_raw_fd()
     }
 }
 
@@ -114,34 +114,34 @@ impl IntoRawFd for File {
 impl IntoRawHandle for File {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
-        self.file.into_raw_handle()
+        self.std.into_raw_handle()
     }
 }
 
 impl io::Read for File {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.file.read(buf)
+        self.std.read(buf)
     }
 
     #[inline]
     fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut]) -> io::Result<usize> {
-        self.file.read_vectored(bufs)
+        self.std.read_vectored(bufs)
     }
 
     #[inline]
     fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
-        self.file.read_exact(buf)
+        self.std.read_exact(buf)
     }
 
     #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
-        self.file.read_to_end(buf)
+        self.std.read_to_end(buf)
     }
 
     #[inline]
     fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
-        self.file.read_to_string(buf)
+        self.std.read_to_string(buf)
     }
 
     // TODO: nightly-only APIs initializer?
@@ -150,29 +150,29 @@ impl io::Read for File {
 impl io::Write for File {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.file.write(buf)
+        self.std.write(buf)
     }
 
     #[inline]
     fn flush(&mut self) -> io::Result<()> {
-        self.file.flush()
+        self.std.flush()
     }
 
     #[inline]
     fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
-        self.file.write_vectored(bufs)
+        self.std.write_vectored(bufs)
     }
 
     #[inline]
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
-        self.file.write_all(buf)
+        self.std.write_all(buf)
     }
 }
 
 impl io::Seek for File {
     #[inline]
     fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
-        self.file.seek(pos)
+        self.std.seek(pos)
     }
 
     // TODO: nightly-only APIs stream_len, stream_position?
@@ -181,7 +181,7 @@ impl io::Seek for File {
 impl From<File> for process::Stdio {
     #[inline]
     fn from(file: File) -> Self {
-        From::<fs::File>::from(file.file)
+        From::<fs::File>::from(file.std)
     }
 }
 
@@ -189,22 +189,22 @@ impl From<File> for process::Stdio {
 impl std::os::unix::fs::FileExt for File {
     #[inline]
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-        self.file.read_at(buf, offset)
+        self.std.read_at(buf, offset)
     }
 
     #[inline]
     fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
-        self.file.write_at(buf, offset)
+        self.std.write_at(buf, offset)
     }
 
     #[inline]
     fn read_exact_at(&self, buf: &mut [u8], offset: u64) -> io::Result<()> {
-        self.file.read_exact_at(buf, offset)
+        self.std.read_exact_at(buf, offset)
     }
 
     #[inline]
     fn write_all_at(&self, buf: &[u8], offset: u64) -> io::Result<()> {
-        self.file.write_all_at(buf, offset)
+        self.std.write_all_at(buf, offset)
     }
 }
 
@@ -212,12 +212,12 @@ impl std::os::unix::fs::FileExt for File {
 impl std::os::windows::fs::FileExt for File {
     #[inline]
     fn seek_read(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-        self.file.seek_read(buf, offset)
+        self.std.seek_read(buf, offset)
     }
 
     #[inline]
     fn seek_write(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
-        self.file.seek_write(buf, offset)
+        self.std.seek_write(buf, offset)
     }
 }
 

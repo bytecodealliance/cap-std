@@ -10,14 +10,14 @@ use std::{ffi, fs, io};
 ///
 /// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry {
-    dir_entry: fs::DirEntry,
+    std: fs::DirEntry,
 }
 
 impl DirEntry {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(dir_entry: fs::DirEntry) -> Self {
-        Self { dir_entry }
+    pub fn from_ambient(std: fs::DirEntry) -> Self {
+        Self { std }
     }
 
     /// Returns the metadata for the file that this entry points at.
@@ -27,7 +27,7 @@ impl DirEntry {
     /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        self.dir_entry.metadata()
+        self.std.metadata()
     }
 
     /// Returns the file type for the file that this entry points at.
@@ -37,7 +37,7 @@ impl DirEntry {
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
-        self.dir_entry.file_type()
+        self.std.file_type()
     }
 
     /// Returns the bare file name of this directory entry without any other leading path component.
@@ -47,14 +47,14 @@ impl DirEntry {
     /// [`std::fs::DirEntry::file_name`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_name
     #[inline]
     pub fn file_name(&self) -> ffi::OsString {
-        self.dir_entry.file_name()
+        self.std.file_name()
     }
 }
 
 #[cfg(unix)]
 impl std::os::unix::fs::DirEntryExt for DirEntry {
     fn ino(&self) -> u64 {
-        self.dir_entry.ino()
+        self.std.ino()
     }
 }
 

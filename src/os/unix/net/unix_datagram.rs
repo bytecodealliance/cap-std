@@ -24,14 +24,14 @@ use std::{
 /// [`Dir::bind_unix_datagram`]: struct.Dir.html#method.bind_unix_datagram
 /// [`Dir::send_to_unix_datagram_addr`]: struct.Dir.html#method.send_to_unix_datagram_addr
 pub struct UnixDatagram {
-    unix_datagram: unix::net::UnixDatagram,
+    std: unix::net::UnixDatagram,
 }
 
 impl UnixDatagram {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixDatagram`.
     #[inline]
-    pub fn from_ambient(unix_datagram: unix::net::UnixDatagram) -> Self {
-        Self { unix_datagram }
+    pub fn from_ambient(std: unix::net::UnixDatagram) -> Self {
+        Self { std }
     }
 
     /// Creates a Unix Datagram socket which is not bound to any address.
@@ -65,7 +65,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::try_clone`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.unix_datagram.try_clone()?))
+        Ok(Self::from_ambient(self.std.try_clone()?))
     }
 
     /// Returns the address of this socket.
@@ -75,7 +75,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::local_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
-        self.unix_datagram.local_addr()
+        self.std.local_addr()
     }
 
     /// Returns the address of this socket's peer.
@@ -85,7 +85,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::peer_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.peer_addr
     #[inline]
     pub fn peer_addr(&self) -> io::Result<SocketAddr> {
-        self.unix_datagram.peer_addr()
+        self.std.peer_addr()
     }
 
     /// Receives data from the socket.
@@ -95,7 +95,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::recv_from`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.recv_from
     #[inline]
     pub fn recv_from(&self, buf: &mut [u8]) -> io::Result<(usize, SocketAddr)> {
-        self.unix_datagram.recv_from(buf)
+        self.std.recv_from(buf)
     }
 
     /// Receives data from the socket.
@@ -105,7 +105,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::recv`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.recv
     #[inline]
     pub fn recv(&self, buf: &mut [u8]) -> io::Result<usize> {
-        self.unix_datagram.recv(buf)
+        self.std.recv(buf)
     }
 
     /// Sends data on the socket to the socket's peer.
@@ -115,7 +115,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::send`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send
     #[inline]
     pub fn send(&self, buf: &[u8]) -> io::Result<usize> {
-        self.unix_datagram.send(buf)
+        self.std.send(buf)
     }
 
     /// Sets the read timeout for the socket.
@@ -125,7 +125,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::set_read_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_read_timeout
     #[inline]
     pub fn set_read_timeout(&self, timeout: Option<Duration>) -> io::Result<()> {
-        self.unix_datagram.set_read_timeout(timeout)
+        self.std.set_read_timeout(timeout)
     }
 
     /// Sets the write timeout for the socket.
@@ -135,7 +135,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::set_write_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_write_timeout
     #[inline]
     pub fn set_write_timeout(&self, timeout: Option<Duration>) -> io::Result<()> {
-        self.unix_datagram.set_write_timeout(timeout)
+        self.std.set_write_timeout(timeout)
     }
 
     /// Returns the read timeout of this socket.
@@ -145,7 +145,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::read_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.read_timeout
     #[inline]
     pub fn read_timeout(&self) -> io::Result<Option<Duration>> {
-        self.unix_datagram.read_timeout()
+        self.std.read_timeout()
     }
 
     /// Returns the write timeout of this socket.
@@ -155,7 +155,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::write_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.write_timeout
     #[inline]
     pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
-        self.unix_datagram.write_timeout()
+        self.std.write_timeout()
     }
 
     /// Moves the socket into or out of nonblocking mode.
@@ -165,7 +165,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::set_nonblocking`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_nonblocking
     #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
-        self.unix_datagram.set_nonblocking(nonblocking)
+        self.std.set_nonblocking(nonblocking)
     }
 
     /// Returns the value of the `SO_ERROR` option.
@@ -175,7 +175,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::take_error`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.take_error
     #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
-        self.unix_datagram.take_error()
+        self.std.take_error()
     }
 
     /// Shut down the read, write, or both halves of this connection.
@@ -185,7 +185,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::shutdown`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
-        self.unix_datagram.shutdown(how)
+        self.std.shutdown(how)
     }
 }
 
@@ -199,14 +199,14 @@ impl FromRawFd for UnixDatagram {
 impl AsRawFd for UnixDatagram {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
-        self.unix_datagram.as_raw_fd()
+        self.std.as_raw_fd()
     }
 }
 
 impl IntoRawFd for UnixDatagram {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
-        self.unix_datagram.into_raw_fd()
+        self.std.into_raw_fd()
     }
 }
 

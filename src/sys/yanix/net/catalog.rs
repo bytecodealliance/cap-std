@@ -40,7 +40,10 @@ impl Catalog {
         }
     }
 
-    pub(crate) fn connect(&self, addrs: impl Iterator<Item = SocketAddr>) -> io::Result<TcpStream> {
+    pub(crate) fn connect_tcp_stream(
+        &self,
+        addrs: impl Iterator<Item = SocketAddr>,
+    ) -> io::Result<TcpStream> {
         let mut last_err = None;
         for addr in addrs {
             self.check_addr(&addr)?;
@@ -56,12 +59,13 @@ impl Catalog {
         }
     }
 
-    pub(crate) fn connect_timeout(
+    pub(crate) fn connect_timeout_tcp_stream(
         &self,
         addr: &SocketAddr,
         timeout: Duration,
     ) -> io::Result<TcpStream> {
-        unimplemented!("Catalog::connect_timeout({}, {:?}", addr, timeout)
+        self.check_addr(&addr)?;
+        net::TcpStream::connect_timeout(addr, timeout).map(TcpStream::from_ambient)
     }
 
     pub(crate) fn bind_udp_socket(
@@ -86,13 +90,14 @@ impl Catalog {
         &self,
         udp_socket: &UdpSocket,
         buf: &[u8],
-        addrs: impl Iterator<Item = SocketAddr>,
+        mut addrs: impl Iterator<Item = SocketAddr>,
     ) -> io::Result<usize> {
-        unimplemented!(
-            "Catalog::send_to_udp_socket_addr({:?}, {:?}",
-            buf,
-            addrs.collect::<Vec<_>>()
-        )
+        // `UdpSocket::send_to` only sends to the first address.
+        let addr = addrs
+            .next()
+            .ok_or_else(|| net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err())?;
+        self.check_addr(&addr)?;
+        udp_socket.std.send_to(buf, addr)
     }
 
     pub(crate) fn connect_udp_socket(
@@ -100,10 +105,18 @@ impl Catalog {
         udp_socket: &UdpSocket,
         addrs: impl Iterator<Item = SocketAddr>,
     ) -> io::Result<()> {
-        unimplemented!(
-            "Catalog::connect_udp_socket({:?})",
-            addrs.collect::<Vec<_>>()
-        )
+        let mut last_err = None;
+        for addr in addrs {
+            self.check_addr(&addr)?;
+            match udp_socket.std.connect(addr) {
+                Ok(()) => return Ok(()),
+                Err(e) => last_err = Some(e),
+            }
+        }
+        match last_err {
+            Some(e) => Err(e),
+            None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
+        }
     }
 
     fn check_addr(&self, addr: &SocketAddr) -> io::Result<()> {

@@ -7,14 +7,14 @@ use std::{fs, io};
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
-    read_dir: fs::ReadDir,
+    std: fs::ReadDir,
 }
 
 impl ReadDir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(read_dir: fs::ReadDir) -> Self {
-        Self { read_dir }
+    pub fn from_ambient(std: fs::ReadDir) -> Self {
+        Self { std }
     }
 }
 
@@ -23,7 +23,7 @@ impl Iterator for ReadDir {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.read_dir
+        self.std
             .next()
             .map(|result| result.map(DirEntry::from_ambient))
     }

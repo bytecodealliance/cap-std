@@ -8,14 +8,14 @@ use std::{io, os::unix};
 /// [`std::os::unix::net::Incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.Incoming.html
 /// [`UnixListener`]: struct.UnixListener.html
 pub struct Incoming<'a> {
-    incoming: unix::net::Incoming<'a>,
+    std: unix::net::Incoming<'a>,
 }
 
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::Incoming`.
     #[inline]
-    pub fn from_ambient(incoming: unix::net::Incoming<'a>) -> Self {
-        Self { incoming }
+    pub fn from_ambient(std: unix::net::Incoming<'a>) -> Self {
+        Self { std }
     }
 }
 
@@ -24,14 +24,14 @@ impl<'a> Iterator for Incoming<'a> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.incoming
+        self.std
             .next()
             .map(|result| result.map(UnixStream::from_ambient))
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        self.incoming.size_hint()
+        self.std.size_hint()
     }
 }
 

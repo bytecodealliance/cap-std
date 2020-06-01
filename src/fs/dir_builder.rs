@@ -11,13 +11,13 @@ use std::fs;
 /// [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
 /// [`Dir::create_with_dir_builder`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_with_dir_builder
 pub struct DirBuilder {
-    dir_builder: fs::DirBuilder,
+    std: fs::DirBuilder,
 }
 
 impl DirBuilder {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
-    pub fn from_ambient(dir_builder: fs::DirBuilder) -> Self {
-        Self { dir_builder }
+    pub fn from_ambient(std: fs::DirBuilder) -> Self {
+        Self { std }
     }
 
     /// Creates a new set of options with default mode/security settings for all platforms and also non-recursive.
@@ -29,7 +29,7 @@ impl DirBuilder {
     #[inline]
     pub fn new() -> Self {
         Self {
-            dir_builder: fs::DirBuilder::new(),
+            std: fs::DirBuilder::new(),
         }
     }
 
@@ -40,7 +40,7 @@ impl DirBuilder {
     /// [`std::fs::DirBuilder::recursive`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.recursive
     #[inline]
     pub fn recursive(&mut self, recursive: bool) -> &mut Self {
-        self.dir_builder.recursive(recursive);
+        self.std.recursive(recursive);
         self
     }
 }
@@ -49,7 +49,7 @@ impl DirBuilder {
 impl std::os::unix::fs::DirBuilderExt for DirBuilder {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
-        self.dir_builder.mode(mode);
+        self.std.mode(mode);
         self
     }
 }

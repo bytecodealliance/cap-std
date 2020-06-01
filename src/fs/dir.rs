@@ -22,7 +22,7 @@ use std::{
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model.
 pub struct Dir {
-    inner: sys::fs::Dir,
+    sys: sys::fs::Dir,
 }
 
 impl Dir {
@@ -30,7 +30,7 @@ impl Dir {
     #[inline]
     pub fn from_ambient(file: fs::File) -> Self {
         Self {
-            inner: sys::fs::Dir::from_ambient(file),
+            sys: sys::fs::Dir::from_ambient(file),
         }
     }
 
@@ -42,7 +42,7 @@ impl Dir {
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
     #[inline]
     pub fn open_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.inner.open_file(path.as_ref())
+        self.sys.open_file(path.as_ref())
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -59,13 +59,13 @@ impl Dir {
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        self.inner.open_file_with(path.as_ref(), options)
+        self.sys.open_file_with(path.as_ref(), options)
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self.inner.open_dir(path.as_ref())
+        self.sys.open_dir(path.as_ref())
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -76,7 +76,7 @@ impl Dir {
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.inner.create_dir(path.as_ref())
+        self.sys.create_dir(path.as_ref())
     }
 
     /// Recursively create a directory and all of its parent components if they are missing.
@@ -87,7 +87,7 @@ impl Dir {
     /// [`std::fs::create_dir_all`]: https://doc.rust-lang.org/std/fs/fn.create_dir_all.html
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.inner.create_dir_all(path.as_ref())
+        self.sys.create_dir_all(path.as_ref())
     }
 
     /// Opens a file in write-only mode.
@@ -98,7 +98,7 @@ impl Dir {
     /// [`std::fs::File::create`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.create
     #[inline]
     pub fn create_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.inner.create_file(path.as_ref())
+        self.sys.create_file(path.as_ref())
     }
 
     /// Returns the canonical form of a path with all intermediate components normalized
@@ -110,7 +110,7 @@ impl Dir {
     /// [`std::fs::canonicalize`]: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        self.inner.canonicalize(path.as_ref())
+        self.sys.canonicalize(path.as_ref())
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission
@@ -122,7 +122,7 @@ impl Dir {
     /// [`std::fs::copy`]: https://doc.rust-lang.org/std/fs/fn.copy.html
     #[inline]
     pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<u64> {
-        self.inner.copy(from.as_ref(), to.as_ref())
+        self.sys.copy(from.as_ref(), to.as_ref())
     }
 
     /// Creates a new hard link on the filesystem.
@@ -133,7 +133,7 @@ impl Dir {
     /// [`std::fs::hard_link`]: https://doc.rust-lang.org/std/fs/fn.hard_link.html
     #[inline]
     pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.inner.hard_link(src.as_ref(), dst.as_ref())
+        self.sys.hard_link(src.as_ref(), dst.as_ref())
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.
@@ -144,7 +144,7 @@ impl Dir {
     /// [`std::fs::metadata`]: https://doc.rust-lang.org/std/fs/fn.metadata.html
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        self.inner.metadata(path.as_ref())
+        self.sys.metadata(path.as_ref())
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -155,7 +155,7 @@ impl Dir {
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        self.inner.read_dir(path.as_ref())
+        self.sys.read_dir(path.as_ref())
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -181,7 +181,7 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        self.inner.read_link(path.as_ref())
+        self.sys.read_link(path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
@@ -192,7 +192,7 @@ impl Dir {
     /// [`std::fs::read_to_string`]: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
     #[inline]
     pub fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
-        self.inner.read_to_string(path.as_ref())
+        self.sys.read_to_string(path.as_ref())
     }
 
     /// Removes an existing, empty directory.
@@ -203,7 +203,7 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.inner.remove_dir(path.as_ref())
+        self.sys.remove_dir(path.as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -214,7 +214,7 @@ impl Dir {
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
     pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.inner.remove_dir_all(path.as_ref())
+        self.sys.remove_dir_all(path.as_ref())
     }
 
     /// Removes a file from the filesystem.
@@ -225,7 +225,7 @@ impl Dir {
     /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.inner.remove_file(path.as_ref())
+        self.sys.remove_file(path.as_ref())
     }
 
     /// Rename a file or directory to a new name, replacing the original file if to already exists.
@@ -236,7 +236,7 @@ impl Dir {
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
     pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        self.inner.rename(from.as_ref(), to.as_ref())
+        self.sys.rename(from.as_ref(), to.as_ref())
     }
 
     /// Changes the permissions found on a file or a directory.
@@ -247,7 +247,7 @@ impl Dir {
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
     #[inline]
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        self.inner.set_permissions(path.as_ref(), perm)
+        self.sys.set_permissions(path.as_ref(), perm)
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -258,7 +258,7 @@ impl Dir {
     /// [`std::fs::symlink_metadata`]: https://doc.rust-lang.org/std/fs/fn.symlink_metadata.html
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        self.inner.symlink_metadata(path.as_ref())
+        self.sys.symlink_metadata(path.as_ref())
     }
 
     /// Write a slice as the entire contents of a file.
@@ -289,8 +289,7 @@ impl Dir {
         dir_builder: &DirBuilder,
         path: P,
     ) -> io::Result<()> {
-        self.inner
-            .create_with_dir_builder(dir_builder, path.as_ref())
+        self.sys.create_with_dir_builder(dir_builder, path.as_ref())
     }
 
     /// Creates a new symbolic link on the filesystem.
@@ -302,7 +301,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.inner.symlink(src.as_ref(), dst.as_ref())
+        self.sys.symlink(src.as_ref(), dst.as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -314,7 +313,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
-        self.inner.bind_unix_listener(path.as_ref())
+        self.sys.bind_unix_listener(path.as_ref())
     }
 
     /// Connects to the socket named by path.
@@ -326,7 +325,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
-        self.inner.connect_unix_stream(path.as_ref())
+        self.sys.connect_unix_stream(path.as_ref())
     }
 
     /// Creates a Unix datagram socket bound to the given path.
@@ -338,7 +337,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
-        self.inner.bind_unix_datagram(path.as_ref())
+        self.sys.bind_unix_datagram(path.as_ref())
     }
 
     /// Connects the socket to the specified address.
@@ -354,8 +353,7 @@ impl Dir {
         unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        self.inner
-            .connect_unix_datagram(unix_datagram, path.as_ref())
+        self.sys.connect_unix_datagram(unix_datagram, path.as_ref())
     }
 
     /// Sends data on the socket to the specified address.
@@ -372,7 +370,7 @@ impl Dir {
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        self.inner
+        self.sys
             .send_to_unix_datagram_addr(unix_datagram, buf, path.as_ref())
     }
 }
@@ -394,28 +392,28 @@ impl FromRawHandle for Dir {
 #[cfg(unix)]
 impl AsRawFd for Dir {
     fn as_raw_fd(&self) -> RawFd {
-        self.inner.as_raw_fd()
+        self.sys.as_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl AsRawHandle for Dir {
     fn as_raw_handle(&self) -> RawHandle {
-        self.inner.as_raw_handle()
+        self.sys.as_raw_handle()
     }
 }
 
 #[cfg(unix)]
 impl IntoRawFd for Dir {
     fn into_raw_fd(self) -> RawFd {
-        self.inner.into_raw_fd()
+        self.sys.into_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl IntoRawHandle for Dir {
     fn into_raw_handle(self) -> RawHandle {
-        self.inner.into_raw_handle()
+        self.sys.into_raw_handle()
     }
 }
 

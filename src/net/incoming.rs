@@ -8,14 +8,14 @@ use std::{io, net};
 /// [`std::net::Incoming`]: https://doc.rust-lang.org/std/net/struct.Incoming.html
 /// [`TcpListener`]: struct.TcpListener.html
 pub struct Incoming<'a> {
-    incoming: net::Incoming<'a>,
+    std: net::Incoming<'a>,
 }
 
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::net::Incoming`.
     #[inline]
-    pub fn from_ambient(incoming: net::Incoming<'a>) -> Self {
-        Self { incoming }
+    pub fn from_ambient(std: net::Incoming<'a>) -> Self {
+        Self { std }
     }
 }
 
@@ -24,14 +24,14 @@ impl<'a> Iterator for Incoming<'a> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.incoming
+        self.std
             .next()
             .map(|result| result.map(TcpStream::from_ambient))
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        self.incoming.size_hint()
+        self.std.size_hint()
     }
 }
 

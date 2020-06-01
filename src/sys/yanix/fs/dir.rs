@@ -10,28 +10,33 @@ use std::{
 use yanix::file::{openat, Mode, OFlag};
 
 pub(crate) struct Dir {
-    file: fs::File,
+    std_file: fs::File,
 }
 
 impl Dir {
     #[inline]
-    pub(crate) fn from_ambient(file: fs::File) -> Self {
-        Self { file }
+    pub(crate) fn from_ambient(std_file: fs::File) -> Self {
+        Self { std_file }
     }
 
     #[inline]
     pub(crate) fn as_raw_fd(&self) -> i32 {
-        self.file.as_raw_fd()
+        self.std_file.as_raw_fd()
     }
 
     #[inline]
     pub(crate) fn into_raw_fd(self) -> i32 {
-        self.file.into_raw_fd()
+        self.std_file.into_raw_fd()
     }
 
     pub(crate) fn open_file(&self, path: &Path) -> io::Result<File> {
         unsafe {
-            let fd = openat(self.file.as_raw_fd(), path, OFlag::RDONLY, Mode::empty())?;
+            let fd = openat(
+                self.std_file.as_raw_fd(),
+                path,
+                OFlag::RDONLY,
+                Mode::empty(),
+            )?;
             Ok(File::from_raw_fd(fd))
         }
     }
@@ -39,7 +44,7 @@ impl Dir {
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         unimplemented!(
             "Dir::open_file_with({:?}, {}, {:?})",
-            self.file,
+            self.std_file,
             path.display(),
             options
         );
@@ -48,7 +53,7 @@ impl Dir {
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
         unsafe {
             let fd = openat(
-                self.file.as_raw_fd(),
+                self.std_file.as_raw_fd(),
                 path,
                 OFlag::RDONLY | OFlag::DIRECTORY,
                 Mode::empty(),
@@ -58,17 +63,21 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::create_dir({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::create_dir({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn create_dir_all(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::create_dir_all({:?}, {})", self.file, path.display())
+        unimplemented!(
+            "Dir::create_dir_all({:?}, {})",
+            self.std_file,
+            path.display()
+        )
     }
 
     pub(crate) fn create_file(&self, path: &Path) -> io::Result<File> {
         unsafe {
             let fd = openat(
-                self.file.as_raw_fd(),
+                self.std_file.as_raw_fd(),
                 path,
                 OFlag::WRONLY | OFlag::CREAT | OFlag::TRUNC,
                 Mode::from_bits(0o666).unwrap(),
@@ -79,13 +88,13 @@ impl Dir {
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
         // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn copy(&self, from: &Path, to: &Path) -> io::Result<u64> {
         unimplemented!(
             "Dir::copy({:?}, {}, {})",
-            self.file,
+            self.std_file,
             from.display(),
             to.display()
         )
@@ -94,44 +103,52 @@ impl Dir {
     pub(crate) fn hard_link(&self, src: &Path, dst: &Path) -> io::Result<()> {
         unimplemented!(
             "Dir::hard_link({:?}, {}, {})",
-            self.file,
+            self.std_file,
             src.display(),
             dst.display()
         )
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
-        unimplemented!("Dir::read_dir({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::read_dir({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn read_link(&self, path: &Path) -> io::Result<PathBuf> {
-        unimplemented!("Dir::read_link({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::read_link({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn read_to_string(&self, path: &Path) -> io::Result<String> {
-        unimplemented!("Dir::read_to_string({:?}, {})", self.file, path.display())
+        unimplemented!(
+            "Dir::read_to_string({:?}, {})",
+            self.std_file,
+            path.display()
+        )
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::remove_dir({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::remove_dir({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn remove_dir_all(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::remove_dir_all({:?}, {})", self.file, path.display())
+        unimplemented!(
+            "Dir::remove_dir_all({:?}, {})",
+            self.std_file,
+            path.display()
+        )
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::remove_file({:?}, {})", self.file, path.display())
+        unimplemented!("Dir::remove_file({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {
         unimplemented!(
             "Dir::rename({:?}, {}, {})",
-            self.file,
+            self.std_file,
             from.display(),
             to.display()
         )
@@ -140,7 +157,7 @@ impl Dir {
     pub(crate) fn set_permissions(&self, path: &Path, perm: Permissions) -> io::Result<()> {
         unimplemented!(
             "Dir::set_permissions({:?}, {}, {:?})",
-            self.file,
+            self.std_file,
             path.display(),
             perm
         )
@@ -149,7 +166,7 @@ impl Dir {
     pub(crate) fn symlink_metadata(&self, path: &Path) -> io::Result<Metadata> {
         unimplemented!(
             "Dir::symlink_metadata({:?}, {:?})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -161,7 +178,7 @@ impl Dir {
     ) -> io::Result<()> {
         unimplemented!(
             "Dir::create_with_dir_builder({:?}, {})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -169,7 +186,7 @@ impl Dir {
     pub(crate) fn symlink(&self, src: &Path, dst: &Path) -> io::Result<()> {
         unimplemented!(
             "Dir::symlink({:?}, {}, {})",
-            self.file,
+            self.std_file,
             src.display(),
             dst.display()
         )
@@ -178,7 +195,7 @@ impl Dir {
     pub(crate) fn bind_unix_listener(&self, path: &Path) -> io::Result<UnixListener> {
         unimplemented!(
             "Dir::bind_unix_listener({:?}, {})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -186,7 +203,7 @@ impl Dir {
     pub(crate) fn connect_unix_stream(&self, path: &Path) -> io::Result<UnixStream> {
         unimplemented!(
             "Dir::connect_unix_stream({:?}, {})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -194,7 +211,7 @@ impl Dir {
     pub(crate) fn bind_unix_datagram(&self, path: &Path) -> io::Result<UnixDatagram> {
         unimplemented!(
             "Dir::bind_unix_datagram({:?}, {})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -206,7 +223,7 @@ impl Dir {
     ) -> io::Result<()> {
         unimplemented!(
             "Dir::connect_unix_datagram({:?}, {})",
-            self.file,
+            self.std_file,
             path.display()
         )
     }
@@ -219,7 +236,7 @@ impl Dir {
     ) -> io::Result<usize> {
         unimplemented!(
             "Dir::send_to_unix_datagram_addr({:?}, {:?}, {})",
-            self.file,
+            self.std_file,
             buf,
             path.display()
         )

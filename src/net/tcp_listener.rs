@@ -17,14 +17,14 @@ use std::{io, net};
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::bind_tcp_listener`]: struct.Catalog.html#method.bind_tcp_listener
 pub struct TcpListener {
-    tcp_listener: net::TcpListener,
+    std: net::TcpListener,
 }
 
 impl TcpListener {
     /// Constructs a new instance of `Self` from the given `std::net::TcpListener`.
     #[inline]
-    pub fn from_ambient(tcp_listener: net::TcpListener) -> Self {
-        Self { tcp_listener }
+    pub fn from_ambient(std: net::TcpListener) -> Self {
+        Self { std }
     }
 
     /// Returns the local socket address of this listener.
@@ -34,7 +34,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
-        self.tcp_listener.local_addr()
+        self.std.local_addr()
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -44,7 +44,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.tcp_listener.try_clone()?))
+        Ok(Self::from_ambient(self.std.try_clone()?))
     }
 
     /// Accept a new incoming connection from this listener.
@@ -54,7 +54,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::accept`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.accept
     #[inline]
     pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
-        self.tcp_listener
+        self.std
             .accept()
             .map(|(tcp_stream, addr)| (TcpStream::from_ambient(tcp_stream), addr))
     }
@@ -66,7 +66,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_ambient(self.tcp_listener.incoming())
+        Incoming::from_ambient(self.std.incoming())
     }
 
     /// Sets the value for the `IP_TTL` option on this socket.
@@ -76,7 +76,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
-        self.tcp_listener.set_ttl(ttl)
+        self.std.set_ttl(ttl)
     }
 
     /// Gets the value of the `IP_TTL` option for this socket.
@@ -86,7 +86,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
-        self.tcp_listener.ttl()
+        self.std.ttl()
     }
 
     /// Gets the value of the `SO_ERROR` option on this socket.
@@ -96,7 +96,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::take_error`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.take_error
     #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
-        self.tcp_listener.take_error()
+        self.std.take_error()
     }
 
     /// Moves this TCP stream into or out of nonblocking mode.
@@ -106,7 +106,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_nonblocking
     #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
-        self.tcp_listener.set_nonblocking(nonblocking)
+        self.std.set_nonblocking(nonblocking)
     }
 }
 
@@ -127,28 +127,28 @@ impl FromRawSocket for TcpListener {
 #[cfg(unix)]
 impl AsRawFd for TcpListener {
     fn as_raw_fd(&self) -> RawFd {
-        self.tcp_listener.as_raw_fd()
+        self.std.as_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl AsRawSocket for TcpListener {
     fn as_raw_socket(&self) -> RawSocket {
-        self.tcp_listener.as_raw_socket()
+        self.std.as_raw_socket()
     }
 }
 
 #[cfg(unix)]
 impl IntoRawFd for TcpListener {
     fn into_raw_fd(self) -> RawFd {
-        self.tcp_listener.into_raw_fd()
+        self.std.into_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl IntoRawHandle for TcpListener {
     fn into_raw_handle(self) -> RawHandle {
-        self.tcp_listener.into_raw_handle()
+        self.std.into_raw_handle()
     }
 }
 

@@ -17,14 +17,14 @@ use std::{io, net, time::Duration};
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::connect_tcp_stream`]: struct.Catalog.html#method.connect_tcp_stream
 pub struct TcpStream {
-    tcp_stream: net::TcpStream,
+    std: net::TcpStream,
 }
 
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `std::net::TcpStream`.
     #[inline]
-    pub fn from_ambient(tcp_stream: net::TcpStream) -> Self {
-        Self { tcp_stream }
+    pub fn from_ambient(std: net::TcpStream) -> Self {
+        Self { std }
     }
 
     /// Returns the local socket address of this listener.
@@ -34,7 +34,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
-        self.tcp_stream.local_addr()
+        self.std.local_addr()
     }
 
     /// Shuts down the read, write, or both halves of this connection.
@@ -44,7 +44,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::shutdown`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
-        self.tcp_stream.shutdown(how)
+        self.std.shutdown(how)
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -54,7 +54,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.tcp_stream.try_clone()?))
+        Ok(Self::from_ambient(self.std.try_clone()?))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -64,7 +64,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::set_read_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_read_timeout
     #[inline]
     pub fn set_read_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
-        self.tcp_stream.set_read_timeout(dur)
+        self.std.set_read_timeout(dur)
     }
 
     /// pub fn set_write_timeout(&self, dur: Option<Duration>) -> Result<()>
@@ -74,7 +74,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::set_write_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_write_timeout
     #[inline]
     pub fn set_write_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
-        self.tcp_stream.set_write_timeout(dur)
+        self.std.set_write_timeout(dur)
     }
 
     /// Returns the read timeout of this socket.
@@ -84,7 +84,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::read_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.read_timeout
     #[inline]
     pub fn read_timeout(&self) -> io::Result<Option<Duration>> {
-        self.tcp_stream.read_timeout()
+        self.std.read_timeout()
     }
 
     /// Returns the write timeout of this socket.
@@ -94,7 +94,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::write_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.write_timeout
     #[inline]
     pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
-        self.tcp_stream.write_timeout()
+        self.std.write_timeout()
     }
 
     /// Receives data on the socket from the remote address to which it is connected, without
@@ -105,7 +105,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::peek`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.peek
     #[inline]
     pub fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
-        self.tcp_stream.peek(buf)
+        self.std.peek(buf)
     }
 
     /// Sets the value of the `TCP_NODELAY` option on this socket.
@@ -115,7 +115,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::set_nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_nodelay
     #[inline]
     pub fn set_nodelay(&self, nodelay: bool) -> io::Result<()> {
-        self.tcp_stream.set_nodelay(nodelay)
+        self.std.set_nodelay(nodelay)
     }
 
     /// Gets the value of the `TCP_NODELAY` option on this socket.
@@ -125,7 +125,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.nodelay
     #[inline]
     pub fn nodelay(&self) -> io::Result<bool> {
-        self.tcp_stream.nodelay()
+        self.std.nodelay()
     }
 
     /// Sets the value for the `IP_TTL` option on this socket.
@@ -135,7 +135,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
-        self.tcp_stream.set_ttl(ttl)
+        self.std.set_ttl(ttl)
     }
 
     /// Gets the value of the `IP_TTL` option for this socket.
@@ -145,7 +145,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
-        self.tcp_stream.ttl()
+        self.std.ttl()
     }
 
     /// Gets the value of the `SO_ERROR` option on this socket.
@@ -155,7 +155,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::take_error`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.take_error
     #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
-        self.tcp_stream.take_error()
+        self.std.take_error()
     }
 
     /// Moves this TCP stream into or out of nonblocking mode.
@@ -165,7 +165,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_nonblocking
     #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
-        self.tcp_stream.set_nonblocking(nonblocking)
+        self.std.set_nonblocking(nonblocking)
     }
 }
 
@@ -189,7 +189,7 @@ impl FromRawSocket for TcpStream {
 impl AsRawFd for TcpStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
-        self.tcp_stream.as_raw_fd()
+        self.std.as_raw_fd()
     }
 }
 
@@ -197,7 +197,7 @@ impl AsRawFd for TcpStream {
 impl AsRawSocket for TcpStream {
     #[inline]
     fn as_raw_socket(&self) -> RawSocket {
-        self.tcp_stream.as_raw_socket()
+        self.std.as_raw_socket()
     }
 }
 
@@ -205,7 +205,7 @@ impl AsRawSocket for TcpStream {
 impl IntoRawFd for TcpStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
-        self.tcp_stream.into_raw_fd()
+        self.std.into_raw_fd()
     }
 }
 
@@ -213,34 +213,34 @@ impl IntoRawFd for TcpStream {
 impl IntoRawHandle for TcpStream {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
-        self.tcp_stream.into_raw_handle()
+        self.std.into_raw_handle()
     }
 }
 
 impl io::Read for TcpStream {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.tcp_stream.read(buf)
+        self.std.read(buf)
     }
 
     #[inline]
     fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut]) -> io::Result<usize> {
-        self.tcp_stream.read_vectored(bufs)
+        self.std.read_vectored(bufs)
     }
 
     #[inline]
     fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
-        self.tcp_stream.read_exact(buf)
+        self.std.read_exact(buf)
     }
 
     #[inline]
     fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
-        self.tcp_stream.read_to_end(buf)
+        self.std.read_to_end(buf)
     }
 
     #[inline]
     fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
-        self.tcp_stream.read_to_string(buf)
+        self.std.read_to_string(buf)
     }
 
     // TODO: nightly-only APIs initializer?
@@ -248,19 +248,19 @@ impl io::Read for TcpStream {
 
 impl io::Write for TcpStream {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.tcp_stream.write(buf)
+        self.std.write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        self.tcp_stream.flush()
+        self.std.flush()
     }
 
     fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
-        self.tcp_stream.write_vectored(bufs)
+        self.std.write_vectored(bufs)
     }
 
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
-        self.tcp_stream.write_all(buf)
+        self.std.write_all(buf)
     }
 }
 
