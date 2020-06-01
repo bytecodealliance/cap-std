@@ -16,7 +16,7 @@ pub struct ReadDir {
 
 impl ReadDir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
-    pub fn from_fs_file(file: fs::File) -> Self {
+    pub fn from_ambient(file: fs::File) -> Self {
         Self { file }
     }
 }

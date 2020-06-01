@@ -1,7 +1,7 @@
 use crate::fs::FileType;
 use std::{fs, io};
 
-/// Entries returned by the ReadDir iterator.
+/// Entries returned by the `ReadDir` iterator.
 ///
 /// This corresponds to [`std::fs::DirEntry`].
 ///

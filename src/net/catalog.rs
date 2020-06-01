@@ -1,3 +1,5 @@
+#![allow(missing_docs)] // TODO: add docs
+
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use ipnet::IpNet;
 use std::time::Duration;
@@ -26,13 +28,13 @@ pub struct Catalog {
 const NO_SOCKET_ADDRS: &[net::SocketAddr] = &[];
 
 impl Catalog {
-    pub fn bind_listener<A: ToSocketAddrs>(&mut self, addr: A) -> io::Result<TcpListener> {
+    pub fn bind_tcp_listener<A: ToSocketAddrs>(&mut self, addr: A) -> io::Result<TcpListener> {
         let mut last_err = None;
         for addr in addr.to_socket_addrs()? {
             self.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr) {
-                Ok(tcp_listener) => return Ok(TcpListener::from_net_tcp_listener(tcp_listener)),
+                Ok(tcp_listener) => return Ok(TcpListener::from_ambient(tcp_listener)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -47,7 +49,7 @@ impl Catalog {
         for addr in addr.to_socket_addrs()? {
             self.check_addr(&addr)?;
             match net::TcpStream::connect(addr) {
-                Ok(tcp_stream) => return Ok(TcpStream::from_net_tcp_stream(tcp_stream)),
+                Ok(tcp_stream) => return Ok(TcpStream::from_ambient(tcp_stream)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -58,9 +60,9 @@ impl Catalog {
     }
 
     pub fn connect_timeout(addr: &SocketAddr, timeout: Duration) -> io::Result<TcpStream> {
-        Ok(TcpStream::from_net_tcp_stream(
-            net::TcpStream::connect_timeout(addr, timeout)?,
-        ))
+        Ok(TcpStream::from_ambient(net::TcpStream::connect_timeout(
+            addr, timeout,
+        )?))
     }
 
     pub fn bind_udp_socket<A: ToSocketAddrs>(&mut self, addr: A) -> io::Result<UdpSocket> {
@@ -68,7 +70,7 @@ impl Catalog {
         for addr in addr.to_socket_addrs()? {
             self.check_addr(&addr)?;
             match net::UdpSocket::bind(addr) {
-                Ok(udp_socket) => return Ok(UdpSocket::from_net_udp_socket(udp_socket)),
+                Ok(udp_socket) => return Ok(UdpSocket::from_ambient(udp_socket)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -76,6 +78,23 @@ impl Catalog {
             Some(e) => Err(e),
             None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
         }
+    }
+
+    pub fn send_to_udp_socket_addr<A: ToSocketAddrs>(
+        &mut self,
+        udp_socket: &UdpSocket,
+        buf: &[u8],
+        addr: A,
+    ) -> io::Result<usize> {
+        unimplemented!("Catalog::send_to_udp_socket_addr")
+    }
+
+    pub fn connect_udp_socket<A: ToSocketAddrs>(
+        &mut self,
+        udp_socket: &UdpSocket,
+        addr: A,
+    ) -> io::Result<()> {
+        unimplemented!("Catalog::connect_udp_socket")
     }
 
     fn check_addr(&self, addr: &SocketAddr) -> io::Result<()> {

@@ -32,7 +32,7 @@ fn touch(dir: &mut Dir, path: &Path) -> io::Result<()> {
 }
 
 fn main() {
-    let mut cwd = Dir::from_fs_file(std::fs::File::open(".").expect("!"));
+    let mut cwd = Dir::from_ambient(std::fs::File::open(".").expect("!"));
 
     println!("`mkdir a`");
 

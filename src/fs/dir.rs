@@ -1,8 +1,10 @@
 use crate::fs::{File, Metadata, OpenOptions, Permissions, ReadDir};
 #[cfg(unix)]
+use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
+#[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::unix::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -21,8 +23,8 @@ pub struct Dir {
 }
 
 impl Dir {
-    /// Constructs a new instance of `Self` from the given file.
-    pub fn from_fs_file(file: fs::File) -> Self {
+    /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    pub fn from_ambient(file: fs::File) -> Self {
         Self { file }
     }
 
@@ -175,13 +177,13 @@ impl Dir {
     ///
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     pub fn read(&mut self) -> io::Result<ReadDir> {
-        Ok(ReadDir::from_fs_file(self.file.try_clone()?))
+        Ok(ReadDir::from_ambient(self.file.try_clone()?))
     }
 
     /// Consumes self and returns an iterator over the entries within a directory
     /// in the manner of `read`.
     pub fn into_read(self) -> ReadDir {
-        ReadDir::from_fs_file(self.file)
+        ReadDir::from_ambient(self.file)
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -307,19 +309,83 @@ impl Dir {
         let mut file = self.create_file(path)?;
         file.write_all(contents.as_ref())
     }
+
+    /// Creates a new `UnixListener` bound to the specified socket.
+    ///
+    /// This corresponds to [`std::os::unix::net::UnixListener::bind`], but only
+    /// accesses paths relative to and within `self`.
+    ///
+    /// [`std::os::unix::net::UnixListener::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.bind
+    #[cfg(unix)]
+    pub fn bind_unix_listener<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixListener> {
+        unimplemented!("Dir::bind_unix_listener")
+    }
+
+    /// Connects to the socket named by path.
+    ///
+    /// This corresponds to [`std::os::unix::net::UnixStream::connect`], but only
+    /// accesses paths relative to and within `self`.
+    ///
+    /// [`std::os::unix::net::UnixStream::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.connect
+    #[cfg(unix)]
+    pub fn connect_unix_stream<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixStream> {
+        unimplemented!("Dir::connect_unix_stream")
+    }
+
+    /// Creates a Unix datagram socket bound to the given path.
+    ///
+    /// This corresponds to [`std::os::unix::net::UnixDatgram::bind`], but only
+    /// accesses paths relative to and within `self`.
+    ///
+    /// [`std::os::unix::net::UnixDatagram::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.bind
+    #[cfg(unix)]
+    pub fn bind_unix_datagram<P: AsRef<Path>>(&mut self, path: P) -> io::Result<UnixDatagram> {
+        unimplemented!("Dir::bind_unix_datagram")
+    }
+
+    /// Connects the socket to the specified address.
+    ///
+    /// This corresponds to [`std::os::unix::net::UnixDatgram::connect`], but only
+    /// accesses paths relative to and within `self`.
+    ///
+    /// [`std::os::unix::net::UnixDatagram::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.connect
+    #[cfg(unix)]
+    pub fn connect_unix_datagram<P: AsRef<Path>>(
+        &mut self,
+        unix_datagram: &UnixDatagram,
+        path: P,
+    ) -> io::Result<()> {
+        unimplemented!("Dir::connect_unix_datagram")
+    }
+
+    /// Sends data on the socket to the specified address.
+    ///
+    /// This corresponds to [`std::os::unix::net::UnixDatgram::send_to`], but only
+    /// accesses paths relative to and within `self`.
+    ///
+    /// [`std::os::unix::net::UnixDatagram::send_to`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send_to
+    #[cfg(unix)]
+    pub fn send_to_unix_datagram_addr<P: AsRef<Path>>(
+        &mut self,
+        unix_datagram: &UnixDatagram,
+        buf: &[u8],
+        path: P,
+    ) -> io::Result<usize> {
+        unimplemented!("Dir::send_to_unix_datagram_addr")
+    }
 }
 
 #[cfg(unix)]
 impl FromRawFd for Dir {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Dir::from_fs_file(fs::File::from_raw_fd(fd))
+        Self::from_ambient(fs::File::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     unsafe fn from_raw_fd(handle: RawHandle) -> Self {
-        Dir::from_fs_file(fs::File::from_raw_handle(handle))
+        Self::from_ambient(fs::File::from_raw_handle(handle))
     }
 }
 

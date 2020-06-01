@@ -1,7 +1,7 @@
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::unix::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{fs, io, process};
 
 /// A reference to an open file on the filesystem.
@@ -9,7 +9,7 @@ use std::{fs, io, process};
 /// This corresponds to [`std::fs::File`].
 ///
 /// Note that this `File` has no `open` or `create` methods. To open or create
-/// a file, you must first obtain a [`Dir`] containing the file, and then call
+/// a file, you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open_file`] or [`Dir::create_file`].
 ///
 /// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
@@ -22,11 +22,7 @@ pub struct File {
 
 impl File {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
-    ///
-    /// This corresponds to [`std::fs::File::from_raw_fd`].
-    ///
-    /// [`std::fs::File::from_raw_fd`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.from_raw_fd
-    pub fn from_fs_file(file: fs::File) -> Self {
+    pub fn from_ambient(file: fs::File) -> Self {
         Self { file }
     }
 
@@ -72,14 +68,14 @@ impl File {
 #[cfg(unix)]
 impl FromRawFd for File {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        File::from_fs_file(fs::File::from_raw_fd(fd))
+        Self::from_ambient(fs::File::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
 impl FromRawHandle for File {
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        File::from_fs_file(fs::File::from_raw_handle(handle))
+        Self::from_ambient(fs::File::from_raw_handle(handle))
     }
 }
 
@@ -158,7 +154,7 @@ impl io::Seek for File {
 }
 
 impl From<File> for process::Stdio {
-    fn from(file: File) -> process::Stdio {
+    fn from(file: File) -> Self {
         From::<fs::File>::from(file.file)
     }
 }

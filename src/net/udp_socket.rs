@@ -1,139 +1,289 @@
-use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr, ToSocketAddrs};
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::unix::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{io, net, time::Duration};
 
+/// A UDP socket.
+///
+/// This corresponds to [`std::net::UdpSocket`].
+///
+/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods. To
+/// create a `UdpSocket` bound to an address or to send a message to an address,
+/// you must first obtain a [`Catalog`] permitting the address, and then call
+/// [`Catalog::bind_udp_socket`], or [`Catalog::connect_udp_socket`], or
+/// [`Catalog::send_to_udp_socket_addr`].
+///
+/// [`std::net::UdpSocket`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html
+/// [`Catalog`]: struct.Catalog.html
+/// [`Catalog::bind_udp_socket`]: struct.Catalog.html#method.bind_udp_socket
+/// [`Catalog::connect_udp_socket`]: struct.Catalog.html#method.connect_udp_socket
+/// [`Catalog::send_to_udp_socket_addr`]: struct.Catalog.html#method.send_to_udp_socket_addr
 pub struct UdpSocket {
     udp_socket: net::UdpSocket,
 }
 
 impl UdpSocket {
-    pub fn from_net_udp_socket(udp_socket: net::UdpSocket) -> Self {
+    /// Constructs a new instance of `Self` from the given `std::net::UdpSocket`.
+    pub fn from_ambient(udp_socket: net::UdpSocket) -> Self {
         Self { udp_socket }
     }
 
+    /// Receives a single datagram message on the socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::recv_from`].
+    ///
+    /// [`std::net::UdpSocket::recv_from`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.recv_from
     pub fn recv_from(&self, buf: &mut [u8]) -> io::Result<(usize, SocketAddr)> {
         self.udp_socket.recv_from(buf)
     }
 
+    /// Receives a single datagram message on the socket, without removing it from the queue.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::peek_from`].
+    ///
+    /// [`std::net::UdpSocket::peek_from`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.peek_from
     pub fn peek_from(&self, buf: &mut [u8]) -> io::Result<(usize, SocketAddr)> {
         self.udp_socket.peek_from(buf)
     }
 
-    pub fn send_to<A: ToSocketAddrs>(&self, buf: &[u8], addr: A) -> io::Result<usize> {
-        self.udp_socket.send_to(buf, addr)
-    }
-
+    /// Returns the socket address of the remote peer this socket was connected to.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::peer_addr`].
+    ///
+    /// [`std::net::UdpSocket::peer_addr`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.peer_addr
     pub fn peer_addr(&self) -> io::Result<SocketAddr> {
         self.udp_socket.peer_addr()
     }
 
+    /// Returns the socket address that this socket was created from.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::local_addr`].
+    ///
+    /// [`std::net::UdpSocket::local_addr`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.local_addr
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.udp_socket.local_addr()
     }
 
-    pub fn try_clone(&self) -> io::Result<UdpSocket> {
-        Ok(UdpSocket::from_net_udp_socket(self.udp_socket.try_clone()?))
+    /// Creates a new independently owned handle to the underlying socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::try_clone`].
+    ///
+    /// [`std::net::UdpSocket::try_clone`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.try_clone
+    pub fn try_clone(&self) -> io::Result<Self> {
+        Ok(Self::from_ambient(self.udp_socket.try_clone()?))
     }
 
+    /// Sets the read timeout to the timeout specified.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_read_timeout`].
+    ///
+    /// [`std::net::UdpSocket::set_read_timeout`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_read_timeout
     pub fn set_read_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
         self.udp_socket.set_read_timeout(dur)
     }
 
+    /// Sets the write timeout to the timeout specified.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_write_timeout`].
+    ///
+    /// [`std::net::UdpSocket::set_write_timeout`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_write_timeout
     pub fn set_write_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
         self.udp_socket.set_write_timeout(dur)
     }
 
+    /// Returns the read timeout of this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::read_timeout`].
+    ///
+    /// [`std::net::UdpSocket::read_timeout`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.read_timeout
     pub fn read_timeout(&self) -> io::Result<Option<Duration>> {
         self.udp_socket.read_timeout()
     }
 
+    /// Returns the write timeout of this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::write_timeout`].
+    ///
+    /// [`std::net::UdpSocket::write_timeout`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.write_timeout
     pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
         self.udp_socket.write_timeout()
     }
 
+    /// Sets the value of the `SO_BROADCAST` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_broadcast`].
+    ///
+    /// [`std::net::UdpSocket::set_broadcast`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_broadcast
     pub fn set_broadcast(&self, broadcast: bool) -> io::Result<()> {
         self.udp_socket.set_broadcast(broadcast)
     }
 
+    /// Gets the value of the `SO_BROADCAST` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::broadcast`].
+    ///
+    /// [`std::net::UdpSocket::broadcast`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.broadcast
     pub fn broadcast(&self) -> io::Result<bool> {
         self.udp_socket.broadcast()
     }
 
+    /// Sets the value of the `IP_MULTICAST_LOOP` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_multicast_loop_v4`].
+    ///
+    /// [`std::net::UdpSocket::set_multicast_loop_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_multicast_loop_v4
     pub fn set_multicast_loop_v4(&self, multicast_loop_v4: bool) -> io::Result<()> {
         self.udp_socket.set_multicast_loop_v4(multicast_loop_v4)
     }
 
+    /// Gets the value of the `IP_MULTICAST_LOOP` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::multicast_loop_v4`].
+    ///
+    /// [`std::net::UdpSocket::multicast_loop_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.multicast_loop_v4
     pub fn multicast_loop_v4(&self) -> io::Result<bool> {
         self.udp_socket.multicast_loop_v4()
     }
 
+    /// Sets the value of the `IP_MULTICAST_TTL` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_multicast_ttl_v4`].
+    ///
+    /// [`std::net::UdpSocket::set_multicast_ttl_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_multicast_ttl_v4
     pub fn set_multicast_ttl_v4(&self, multicast_ttl_v4: u32) -> io::Result<()> {
         self.udp_socket.set_multicast_ttl_v4(multicast_ttl_v4)
     }
 
+    /// Gets the value of the `IP_MULTICAST_TTL` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::multicast_ttl_v4`].
+    ///
+    /// [`std::net::UdpSocket::multicast_ttl_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.multicast_ttl_v4
     pub fn multicast_ttl_v4(&self) -> io::Result<u32> {
         self.udp_socket.multicast_ttl_v4()
     }
 
+    /// Sets the value of the `IPV6_MULTICAST_LOOP` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_multicast_loop_v6`].
+    ///
+    /// [`std::net::UdpSocket::set_multicast_loop_v6`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_multicast_loop_v6
     pub fn set_multicast_loop_v6(&self, multicast_loop_v6: bool) -> io::Result<()> {
         self.udp_socket.set_multicast_loop_v6(multicast_loop_v6)
     }
 
+    /// Gets the value of the `IPV6_MULTICAST_LOOP` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::multicast_loop_v6`].
+    ///
+    /// [`std::net::UdpSocket::multicast_loop_v6`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.multicast_loop_v6
     pub fn multicast_loop_v6(&self) -> io::Result<bool> {
         self.udp_socket.multicast_loop_v6()
     }
 
+    /// Sets the value for the `IP_TTL` option on this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_ttl`].
+    ///
+    /// [`std::net::UdpSocket::set_ttl`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_ttl
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.udp_socket.set_ttl(ttl)
     }
 
+    /// Gets the value of the `IP_TTL` option for this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::ttl`].
+    ///
+    /// [`std::net::UdpSocket::ttl`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.ttl
     pub fn ttl(&self) -> io::Result<u32> {
         self.udp_socket.ttl()
     }
 
+    /// Executes an operation of the `IP_ADD_MEMBERSHIP` type.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::join_multicast_v4`].
+    ///
+    /// [`std::net::UdpSocket::join_multicast_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.join_multicast_v4
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn join_multicast_v4(&self, multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> io::Result<()> {
         self.udp_socket.join_multicast_v4(multiaddr, interface)
     }
 
+    /// Executes an operation of the `IPV6_ADD_MEMBERSHIP` type.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::join_multicast_v6`].
+    ///
+    /// [`std::net::UdpSocket::join_multicast_v6`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.join_multicast_v6
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn join_multicast_v6(&self, multiaddr: &Ipv6Addr, interface: u32) -> io::Result<()> {
         self.udp_socket.join_multicast_v6(multiaddr, interface)
     }
 
+    /// Executes an operation of the `IP_DROP_MEMBERSHIP` type.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::leave_multicast_v4`].
+    ///
+    /// [`std::net::UdpSocket::leave_multicast_v4`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.leave_multicast_v4
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn leave_multicast_v4(&self, multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> io::Result<()> {
         self.udp_socket.leave_multicast_v4(multiaddr, interface)
     }
 
+    /// Executes an operation of the `IPV6_DROP_MEMBERSHIP` type.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::leave_multicast_v6`].
+    ///
+    /// [`std::net::UdpSocket::leave_multicast_v6`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.leave_multicast_v6
     #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn leave_multicast_v6(&self, multiaddr: &Ipv6Addr, interface: u32) -> io::Result<()> {
         self.udp_socket.leave_multicast_v6(multiaddr, interface)
     }
 
+    /// Gets the value of the `SO_ERROR` option on this socket.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::take_error`].
+    ///
+    /// [`std::net::UdpSocket::take_error`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.take_error
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.udp_socket.take_error()
     }
 
-    pub fn connect<A: ToSocketAddrs>(&self, addr: A) -> io::Result<()> {
-        self.udp_socket.connect(addr)
-    }
-
+    /// Sends data on the socket to the remote address to which it is connected.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::send`].
+    ///
+    /// [`std::net::UdpSocket::send`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.send
     pub fn send(&self, buf: &[u8]) -> io::Result<usize> {
         self.udp_socket.send(buf)
     }
 
+    /// Receives a single datagram message on the socket from the remote address to which it is
+    /// connected.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::recv`].
+    ///
+    /// [`std::net::UdpSocket::recv`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.recv
     pub fn recv(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.udp_socket.recv(buf)
     }
 
+    /// Receives single datagram on the socket from the remote address to which it is connected,
+    /// without removing the message from input queue.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::peek`].
+    ///
+    /// [`std::net::UdpSocket::peek`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.peek
     pub fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.udp_socket.peek(buf)
     }
 
+    /// Moves this UDP socket into or out of nonblocking mode.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::set_nonblocking`].
+    ///
+    /// [`std::net::UdpSocket::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.set_nonblocking
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
         self.udp_socket.set_nonblocking(nonblocking)
     }
@@ -142,14 +292,14 @@ impl UdpSocket {
 #[cfg(unix)]
 impl FromRawFd for UdpSocket {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        UdpSocket::from_net_udp_socket(net::UdpSocket::from_raw_fd(fd))
+        Self::from_ambient(net::UdpSocket::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
 impl FromRawSocket for UdpSockeUdpSocket {
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        UdpSocket::from_net_udp_socket(net::UdpSocket::from_raw_socket(handle))
+        Self::from_ambient(net::UdpSocket::from_raw_socket(handle))
     }
 }
 
