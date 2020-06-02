@@ -13,7 +13,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-/// A reference to an open directory on the filesystem.
+/// A reference to an open directory on a filesystem.
 ///
 /// TODO: Add OFlag::CLOEXEC to yanix and use it in `open_file` and friends.
 ///
@@ -125,7 +125,7 @@ impl Dir {
         self.sys.copy(from.as_ref(), to.as_ref())
     }
 
-    /// Creates a new hard link on the filesystem.
+    /// Creates a new hard link on a filesystem.
     ///
     /// This corresponds to [`std::fs::hard_link`], but only accesses paths
     /// relative to `self`.
@@ -217,7 +217,7 @@ impl Dir {
         self.sys.remove_dir_all(path.as_ref())
     }
 
-    /// Removes a file from the filesystem.
+    /// Removes a file from a filesystem.
     ///
     /// This corresponds to [`std::fs::remove_file`], but only accesses paths
     /// relative to `self`.
@@ -292,7 +292,7 @@ impl Dir {
         self.sys.create_with_dir_builder(dir_builder, path.as_ref())
     }
 
-    /// Creates a new symbolic link on the filesystem.
+    /// Creates a new symbolic link on a filesystem.
     ///
     /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses paths
     /// relative to `self`.

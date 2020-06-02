@@ -4,7 +4,7 @@ use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{fs, io, process};
 
-/// A reference to an open file on the filesystem.
+/// A reference to an open file on a filesystem.
 ///
 /// This corresponds to [`std::fs::File`].
 ///
@@ -38,7 +38,7 @@ impl File {
     }
 
     /// This function is similar to `sync_all`, except that it may not synchronize
-    /// file metadata to the filesystem.
+    /// file metadata to a filesystem.
     ///
     /// This corresponds to [`std::fs::File::sync_data`].
     ///
