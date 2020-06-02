@@ -30,7 +30,7 @@ impl Catalog {
             self.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr) {
-                Ok(tcp_listener) => return Ok(TcpListener::from_ambient(tcp_listener)),
+                Ok(tcp_listener) => return Ok(TcpListener::from_std(tcp_listener)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -49,7 +49,7 @@ impl Catalog {
             self.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpStream::connect(addr) {
-                Ok(tcp_stream) => return Ok(TcpStream::from_ambient(tcp_stream)),
+                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -65,7 +65,7 @@ impl Catalog {
         timeout: Duration,
     ) -> io::Result<TcpStream> {
         self.check_addr(&addr)?;
-        net::TcpStream::connect_timeout(addr, timeout).map(TcpStream::from_ambient)
+        net::TcpStream::connect_timeout(addr, timeout).map(TcpStream::from_std)
     }
 
     pub(crate) fn bind_udp_socket(
@@ -76,7 +76,7 @@ impl Catalog {
         for addr in addrs {
             self.check_addr(&addr)?;
             match net::UdpSocket::bind(addr) {
-                Ok(udp_socket) => return Ok(UdpSocket::from_ambient(udp_socket)),
+                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket)),
                 Err(e) => last_err = Some(e),
             }
         }

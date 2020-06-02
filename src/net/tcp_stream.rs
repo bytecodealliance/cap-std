@@ -23,7 +23,7 @@ pub struct TcpStream {
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `std::net::TcpStream`.
     #[inline]
-    pub fn from_ambient(std: net::TcpStream) -> Self {
+    pub fn from_std(std: net::TcpStream) -> Self {
         Self { std }
     }
 
@@ -54,7 +54,7 @@ impl TcpStream {
     /// [`std::net::TcpStream::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.std.try_clone()?))
+        Ok(Self::from_std(self.std.try_clone()?))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -173,7 +173,7 @@ impl TcpStream {
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(net::TcpStream::from_raw_fd(fd))
+        Self::from_std(net::TcpStream::from_raw_fd(fd))
     }
 }
 
@@ -181,7 +181,7 @@ impl FromRawFd for TcpStream {
 impl FromRawSocket for TcpStream {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_ambient(net::TcpStream::from_raw_socket(handle))
+        Self::from_std(net::TcpStream::from_raw_socket(handle))
     }
 }
 

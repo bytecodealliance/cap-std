@@ -16,7 +16,7 @@ pub struct DirEntry {
 impl DirEntry {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(std: fs::DirEntry) -> Self {
+    pub fn from_std(std: fs::DirEntry) -> Self {
         Self { std }
     }
 

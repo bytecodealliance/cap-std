@@ -23,7 +23,7 @@ pub struct File {
 impl File {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(std: fs::File) -> Self {
+    pub fn from_std(std: fs::File) -> Self {
         Self { std }
     }
 
@@ -74,7 +74,7 @@ impl File {
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(fs::File::from_raw_fd(fd))
+        Self::from_std(fs::File::from_raw_fd(fd))
     }
 }
 
@@ -82,7 +82,7 @@ impl FromRawFd for File {
 impl FromRawHandle for File {
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_ambient(fs::File::from_raw_handle(handle))
+        Self::from_std(fs::File::from_raw_handle(handle))
     }
 }
 

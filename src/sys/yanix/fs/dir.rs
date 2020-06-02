@@ -15,7 +15,7 @@ pub(crate) struct Dir {
 
 impl Dir {
     #[inline]
-    pub(crate) fn from_ambient(std_file: fs::File) -> Self {
+    pub(crate) fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
     }
 

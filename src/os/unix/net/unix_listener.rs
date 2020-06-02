@@ -25,7 +25,7 @@ pub struct UnixListener {
 impl UnixListener {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixListener`.
     #[inline]
-    pub fn from_ambient(std: unix::net::UnixListener) -> Self {
+    pub fn from_std(std: unix::net::UnixListener) -> Self {
         Self { std }
     }
 
@@ -38,7 +38,7 @@ impl UnixListener {
     pub fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
         self.std
             .accept()
-            .map(|(unix_stream, addr)| (UnixStream::from_ambient(unix_stream), addr))
+            .map(|(unix_stream, addr)| (UnixStream::from_std(unix_stream), addr))
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -48,7 +48,7 @@ impl UnixListener {
     /// [`std::os::unix::net::UnixListener::try_clone`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.std.try_clone()?))
+        Ok(Self::from_std(self.std.try_clone()?))
     }
 
     /// Returns the local socket address of this listener.
@@ -88,14 +88,14 @@ impl UnixListener {
     /// [`std::os::unix::net::UnixListener::incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_ambient(self.std.incoming())
+        Incoming::from_std(self.std.incoming())
     }
 }
 
 impl FromRawFd for UnixListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(unix::net::UnixListener::from_raw_fd(fd))
+        Self::from_std(unix::net::UnixListener::from_raw_fd(fd))
     }
 }
 
@@ -120,7 +120,7 @@ impl<'a> IntoIterator for &'a UnixListener {
 
     #[inline]
     fn into_iter(self) -> Incoming<'a> {
-        Incoming::from_ambient(self.std.into_iter())
+        Incoming::from_std(self.std.into_iter())
     }
 }
 

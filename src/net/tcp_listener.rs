@@ -23,7 +23,7 @@ pub struct TcpListener {
 impl TcpListener {
     /// Constructs a new instance of `Self` from the given `std::net::TcpListener`.
     #[inline]
-    pub fn from_ambient(std: net::TcpListener) -> Self {
+    pub fn from_std(std: net::TcpListener) -> Self {
         Self { std }
     }
 
@@ -44,7 +44,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.std.try_clone()?))
+        Ok(Self::from_std(self.std.try_clone()?))
     }
 
     /// Accept a new incoming connection from this listener.
@@ -56,7 +56,7 @@ impl TcpListener {
     pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
         self.std
             .accept()
-            .map(|(tcp_stream, addr)| (TcpStream::from_ambient(tcp_stream), addr))
+            .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream), addr))
     }
 
     /// Returns an iterator over the connections being received on this listener.
@@ -66,7 +66,7 @@ impl TcpListener {
     /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_ambient(self.std.incoming())
+        Incoming::from_std(self.std.incoming())
     }
 
     /// Sets the value for the `IP_TTL` option on this socket.
@@ -113,14 +113,14 @@ impl TcpListener {
 #[cfg(unix)]
 impl FromRawFd for TcpListener {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(net::TcpListener::from_raw_fd(fd))
+        Self::from_std(net::TcpListener::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
 impl FromRawSocket for TcpListener {
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_ambient(net::TcpListener::from_raw_socket(handle))
+        Self::from_std(net::TcpListener::from_raw_socket(handle))
     }
 }
 

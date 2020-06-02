@@ -28,9 +28,9 @@ pub struct Dir {
 impl Dir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_ambient(file: fs::File) -> Self {
+    pub fn from_std_file(file: fs::File) -> Self {
         Self {
-            sys: sys::fs::Dir::from_ambient(file),
+            sys: sys::fs::Dir::from_std_file(file),
         }
     }
 
@@ -378,14 +378,14 @@ impl Dir {
 #[cfg(unix)]
 impl FromRawFd for Dir {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(fs::File::from_raw_fd(fd))
+        Self::from_std_file(fs::File::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     unsafe fn from_raw_fd(handle: RawHandle) -> Self {
-        Self::from_ambient(fs::File::from_raw_handle(handle))
+        Self::from_std_file(fs::File::from_raw_handle(handle))
     }
 }
 

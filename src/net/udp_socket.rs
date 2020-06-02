@@ -27,7 +27,7 @@ pub struct UdpSocket {
 impl UdpSocket {
     /// Constructs a new instance of `Self` from the given `std::net::UdpSocket`.
     #[inline]
-    pub fn from_ambient(std: net::UdpSocket) -> Self {
+    pub fn from_std(std: net::UdpSocket) -> Self {
         Self { std }
     }
 
@@ -78,7 +78,7 @@ impl UdpSocket {
     /// [`std::net::UdpSocket::try_clone`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.std.try_clone()?))
+        Ok(Self::from_std(self.std.try_clone()?))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -322,15 +322,15 @@ impl UdpSocket {
 impl FromRawFd for UdpSocket {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(net::UdpSocket::from_raw_fd(fd))
+        Self::from_std(net::UdpSocket::from_raw_fd(fd))
     }
 }
 
 #[cfg(windows)]
-impl FromRawSocket for UdpSockeUdpSocket {
+impl FromRawSocket for UdpSocket {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_ambient(net::UdpSocket::from_raw_socket(handle))
+        Self::from_std(net::UdpSocket::from_raw_socket(handle))
     }
 }
 

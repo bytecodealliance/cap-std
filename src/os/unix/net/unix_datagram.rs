@@ -30,7 +30,7 @@ pub struct UnixDatagram {
 impl UnixDatagram {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixDatagram`.
     #[inline]
-    pub fn from_ambient(std: unix::net::UnixDatagram) -> Self {
+    pub fn from_std(std: unix::net::UnixDatagram) -> Self {
         Self { std }
     }
 
@@ -43,7 +43,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::unbound`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.unbound
     #[inline]
     pub fn unbound() -> io::Result<Self> {
-        unix::net::UnixDatagram::unbound().map(Self::from_ambient)
+        unix::net::UnixDatagram::unbound().map(Self::from_std)
     }
 
     /// Creates an unnamed pair of connected sockets.
@@ -55,7 +55,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::pair`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixDatagram::pair().map(|(a, b)| (Self::from_ambient(a), Self::from_ambient(b)))
+        unix::net::UnixDatagram::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -65,7 +65,7 @@ impl UnixDatagram {
     /// [`std::os::unix::net::UnixDatagram::try_clone`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_ambient(self.std.try_clone()?))
+        Ok(Self::from_std(self.std.try_clone()?))
     }
 
     /// Returns the address of this socket.
@@ -192,7 +192,7 @@ impl UnixDatagram {
 impl FromRawFd for UnixDatagram {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_ambient(unix::net::UnixDatagram::from_raw_fd(fd))
+        Self::from_std(unix::net::UnixDatagram::from_raw_fd(fd))
     }
 }
 
