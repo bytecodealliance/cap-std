@@ -241,4 +241,8 @@ impl Dir {
             path.display()
         )
     }
+
+    pub(crate) fn try_clone(&self) -> io::Result<Dir> {
+        Ok(Self::from_std_file(self.std_file.try_clone()?))
+    }
 }

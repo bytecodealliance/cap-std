@@ -68,6 +68,17 @@ impl File {
     pub fn metadata(&self) -> io::Result<fs::Metadata> {
         self.std.metadata()
     }
+
+    /// Creates a new `File` instance that shares the same underlying file handle as the existing
+    /// `File` instance.
+    ///
+    /// This corresponds to [`std::fs::File::try_clone`].
+    ///
+    /// [`std::fs::File::try_clone`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.try_clone
+    #[inline]
+    pub fn try_clone(&self) -> io::Result<Self> {
+        Ok(Self::from_std(self.std.try_clone()?))
+    }
 }
 
 #[cfg(unix)]

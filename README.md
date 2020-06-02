@@ -26,6 +26,13 @@ Things to think about:
    Where is this going?
  - Should we provide any of Rust's Unix-specific APIs on Windows, using
    winx and emulation?
+ - Should we propose adding things to Rust's libstd which would help streamline this library?
+    - A way to construct an arbitrary [`std::fs::FileType`] and [`std::fs::Metadata`]?
+    - A way to read the options out of a [`std::fs::OpenOptions`] and [`std::fs::DirBuilder`]?
 
 [arf strings]: https://github.com/bytecodealliance/arf-strings/
 [`std::process::Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
+[`std::fs::FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
+[`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
+[`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
+[`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html

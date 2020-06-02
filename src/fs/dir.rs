@@ -373,6 +373,15 @@ impl Dir {
         self.sys
             .send_to_unix_datagram_addr(unix_datagram, buf, path.as_ref())
     }
+
+    /// Creates a new `Dir` instance that shares the same underlying file handle as the existing
+    /// `Dir` instance.
+    #[inline]
+    pub fn try_clone(&self) -> io::Result<Self> {
+        Ok(Self {
+            sys: self.sys.try_clone()?,
+        })
+    }
 }
 
 #[cfg(unix)]
