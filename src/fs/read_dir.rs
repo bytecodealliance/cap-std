@@ -1,29 +1,27 @@
-use crate::fs::DirEntry;
-use std::{fs, io};
+use crate::{fs::DirEntry, sys};
+use std::io;
 
 /// Iterator over the entries in a directory.
 ///
 /// This corresponds to [`std::fs::ReadDir`].
 ///
+/// Unlike `std::fs::ReadDir`, this API has a lifetime parameter.
+///
+/// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
+/// provide a way to construct a `ReadDir` without opening directories by
+/// ambient paths.
+///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
-pub struct ReadDir {
-    std: fs::ReadDir,
+pub struct ReadDir<'dir> {
+    sys: sys::fs::ReadDir<'dir>,
 }
 
-impl ReadDir {
-    /// Constructs a new instance of `Self` from the given `std::fs::File`.
-    #[inline]
-    pub fn from_std(std: fs::ReadDir) -> Self {
-        Self { std }
-    }
-}
-
-impl Iterator for ReadDir {
-    type Item = io::Result<DirEntry>;
+impl<'dir> Iterator for ReadDir<'dir> {
+    type Item = io::Result<DirEntry<'dir>>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.std.next().map(|result| result.map(DirEntry::from_std))
+        self.sys.next()
     }
 }
 

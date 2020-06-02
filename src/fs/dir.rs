@@ -28,9 +28,9 @@ pub struct Dir {
 impl Dir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_std_file(file: fs::File) -> Self {
+    pub fn from_std_file(std_file: fs::File) -> Self {
         Self {
-            sys: sys::fs::Dir::from_std_file(file),
+            sys: sys::fs::Dir::from_std_file(std_file),
         }
     }
 
