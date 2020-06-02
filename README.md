@@ -10,7 +10,7 @@ Dirs represent capabilities for accessing files beneath them, and "catalogs"
 represent capabilities for creating network connections.
 
 This library has two potential uses in the WASI ecosystem. First, an implementation
-abstraction within wasi-common, abstracting over some yanix/winx differences. And
+abstraction within wasi-common, abstracting over some [yanix]/[winx] differences. And
 second, a user library, for writing applications that use std-like APIs but that
 don't require a preopen-like layer.
 
@@ -36,3 +36,5 @@ Things to think about:
 [`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
 [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
 [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
+[yanix](https://docs.rs/yanix)
+[winx](https://docs.rs/winx)
