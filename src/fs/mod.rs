@@ -6,6 +6,9 @@
 //! crate has methods on [`Dir`] which operate on paths which must be
 //! relative to the directory.
 //!
+//! Where `std` says "the filesystem", this API says "a filesystem", as
+//! it doesn't assume that there's a single global filesystem namespace.
+//!
 //! Since all functions which expose raw file descriptors are `unsafe`,
 //! I/O handles in this API are unforgeable (unsafe code notwithstanding).
 //! This combined a lack of absolute paths provides a natural
