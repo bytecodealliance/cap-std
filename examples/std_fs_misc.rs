@@ -79,7 +79,7 @@ fn main() {
         Err(why) => println!("! {:?}", why.kind()),
         Ok(paths) => {
             for path in paths {
-                println!("> {:?}", path.unwrap().0);
+                println!("> {:?}", path.unwrap().path());
             }
         }
     }

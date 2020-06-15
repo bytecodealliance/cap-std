@@ -7,7 +7,7 @@ use std::{
     os::unix::io::{AsRawFd, FromRawFd, IntoRawFd},
     path::{Path, PathBuf},
 };
-use yanix::file::{openat, Mode, OFlag};
+use yanix::file::{mkdirat, openat, Mode, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -63,7 +63,13 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::create_dir({:?}, {})", self.std_file, path.display())
+        unsafe {
+            mkdirat(
+                self.std_file.as_raw_fd(),
+                path,
+                Mode::from_bits(0o777).unwrap(),
+            )
+        }
     }
 
     pub(crate) fn create_dir_all(&self, path: &Path) -> io::Result<()> {
