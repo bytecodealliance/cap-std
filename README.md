@@ -36,5 +36,5 @@ Things to think about:
 [`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
 [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
 [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
-[yanix](https://docs.rs/yanix)
-[winx](https://docs.rs/winx)
+[yanix]: https://docs.rs/yanix
+[winx]: https://docs.rs/winx
