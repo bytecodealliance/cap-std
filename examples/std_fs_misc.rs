@@ -79,10 +79,7 @@ fn main() {
         Err(why) => println!("! {:?}", why.kind()),
         Ok(paths) => {
             for path in paths {
-                // TODO Figure out an interface that extracts the path relative
-                // to the dir read from.
-                // In the meantime, simply unwrap to prove that something is there.
-                path.unwrap();
+                println!("! {:?}", path.unwrap().file_name());
             }
         }
     }
