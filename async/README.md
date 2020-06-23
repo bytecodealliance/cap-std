@@ -27,7 +27,6 @@ Things to think about:
    `read_link`, `read_dir`, `symlink_metadata`, `canonicalize`. Is it
    worth having our own version of `Path` just to exclude those? Such a
    thing could also exclude absolute paths.
- - utf8-cap-async-std (with [arf strings])?
  - Should we provide any of Rust's Unix-specific APIs on Windows, using
    winx and emulation?
  - Should we propose adding things to Rust's libstd which would help streamline this library?

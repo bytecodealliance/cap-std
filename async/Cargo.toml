@@ -13,6 +13,7 @@ readme = "README.md"
 async-std = { version = "1.6.2", features = ["attributes"] }
 ipnet = "2.3.0"
 cfg-if = "0.1.9"
+arf-strings = { version = "0.1.2", optional = true }
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.16.0"
@@ -28,3 +29,7 @@ winx = "0.16.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
+
+[features]
+default = []
+fs_utf8 = ["arf-strings"]
