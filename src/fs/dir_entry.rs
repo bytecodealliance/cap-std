@@ -2,10 +2,7 @@ use crate::{
     fs::{FileType, Metadata},
     sys,
 };
-use std::{
-    ffi, io,
-    path::{Path, PathBuf},
-};
+use std::{ffi, io};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -26,16 +23,6 @@ pub struct DirEntry<'dir> {
 }
 
 impl<'dir> DirEntry<'dir> {
-    /// Returns the path to the resource relative to `Dir` the `Dir::read_dir` was called from.
-    ///
-    /// This corresponds to [`std::fs::DirEntry::path`].
-    ///
-    /// [`std::fs::DirEntry::path`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.path
-    #[inline]
-    pub fn path(&self) -> PathBuf {
-        Path::new(".").join(self.file_name())
-    }
-
     /// Returns the metadata for the file that this entry points at.
     ///
     /// This corresponds to [`std::fs::DirEntry::metadata`].
