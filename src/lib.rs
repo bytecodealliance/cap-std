@@ -30,5 +30,7 @@
 mod sys;
 
 pub mod fs;
+#[cfg(feature = "fs_utf8")]
+pub mod fs_utf8;
 pub mod net;
 pub mod os;
