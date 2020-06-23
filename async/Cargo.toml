@@ -1,0 +1,30 @@
+[package]
+name = "cap-async-std"
+version = "0.0.0"
+description = "Capability-based version of async-std"
+authors = ["Dan Gohman <sunfish@mozilla.com>"]
+license = "Apache-2.0 WITH LLVM-exception"
+keywords = ["std", "api", "network", "file", "async", "future", "await", "task"]
+categories = ["filesystem", "network-programming", "asynchronous", "concurrency"]
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+async-std = { version = "1.6.2", features = ["attributes"] }
+ipnet = "2.3.0"
+cfg-if = "0.1.9"
+
+[target.'cfg(unix)'.dependencies]
+yanix = "0.16.0"
+
+[target.'cfg(target_os = "wasi")'.dependencies]
+yanix = "0.16.0"
+
+[target.'cfg(target_os = "fuchsia")'.dependencies]
+yanix = "0.16.0"
+
+[target.'cfg(windows)'.dependencies]
+winx = "0.16.0"
+
+[badges]
+maintenance = { status = "actively-developed" }
