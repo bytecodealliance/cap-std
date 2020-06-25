@@ -15,16 +15,16 @@ cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
 
 [target.'cfg(unix)'.dependencies]
-yanix = "0.16.0"
+yanix = "0.18.0"
 
 [target.'cfg(target_os = "wasi")'.dependencies]
-yanix = "0.16.0"
+yanix = "0.18.0"
 
 [target.'cfg(target_os = "fuchsia")'.dependencies]
-yanix = "0.16.0"
+yanix = "0.18.0"
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.16.0"
+winx = "0.18.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
