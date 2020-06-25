@@ -1,12 +1,12 @@
-//! A capability-based network API modeled after `std::net`.
+//! A capability-based network API modeled after `async_std::net`.
 //!
-//! This corresponds to [`std::net`].
+//! This corresponds to [`async_std::net`].
 //!
-//! Instead of [`std::net`]'s constructor methods which take an address to
+//! Instead of [`async_std::net`]'s constructor methods which take an address to
 //! connect to, this crates has methods on [`Catalog`] which operate on addresses
 //! which must be present in the catalog.
 //!
-//! [`std::net`]: https://doc.rust-lang.org/std/net/index.html
+//! [`async_std::net`]: https://docs.rs/async-std/latest/async_std/net/index.html
 //! [`Catalog`]: struct.Catalog.html
 
 mod catalog;

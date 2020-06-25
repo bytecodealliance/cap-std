@@ -1,6 +1,6 @@
-//! A capability-based API modeled after `std`.
+//! A capability-based API modeled after `async_std`.
 //!
-//! This corresponds to [`std`].
+//! This corresponds to [`async_std`].
 //!
 //! Capability-based APIs represent access to external resources as
 //! objects which can be passed around between different parts of a
@@ -20,9 +20,9 @@
 //! On WASI, use of this library closely reflects the underlying system
 //! API, so it avoids compatibility layers.
 //!
-//! [`std`]: https://doc.rust-lang.org/std/index.html
-//! [`Dir`]: struct.Dir.html
-//! [`Catalog`]: struct.Catalog.html
+//! [`async_std`]: https://docs.rs/async-std/latest/async_std/
+//! [`Dir`]: fs/struct.Dir.html
+//! [`Catalog`]: net/struct.Catalog.html
 
 #![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
