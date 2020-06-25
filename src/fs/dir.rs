@@ -99,7 +99,7 @@ impl Dir {
             Ok(()) => return Ok(()),
             Err(e) => match e.kind() {
                 io::ErrorKind::NotFound => {}
-                io::ErrorKind::AlreadyExists => return Ok(()),
+                io::ErrorKind::AlreadyExists => return Ok(()), // TODO OK only if Dir
                 _ => return Err(e),
             },
         }
@@ -115,7 +115,7 @@ impl Dir {
         match self.create_dir(path) {
             Ok(()) => Ok(()),
             Err(e) => match e.kind() {
-                io::ErrorKind::AlreadyExists => Ok(()),
+                io::ErrorKind::AlreadyExists => Ok(()), // TODO OK only if Dir
                 _ => Err(e),
             },
         }
@@ -468,3 +468,18 @@ fn initial_buffer_size(file: &File) -> usize {
 }
 
 // TODO: impl Debug for Dir? But don't expose Dir's path...
+
+#[cfg(test)]
+mod test {
+    use crate::test::TempDir;
+    use std::io;
+
+    #[test]
+    fn create_dir_all() -> io::Result<()> {
+        let tmp = TempDir::new()?;
+        tmp.create_dir_all("a/b/c")?;
+        assert!(tmp.create_dir("a").is_err());
+
+        Ok(())
+    }
+}
