@@ -2,7 +2,7 @@ use crate::{
     fs::{FileType, Metadata},
     sys,
 };
-use std::{ffi, io};
+use std::{ffi, fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -61,4 +61,9 @@ impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
     }
 }
 
-// TODO: impl Debug for DirEntry? But don't expose DirEntry's path...
+impl<'dir> fmt::Debug for DirEntry<'dir> {
+    // Like libstd's version, but doesn't print the path.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("DirEntry").field(&self.file_name()).finish()
+    }
+}

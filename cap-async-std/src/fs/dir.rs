@@ -200,8 +200,8 @@ impl Dir {
     ///
     /// [`std::fs::read_to_string`]: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
     #[inline]
-    pub fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
-        self.sys.read_to_string(path.as_ref())
+    pub async fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
+        self.sys.read_to_string(path.as_ref()).await
     }
 
     /// Removes an existing, empty directory.

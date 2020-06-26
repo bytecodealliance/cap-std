@@ -10,7 +10,7 @@ use std::io::prelude::*;
 use cap_std::fs::{self, OpenOptions};
 use std::{
     io::{ErrorKind, SeekFrom},
-    path::Path,
+    path::{Path, PathBuf},
     str,
 };
 /*use std::thread;*/
@@ -1219,7 +1219,6 @@ fn binary_file() {
     assert!(v == &bytes[..]);
 }
 
-/*
 #[test]
 fn write_then_read() {
     let mut bytes = [0; 1024];
@@ -1227,22 +1226,23 @@ fn write_then_read() {
 
     let tmpdir = tmpdir();
 
-    check!(fs::write("test"), &bytes[..]);
-    let v = check!(fs::read("test"));
+    check!(tmpdir.write_file("test", &bytes[..]));
+    let v = check!(tmpdir.read_file("test"));
     assert!(v == &bytes[..]);
 
-    check!(fs::write("not-utf8"), &[0xFF]);
+    check!(tmpdir.write_file("not-utf8", &[0xFF]));
     error_contains!(
-        fs::read_to_string(&tmpdir.join("not-utf8")),
+        tmpdir.read_to_string("not-utf8"),
         "stream did not contain valid UTF-8"
     );
 
     let s = "𐁁𐀓𐀠𐀴𐀍";
-    check!(fs::write("utf8"), s.as_bytes());
-    let string = check!(fs::read_to_string("utf8"));
+    check!(tmpdir.write_file("utf8", s.as_bytes()));
+    let string = check!(tmpdir.read_to_string("utf8"));
     assert_eq!(string, s);
 }
 
+/*
 #[test]
 fn file_try_clone() {
     let tmpdir = tmpdir();
@@ -1264,26 +1264,30 @@ fn file_try_clone() {
 
     check!(f1.write_all(b"!"));
 }
+*/
 
 #[test]
+#[ignore] // `metadata` not yet implemented in cap-std
 #[cfg(not(windows))]
 fn unlink_readonly() {
     let tmpdir = tmpdir();
     let path = "file";
-    check!(File::create(&path));
-    let mut perm = check!(fs::metadata(&path)).permissions();
+    check!(tmpdir.create_file(&path));
+    let mut perm = check!(tmpdir.metadata(&path)).permissions();
     perm.set_readonly(true);
-    check!(fs::set_permissions(&path, perm));
-    check!(fs::remove_file(&path));
+    check!(tmpdir.set_permissions(&path, perm));
+    check!(tmpdir.remove_file(&path));
 }
 
 #[test]
+#[ignore] // `create_dir_all` not yet implemented in cap-std
 fn mkdir_trailing_slash() {
     let tmpdir = tmpdir();
-    let path = "file";
-    check!(fs::create_dir_all(&path.join("a/")));
+    let path = PathBuf::from("file");
+    check!(tmpdir.create_dir_all(&path.join("a/")));
 }
 
+/*
 #[test]
 fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
@@ -1350,15 +1354,17 @@ fn realpath_works_tricky() {
     assert_eq!(fs::canonicalize(&c).unwrap(), f);
     assert_eq!(fs::canonicalize(&e).unwrap(), f);
 }
+*/
 
 #[test]
+#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_methods() {
     let tmpdir = tmpdir();
 
-    fs::create_dir_all("a")).unwrap(
-    File::create("b")).unwrap(
+    tmpdir.create_dir_all("a").unwrap();
+    tmpdir.create_file("b").unwrap();
 
-    for file in tmpdir.path().read_dir().unwrap().map(|f| f.unwrap()) {
+    for file in tmpdir.read_dir(".").unwrap().map(|f| f.unwrap()) {
         let fname = file.file_name();
         match fname.to_str() {
             Some("a") => {
@@ -1375,22 +1381,26 @@ fn dir_entry_methods() {
 }
 
 #[test]
+#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_debug() {
     let tmpdir = tmpdir();
-    File::create("b")).unwrap(
-    let mut read_dir = tmpdir.path().read_dir().unwrap();
+    tmpdir.create_file("b").unwrap();
+    let mut read_dir = tmpdir.read_dir(".").unwrap();
     let dir_entry = read_dir.next().unwrap().unwrap();
     let actual = format!("{:?}", dir_entry);
-    let expected = format!("DirEntry({:?})", dir_entry.0.path());
+    let expected = format!("DirEntry({:?})", dir_entry.file_name());
     assert_eq!(actual, expected);
 }
 
 #[test]
+#[ignore] // `read_dir` not yet implemented in cap-std
 fn read_dir_not_found() {
-    let res = fs::read_dir("/path/that/does/not/exist");
+    let tmpdir = tmpdir();
+    let res = tmpdir.read_dir("/path/that/does/not/exist");
     assert_eq!(res.err().unwrap().kind(), ErrorKind::NotFound);
 }
 
+/*
 #[test]
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();

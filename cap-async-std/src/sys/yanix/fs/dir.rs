@@ -159,12 +159,11 @@ impl Dir {
         unimplemented!("Dir::read_link({:?}, {})", self.std_file, path.display())
     }
 
-    pub(crate) fn read_to_string(&self, path: &Path) -> io::Result<String> {
-        unimplemented!(
-            "Dir::read_to_string({:?}, {})",
-            self.std_file,
-            path.display()
-        )
+    pub(crate) async fn read_to_string(&self, path: &Path) -> io::Result<String> {
+        use async_std::prelude::*;
+        let mut s = String::new();
+        self.open_file(path)?.read_to_string(&mut s).await?;
+        Ok(s)
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {

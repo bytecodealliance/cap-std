@@ -3,7 +3,8 @@ use crate::{
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
 use std::{
-    fs, io,
+    fs,
+    io::{self, Read},
     os::unix::io::{AsRawFd, FromRawFd, IntoRawFd},
     path::{Path, PathBuf},
 };
@@ -152,11 +153,9 @@ impl Dir {
     }
 
     pub(crate) fn read_to_string(&self, path: &Path) -> io::Result<String> {
-        unimplemented!(
-            "Dir::read_to_string({:?}, {})",
-            self.std_file,
-            path.display()
-        )
+        let mut s = String::new();
+        self.open_file(path)?.read_to_string(&mut s)?;
+        Ok(s)
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {
