@@ -100,11 +100,7 @@ impl Dir {
             Err(e) => match e.kind() {
                 io::ErrorKind::NotFound => {}
                 io::ErrorKind::AlreadyExists => {
-                    return if self.is_dir(path) {
-                        Ok(())
-                    } else {
-                        Err(e)
-                    }
+                    return if self.is_dir(path) { Ok(()) } else { Err(e) }
                 }
                 _ => return Err(e),
             },
