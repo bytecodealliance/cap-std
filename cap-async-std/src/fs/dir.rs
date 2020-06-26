@@ -32,6 +32,12 @@ impl Dir {
         }
     }
 
+    /// Consumes `self` and returns an `async_std::fs::File`.
+    #[inline]
+    pub fn into_std_file(self) -> fs::File {
+        self.sys.into_std_file()
+    }
+
     /// Attempts to open a file in read-only mode.
     ///
     /// This corresponds to [`std::fs::File::open`], but only accesses paths
@@ -130,8 +136,13 @@ impl Dir {
     ///
     /// [`std::fs::hard_link`]: https://doc.rust-lang.org/std/fs/fn.hard_link.html
     #[inline]
-    pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.sys.hard_link(src.as_ref(), dst.as_ref())
+    pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        src: P,
+        dst_dir: &Dir,
+        dst: Q,
+    ) -> io::Result<()> {
+        self.sys.hard_link(src.as_ref(), &dst_dir.sys, dst.as_ref())
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.
