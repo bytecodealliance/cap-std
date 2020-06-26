@@ -1,9 +1,23 @@
-This crate provides a capability-based version of [`std`]. It provides all the
+<div align="center">
+  <h1><code>cap-std</code></h1>
+
+  <p>
+    <strong>Capability-based version of Rust standard library</strong>
+  </p>
+
+  <p>
+    <a href="https://github.com/sunfishcode/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-std/workflows/CI/badge.svg" alt="build status" /></a>
+  </p>
+</div>
+
+`cap-std` crate provides a capability-based version of [`std`]. It provides all the
 interfaces you are used to, but in a capability-based version.
 
 [`std`]: https://doc.rust-lang.org/std/index.html
 
-It is a work in progress and many things aren't implemented yet.
+**It is a work in progress and many things aren't implemented yet.**
+
+## The story
 
 The two most interesting features are `fs::Dir` and `net::Catalog` (name TBD).
 Dirs represent capabilities for accessing files beneath them, and "catalogs"
