@@ -8,9 +8,11 @@ mod sys_common;
 use std::io::prelude::*;
 
 use cap_std::fs::{self, OpenOptions};
-use std::io::{ErrorKind, SeekFrom};
-/*use std::path::PathBuf;*/
-use std::str;
+use std::{
+    io::{ErrorKind, SeekFrom},
+    path::Path,
+    str,
+};
 /*use std::thread;*/
 use sys_common::io::tmpdir;
 
@@ -484,36 +486,34 @@ fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
 }
 */
 
-/*
 #[test]
+#[ignore] // `read_dir` not yet implemented in cap-std
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";
-    check!(fs::create_dir(dir));
+    check!(tmpdir.create_dir(dir));
     let prefix = "foo";
     for n in 0..3 {
-        let f = dir.join(&format!("{}.txt", n));
-        let mut w = check!(File::create(&f));
+        let f = format!("{}.txt", n);
+        let mut w = check!(tmpdir.create_file(&f));
         let msg_str = format!("{}{}", prefix, n.to_string());
         let msg = msg_str.as_bytes();
         check!(w.write(msg));
     }
-    let files = check!(fs::read_dir(dir));
+    let files = check!(tmpdir.read_dir(dir));
     let mut mem = [0; 4];
     for f in files {
-        let f = f.unwrap().path();
+        let f = f.unwrap().file_name();
         {
-            let n = f.file_stem().unwrap();
-            check!(check!(File::open(&f)).read(&mut mem));
+            check!(check!(tmpdir.open_file(&f)).read(&mut mem));
             let read_str = str::from_utf8(&mem).unwrap();
-            let expected = format!("{}{}", prefix, n.to_str().unwrap());
+            let expected = format!("{}{}", prefix, f.to_str().unwrap());
             assert_eq!(expected, read_str);
         }
-        check!(fs::remove_file(&f));
+        check!(tmpdir.remove_file(&f));
     }
-    check!(fs::remove_dir(dir));
+    check!(tmpdir.remove_dir(dir));
 }
-*/
 
 #[test]
 fn file_create_new_already_exists_error() {
@@ -526,38 +526,41 @@ fn file_create_new_already_exists_error() {
     assert_eq!(e.kind(), ErrorKind::AlreadyExists);
 }
 
-/*
 #[test]
 fn mkdir_path_already_exists_error() {
     let tmpdir = tmpdir();
     let dir = "mkdir_error_twice";
-    check!(fs::create_dir(dir));
-    let e = fs::create_dir(dir).unwrap_err();
+    check!(tmpdir.create_dir(dir));
+    let e = tmpdir.create_dir(dir).unwrap_err();
     assert_eq!(e.kind(), ErrorKind::AlreadyExists);
 }
 
+/*
 #[test]
 fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
-    check!(fs::create_dir_all(dir));
+    check!(tmpdir.create_dir_all(dir));
     assert!(dir.is_dir())
 }
+*/
 
 #[test]
+#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_failure() {
     let tmpdir = tmpdir();
     let dir = "d1";
-    let file = dir.join("f1");
+    let file = "f1";
 
-    check!(fs::create_dir_all(&dir));
-    check!(File::create(&file));
+    check!(tmpdir.create_dir_all(&dir));
+    check!(tmpdir.create_file(&file));
 
-    let result = fs::create_dir_all(&file);
+    let result = tmpdir.create_dir_all(&file);
 
     assert!(result.is_err());
 }
 
+/*
 #[test]
 fn concurrent_recursive_mkdir() {
     for _ in 0..100 {
@@ -579,36 +582,45 @@ fn concurrent_recursive_mkdir() {
         join.drain(..).map(|join| join.join().unwrap()).count();
     }
 }
+*/
 
 #[test]
+#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_slash() {
-    check!(fs::create_dir_all(Path::new("/")));
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir_all(Path::new("/")));
 }
 
 #[test]
+#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_dot() {
-    check!(fs::create_dir_all(Path::new(".")));
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir_all(Path::new(".")));
 }
 
 #[test]
+#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_empty() {
-    check!(fs::create_dir_all(Path::new("")));
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir_all(Path::new("")));
 }
 
+/*
 #[test]
+#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
-    let d1 = "d1";
+    let d1 = PathBuf::from("d1");
     let dt = d1.join("t");
     let dtt = dt.join("t");
-    let d2 = "d2";
+    let d2 = PathBuf::from("d2");
     let canary = d2.join("do_not_delete");
-    check!(fs::create_dir_all(&dtt));
-    check!(fs::create_dir_all(d2));
-    check!(check!(File::create(&canary)).write(b"foo"));
+    check!(tmpdir.create_dir_all(&dtt));
+    check!(tmpdir.create_dir_all(d2));
+    check!(check!(tmpdir.create_file(&canary)).write(b"foo"));
     check!(symlink_junction(d2, &dt.join("d2")));
     let _ = symlink_file(&canary, &d1.join("canary"));
-    check!(fs::remove_dir_all(&d1));
+    check!(tmpdir.remove_dir_all(&d1));
 
     assert!(!d1.is_dir());
     assert!(canary.exists());
@@ -707,32 +719,36 @@ fn copy_src_does_not_exist() {
     check!(check!(File::open(&to)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
 }
+*/
 
 #[test]
+#[ignore] // `copy` not yet implemented in cap-std
 fn copy_file_ok() {
     let tmpdir = tmpdir();
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(File::create(&input)).write(b"hello"));
-    check!(fs::copy(&input, &out));
+    check!(check!(tmpdir.create_file(&input)).write(b"hello"));
+    check!(tmpdir.copy(&input, &out));
     let mut v = Vec::new();
-    check!(check!(File::open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&out)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
 
     assert_eq!(
-        check!(input.metadata()).permissions(),
-        check!(out.metadata()).permissions()
+        check!(tmpdir.metadata(input)).permissions(),
+        check!(tmpdir.metadata(out)).permissions()
     );
 }
 
+/*
 #[test]
+#[ignore] // `copy` not yet implemented in cap-std
 fn copy_file_dst_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    check!(File::create(&out));
-    match fs::copy(&*out, tmpdir.path()) {
+    check!(tmpdir.create_file(&out));
+    match tmpdir.copy(&*out, tmpdir.path()) {
         Ok(..) => panic!(),
         Err(..) => {}
     }
@@ -998,13 +1014,12 @@ fn sync_doesnt_kill_anything() {
     check!(file.sync_data());
 }
 
-/*
 #[test]
 fn truncate_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let mut file = check!(File::create(&path));
+    let mut file = check!(tmpdir.create_file(&path));
     check!(file.write(b"foo"));
     check!(file.sync_all());
 
@@ -1017,7 +1032,7 @@ fn truncate_works() {
     assert_eq!(check!(file.metadata()).len(), 10);
 
     let mut v = Vec::new();
-    check!(check!(File::open(&path)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&path)).read_to_end(&mut v));
     assert_eq!(v, b"foobar\0\0\0\0".to_vec());
 
     // Truncate to a smaller length, don't seek, and then write something.
@@ -1029,11 +1044,12 @@ fn truncate_works() {
     check!(file.sync_all());
     assert_eq!(check!(file.metadata()).len(), 9);
     let mut v = Vec::new();
-    check!(check!(File::open(&path)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&path)).read_to_end(&mut v));
     assert_eq!(v, b"fo\0\0\0\0wut".to_vec());
 }
 
 #[test]
+#[ignore] // cap-std's OpenOptions doesn't handle all the flags correctly yet
 fn open_flavors() {
     use cap_std::fs::OpenOptions as OO;
     fn c<T: Clone>(t: &T) -> T {
@@ -1074,82 +1090,88 @@ fn open_flavors() {
     // tested in reverse order, so 'create_new' creates the file, and 'open existing' opens it.
 
     // write-only
-    check!(c(&w).create_new(true).open("a"));
-    check!(c(&w).create(true).truncate(true).open("a"));
-    check!(c(&w).truncate(true).open("a"));
-    check!(c(&w).create(true).open("a"));
-    check!(c(&w).open("a"));
+    check!(tmpdir.open_file_with("a", c(&w).create_new(true)));
+    check!(tmpdir.open_file_with("a", c(&w).create(true).truncate(true)));
+    check!(tmpdir.open_file_with("a", c(&w).truncate(true)));
+    check!(tmpdir.open_file_with("a", c(&w).create(true)));
+    check!(tmpdir.open_file_with("a", &c(&w)));
 
     // read-only
     error!(
-        c(&r).create_new(true).open(&tmpdir.join("b")),
+        tmpdir.open_file_with("b", c(&r).create_new(true)),
         invalid_options
     );
     error!(
-        c(&r).create(true).truncate(true).open(&tmpdir.join("b")),
+        tmpdir.open_file_with("b", c(&r).create(true).truncate(true)),
         invalid_options
     );
     error!(
-        c(&r).truncate(true).open(&tmpdir.join("b")),
+        tmpdir.open_file_with("b", c(&r).truncate(true)),
         invalid_options
     );
-    error!(c(&r).create(true).open("b")), invalid_options
-    check!(c(&r).open("a")) // try opening the file created with write_only
+    error!(
+        tmpdir.open_file_with("b", c(&r).create(true)),
+        invalid_options
+    );
+    check!(tmpdir.open_file_with("a", &c(&r))); // try opening the file created with write_only
 
     // read-write
-    check!(c(&rw).create_new(true).open("c"));
-    check!(c(&rw).create(true).truncate(true).open("c"));
-    check!(c(&rw).truncate(true).open("c"));
-    check!(c(&rw).create(true).open("c"));
-    check!(c(&rw).open("c"));
+    check!(tmpdir.open_file_with("c", c(&rw).create_new(true)));
+    check!(tmpdir.open_file_with("c", c(&rw).create(true).truncate(true)));
+    check!(tmpdir.open_file_with("c", c(&rw).truncate(true)));
+    check!(tmpdir.open_file_with("c", c(&rw).create(true)));
+    check!(tmpdir.open_file_with("c", &c(&rw)));
 
     // append
-    check!(c(&a).create_new(true).open("d"));
+    check!(tmpdir.open_file_with("d", c(&a).create_new(true)));
     error!(
-        c(&a).create(true).truncate(true).open(&tmpdir.join("d")),
+        tmpdir.open_file_with("d", c(&a).create(true).truncate(true)),
         invalid_options
     );
     error!(
-        c(&a).truncate(true).open(&tmpdir.join("d")),
+        tmpdir.open_file_with("d", c(&a).truncate(true)),
         invalid_options
     );
-    check!(c(&a).create(true).open("d"));
-    check!(c(&a).open("d"));
+    check!(tmpdir.open_file_with("d", c(&a).create(true)));
+    check!(tmpdir.open_file_with("d", &c(&a)));
 
     // read-append
-    check!(c(&ra).create_new(true).open("e"));
+    check!(tmpdir.open_file_with("e", c(&ra).create_new(true)));
     error!(
-        c(&ra).create(true).truncate(true).open(&tmpdir.join("e")),
+        tmpdir.open_file_with("e", c(&ra).create(true).truncate(true)),
         invalid_options
     );
     error!(
-        c(&ra).truncate(true).open(&tmpdir.join("e")),
+        tmpdir.open_file_with("e", c(&ra).truncate(true)),
         invalid_options
     );
-    check!(c(&ra).create(true).open("e"));
-    check!(c(&ra).open("e"));
+    check!(tmpdir.open_file_with("e", c(&ra).create(true)));
+    check!(tmpdir.open_file_with("e", &c(&ra)));
 
     // Test opening a file without setting an access mode
     let mut blank = OO::new();
-    error!(blank.create(true).open("f")), invalid_options
+    error!(
+        tmpdir.open_file_with("f", blank.create(true)),
+        invalid_options
+    );
 
     // Test write works
-    check!(check!(File::create("h"))).write("foobar".as_bytes());
+    check!(check!(tmpdir.create_file("h")).write("foobar".as_bytes()));
 
     // Test write fails for read-only
-    check!(r.open("h"));
+    check!(tmpdir.open_file_with("h", &r));
     {
-        let mut f = check!(r.open("h"))
+        let mut f = check!(tmpdir.open_file_with("h", &r));
         assert!(f.write("wut".as_bytes()).is_err());
     }
 
     // Test write overwrites
     {
-        let mut f = check!(c(&w).open("h"));
+        let mut f = check!(tmpdir.open_file_with("h", &c(&w)));
         check!(f.write("baz".as_bytes()));
     }
     {
-        let mut f = check!(c(&r).open("h"));
+        let mut f = check!(tmpdir.open_file_with("h", &c(&r)));
         let mut b = vec![0; 6];
         check!(f.read(&mut b));
         assert_eq!(b, "bazbar".as_bytes());
@@ -1157,27 +1179,26 @@ fn open_flavors() {
 
     // Test truncate works
     {
-        let mut f = check!(c(&w).truncate(true).open("h"));
+        let mut f = check!(tmpdir.open_file_with("h", c(&w).truncate(true)));
         check!(f.write("foo".as_bytes()));
     }
-    assert_eq!(check!(fs::metadata("h"))).len(), 3
+    assert_eq!(check!(tmpdir.metadata("h")).len(), 3);
 
     // Test append works
-    assert_eq!(check!(fs::metadata("h"))).len(), 3
+    assert_eq!(check!(tmpdir.metadata("h")).len(), 3);
     {
-        let mut f = check!(c(&a).open("h"));
+        let mut f = check!(tmpdir.open_file_with("h", &c(&a)));
         check!(f.write("bar".as_bytes()));
     }
-    assert_eq!(check!(fs::metadata("h"))).len(), 6
+    assert_eq!(check!(tmpdir.metadata("h")).len(), 6);
 
     // Test .append(true) equals .write(true).append(true)
     {
-        let mut f = check!(c(&w).append(true).open("h"));
+        let mut f = check!(tmpdir.open_file_with("h", c(&w).append(true)));
         check!(f.write("baz".as_bytes()));
     }
-    assert_eq!(check!(fs::metadata("h"))).len(), 9
+    assert_eq!(check!(tmpdir.metadata("h")).len(), 9);
 }
-*/
 
 #[test]
 fn _assert_send_sync() {
