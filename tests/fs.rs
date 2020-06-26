@@ -1242,16 +1242,14 @@ fn write_then_read() {
     assert_eq!(string, s);
 }
 
-/*
 #[test]
 fn file_try_clone() {
     let tmpdir = tmpdir();
 
-    let mut f1 = check!(OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open("test"));
+    let mut f1 = check!(tmpdir.open_file_with(
+        "test",
+        OpenOptions::new().read(true).write(true).create(true)
+    ));
     let mut f2 = check!(f1.try_clone());
 
     check!(f1.write_all(b"hello world"));
@@ -1264,7 +1262,6 @@ fn file_try_clone() {
 
     check!(f1.write_all(b"!"));
 }
-*/
 
 #[test]
 #[ignore] // `metadata` not yet implemented in cap-std
