@@ -2,7 +2,7 @@
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-use std::{fs, io, process};
+use std::{fmt, fs, io, process};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -234,4 +234,32 @@ impl std::os::windows::fs::FileExt for File {
 
 // TODO: Use winx to implement "unix" FileExt api on Windows?
 
-// TODO: impl Debug for File? But don't expose File's path...
+impl fmt::Debug for File {
+    // Like libstd's version, but doesn't print the path.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut b = f.debug_struct("File");
+
+        if cfg!(any(unix, target_os = "wasi", target_os = "fuchsia")) {
+            unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
+                let mode = yanix::fcntl::get_status_flags(fd);
+                if mode.is_err() {
+                    return None;
+                }
+                match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+                    yanix::file::OFlag::RDONLY => Some((true, false)),
+                    yanix::file::OFlag::RDWR => Some((true, true)),
+                    yanix::file::OFlag::WRONLY => Some((false, true)),
+                    _ => None,
+                }
+            }
+
+            let fd = self.std.as_raw_fd();
+            b.field("fd", &fd);
+            if let Some((read, write)) = unsafe { get_mode(fd) } {
+                b.field("read", &read).field("write", &write);
+            }
+        }
+
+        b.finish()
+    }
+}

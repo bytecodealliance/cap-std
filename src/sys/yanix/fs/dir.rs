@@ -3,11 +3,12 @@ use crate::{
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
 use std::{
-    fs, io,
+    fs,
+    io::{self, Read},
     os::unix::io::{AsRawFd, FromRawFd, IntoRawFd},
     path::{Path, PathBuf},
 };
-use yanix::file::{mkdirat, openat, Mode, OFlag};
+use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -17,6 +18,11 @@ impl Dir {
     #[inline]
     pub(crate) fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
+    }
+
+    #[inline]
+    pub(crate) fn into_std_file(self) -> fs::File {
+        self.std_file
     }
 
     #[inline]
@@ -42,12 +48,36 @@ impl Dir {
     }
 
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        unimplemented!(
-            "Dir::open_file_with({:?}, {}, {:?})",
-            self.std_file,
-            path.display(),
-            options
-        );
+        let mut oflags = OFlag::empty();
+        if options.read && options.write {
+            oflags |= OFlag::RDWR;
+        } else if options.read {
+            oflags |= OFlag::RDONLY;
+        } else if options.write {
+            oflags |= OFlag::WRONLY;
+        }
+        if options.append {
+            oflags |= OFlag::APPEND;
+        }
+        if options.create_new {
+            oflags |= OFlag::EXCL | OFlag::CREAT;
+        } else {
+            if options.truncate {
+                oflags |= OFlag::TRUNC;
+            }
+            if options.create {
+                oflags |= OFlag::CREAT;
+            }
+        }
+        unsafe {
+            let fd = openat(
+                self.std_file.as_raw_fd(),
+                path,
+                oflags,
+                Mode::from_bits(0o666).unwrap(),
+            )?;
+            Ok(File::from_raw_fd(fd))
+        }
     }
 
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
@@ -98,13 +128,16 @@ impl Dir {
         )
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::hard_link({:?}, {}, {})",
-            self.std_file,
-            src.display(),
-            dst.display()
-        )
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+        unsafe {
+            linkat(
+                self.std_file.as_raw_fd(),
+                src,
+                dst_dir.std_file.as_raw_fd(),
+                dst,
+                AtFlag::from_bits(0).unwrap(),
+            )
+        }
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
@@ -120,11 +153,9 @@ impl Dir {
     }
 
     pub(crate) fn read_to_string(&self, path: &Path) -> io::Result<String> {
-        unimplemented!(
-            "Dir::read_to_string({:?}, {})",
-            self.std_file,
-            path.display()
-        )
+        let mut s = String::new();
+        self.open_file(path)?.read_to_string(&mut s)?;
+        Ok(s)
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {
@@ -140,7 +171,7 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unimplemented!("Dir::remove_file({:?}, {})", self.std_file, path.display())
+        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {

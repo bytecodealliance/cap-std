@@ -9,14 +9,14 @@
 /// [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::open_file_with`]: struct.Dir.html#method.open_file_with
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OpenOptions {
-    read: bool,
-    write: bool,
-    append: bool,
-    truncate: bool,
-    create: bool,
-    create_new: bool,
+    pub(crate) read: bool,
+    pub(crate) write: bool,
+    pub(crate) append: bool,
+    pub(crate) truncate: bool,
+    pub(crate) create: bool,
+    pub(crate) create_new: bool,
 }
 
 impl OpenOptions {
