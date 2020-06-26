@@ -14,7 +14,7 @@ use std::str;
 /*use std::thread;*/
 use sys_common::io::tmpdir;
 
-/*use rand::{rngs::StdRng, RngCore, SeedableRng};*/
+use rand::{rngs::StdRng, RngCore, SeedableRng};
 
 /*
 #[cfg(unix)]
@@ -861,7 +861,7 @@ fn symlink_noexist() {
 
     // Use a relative path for testing. Symlinks get normalized by Windows,
     // so we may not get the same path back for absolute paths
-    check!(symlink_file(&"foo", "bar"))
+    check!(symlink_file(&"foo", "bar"));
     assert_eq!(
         check!(fs::read_link(&tmpdir.join("bar"))).to_str().unwrap(),
         "foo"
@@ -971,25 +971,26 @@ fn fchmod_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let file = check!(File::create(&path));
-    let attr = check!(fs::metadata(&path));
+    let file = check!(tmpdir.create_file(&path));
+    let attr = check!(tmpdir.metadata(&path));
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
     check!(file.set_permissions(p.clone()));
-    let attr = check!(fs::metadata(&path));
+    let attr = check!(tmpdir.metadata(&path));
     assert!(attr.permissions().readonly());
 
     p.set_readonly(false);
     check!(file.set_permissions(p));
 }
+*/
 
 #[test]
 fn sync_doesnt_kill_anything() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let mut file = check!(File::create(&path));
+    let mut file = check!(tmpdir.create_file(&path));
     check!(file.sync_all());
     check!(file.sync_data());
     check!(file.write(b"foo"));
@@ -997,6 +998,7 @@ fn sync_doesnt_kill_anything() {
     check!(file.sync_data());
 }
 
+/*
 #[test]
 fn truncate_works() {
     let tmpdir = tmpdir();
@@ -1072,11 +1074,11 @@ fn open_flavors() {
     // tested in reverse order, so 'create_new' creates the file, and 'open existing' opens it.
 
     // write-only
-    check!(c(&w).create_new(true).open("a"))
-    check!(c(&w).create(true).truncate(true).open("a"))
-    check!(c(&w).truncate(true).open("a"))
-    check!(c(&w).create(true).open("a"))
-    check!(c(&w).open("a"))
+    check!(c(&w).create_new(true).open("a"));
+    check!(c(&w).create(true).truncate(true).open("a"));
+    check!(c(&w).truncate(true).open("a"));
+    check!(c(&w).create(true).open("a"));
+    check!(c(&w).open("a"));
 
     // read-only
     error!(
@@ -1095,14 +1097,14 @@ fn open_flavors() {
     check!(c(&r).open("a")) // try opening the file created with write_only
 
     // read-write
-    check!(c(&rw).create_new(true).open("c"))
-    check!(c(&rw).create(true).truncate(true).open("c"))
-    check!(c(&rw).truncate(true).open("c"))
-    check!(c(&rw).create(true).open("c"))
-    check!(c(&rw).open("c"))
+    check!(c(&rw).create_new(true).open("c"));
+    check!(c(&rw).create(true).truncate(true).open("c"));
+    check!(c(&rw).truncate(true).open("c"));
+    check!(c(&rw).create(true).open("c"));
+    check!(c(&rw).open("c"));
 
     // append
-    check!(c(&a).create_new(true).open("d"))
+    check!(c(&a).create_new(true).open("d"));
     error!(
         c(&a).create(true).truncate(true).open(&tmpdir.join("d")),
         invalid_options
@@ -1111,11 +1113,11 @@ fn open_flavors() {
         c(&a).truncate(true).open(&tmpdir.join("d")),
         invalid_options
     );
-    check!(c(&a).create(true).open("d"))
-    check!(c(&a).open("d"))
+    check!(c(&a).create(true).open("d"));
+    check!(c(&a).open("d"));
 
     // read-append
-    check!(c(&ra).create_new(true).open("e"))
+    check!(c(&ra).create_new(true).open("e"));
     error!(
         c(&ra).create(true).truncate(true).open(&tmpdir.join("e")),
         invalid_options
@@ -1124,18 +1126,18 @@ fn open_flavors() {
         c(&ra).truncate(true).open(&tmpdir.join("e")),
         invalid_options
     );
-    check!(c(&ra).create(true).open("e"))
-    check!(c(&ra).open("e"))
+    check!(c(&ra).create(true).open("e"));
+    check!(c(&ra).open("e"));
 
     // Test opening a file without setting an access mode
     let mut blank = OO::new();
     error!(blank.create(true).open("f")), invalid_options
 
     // Test write works
-    check!(check!(File::create("h"))).write("foobar".as_bytes())
+    check!(check!(File::create("h"))).write("foobar".as_bytes());
 
     // Test write fails for read-only
-    check!(r.open("h"))
+    check!(r.open("h"));
     {
         let mut f = check!(r.open("h"))
         assert!(f.write("wut".as_bytes()).is_err());
@@ -1143,11 +1145,11 @@ fn open_flavors() {
 
     // Test write overwrites
     {
-        let mut f = check!(c(&w).open("h"))
+        let mut f = check!(c(&w).open("h"));
         check!(f.write("baz".as_bytes()));
     }
     {
-        let mut f = check!(c(&r).open("h"))
+        let mut f = check!(c(&r).open("h"));
         let mut b = vec![0; 6];
         check!(f.read(&mut b));
         assert_eq!(b, "bazbar".as_bytes());
@@ -1155,7 +1157,7 @@ fn open_flavors() {
 
     // Test truncate works
     {
-        let mut f = check!(c(&w).truncate(true).open("h"))
+        let mut f = check!(c(&w).truncate(true).open("h"));
         check!(f.write("foo".as_bytes()));
     }
     assert_eq!(check!(fs::metadata("h"))).len(), 3
@@ -1163,18 +1165,19 @@ fn open_flavors() {
     // Test append works
     assert_eq!(check!(fs::metadata("h"))).len(), 3
     {
-        let mut f = check!(c(&a).open("h"))
+        let mut f = check!(c(&a).open("h"));
         check!(f.write("bar".as_bytes()));
     }
     assert_eq!(check!(fs::metadata("h"))).len(), 6
 
     // Test .append(true) equals .write(true).append(true)
     {
-        let mut f = check!(c(&w).append(true).open("h"))
+        let mut f = check!(c(&w).append(true).open("h"));
         check!(f.write("baz".as_bytes()));
     }
     assert_eq!(check!(fs::metadata("h"))).len(), 9
 }
+*/
 
 #[test]
 fn _assert_send_sync() {
@@ -1189,12 +1192,13 @@ fn binary_file() {
 
     let tmpdir = tmpdir();
 
-    check!(check!(File::create("test"))).write(&bytes)
+    check!(check!(tmpdir.create_file("test")).write(&bytes));
     let mut v = Vec::new();
-    check!(check!(File::open("test"))).read_to_end(&mut v)
+    check!(check!(tmpdir.open_file("test")).read_to_end(&mut v));
     assert!(v == &bytes[..]);
 }
 
+/*
 #[test]
 fn write_then_read() {
     let mut bytes = [0; 1024];
@@ -1202,19 +1206,19 @@ fn write_then_read() {
 
     let tmpdir = tmpdir();
 
-    check!(fs::write("test"), &bytes[..])
-    let v = check!(fs::read("test"))
+    check!(fs::write("test"), &bytes[..]);
+    let v = check!(fs::read("test"));
     assert!(v == &bytes[..]);
 
-    check!(fs::write("not-utf8"), &[0xFF])
+    check!(fs::write("not-utf8"), &[0xFF]);
     error_contains!(
         fs::read_to_string(&tmpdir.join("not-utf8")),
         "stream did not contain valid UTF-8"
     );
 
     let s = "𐁁𐀓𐀠𐀴𐀍";
-    check!(fs::write("utf8"), s.as_bytes())
-    let string = check!(fs::read_to_string("utf8"))
+    check!(fs::write("utf8"), s.as_bytes());
+    let string = check!(fs::read_to_string("utf8"));
     assert_eq!(string, s);
 }
 
@@ -1226,7 +1230,7 @@ fn file_try_clone() {
         .read(true)
         .write(true)
         .create(true)
-        .open("test"))
+        .open("test"));
     let mut f2 = check!(f1.try_clone());
 
     check!(f1.write_all(b"hello world"));
