@@ -72,14 +72,6 @@ impl Dir {
         }
     }
 
-    pub(crate) fn create_dir_all(&self, path: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::create_dir_all({:?}, {})",
-            self.std_file,
-            path.display()
-        )
-    }
-
     pub(crate) fn create_file(&self, path: &Path) -> io::Result<File> {
         unsafe {
             let fd = openat(

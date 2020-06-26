@@ -87,7 +87,46 @@ impl Dir {
     /// [`std::fs::create_dir_all`]: https://doc.rust-lang.org/std/fs/fn.create_dir_all.html
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.create_dir_all(path.as_ref())
+        self._create_dir_all(path.as_ref())
+    }
+
+    fn _create_dir_all(&self, path: &Path) -> io::Result<()> {
+        if path == Path::new("") {
+            return Ok(());
+        }
+
+        match self.create_dir(path) {
+            Ok(()) => return Ok(()),
+            Err(e) => match e.kind() {
+                io::ErrorKind::NotFound => {}
+                io::ErrorKind::AlreadyExists => {
+                    return if self.is_dir(path) { Ok(()) } else { Err(e) }
+                }
+                _ => return Err(e),
+            },
+        }
+        match path.parent() {
+            Some(p) => self._create_dir_all(p)?,
+            None => {
+                return Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "failed to create whole tree",
+                ));
+            }
+        }
+        match self.create_dir(path) {
+            Ok(()) => Ok(()),
+            Err(e) => match e.kind() {
+                io::ErrorKind::AlreadyExists => {
+                    if self.is_dir(path) {
+                        Ok(())
+                    } else {
+                        Err(e)
+                    }
+                }
+                _ => Err(e),
+            },
+        }
     }
 
     /// Opens a file in write-only mode.
@@ -381,6 +420,18 @@ impl Dir {
         Ok(Self {
             sys: self.sys.try_clone()?,
         })
+    }
+
+    /// Checks if `path` is a directory.
+    ///
+    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to `Dir`
+    /// is a directory. This function will traverse symbolic links to query information about the
+    /// destination file. In case of broken symbolic links, this will return `false`.
+    ///
+    /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
+    #[inline]
+    pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
+        unimplemented!("TODO implement is_dir")
     }
 }
 
