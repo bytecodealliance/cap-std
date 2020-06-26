@@ -468,18 +468,3 @@ fn initial_buffer_size(file: &File) -> usize {
 }
 
 // TODO: impl Debug for Dir? But don't expose Dir's path...
-
-#[cfg(test)]
-mod test {
-    use crate::test::TempDir;
-    use std::io;
-
-    #[test]
-    fn create_dir_all() -> io::Result<()> {
-        let tmp = TempDir::new()?;
-        tmp.create_dir_all("a/b/c")?;
-        assert!(tmp.create_dir("a").is_err());
-
-        Ok(())
-    }
-}
