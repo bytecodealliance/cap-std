@@ -9,12 +9,12 @@ use std::ffi;
 ///
 /// This corresponds to [`std::fs::DirEntry`].
 ///
-/// Unlike `std::fs::DirEntry`, this API has no `DirEntry::path`, because
+/// Unlike `async_std::fs::DirEntry`, this API has no `DirEntry::path`, because
 /// absolute paths don't interoperate well with the capability model.
 ///
-/// And unlike `std::fs::DirEntry`, this API has a lifetime parameter.
+/// And unlike `async_std::fs::DirEntry`, this API has a lifetime parameter.
 ///
-/// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
+/// Note that there is no `from_std` method, as `async_std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
 /// ambient paths.
 ///
@@ -36,7 +36,7 @@ impl<'dir> DirEntry<'dir> {
 
     /// Returns the file type for the file that this entry points at.
     ///
-    /// This to [`std::fs::DirEntry::file_type`].
+    /// This corresponds to [`std::fs::DirEntry::file_type`].
     ///
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]

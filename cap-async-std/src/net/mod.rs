@@ -21,7 +21,7 @@ pub use tcp_listener::*;
 pub use tcp_stream::*;
 pub use udp_socket::*;
 
-// Re-export things from std::net that we can use as-is.
+// Re-export things from `async_std::net` that we can use as-is.
 pub use async_std::net::{
     AddrParseError, IpAddr, Ipv4Addr, Ipv6Addr, Shutdown, SocketAddr, SocketAddrV4, SocketAddrV6,
     ToSocketAddrs,

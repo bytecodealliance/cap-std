@@ -32,5 +32,5 @@ pub use file::*;
 pub use open_options::*;
 pub use read_dir::*;
 
-// Re-export things from async_std::fs that we can use as-is.
+// Re-export things from `async_std::fs` that we can use as-is.
 pub use async_std::fs::{FileType, Metadata, Permissions};
