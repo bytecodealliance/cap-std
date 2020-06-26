@@ -2,7 +2,7 @@
 ///
 /// This corresponds to [`std::fs::DirBuilder`].
 ///
-/// Unlike `std::fs::DirBuilder`, this API has no `DirBuilder::create`, because
+/// Unlike `async_std::fs::DirBuilder`, this API has no `DirBuilder::create`, because
 /// creating directories requires a capability. Use
 /// [`Dir::create_with_dir_builder`] instead.
 ///

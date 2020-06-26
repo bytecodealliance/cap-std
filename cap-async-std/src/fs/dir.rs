@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 ///
 /// TODO: Windows support.
 ///
-/// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
+/// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model.
 pub struct Dir {
     sys: sys::fs::Dir,

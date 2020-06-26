@@ -5,12 +5,12 @@ use std::io;
 ///
 /// This corresponds to [`std::fs::ReadDir`].
 ///
-/// Unlike `std::fs::ReadDir`, this API has a lifetime parameter.
+/// Unlike `async_std::fs::ReadDir`, this API has a lifetime parameter.
 ///
 /// TODO: The lifetime parameter is here because `ReadDir` needs to return
 /// `DirEntry`s which have paths
 ///
-/// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
+/// Note that there is no `from_std` method, as `async_std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
 ///
