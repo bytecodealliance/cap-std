@@ -3,8 +3,8 @@
 //
 // Note that we use `std`, because this is infrastructure for running tests.
 
-use rand::RngCore;
 use std::{env, fs, ops::Deref, path::PathBuf};
+use uuid::Uuid;
 
 pub struct TempDir(cap_std::fs::Dir, PathBuf);
 
@@ -24,8 +24,7 @@ impl Deref for TempDir {
 
 pub fn tmpdir() -> TempDir {
     let p = env::temp_dir();
-    let mut r = rand::thread_rng();
-    let ret = p.join(&format!("rust-{}", r.next_u32()));
+    let ret = p.join(&Uuid::new_v4().to_string());
     fs::create_dir(&ret).unwrap();
     TempDir(
         cap_std::fs::Dir::from_std_file(
