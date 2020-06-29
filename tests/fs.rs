@@ -535,18 +535,18 @@ fn mkdir_path_already_exists_error() {
     assert_eq!(e.kind(), ErrorKind::AlreadyExists);
 }
 
-/*
 #[test]
 fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
     check!(tmpdir.create_dir_all(dir));
-    assert!(dir.is_dir())
+    assert!(tmpdir.is_dir("d1"));
+    let dir = check!(tmpdir.open_dir("d1"));
+    assert!(dir.is_dir("d2"));
+    assert!(tmpdir.is_dir("d1/d2"));
 }
-*/
 
 #[test]
-#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_failure() {
     let tmpdir = tmpdir();
     let dir = "d1";
@@ -585,21 +585,18 @@ fn concurrent_recursive_mkdir() {
 */
 
 #[test]
-#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_slash() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all(Path::new("/")));
 }
 
 #[test]
-#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_dot() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all(Path::new(".")));
 }
 
 #[test]
-#[ignore] // create_dir_all is not yet implemented in cap-std
 fn recursive_mkdir_empty() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all(Path::new("")));
