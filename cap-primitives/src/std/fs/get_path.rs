@@ -1,4 +1,6 @@
-//! `get_path` functions similar to the code in libstd.
+//! `get_path` translation code for Linux and macOS derived from Rust's
+//! src/libstd/sys/unix/fs.rs at revision
+//! 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
 
 use std::{fs, path::PathBuf};
 

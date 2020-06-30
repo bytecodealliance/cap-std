@@ -1,7 +1,8 @@
-// This file is derived from src/libstd/sys_common/io.rs in the Rust repository at revision
-// 50fc24d8a172a853b5dfe40702d6550e3b8562ba.
+// This file is derived from src/libstd/sys_common/io.rs in the Rust repository
+// at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
 //
-// Note that we use `std`, because this is infrastructure for running tests.
+// Note that we use plain `std` here, because this is infrastructure for running
+// tests.
 
 use std::{
     env, fs, io,

@@ -16,6 +16,7 @@ pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlag> {
 }
 
 // `OpenOptions` translation code derived from Rust's src/libstd/sys/unix/fs.rs
+// at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
 
 fn get_access_mode(options: &OpenOptions) -> io::Result<libc::c_int> {
     match (options.read, options.write, options.append) {
