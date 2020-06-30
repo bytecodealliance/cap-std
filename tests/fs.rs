@@ -31,47 +31,6 @@ use cap_std::os::windows::fs::{symlink_dir, symlink_file};
 use cap_std::sys::fs::symlink_junction;
 */
 
-macro_rules! check {
-    ($e:expr) => {
-        match $e {
-            Ok(t) => t,
-            Err(e) => panic!("{} failed with: {}", stringify!($e), e),
-        }
-    };
-}
-
-#[cfg(windows)]
-macro_rules! error {
-    ($e:expr, $s:expr) => {
-        match $e {
-            Ok(_) => panic!("Unexpected success. Should've been: {:?}", $s),
-            Err(ref err) => assert!(
-                err.raw_os_error() == Some($s),
-                format!("`{}` did not have a code of `{}`", err, $s)
-            ),
-        }
-    };
-}
-
-#[cfg(unix)]
-macro_rules! error {
-    ($e:expr, $s:expr) => {
-        error_contains!($e, $s)
-    };
-}
-
-macro_rules! error_contains {
-    ($e:expr, $s:expr) => {
-        match $e {
-            Ok(_) => panic!("Unexpected success. Should've been: {:?}", $s),
-            Err(ref err) => assert!(
-                err.to_string().contains($s),
-                format!("`{}` did not contain `{}`", err, $s)
-            ),
-        }
-    };
-}
-
 /*
 // Several test fail on windows if the user does not have permission to
 // create symlinks (the `SeCreateSymbolicLinkPrivilege`). Instead of
@@ -540,10 +499,7 @@ fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
     check!(tmpdir.create_dir_all(dir));
-    assert!(tmpdir.is_dir("d1"));
-    let dir = check!(tmpdir.open_dir("d1"));
-    assert!(dir.is_dir("d2"));
-    assert!(tmpdir.is_dir("d1/d2"));
+    assert!(tmpdir.is_dir(dir));
 }
 
 #[test]
