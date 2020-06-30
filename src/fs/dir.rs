@@ -103,13 +103,9 @@ impl Dir {
 
         match self.create_dir(path) {
             Ok(()) => return Ok(()),
-            Err(e) => match e.kind() {
-                io::ErrorKind::NotFound => {}
-                io::ErrorKind::AlreadyExists => {
-                    return if self.is_dir(path) { Ok(()) } else { Err(e) }
-                }
-                _ => return Err(e),
-            },
+            Err(ref e) if e.kind() == io::ErrorKind::NotFound => {}
+            Err(_) if self.is_dir(path) => return Ok(()),
+            Err(e) => return Err(e),
         }
         match path.parent() {
             Some(p) => self._create_dir_all(p)?,
@@ -122,16 +118,8 @@ impl Dir {
         }
         match self.create_dir(path) {
             Ok(()) => Ok(()),
-            Err(e) => match e.kind() {
-                io::ErrorKind::AlreadyExists => {
-                    if self.is_dir(path) {
-                        Ok(())
-                    } else {
-                        Err(e)
-                    }
-                }
-                _ => Err(e),
-            },
+            Err(_) if self.is_dir(path) => Ok(()),
+            Err(e) => Err(e),
         }
     }
 
@@ -442,7 +430,7 @@ impl Dir {
     /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
     #[inline]
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
-        unimplemented!("TODO implement is_dir")
+        self.open_dir(path.as_ref()).map(|_| true).unwrap_or(false)
     }
 }
 
