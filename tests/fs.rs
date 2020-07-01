@@ -1240,16 +1240,16 @@ fn mkdir_trailing_slash() {
     check!(tmpdir.create_dir_all(&path.join("a/")));
 }
 
-/*
 #[test]
 fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
-    let tmpdir = fs::canonicalize(tmpdir.path()).unwrap();
-    let file = "test";
-    File::create(&file).unwrap();
-    assert_eq!(fs::canonicalize(&file).unwrap(), file);
+    let path = "file";
+    check!(tmpdir.create_file(&path));
+    let canonicalized = check!(tmpdir.canonicalize(&path));
+    assert_eq!(canonicalized, PathBuf::from(path));
 }
 
+/*
 #[test]
 fn realpath_works() {
     let tmpdir = tmpdir();

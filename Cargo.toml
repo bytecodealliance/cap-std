@@ -13,6 +13,7 @@ readme = "README.md"
 ipnet = "2.3.0"
 cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
+thiserror = "1.0.20"
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.18.0"

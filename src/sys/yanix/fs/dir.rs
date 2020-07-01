@@ -11,7 +11,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
+use yanix::file::{linkat, mkdirat, openat, readlinkat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -97,9 +97,16 @@ impl Dir {
         }
     }
 
-    pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
+    pub(crate) fn create_file(&self, path: &Path) -> io::Result<File> {
+        unsafe {
+            let fd = openat(
+                self.std_file.as_raw_fd(),
+                path,
+                OFlag::WRONLY | OFlag::CREAT | OFlag::TRUNC,
+                Mode::from_bits(0o666).unwrap(),
+            )?;
+            Ok(File::from_raw_fd(fd))
+        }
     }
 
     pub(crate) fn copy(&self, from: &Path, to: &Path) -> io::Result<u64> {
@@ -132,7 +139,10 @@ impl Dir {
     }
 
     pub(crate) fn read_link(&self, path: &Path) -> io::Result<PathBuf> {
-        unimplemented!("Dir::read_link({:?}, {})", self.std_file, path.display())
+        unsafe {
+            let expanded = readlinkat(self.std_file.as_raw_fd(), path)?;
+            Ok(expanded.into())
+        }
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {

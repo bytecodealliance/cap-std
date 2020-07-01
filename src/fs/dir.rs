@@ -1,7 +1,7 @@
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use crate::{
-    fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
+    fs::{DirBuilder, File, Metadata, OpenOptions, PathNormalizer, Permissions, ReadDir},
     sys,
 };
 #[cfg(unix)]
@@ -146,7 +146,18 @@ impl Dir {
     /// [`std::fs::canonicalize`]: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        self.sys.canonicalize(path.as_ref())
+        self._canonicalize(path.as_ref())
+    }
+
+    fn _canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
+        let mut normalizer = PathNormalizer::new(self.try_clone()?, path);
+        while let Some(res) = normalizer.advance() {
+            if let Err(err) = res {
+                return Err(err.into());
+            }
+        }
+        let normalized_path = normalizer.last_valid_path();
+        Ok(normalized_path.to_owned())
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission

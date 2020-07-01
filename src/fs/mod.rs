@@ -23,6 +23,7 @@ mod dir_builder;
 mod dir_entry;
 mod file;
 mod open_options;
+mod path_normalizer;
 mod read_dir;
 
 pub use dir::*;
@@ -30,6 +31,7 @@ pub use dir_builder::*;
 pub use dir_entry::*;
 pub use file::*;
 pub use open_options::*;
+pub(crate) use path_normalizer::*;
 pub use read_dir::*;
 
 // Re-export things from `std::fs` that we can use as-is.
