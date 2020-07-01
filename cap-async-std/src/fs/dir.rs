@@ -91,7 +91,34 @@ impl Dir {
     /// [`std::fs::create_dir_all`]: https://doc.rust-lang.org/std/fs/fn.create_dir_all.html
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.create_dir_all(path.as_ref())
+        self._create_dir_all(path.as_ref())
+    }
+
+    fn _create_dir_all(&self, path: &Path) -> io::Result<()> {
+        if path == Path::new("") {
+            return Ok(());
+        }
+
+        match self.create_dir(path) {
+            Ok(()) => return Ok(()),
+            Err(ref e) if e.kind() == io::ErrorKind::NotFound => {}
+            Err(_) if self.is_dir(path) => return Ok(()),
+            Err(e) => return Err(e),
+        }
+        match path.parent() {
+            Some(p) => self._create_dir_all(p)?,
+            None => {
+                return Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "failed to create whole tree",
+                ));
+            }
+        }
+        match self.create_dir(path) {
+            Ok(()) => Ok(()),
+            Err(_) if self.is_dir(path) => Ok(()),
+            Err(e) => Err(e),
+        }
     }
 
     /// Opens a file in write-only mode.
@@ -128,8 +155,22 @@ impl Dir {
     ///
     /// [`std::fs::copy`]: https://doc.rust-lang.org/std/fs/fn.copy.html
     #[inline]
-    pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<u64> {
-        self.sys.copy(from.as_ref(), to.as_ref())
+    pub async fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<u64> {
+        // Implementation derived from `copy` in Rust's src/libstd/sys_common/fs.rs
+        if !self.is_file(from.as_ref()).await {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "the source path is not an existing regular file",
+            ));
+        }
+
+        let mut reader = self.open_file(from)?;
+        let mut writer = self.create_file(to.as_ref())?;
+        let perm = reader.metadata().await?.permissions();
+
+        let ret = io::copy(&mut reader, &mut writer).await?;
+        self.set_permissions(to, perm)?;
+        Ok(ret)
     }
 
     /// Creates a new hard link on a filesystem.
@@ -390,6 +431,54 @@ impl Dir {
     }
 
     // async_std doesn't have `try_clone`.
+
+    /// Returns true if the path points at an existing entity.
+    ///
+    /// This corresponds to [`std::path::Path::exists`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::exists`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.exists
+    #[inline]
+    pub fn exists<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the file.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
+        self.open_file(path).is_ok()
+    }
+
+    /// Returns true if the path exists on disk and is pointing at a regular file.
+    ///
+    /// This corresponds to [`std::path::Path::is_file`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::is_file`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file
+    #[inline]
+    pub async fn is_file<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the file.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
+        let file = match self.open_file(path) {
+            Ok(file) => file,
+            Err(_) => return false,
+        };
+        let metadata = match file.metadata().await {
+            Ok(metadata) => metadata,
+            Err(_) => return false,
+        };
+        metadata.is_file()
+    }
+
+    /// Checks if `path` is a directory.
+    ///
+    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to `Dir`
+    /// is a directory. This function will traverse symbolic links to query information about the
+    /// destination file. In case of broken symbolic links, this will return `false`.
+    ///
+    /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
+    #[inline]
+    pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the directory.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
+        self.open_dir(path.as_ref()).map(|_| true).unwrap_or(false)
+    }
 }
 
 #[cfg(unix)]

@@ -99,14 +99,6 @@ impl Dir {
         }
     }
 
-    pub(crate) fn create_dir_all(&self, path: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::create_dir_all({:?}, {})",
-            self.std_file,
-            path.display()
-        )
-    }
-
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
         // TODO Implement canoncalize without returning an absolute path.
         unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())

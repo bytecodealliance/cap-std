@@ -645,13 +645,15 @@ fn unicode_path_exists() {
     assert!(unicode.exists());
     assert!(!Path::new("test/unicode-bogus-path-각丁ー再见").exists());
 }
+*/
 
 #[test]
 fn copy_file_does_not_exist() {
+    let tmpdir = tmpdir();
     let from = Path::new("test/nonexistent-bogus-path");
     let to = Path::new("test/other-bogus-path");
 
-    match fs::copy(&from, &to) {
+    match tmpdir.copy(&from, &to) {
         Ok(..) => panic!(),
         Err(..) => {
             assert!(!from.exists());
@@ -665,17 +667,16 @@ fn copy_src_does_not_exist() {
     let tmpdir = tmpdir();
     let from = Path::new("test/nonexistent-bogus-path");
     let to = "out.txt";
-    check!(check!(File::create(&to)).write(b"hello"));
-    assert!(fs::copy(&from, &to).is_err());
+    check!(check!(tmpdir.create_file(&to)).write(b"hello"));
+    assert!(tmpdir.copy(&from, &to).is_err());
     assert!(!from.exists());
     let mut v = Vec::new();
-    check!(check!(File::open(&to)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&to)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
 }
-*/
 
 #[test]
-#[ignore] // `copy` not yet implemented in cap-std
+#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_ok() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -693,32 +694,31 @@ fn copy_file_ok() {
     );
 }
 
-/*
 #[test]
-#[ignore] // `copy` not yet implemented in cap-std
 fn copy_file_dst_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
     check!(tmpdir.create_file(&out));
-    match tmpdir.copy(&*out, tmpdir.path()) {
+    match tmpdir.copy(&*out, ".") {
         Ok(..) => panic!(),
         Err(..) => {}
     }
 }
 
 #[test]
+#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_dst_exists() {
     let tmpdir = tmpdir();
     let input = "in";
     let output = "out";
 
-    check!(check!(File::create(&input)).write("foo".as_bytes()));
-    check!(check!(File::create(&output)).write("bar".as_bytes()));
-    check!(fs::copy(&input, &output));
+    check!(check!(tmpdir.create_file(&input)).write("foo".as_bytes()));
+    check!(check!(tmpdir.create_file(&output)).write("bar".as_bytes()));
+    check!(tmpdir.copy(&input, &output));
 
     let mut v = Vec::new();
-    check!(check!(File::open(&output)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&output)).read_to_end(&mut v));
     assert_eq!(v, b"foo".to_vec());
 }
 
@@ -727,53 +727,56 @@ fn copy_file_src_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    match fs::copy(tmpdir.path(), &out) {
+    match tmpdir.copy(".", &out) {
         Ok(..) => panic!(),
         Err(..) => {}
     }
-    assert!(!out.exists());
+    assert!(!tmpdir.exists(out));
 }
 
 #[test]
+#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_preserves_perm_bits() {
     let tmpdir = tmpdir();
     let input = "in.txt";
     let out = "out.txt";
 
-    let attr = check!(check!(File::create(&input)).metadata());
+    let attr = check!(check!(tmpdir.create_file(&input)).metadata());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(fs::set_permissions(&input, p));
-    check!(fs::copy(&input, &out));
-    assert!(check!(out.metadata()).permissions().readonly());
-    check!(fs::set_permissions(&input, attr.permissions()));
-    check!(fs::set_permissions(&out, attr.permissions()));
+    check!(tmpdir.set_permissions(&input, p));
+    check!(tmpdir.copy(&input, &out));
+    assert!(check!(tmpdir.metadata(out)).permissions().readonly());
+    check!(tmpdir.set_permissions(&input, attr.permissions()));
+    check!(tmpdir.set_permissions(&out, attr.permissions()));
 }
 
 #[test]
 #[cfg(windows)]
 fn copy_file_preserves_streams() {
     let tmp = tmpdir();
-    check!(check!(File::create(tmp.join("in.txt:bunny"))).write("carrot".as_bytes()));
-    assert_eq!(check!(fs::copy(tmp.join("in.txt"), tmp.join("out.txt"))), 0);
-    assert_eq!(check!(tmp.join("out.txt").metadata()).len(), 0);
+    check!(check!(tmp.create_file("in.txt:bunny")).write("carrot".as_bytes()));
+    assert_eq!(check!(tmp.copy("in.txt", "out.txt")), 0);
+    assert_eq!(check!(tmp.metadata("out.txt")).len(), 0);
     let mut v = Vec::new();
-    check!(check!(File::open(tmp.join("out.txt:bunny"))).read_to_end(&mut v));
+    check!(check!(tmp.open_file("out.txt:bunny")).read_to_end(&mut v));
     assert_eq!(v, b"carrot".to_vec());
 }
 
 #[test]
+#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_returns_metadata_len() {
     let tmp = tmpdir();
-    let in_path = tmp.join("in.txt");
-    let out_path = tmp.join("out.txt");
-    check!(check!(File::create(&in_path)).write(b"lettuce"));
+    let in_path = "in.txt";
+    let out_path = "out.txt";
+    check!(check!(tmp.create_file(&in_path)).write(b"lettuce"));
     #[cfg(windows)]
-    check!(check!(File::create(tmp.join("in.txt:bunny"))).write(b"carrot"));
-    let copied_len = check!(fs::copy(&in_path, &out_path));
-    assert_eq!(check!(out_path.metadata()).len(), copied_len);
+    check!(check!(tmp.create_file(tmp.join("in.txt:bunny"))).write(b"carrot"));
+    let copied_len = check!(tmp.copy(&in_path, &out_path));
+    assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
 
+/*
 #[test]
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
@@ -785,17 +788,17 @@ fn copy_file_follows_dst_symlink() {
     let out_path = tmp.join("out.txt");
     let out_path_symlink = tmp.join("out_symlink.txt");
 
-    check!(fs::write(&in_path, "foo"));
-    check!(fs::write(&out_path, "bar"));
+    check!(tmpdir.write_file(&in_path, "foo"));
+    check!(tmpdir.write_file(&out_path, "bar"));
     check!(symlink_file(&out_path, &out_path_symlink));
 
-    check!(fs::copy(&in_path, &out_path_symlink));
+    check!(tmpdir.copy(&in_path, &out_path_symlink));
 
     assert!(check!(out_path_symlink.symlink_metadata())
         .file_type()
         .is_symlink());
-    assert_eq!(check!(fs::read(&out_path_symlink)), b"foo".to_vec());
-    assert_eq!(check!(fs::read(&out_path)), b"foo".to_vec());
+    assert_eq!(check!(tmpdir.read_file(&out_path_symlink)), b"foo".to_vec());
+    assert_eq!(check!(tmpdir.read_file(&out_path)), b"foo".to_vec());
 }
 
 #[test]
