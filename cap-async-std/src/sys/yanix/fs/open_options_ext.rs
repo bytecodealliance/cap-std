@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
-    pub(crate) mode: u32,
+    pub(crate) mode: libc::mode_t,
     pub(crate) custom_flags: i32,
 }
 
@@ -12,7 +12,7 @@ impl OpenOptionsExt {
         }
     }
 
-    pub(crate) fn mode(&mut self, mode: u32) -> &mut Self {
+    pub(crate) fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
         self.mode = mode;
         self
     }
