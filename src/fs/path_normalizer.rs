@@ -83,6 +83,12 @@ impl PathNormalizer {
         // try opening as dir
         let sub_dir = match this_dir.open_dir(&path) {
             Ok(dir) => dir,
+            Err(err) if this_dir.is_file(&path) && self.remaining.is_empty() => {
+                // we've hit the end of path which turns out to be a file,
+                // so all good!
+                self.normalized_path.push(path);
+                return Some(Ok(()));
+            }
             Err(err) if err.kind() == io::ErrorKind::NotFound => {
                 // if the dir doesn't exist, we exit signalling the reason
                 let out_dir = match this_dir.try_clone() {
