@@ -9,7 +9,10 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd},
     },
 };
-use std::path::{Path, PathBuf};
+use std::{
+    convert::TryInto,
+    path::{Path, PathBuf},
+};
 use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
@@ -66,7 +69,9 @@ impl Dir {
                 self.std_file.as_raw_fd(),
                 path,
                 oflags,
-                Mode::from_bits(options.ext.mode).expect("unrecognized Mode bits"),
+                #[allow(clippy::useless_conversion)]
+                Mode::from_bits(options.ext.mode.try_into().expect("unrecognized Mode bits"))
+                    .expect("unrecognized Mode bits"),
             )?;
             Ok(File::from_raw_fd(fd))
         }
