@@ -9,7 +9,7 @@ use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{
-    fs, io,
+    fmt, fs, io,
     path::{Path, PathBuf},
 };
 
@@ -80,6 +80,8 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
+    ///
+    /// TODO: Should this return a `Dir` with the newly created directory?
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self.sys.create_dir(path.as_ref())
@@ -542,4 +544,9 @@ fn initial_buffer_size(file: &File) -> usize {
     file.metadata().map(|m| m.len() as usize + 1).unwrap_or(0)
 }
 
-// TODO: impl Debug for Dir? But don't expose Dir's path...
+impl fmt::Debug for Dir {
+    // Like libstd's version, but doesn't print the path.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.sys.fmt(f)
+    }
+}

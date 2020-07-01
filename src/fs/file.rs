@@ -17,7 +17,7 @@ use std::{fmt, fs, io, process};
 /// [`Dir::open_file`]: struct.Dir.html#method.open_file
 /// [`Dir::create_file`]: struct.Dir.html#method.create_file
 pub struct File {
-    std: fs::File,
+    pub(crate) std: fs::File,
 }
 
 impl File {

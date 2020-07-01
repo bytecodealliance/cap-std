@@ -14,6 +14,7 @@ async-std = { version = "1.6.2", features = ["attributes"] }
 ipnet = "2.3.0"
 cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
+cap-primitives = { path = "../cap-primitives", version = "0.0.0" }
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.18.0"

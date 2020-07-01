@@ -1,10 +1,10 @@
 [package]
-name = "cap-std"
+name = "cap-primitives"
 version = "0.0.0"
-description = "Capability-based version of the Rust standard library"
+description = "Capability-based primitives"
 authors = ["Dan Gohman <sunfish@mozilla.com>"]
 license = "Apache-2.0 WITH LLVM-exception"
-keywords = ["std", "api", "network", "file"]
+keywords = ["api", "network", "file"]
 categories = ["filesystem", "network-programming"]
 edition = "2018"
 readme = "README.md"
@@ -12,8 +12,6 @@ readme = "README.md"
 [dependencies]
 ipnet = "2.3.0"
 cfg-if = "0.1.9"
-arf-strings = { version = "0.1.2", optional = true }
-cap-primitives = { path = "cap-primitives", version = "0.0.0" }
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.18.0"
@@ -33,19 +31,5 @@ lazy_static = "1.4.0"
 [target.'cfg(windows)'.dependencies]
 winx = "0.18.0"
 
-[dev-dependencies]
-rand = "0.7.3"
-uuid = { version = "0.8", features = ["v4"] }
-
 [badges]
 maintenance = { status = "actively-developed" }
-
-[features]
-default = []
-fs_utf8 = ["arf-strings"]
-
-[workspace]
-members = [
-  "cap-primitives",
-  "cap-async-std",
-]

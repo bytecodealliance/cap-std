@@ -22,15 +22,16 @@ mod dir;
 mod dir_builder;
 mod dir_entry;
 mod file;
-mod open_options;
 mod read_dir;
 
 pub use dir::*;
 pub use dir_builder::*;
 pub use dir_entry::*;
 pub use file::*;
-pub use open_options::*;
 pub use read_dir::*;
 
 // Re-export things from `std::fs` that we can use as-is.
 pub use std::fs::{FileType, Metadata, Permissions};
+
+// Re-export things from `cap_primitives` that we can use as-is.
+pub use cap_primitives::fs::OpenOptions;

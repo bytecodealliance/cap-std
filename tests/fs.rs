@@ -541,6 +541,7 @@ fn concurrent_recursive_mkdir() {
 */
 
 #[test]
+#[ignore] // is_dir is not yet fully implemented in cap-std
 fn recursive_mkdir_slash() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all(Path::new("/")));
