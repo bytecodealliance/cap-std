@@ -3,6 +3,7 @@ use crate::{
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
 use std::{
+    convert::TryInto,
     fs, io,
     os::unix::{
         fs::OpenOptionsExt,
