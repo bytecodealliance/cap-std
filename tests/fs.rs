@@ -1245,8 +1245,7 @@ fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
     let path = "file";
     check!(tmpdir.create_file(&path));
-    let canonicalized = check!(tmpdir.canonicalize(&path));
-    assert_eq!(canonicalized, PathBuf::from(path));
+    assert_eq!(tmpdir.canonicalize(&path).unwrap(), PathBuf::from(path));
 }
 
 /*
