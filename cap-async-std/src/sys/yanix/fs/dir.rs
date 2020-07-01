@@ -4,7 +4,10 @@ use crate::{
 };
 use async_std::{
     fs, io,
-    os::unix::io::{AsRawFd, FromRawFd, IntoRawFd},
+    os::unix::{
+        fs::OpenOptionsExt,
+        io::{AsRawFd, FromRawFd, IntoRawFd},
+    },
 };
 use std::path::{Path, PathBuf};
 use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
@@ -34,18 +37,6 @@ impl Dir {
         self.std_file.into_raw_fd()
     }
 
-    pub(crate) fn open_file(&self, path: &Path) -> io::Result<File> {
-        unsafe {
-            let fd = openat(
-                self.std_file.as_raw_fd(),
-                path,
-                OFlag::RDONLY,
-                Mode::empty(),
-            )?;
-            Ok(File::from_raw_fd(fd))
-        }
-    }
-
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let mut oflags = OFlag::empty();
         if options.read && options.write {
@@ -68,27 +59,29 @@ impl Dir {
                 oflags |= OFlag::CREAT;
             }
         }
+        oflags |= OFlag::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")
+            & !OFlag::ACCMODE;
         unsafe {
             let fd = openat(
                 self.std_file.as_raw_fd(),
                 path,
                 oflags,
-                Mode::from_bits(0o666).unwrap(),
+                Mode::from_bits(options.ext.mode).expect("unrecognized Mode bits"),
             )?;
             Ok(File::from_raw_fd(fd))
         }
     }
 
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
-        unsafe {
-            let fd = openat(
-                self.std_file.as_raw_fd(),
-                path,
-                OFlag::RDONLY | OFlag::DIRECTORY,
-                Mode::empty(),
-            )?;
-            Ok(crate::fs::Dir::from_raw_fd(fd))
-        }
+        let file = self.open_file_with(
+            path,
+            OpenOptions::new()
+                .read(true)
+                .custom_flags(OFlag::DIRECTORY.bits()),
+        )?;
+        Ok(crate::fs::Dir::from_std_file(unsafe {
+            fs::File::from_raw_fd(file.into_raw_fd())
+        }))
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
@@ -107,18 +100,6 @@ impl Dir {
             self.std_file,
             path.display()
         )
-    }
-
-    pub(crate) fn create_file(&self, path: &Path) -> io::Result<File> {
-        unsafe {
-            let fd = openat(
-                self.std_file.as_raw_fd(),
-                path,
-                OFlag::WRONLY | OFlag::CREAT | OFlag::TRUNC,
-                Mode::from_bits(0o666).unwrap(),
-            )?;
-            Ok(File::from_raw_fd(fd))
-        }
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
@@ -157,13 +138,6 @@ impl Dir {
 
     pub(crate) fn read_link(&self, path: &Path) -> io::Result<PathBuf> {
         unimplemented!("Dir::read_link({:?}, {})", self.std_file, path.display())
-    }
-
-    pub(crate) async fn read_to_string(&self, path: &Path) -> io::Result<String> {
-        use async_std::prelude::*;
-        let mut s = String::new();
-        self.open_file(path)?.read_to_string(&mut s).await?;
-        Ok(s)
     }
 
     pub(crate) fn remove_dir(&self, path: &Path) -> io::Result<()> {

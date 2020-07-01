@@ -46,7 +46,7 @@ impl Dir {
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
     #[inline]
     pub fn open_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.sys.open_file(path.as_ref())
+        self.open_file_with(path, OpenOptions::new().read(true))
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -102,7 +102,10 @@ impl Dir {
     /// [`std::fs::File::create`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.create
     #[inline]
     pub fn create_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.sys.create_file(path.as_ref())
+        self.open_file_with(
+            path,
+            OpenOptions::new().write(true).create(true).truncate(true),
+        )
     }
 
     /// Returns the canonical form of a path with all intermediate components normalized
@@ -201,7 +204,10 @@ impl Dir {
     /// [`std::fs::read_to_string`]: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
     #[inline]
     pub async fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
-        self.sys.read_to_string(path.as_ref()).await
+        use async_std::prelude::*;
+        let mut s = String::new();
+        self.open_file(path)?.read_to_string(&mut s).await?;
+        Ok(s)
     }
 
     /// Removes an existing, empty directory.
