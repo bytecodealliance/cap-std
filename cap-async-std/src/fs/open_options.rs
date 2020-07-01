@@ -115,7 +115,7 @@ impl OpenOptions {
 
 #[cfg(unix)]
 impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
-    fn mode(&mut self, mode: u32) -> &mut Self {
+    fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
         self.ext.mode(mode);
         self
     }
@@ -128,7 +128,7 @@ impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
 
 #[cfg(target_os = "vxworks")]
 impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
-    fn mode(&mut self, mode: u32) -> &mut Self {
+    fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
         self.ext.mode(mode);
         self
     }
