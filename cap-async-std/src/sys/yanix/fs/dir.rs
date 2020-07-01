@@ -9,9 +9,7 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd},
     },
 };
-use std::{
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
