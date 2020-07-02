@@ -24,7 +24,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     let l = buf.iter().position(|&c| c == 0).unwrap();
     buf.truncate(l as usize);
     buf.shrink_to_fit();
-    Some(PathBuf::from(OsString::from_vec(buf)))
+    Some(PathBuf::from(std::ffi::OsString::from_vec(buf)))
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
