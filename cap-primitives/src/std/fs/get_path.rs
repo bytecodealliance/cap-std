@@ -19,7 +19,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     // alternatives. If a better method is invented, it should be used
     // instead.
     let mut buf = vec![0; libc::PATH_MAX as usize];
-    let n = libc::fcntl(file.as_raw_fd(), libc::F_GETPATH, buf.as_ptr());
+    let n = unsafe { libc::fcntl(file.as_raw_fd(), libc::F_GETPATH, buf.as_ptr()) };
     if n == -1 {
         return None;
     }
