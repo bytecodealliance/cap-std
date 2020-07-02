@@ -2,15 +2,16 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
+use cap_primitives::fs::open;
 use std::{
-    fs, io,
+    fmt, fs, io,
     os::unix::{
         fs::OpenOptionsExt,
-        io::{AsRawFd, FromRawFd, IntoRawFd},
+        io::{AsRawFd, IntoRawFd},
     },
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
+use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -38,51 +39,17 @@ impl Dir {
     }
 
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        let mut oflags = OFlag::empty();
-        if options.read && options.write {
-            oflags |= OFlag::RDWR;
-        } else if options.read {
-            oflags |= OFlag::RDONLY;
-        } else if options.write {
-            oflags |= OFlag::WRONLY;
-        }
-        if options.append {
-            oflags |= OFlag::APPEND;
-        }
-        if options.create_new {
-            oflags |= OFlag::EXCL | OFlag::CREAT;
-        } else {
-            if options.truncate {
-                oflags |= OFlag::TRUNC;
-            }
-            if options.create {
-                oflags |= OFlag::CREAT;
-            }
-        }
-        oflags |= OFlag::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")
-            & !OFlag::ACCMODE;
-        unsafe {
-            let fd = openat(
-                self.std_file.as_raw_fd(),
-                path,
-                oflags,
-                #[allow(clippy::useless_conversion)]
-                Mode::from_bits_truncate(options.ext.mode as _),
-            )?;
-            Ok(File::from_raw_fd(fd))
-        }
+        open(&self.std_file, path, options).map(File::from_std)
     }
 
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
-        let file = self.open_file_with(
+        self.open_file_with(
             path,
             OpenOptions::new()
                 .read(true)
                 .custom_flags(OFlag::DIRECTORY.bits()),
-        )?;
-        Ok(crate::fs::Dir::from_std_file(unsafe {
-            fs::File::from_raw_fd(file.into_raw_fd())
-        }))
+        )
+        .map(|file| crate::fs::Dir::from_std_file(file.std))
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
@@ -248,5 +215,35 @@ impl Dir {
 
     pub(crate) fn try_clone(&self) -> io::Result<Dir> {
         Ok(Self::from_std_file(self.std_file.try_clone()?))
+    }
+}
+
+impl fmt::Debug for Dir {
+    // Like libstd's version, but doesn't print the path.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut b = f.debug_struct("Dir");
+
+        if cfg!(any(unix, target_os = "wasi", target_os = "fuchsia")) {
+            unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
+                let mode = yanix::fcntl::get_status_flags(fd);
+                if mode.is_err() {
+                    return None;
+                }
+                match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+                    yanix::file::OFlag::RDONLY => Some((true, false)),
+                    yanix::file::OFlag::RDWR => Some((true, true)),
+                    yanix::file::OFlag::WRONLY => Some((false, true)),
+                    _ => None,
+                }
+            }
+
+            let fd = self.std_file.as_raw_fd();
+            b.field("fd", &fd);
+            if let Some((read, write)) = unsafe { get_mode(fd) } {
+                b.field("read", &read).field("write", &write);
+            }
+        }
+
+        b.finish()
     }
 }

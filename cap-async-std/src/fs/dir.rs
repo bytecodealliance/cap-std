@@ -9,7 +9,10 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::{fs, io};
-use std::path::{Path, PathBuf};
+use std::{
+    fmt,
+    path::{Path, PathBuf},
+};
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -536,4 +539,9 @@ async fn initial_buffer_size(file: &File) -> usize {
         .unwrap_or(0)
 }
 
-// TODO: impl Debug for Dir? But don't expose Dir's path...
+impl fmt::Debug for Dir {
+    // Like libstd's version, but doesn't print the path.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.sys.fmt(f)
+    }
+}

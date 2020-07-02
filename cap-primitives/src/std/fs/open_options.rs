@@ -1,5 +1,3 @@
-use crate::sys;
-
 /// Options and flags which can be used to configure how a file is opened.
 ///
 /// This corresponds to [`std::fs::OpenOptions`].
@@ -19,9 +17,10 @@ pub struct OpenOptions {
     pub(crate) truncate: bool,
     pub(crate) create: bool,
     pub(crate) create_new: bool,
+    pub(crate) nofollow: bool,
 
     #[cfg(any(unix, windows, target_os = "vxworks"))]
-    pub(crate) ext: sys::fs::OpenOptionsExt,
+    pub(crate) ext: crate::fs::OpenOptionsExt,
 }
 
 impl OpenOptions {
@@ -40,9 +39,10 @@ impl OpenOptions {
             truncate: false,
             create: false,
             create_new: false,
+            nofollow: false,
 
             #[cfg(any(unix, windows, target_os = "vxworks"))]
-            ext: sys::fs::OpenOptionsExt::new(),
+            ext: crate::fs::OpenOptionsExt::new(),
         }
     }
 
@@ -111,6 +111,13 @@ impl OpenOptions {
         self.create_new = create_new;
         self
     }
+
+    /// Sets the option to suppress following of symlinks.
+    #[inline]
+    pub(crate) fn nofollow(&mut self, nofollow: bool) -> &mut Self {
+        self.nofollow = nofollow;
+        self
+    }
 }
 
 #[cfg(unix)]
@@ -128,7 +135,7 @@ impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
 
 #[cfg(target_os = "vxworks")]
 impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
-    fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
+    fn mode(&mut self, mode: u32) -> &mut Self {
         self.ext.mode(mode);
         self
     }

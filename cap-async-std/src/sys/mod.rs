@@ -11,7 +11,3 @@ cfg_if! {
         compile_error!("cap-async-std doesn't compile for this platform yet");
     }
 }
-
-// For now, assume all platforms use the std implementation.
-mod std;
-pub(crate) use self::std::*;
