@@ -47,8 +47,11 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
         resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
     };
 
-    unsafe {
-        loop {
+    // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
+    // while it's running, so use a loop to retry it a few times. But not too many
+    // times, because there's no limit on how often this can happen.
+    for _ in 0..4 {
+        unsafe {
             match libc::syscall(
                 SYS_OPENAT2,
                 start.as_raw_fd(),
@@ -58,7 +61,8 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
             ) {
                 -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
                     libc::EAGAIN => continue,
-                    errno => return Err(io::Error::from_raw_os_error(errno)),
+                    libc::EXDEV => return escape_attempt(),
+                    errno => return other_error(errno),
                 },
                 ret => {
                     let fd = ret as RawFd;
@@ -86,6 +90,9 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
             }
         }
     }
+
+    // Fall back to the manual-resolution path.
+    open_manually_wrapper(start, path, options)
 }
 
 lazy_static! {
@@ -119,4 +126,17 @@ pub(crate) fn open_impl(
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
     OPEN(start, path, options)
+}
+
+#[cold]
+fn escape_attempt() -> io::Result<fs::File> {
+    Err(io::Error::new(
+        io::ErrorKind::PermissionDenied,
+        "a path led outside of the filesystem",
+    ))
+}
+
+#[cold]
+fn other_error(errno: i32) -> io::Result<fs::File> {
+    Err(io::Error::from_raw_os_error(errno))
 }
