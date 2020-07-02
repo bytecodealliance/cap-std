@@ -10,7 +10,6 @@ use async_std::{
     },
 };
 use std::{
-    convert::TryInto,
     path::{Path, PathBuf},
 };
 use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
@@ -70,8 +69,7 @@ impl Dir {
                 path,
                 oflags,
                 #[allow(clippy::useless_conversion)]
-                Mode::from_bits(options.ext.mode.try_into().expect("unrecognized Mode bits"))
-                    .expect("unrecognized Mode bits"),
+                Mode::from_bits_truncate(options.ext.mode as _),
             )?;
             Ok(File::from_raw_fd(fd))
         }

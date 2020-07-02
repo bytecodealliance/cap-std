@@ -3,7 +3,6 @@ use crate::{
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
 use std::{
-    convert::TryInto,
     fs, io,
     os::unix::{
         fs::OpenOptionsExt,
@@ -68,8 +67,7 @@ impl Dir {
                 path,
                 oflags,
                 #[allow(clippy::useless_conversion)]
-                Mode::from_bits(options.ext.mode.try_into().expect("unrecognized Mode bits"))
-                    .expect("unrecognized Mode bits"),
+                Mode::from_bits_truncate(options.ext.mode as _),
             )?;
             Ok(File::from_raw_fd(fd))
         }
