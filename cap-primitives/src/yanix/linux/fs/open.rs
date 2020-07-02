@@ -5,12 +5,12 @@
 //!
 //! On older Linux, fall back to `open_manually`.
 
+#[cfg(debug_assertions)]
+use crate::fs::is_same_file;
 use crate::{
     fs::OpenOptions,
     fs::{compute_oflags, open_manually_wrapper},
 };
-#[cfg(debug_assertions)]
-use crate::fs::is_same_file;
 use std::{
     ffi::CString,
     fs, io,
@@ -65,8 +65,16 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
 
                     #[cfg(debug_assertions)]
                     {
-                        let check = open_manually_wrapper(start, path, options)
-                            .expect("open_manually failed when open_openat2 succeeded");
+                        let check = open_manually_wrapper(
+                            start,
+                            path,
+                            options
+                                .clone()
+                                .create(false)
+                                .create_new(false)
+                                .truncate(false),
+                        )
+                        .expect("open_manually failed when open_openat2 succeeded");
                         debug_assert!(
                             is_same_file(start, &check)?,
                             "open_manually should open the same inode as open_openat2"

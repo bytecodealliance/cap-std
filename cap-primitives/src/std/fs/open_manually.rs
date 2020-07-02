@@ -69,60 +69,6 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 }
 
-/// Implement `open` by breaking up the path into components and resolving
-/// each component individually, and resolving symbolic links manually. This
-/// implementation can also optionally produce the canonical path computed along
-/// the way.
-///
-/// In the case where a canonical path is not requested, where the path does not
-/// contain `..`, and where the file does not contain symlinks, a fast path is
-/// used which opens the file with a single system call.
-pub(crate) fn open_manually(
-    start: &fs::File,
-    path: &Path,
-    options: &OpenOptions,
-    symlink_count: &mut u8,
-    canonical_path: Option<&mut PathBuf>,
-) -> io::Result<fs::File> {
-    if canonical_path.is_none() {
-        if let Some(quick) = open_quickly(start, path, options) {
-            #[cfg(debug_assertions)]
-            match (
-                &quick,
-                &open_slowly(
-                    start,
-                    path,
-                    options
-                        .clone()
-                        .create(false)
-                        .create_new(false)
-                        .truncate(false),
-                    symlink_count,
-                    None,
-                ),
-            ) {
-                (Ok(quick_file), Ok(slow_file)) => {
-                    debug_assert!(is_same_file(&quick_file, &slow_file)?)
-                }
-                (Err(quick_err), Err(slow_err)) => {
-                    debug_assert_eq!(quick_err.to_string(), slow_err.to_string())
-                }
-                (Err(quick_err), Ok(_))
-                    if options.create_new && quick_err.kind() == io::ErrorKind::AlreadyExists => {}
-                x => debug_assert!(
-                    false,
-                    "inconsistent error states: {:?}; options={:?}",
-                    x, options
-                ),
-            }
-
-            return quick;
-        }
-    }
-
-    open_slowly(start, path, options, symlink_count, canonical_path)
-}
-
 /// A wrapper around `open_manually` which starts with a symlink_count of 0
 /// and does not return the canonical path, so it has the signature needed
 /// to be used as `open_impl`.
@@ -135,36 +81,11 @@ pub(crate) fn open_manually_wrapper(
     open_manually(start, path, options, &mut symlink_count, None)
 }
 
-/// Opportunistic fast-path; if conditions are right, call the fast path, otherwise
-/// return `None`.
-#[inline]
-fn open_quickly(
-    start: &fs::File,
-    path: &Path,
-    options: &OpenOptions,
-) -> Option<io::Result<fs::File>> {
-    // Fast path: If the path contains no absolute or `..` components, just do an
-    // unchecked openat, with `nofollow` set so that if we do encounter a symlink, we
-    // won't follow it.
-    if path.components().all(|component| match component {
-        Component::Normal(_) | Component::CurDir => true,
-        _ => false,
-    }) {
-        match open_unchecked(start, path.as_ref(), options.clone().nofollow(true)) {
-            Ok(file) => return Some(Ok(file)),
-            Err(e) => match e.raw_os_error() {
-                // We encountered a symlink; proceed to the slow path.
-                Some(libc::ELOOP) | Some(libc::EMLINK) if !options.nofollow => (),
-                _ => return Some(Err(e)),
-            },
-        }
-    }
-
-    None
-}
-
-/// Fully general path; perform the lookup one component at a time.
-fn open_slowly(
+/// Implement `open` by breaking up the path into components and resolving
+/// each component individually, and resolving symbolic links manually. This
+/// implementation can also optionally produce the canonical path computed along
+/// the way.
+pub(crate) fn open_manually(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
@@ -235,7 +156,16 @@ fn open_slowly(
 
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    match open_unchecked(start, canonical_path.debug.as_ref(), options) {
+    match open_unchecked(
+              start,
+              canonical_path.debug.as_ref(),
+              options
+                  .clone()
+                  .create(false)
+                  .create_new(false)
+                  .truncate(false),
+          )
+    {
         Ok(unchecked_file) => {
             assert!(
                 is_same_file(base.as_file(), &unchecked_file)?,
