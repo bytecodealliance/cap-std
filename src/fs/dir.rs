@@ -158,7 +158,21 @@ impl Dir {
     /// [`std::fs::copy`]: https://doc.rust-lang.org/std/fs/fn.copy.html
     #[inline]
     pub fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<u64> {
-        self.sys.copy(from.as_ref(), to.as_ref())
+        // Implementation derived from `copy` in Rust's src/libstd/sys_common/fs.rs
+        if !self.is_file(from.as_ref()) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "the source path is not an existing regular file",
+            ));
+        }
+
+        let mut reader = self.open_file(from)?;
+        let mut writer = self.create_file(to.as_ref())?;
+        let perm = reader.metadata()?.permissions();
+
+        let ret = io::copy(&mut reader, &mut writer)?;
+        self.set_permissions(to, perm)?;
+        Ok(ret)
     }
 
     /// Creates a new hard link on a filesystem.
@@ -427,6 +441,40 @@ impl Dir {
         })
     }
 
+    /// Returns true if the path points at an existing entity.
+    ///
+    /// This corresponds to [`std::path::Path::exists`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::exists`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.exists
+    #[inline]
+    pub fn exists<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the file.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
+        self.open_file(path).is_ok()
+    }
+
+    /// Returns true if the path exists on disk and is pointing at a regular file.
+    ///
+    /// This corresponds to [`std::path::Path::is_file`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::is_file`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file
+    #[inline]
+    pub fn is_file<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the file.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
+        let file = match self.open_file(path) {
+            Ok(file) => file,
+            Err(_) => return false,
+        };
+        let metadata = match file.metadata() {
+            Ok(metadata) => metadata,
+            Err(_) => return false,
+        };
+        metadata.is_file()
+    }
+
     /// Checks if `path` is a directory.
     ///
     /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to `Dir`
@@ -436,6 +484,8 @@ impl Dir {
     /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
     #[inline]
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
+        // FIXME: This implementation depends on having read access to the directory.
+        // Reimplement this once we have `O_PATH` and/or `fstatat`.
         self.open_dir(path.as_ref()).map(|_| true).unwrap_or(false)
     }
 }
