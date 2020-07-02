@@ -1,4 +1,6 @@
-use std::{ffi::OsStr, fs, io, os::unix::io::AsRawFd, path::PathBuf};
+use std::{ffi::OsStr, fs, io, path::PathBuf};
+#[cfg(unix)]
+use std::os::unix::io::AsRawFd;
 use yanix::file::readlinkat;
 
 const MAX_SYMLINK_EXPANSIONS: u8 = 40;

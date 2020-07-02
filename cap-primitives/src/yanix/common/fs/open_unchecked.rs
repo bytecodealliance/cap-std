@@ -4,8 +4,9 @@ use std::{
     ffi::OsStr,
     path::Path,
     fs, io,
-    os::unix::io::{AsRawFd, FromRawFd},
 };
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, FromRawFd};
 use yanix::file::{openat, Mode};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.

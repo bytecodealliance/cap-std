@@ -1,6 +1,5 @@
 use crate::fs::{Dir, FileType, Metadata};
-use async_std::io;
-use std::{ffi, path::PathBuf};
+use std::{ffi, io, path::PathBuf};
 
 pub(crate) struct DirEntry<'dir> {
     dir: &'dir Dir,
@@ -32,7 +31,7 @@ impl<'dir> DirEntry<'dir> {
     }
 }
 
-impl<'dir> async_std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+impl<'dir> std::os::wasi::fs::DirEntryExt for DirEntry<'dir> {
     fn ino(&self) -> u64 {
         self.ino
     }

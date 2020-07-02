@@ -1,9 +1,11 @@
 //! `get_path` functions similar to the code in libstd.
 
-use std::{fs, os::unix::io::AsRawFd, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 #[cfg(target_os = "linux")]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
+    use std::os::unix::io::AsRawFd;
+
     let mut p = PathBuf::from("/proc/self/fd");
     p.push(&file.as_raw_fd().to_string());
     fs::read_link(p).ok()
@@ -11,7 +13,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
 
 #[cfg(target_os = "macos")]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
-    use std::os::unix::ffi::OsStringExt;
+    use std::os::unix::{ffi::OsStringExt, io::AsRawFd};
 
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with

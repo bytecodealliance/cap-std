@@ -202,7 +202,7 @@ impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("Dir");
 
-        if cfg!(any(unix, target_os = "wasi", target_os = "fuchsia")) {
+        if cfg!(any(unix, target_os = "fuchsia")) {
             unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
                 let mode = yanix::fcntl::get_status_flags(fd);
                 if mode.is_err() {

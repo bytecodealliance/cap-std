@@ -1,3 +1,3 @@
-mod open;
+mod open_impl;
 
-pub(crate) use open::*;
+pub(crate) use open_impl::*;
