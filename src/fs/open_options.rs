@@ -1,3 +1,5 @@
+use crate::sys;
+
 /// Options and flags which can be used to configure how a file is opened.
 ///
 /// This corresponds to [`std::fs::OpenOptions`].
@@ -17,6 +19,9 @@ pub struct OpenOptions {
     pub(crate) truncate: bool,
     pub(crate) create: bool,
     pub(crate) create_new: bool,
+
+    #[cfg(any(unix, windows, target_os = "vxworks"))]
+    pub(crate) ext: sys::fs::OpenOptionsExt,
 }
 
 impl OpenOptions {
@@ -35,6 +40,9 @@ impl OpenOptions {
             truncate: false,
             create: false,
             create_new: false,
+
+            #[cfg(any(unix, windows, target_os = "vxworks"))]
+            ext: sys::fs::OpenOptionsExt::new(),
         }
     }
 
@@ -105,4 +113,53 @@ impl OpenOptions {
     }
 }
 
-// TODO: impl OpenOptionsExt for OpenOptions
+#[cfg(unix)]
+impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
+    fn mode(&mut self, mode: u32) -> &mut Self {
+        self.ext.mode(mode);
+        self
+    }
+
+    fn custom_flags(&mut self, flags: i32) -> &mut Self {
+        self.ext.custom_flags(flags);
+        self
+    }
+}
+
+#[cfg(target_os = "vxworks")]
+impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
+    fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
+        self.ext.mode(mode);
+        self
+    }
+
+    fn custom_flags(&mut self, flags: i32) -> &mut Self {
+        self.ext.custom_flags(flags);
+        self
+    }
+}
+
+#[cfg(windows)]
+impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
+    fn access_mode(&mut self, access: u32) -> &mut Self {
+        unimplemnted!("OpenOptionsExt::access_mode for Windows")
+    }
+
+    fn share_mode(&mut self, val: u32) -> &mut Self {
+        unimplemnted!("OpenOptionsExt::share_mode for Windows")
+    }
+
+    fn custom_flags(&mut self, flags: u32) -> &mut Self {
+        unimplemnted!("OpenOptionsExt::custom_flags for Windows")
+    }
+
+    fn attributes(&mut self, val: u32) -> &mut Self {
+        unimplemnted!("OpenOptionsExt::attributes for Windows")
+    }
+
+    fn security_qos_flags(&mut self, flags: u32) -> &mut fs::OpenOptions {
+        unimplemented!(
+            "can't implement OpenOptionsExt::security_qos_flags because the return type is wrong"
+        )
+    }
+}
