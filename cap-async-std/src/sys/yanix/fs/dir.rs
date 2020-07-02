@@ -9,7 +9,7 @@ use async_std::{
         io::{AsRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::open;
+use cap_primitives::fs::{open, stat, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
@@ -96,7 +96,10 @@ impl Dir {
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        stat(&file, path, FollowSymlinks::Yes)
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {

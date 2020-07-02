@@ -4,7 +4,7 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::open;
+use cap_primitives::fs::{open, stat, FollowSymlinks};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -82,7 +82,7 @@ impl Dir {
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
+        stat(&self.std_file, path, FollowSymlinks::Yes)
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {

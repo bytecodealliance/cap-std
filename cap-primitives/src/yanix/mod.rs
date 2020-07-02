@@ -10,4 +10,6 @@ pub(crate) mod fs {
 
     #[cfg(not(target_os = "linux"))]
     pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+
+    pub(crate) use crate::fs::stat_via_parent as stat_impl;
 }

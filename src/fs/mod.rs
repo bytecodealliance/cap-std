@@ -30,8 +30,5 @@ pub use dir_entry::*;
 pub use file::*;
 pub use read_dir::*;
 
-// Re-export things from `std::fs` that we can use as-is.
-pub use std::fs::{FileType, Metadata, Permissions};
-
 // Re-export things from `cap_primitives` that we can use as-is.
-pub use cap_primitives::fs::OpenOptions;
+pub use cap_primitives::fs::{FileType, Metadata, OpenOptions, Permissions};

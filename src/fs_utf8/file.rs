@@ -1,3 +1,4 @@
+use crate::fs::Metadata;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -71,7 +72,7 @@ impl File {
     ///
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
-    pub fn metadata(&self) -> io::Result<fs::Metadata> {
+    pub fn metadata(&self) -> io::Result<Metadata> {
         self.cap_std.metadata()
     }
 

@@ -1,3 +1,4 @@
+use crate::fs::Metadata;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -65,8 +66,8 @@ impl File {
     ///
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
-    pub fn metadata(&self) -> io::Result<fs::Metadata> {
-        self.std.metadata()
+    pub fn metadata(&self) -> io::Result<Metadata> {
+        self.std.metadata().map(Metadata::from_std)
     }
 
     /// Creates a new `File` instance that shares the same underlying file handle as the existing
