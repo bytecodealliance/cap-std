@@ -26,11 +26,13 @@
 
 #![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
+#![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
 mod sys;
 
 pub mod fs;
 #[cfg(feature = "fs_utf8")]
 pub mod fs_utf8;
+#[cfg(not(target_os = "wasi"))] // Disable `net` on WASI until it has networking support.
 pub mod net;
 pub mod os;

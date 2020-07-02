@@ -1,6 +1,8 @@
 use crate::fs::Metadata;
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(target_os = "wasi")]
+use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::{
@@ -77,7 +79,7 @@ impl File {
     // async_std doesn't have `try_clone`.
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -93,7 +95,7 @@ impl FromRawHandle for File {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl AsRawFd for File {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -109,7 +111,7 @@ impl AsRawHandle for File {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl IntoRawFd for File {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -202,7 +204,7 @@ impl fmt::Debug for File {
         let mut b = f.debug_struct("File");
 
         if cfg!(any(unix, target_os = "wasi", target_os = "fuchsia")) {
-            unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
+            unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
                 let mode = yanix::fcntl::get_status_flags(fd);
                 if mode.is_err() {
                     return None;

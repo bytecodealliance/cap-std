@@ -1,21 +1,13 @@
-use crate::{
-    fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
-    os::unix::net::{UnixDatagram, UnixListener, UnixStream},
-};
-use async_std::{
-    fs, io,
-    os::unix::{
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
+use std::{
+    fmt, fs, io,
+    os::wasi::{
         fs::OpenOptionsExt,
         io::{AsRawFd, IntoRawFd},
     },
-};
-use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
-use std::{
-    fmt,
-    mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
-use yanix::file::OFlag;
+//use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -34,22 +26,20 @@ impl Dir {
 
     #[inline]
     pub(crate) fn as_raw_fd(&self) -> i32 {
-        self.std_file.as_raw_fd()
+        self.std_file.as_raw_fd() as i32
     }
 
     #[inline]
     pub(crate) fn into_raw_fd(self) -> i32 {
-        self.std_file.into_raw_fd()
+        self.std_file.into_raw_fd() as i32
     }
 
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        open(&file, path, options).map(|file| unsafe { File::from_raw_fd(file.into_raw_fd()) })
+        options.open_at(&self.std_file, path).map(File::from_std)
     }
 
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
+        /*
         self.open_file_with(
             path,
             OpenOptions::new()
@@ -57,13 +47,21 @@ impl Dir {
                 .custom_flags(OFlag::DIRECTORY.bits()),
         )
         .map(|file| crate::fs::Dir::from_std_file(file.std))
+        */
+        unimplemented!("Dir::open_dir({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        mkdir(&file, path)
+        /*
+        unsafe {
+            mkdirat(
+                self.std_file.as_raw_fd(),
+                path,
+                Mode::from_bits(0o777).unwrap(),
+            )
+        }
+        */
+        unimplemented!("Dir::create_dir({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
@@ -81,19 +79,28 @@ impl Dir {
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let src_file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        let dst_file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(dst_dir.std_file.as_raw_fd()) });
-        link(&src_file, src, &dst_file, dst)
+        /*
+        unsafe {
+            linkat(
+                self.std_file.as_raw_fd(),
+                src,
+                dst_dir.std_file.as_raw_fd(),
+                dst,
+                AtFlag::from_bits(0).unwrap(),
+            )
+        }
+        */
+        unimplemented!(
+            "Dir::link_at({:?}, {}, {:?}, {})",
+            self.std_file,
+            src.display(),
+            dst_dir,
+            dst.display()
+        )
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        stat(&file, path, FollowSymlinks::Yes)
+        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
@@ -117,10 +124,10 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        unlink(&file, path)
+        /*
+        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
+        */
+        unimplemented!("Dir::remove_file({:?}, {})", self.std_file, path.display())
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {
@@ -170,57 +177,9 @@ impl Dir {
         )
     }
 
-    pub(crate) fn bind_unix_listener(&self, path: &Path) -> io::Result<UnixListener> {
-        unimplemented!(
-            "Dir::bind_unix_listener({:?}, {})",
-            self.std_file,
-            path.display()
-        )
+    pub(crate) fn try_clone(&self) -> io::Result<Dir> {
+        Ok(Self::from_std_file(self.std_file.try_clone()?))
     }
-
-    pub(crate) fn connect_unix_stream(&self, path: &Path) -> io::Result<UnixStream> {
-        unimplemented!(
-            "Dir::connect_unix_stream({:?}, {})",
-            self.std_file,
-            path.display()
-        )
-    }
-
-    pub(crate) fn bind_unix_datagram(&self, path: &Path) -> io::Result<UnixDatagram> {
-        unimplemented!(
-            "Dir::bind_unix_datagram({:?}, {})",
-            self.std_file,
-            path.display()
-        )
-    }
-
-    pub(crate) fn connect_unix_datagram(
-        &self,
-        unix_datagram: &UnixDatagram,
-        path: &Path,
-    ) -> io::Result<()> {
-        unimplemented!(
-            "Dir::connect_unix_datagram({:?}, {})",
-            self.std_file,
-            path.display()
-        )
-    }
-
-    pub(crate) fn send_to_unix_datagram_addr(
-        &self,
-        unix_datagram: &UnixDatagram,
-        buf: &[u8],
-        path: &Path,
-    ) -> io::Result<usize> {
-        unimplemented!(
-            "Dir::send_to_unix_datagram_addr({:?}, {:?}, {})",
-            self.std_file,
-            buf,
-            path.display()
-        )
-    }
-
-    // async_std doesn't have `try_clone`.
 }
 
 impl fmt::Debug for Dir {
@@ -228,25 +187,23 @@ impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("Dir");
 
-        if cfg!(any(unix, target_os = "fuchsia")) {
-            unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
-                let mode = yanix::fcntl::get_status_flags(fd);
-                if mode.is_err() {
-                    return None;
-                }
-                match mode.unwrap() & yanix::file::OFlag::ACCMODE {
-                    yanix::file::OFlag::RDONLY => Some((true, false)),
-                    yanix::file::OFlag::RDWR => Some((true, true)),
-                    yanix::file::OFlag::WRONLY => Some((false, true)),
-                    _ => None,
-                }
+        unsafe fn get_mode(fd: std::os::wasi::io::RawFd) -> Option<(bool, bool)> {
+            let mode = yanix::fcntl::get_status_flags(fd);
+            if mode.is_err() {
+                return None;
             }
+            match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+                yanix::file::OFlag::RDONLY => Some((true, false)),
+                yanix::file::OFlag::RDWR => Some((true, true)),
+                yanix::file::OFlag::WRONLY => Some((false, true)),
+                _ => None,
+            }
+        }
 
-            let fd = self.std_file.as_raw_fd();
-            b.field("fd", &fd);
-            if let Some((read, write)) = unsafe { get_mode(fd) } {
-                b.field("read", &read).field("write", &write);
-            }
+        let fd = self.std_file.as_raw_fd();
+        b.field("fd", &fd);
+        if let Some((read, write)) = unsafe { get_mode(fd) } {
+            b.field("read", &read).field("write", &write);
         }
 
         b.finish()

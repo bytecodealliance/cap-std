@@ -226,6 +226,80 @@ impl std::os::unix::fs::FileExt for File {
     }
 }
 
+#[cfg(target_os = "wasi")]
+impl std::os::wasi::fs::FileExt for File {
+    #[inline]
+    fn read_at(&self, bufs: &mut [io::IoSliceMut], offset: u64) -> io::Result<usize> {
+        self.std.read_at(bufs, offset)
+    }
+
+    #[inline]
+    fn write_at(&self, bufs: &[io::IoSlice], offset: u64) -> io::Result<usize> {
+        self.std.write_at(bufs, offset)
+    }
+
+    #[inline]
+    fn tell(&self) -> std::result::Result<u64, std::io::Error> {
+        self.std.tell()
+    }
+
+    #[inline]
+    fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), std::io::Error> {
+        self.std.fdstat_set_flags(flags)
+    }
+
+    #[inline]
+    fn fdstat_set_rights(
+        &self,
+        rights: u64,
+        inheriting: u64,
+    ) -> std::result::Result<(), std::io::Error> {
+        self.std.fdstat_set_rights(rights, inheriting)
+    }
+
+    #[inline]
+    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), std::io::Error> {
+        self.std.advise(offset, len, advice)
+    }
+
+    #[inline]
+    fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), std::io::Error> {
+        self.std.allocate(offset, len)
+    }
+
+    #[inline]
+    fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
+        self.std.create_directory(dir)
+    }
+
+    #[inline]
+    fn read_link<P: AsRef<Path>>(
+        &self,
+        path: P,
+    ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
+        self.std.read_link(path)
+    }
+
+    #[inline]
+    fn metadata_at<P: AsRef<Path>>(
+        &self,
+        lookup_flags: u32,
+        path: P,
+    ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
+        self.std.metadata_at(lookup_flags, path)
+    }
+
+    #[inline]
+    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        self.std.remove_file(path)
+    }
+
+    #[inline]
+    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        self.std.remove_directory(path)
+    }
+}
+
 #[cfg(windows)]
 impl std::os::windows::fs::FileExt for File {
     #[inline]

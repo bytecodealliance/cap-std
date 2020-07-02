@@ -31,4 +31,9 @@ pub use file::*;
 pub use read_dir::*;
 
 // Re-export things from `cap_primitives` that we can use as-is.
+#[cfg(not(target_os = "wasi"))]
 pub use cap_primitives::fs::{FileType, Metadata, OpenOptions, Permissions};
+
+// Re-export things from `std` that we can use as-is.
+#[cfg(target_os = "wasi")]
+pub use std::fs::{FileType, Metadata, OpenOptions, Permissions};

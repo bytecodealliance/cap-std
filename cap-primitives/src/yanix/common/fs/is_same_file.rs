@@ -1,4 +1,6 @@
-use std::{fs, io, os::unix::fs::MetadataExt};
+use std::{fs, io};
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
 
 /// Determine if `a` and `b` refer to the same inode on the same device.
 pub(crate) fn is_same_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {

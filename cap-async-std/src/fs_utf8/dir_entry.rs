@@ -62,7 +62,7 @@ impl<'dir> DirEntry<'dir> {
 }
 
 #[cfg(unix)]
-impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+impl<'dir> async_std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
     fn ino(&self) -> u64 {
         self.cap_std.ino()
     }
