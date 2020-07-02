@@ -10,7 +10,6 @@ use async_std::{
     },
 };
 use std::{
-    convert::TryInto,
     path::{Path, PathBuf},
 };
 use yanix::file::{linkat, mkdirat, openat, unlinkat, AtFlag, Mode, OFlag};
