@@ -11,6 +11,8 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
 
 #[cfg(target_os = "macos")]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
+    use std::os::unix::ffi::OsStringExt;
+
     // The use of PATH_MAX is generally not encouraged, but it
     // is inevitable in this case because macOS defines `fcntl` with
     // `F_GETPATH` in terms of `MAXPATHLEN`, and there are no
