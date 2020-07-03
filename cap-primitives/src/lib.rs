@@ -1,6 +1,5 @@
 //! Capability-oriented primitives.
 
-#![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
 
 use cfg_if::cfg_if;

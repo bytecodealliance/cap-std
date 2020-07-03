@@ -1,3 +1,6 @@
+//! Filesystem utilities.
+
+#[cfg(debug_assertions)]
 mod get_path;
 mod maybe_owned_file;
 mod open;

@@ -112,6 +112,7 @@ impl TcpListener {
 
 #[cfg(unix)]
 impl FromRawFd for TcpListener {
+    #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self::from_std(net::TcpListener::from_raw_fd(fd))
     }
@@ -119,6 +120,7 @@ impl FromRawFd for TcpListener {
 
 #[cfg(windows)]
 impl FromRawSocket for TcpListener {
+    #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
         Self::from_std(net::TcpListener::from_raw_socket(handle))
     }
@@ -126,6 +128,7 @@ impl FromRawSocket for TcpListener {
 
 #[cfg(unix)]
 impl AsRawFd for TcpListener {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.std.as_raw_fd()
     }
@@ -133,6 +136,7 @@ impl AsRawFd for TcpListener {
 
 #[cfg(windows)]
 impl AsRawSocket for TcpListener {
+    #[inline]
     fn as_raw_socket(&self) -> RawSocket {
         self.std.as_raw_socket()
     }
@@ -140,6 +144,7 @@ impl AsRawSocket for TcpListener {
 
 #[cfg(unix)]
 impl IntoRawFd for TcpListener {
+    #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
     }
@@ -147,6 +152,7 @@ impl IntoRawFd for TcpListener {
 
 #[cfg(windows)]
 impl IntoRawHandle for TcpListener {
+    #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.std.into_raw_handle()
     }

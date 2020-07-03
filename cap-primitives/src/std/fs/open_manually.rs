@@ -69,7 +69,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 }
 
-/// A wrapper around `open_manually` which starts with a symlink_count of 0
+/// A wrapper around `open_manually` which starts with a `symlink_count` of 0
 /// and does not return the canonical path, so it has the signature needed
 /// to be used as `open_impl`.
 pub(crate) fn open_manually_wrapper(
@@ -173,7 +173,7 @@ pub(crate) fn open_manually(
                 get_path(start),
                 path.display(),
                 canonical_path.debug.display(),
-                get_path(&base.as_file()),
+                get_path(base.as_file()),
                 get_path(&unchecked_file),
             );
         }

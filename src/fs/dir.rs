@@ -187,7 +187,7 @@ impl Dir {
     pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(
         &self,
         src: P,
-        dst_dir: &Dir,
+        dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
         self.sys.hard_link(src.as_ref(), &dst_dir.sys, dst.as_ref())
@@ -494,6 +494,7 @@ impl Dir {
 
 #[cfg(unix)]
 impl FromRawFd for Dir {
+    #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self::from_std_file(fs::File::from_raw_fd(fd))
     }
@@ -501,6 +502,7 @@ impl FromRawFd for Dir {
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
+    #[inline]
     unsafe fn from_raw_fd(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))
     }
@@ -508,6 +510,7 @@ impl FromRawHandle for Dir {
 
 #[cfg(unix)]
 impl AsRawFd for Dir {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.sys.as_raw_fd()
     }
@@ -515,6 +518,7 @@ impl AsRawFd for Dir {
 
 #[cfg(windows)]
 impl AsRawHandle for Dir {
+    #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.sys.as_raw_handle()
     }
@@ -522,6 +526,7 @@ impl AsRawHandle for Dir {
 
 #[cfg(unix)]
 impl IntoRawFd for Dir {
+    #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.sys.into_raw_fd()
     }
@@ -529,6 +534,7 @@ impl IntoRawFd for Dir {
 
 #[cfg(windows)]
 impl IntoRawHandle for Dir {
+    #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.sys.into_raw_handle()
     }

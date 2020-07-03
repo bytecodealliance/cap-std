@@ -83,7 +83,7 @@ impl Dir {
         )
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
         unsafe {
             linkat(
                 self.std_file.as_raw_fd(),

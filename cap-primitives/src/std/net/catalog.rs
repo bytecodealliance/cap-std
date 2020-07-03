@@ -1,4 +1,5 @@
 #![allow(missing_docs)] // TODO: add docs
+#![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 
 use ipnet::IpNet;
 use std::{io, net};

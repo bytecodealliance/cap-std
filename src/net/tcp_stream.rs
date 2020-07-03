@@ -247,18 +247,22 @@ impl io::Read for TcpStream {
 }
 
 impl io::Write for TcpStream {
+    #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.std.write(buf)
     }
 
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         self.std.flush()
     }
 
+    #[inline]
     fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
         self.std.write_vectored(bufs)
     }
 
+    #[inline]
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         self.std.write_all(buf)
     }
