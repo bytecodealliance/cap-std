@@ -146,8 +146,15 @@ impl Dir {
     ///
     /// [`std::fs::hard_link`]: https://doc.rust-lang.org/std/fs/fn.hard_link.html
     #[inline]
-    pub fn hard_link<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.cap_std.hard_link(src.as_ref(), dst.as_ref())
+    pub fn hard_link<P: AsRef<str>, Q: AsRef<str>>(
+        &self,
+        src: P,
+        dst_dir: &Dir,
+        dst: Q,
+    ) -> io::Result<()> {
+        let src = from_utf8(src)?;
+        let dst = from_utf8(dst)?;
+        self.cap_std.hard_link(src, &dst_dir.cap_std, dst)
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.

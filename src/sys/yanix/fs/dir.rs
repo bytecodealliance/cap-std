@@ -4,7 +4,7 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::{mkdir, open, stat, unlink, FollowSymlinks};
+use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -13,7 +13,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, AtFlag, OFlag};
+use yanix::file::OFlag;
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -63,16 +63,8 @@ impl Dir {
         unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
-        unsafe {
-            linkat(
-                self.std_file.as_raw_fd(),
-                src,
-                dst_dir.std_file.as_raw_fd(),
-                dst,
-                AtFlag::from_bits(0).unwrap(),
-            )
-        }
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+        link(&self.std_file, src, &dst_dir.std_file, dst)
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {

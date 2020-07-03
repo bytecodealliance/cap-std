@@ -9,13 +9,13 @@ use async_std::{
         io::{AsRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::{mkdir, open, stat, unlink, FollowSymlinks};
+use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, AtFlag, OFlag};
+use yanix::file::OFlag;
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -80,16 +80,13 @@ impl Dir {
         )
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
-        unsafe {
-            linkat(
-                self.std_file.as_raw_fd(),
-                src,
-                dst_dir.std_file.as_raw_fd(),
-                dst,
-                AtFlag::from_bits(0).unwrap(),
-            )
-        }
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+        use std::os::unix::io::FromRawFd;
+        let src_file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let dst_file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(dst_dir.std_file.as_raw_fd()) });
+        link(&src_file, src, &dst_file, dst)
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {

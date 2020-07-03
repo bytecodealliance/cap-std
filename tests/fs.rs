@@ -883,6 +883,7 @@ fn readlink_not_symlink() {
         Err(..) => {}
     }
 }
+*/
 
 #[test]
 fn links_work() {
@@ -890,32 +891,33 @@ fn links_work() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(File::create(&input)).write("foobar".as_bytes()));
-    check!(fs::hard_link(&input, &out));
+    check!(check!(tmpdir.create_file(&input)).write("foobar".as_bytes()));
+    check!(tmpdir.hard_link(&input, &tmpdir, &out));
     assert_eq!(
-        check!(fs::metadata(&out)).len(),
-        check!(fs::metadata(&input)).len()
+        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(&input)).len()
     );
     assert_eq!(
-        check!(fs::metadata(&out)).len(),
-        check!(input.metadata()).len()
+        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(input)).len()
     );
     let mut v = Vec::new();
-    check!(check!(File::open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&out)).read_to_end(&mut v));
     assert_eq!(v, b"foobar".to_vec());
 
     // can't link to yourself
-    match fs::hard_link(&input, &input) {
+    match tmpdir.hard_link(&input, &tmpdir, &input) {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
     // can't link to something that doesn't exist
-    match fs::hard_link(&tmpdir.join("foo"), &tmpdir.join("bar")) {
+    match tmpdir.hard_link("foo", &tmpdir, "bar") {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
 }
 
+/*
 #[test]
 fn chmod_works() {
     let tmpdir = tmpdir();

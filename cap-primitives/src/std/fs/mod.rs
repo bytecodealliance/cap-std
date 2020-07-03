@@ -4,6 +4,8 @@ mod file_type;
 mod follow_symlinks;
 #[cfg(debug_assertions)]
 mod get_path;
+mod link;
+mod link_via_parent;
 mod maybe_owned_file;
 mod metadata;
 mod mkdir;
@@ -20,6 +22,7 @@ mod unlink_via_parent;
 
 #[cfg(debug_assertions)]
 pub(crate) use get_path::*;
+pub(crate) use link_via_parent::*;
 pub(crate) use maybe_owned_file::*;
 pub(crate) use mkdir_via_parent::*;
 pub(crate) use open_manually::*;
@@ -29,6 +32,7 @@ pub(crate) use unlink_via_parent::*;
 
 pub use file_type::*;
 pub use follow_symlinks::*;
+pub use link::*;
 pub use metadata::*;
 pub use mkdir::*;
 pub use open::*;
