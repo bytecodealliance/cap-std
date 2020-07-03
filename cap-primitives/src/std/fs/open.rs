@@ -18,7 +18,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
     #[cfg(debug_assertions)]
     match open_unchecked(
         start,
-        path.as_ref(),
+        path,
         options
             .clone()
             .create(false)

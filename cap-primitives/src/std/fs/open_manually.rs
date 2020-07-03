@@ -131,7 +131,11 @@ pub(crate) fn open_manually(
                 } else {
                     &dir_options
                 };
-                match open_unchecked(base.as_file(), &one, use_options.clone().nofollow(true)) {
+                match open_unchecked(
+                    base.as_file(),
+                    one.as_ref(),
+                    use_options.clone().nofollow(true),
+                ) {
                     Ok(file) => {
                         let prev_base = mem::replace(&mut base, MaybeOwnedFile::Owned(file));
                         dirs.push(prev_base);
