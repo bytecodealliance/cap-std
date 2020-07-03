@@ -1,3 +1,5 @@
+#![allow(unused_variables)] // TODO: When more things are implemented, remove these.
+
 use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -67,16 +69,7 @@ impl Dir {
         unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
     }
 
-    pub(crate) fn copy(&self, from: &Path, to: &Path) -> io::Result<u64> {
-        unimplemented!(
-            "Dir::copy({:?}, {}, {})",
-            self.std_file,
-            from.display(),
-            to.display()
-        )
-    }
-
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
         unsafe {
             linkat(
                 self.std_file.as_raw_fd(),
@@ -213,7 +206,7 @@ impl Dir {
         )
     }
 
-    pub(crate) fn try_clone(&self) -> io::Result<Dir> {
+    pub(crate) fn try_clone(&self) -> io::Result<Self> {
         Ok(Self::from_std_file(self.std_file.try_clone()?))
     }
 }

@@ -6,6 +6,7 @@ authors = ["Dan Gohman <sunfish@mozilla.com>"]
 license = "Apache-2.0 WITH LLVM-exception"
 keywords = ["std", "api", "network", "file"]
 categories = ["filesystem", "network-programming"]
+repository = "https://github.com/sunfishcode/cap-std"
 edition = "2018"
 readme = "README.md"
 

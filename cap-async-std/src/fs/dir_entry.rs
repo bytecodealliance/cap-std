@@ -57,6 +57,7 @@ impl<'dir> DirEntry<'dir> {
 
 #[cfg(unix)]
 impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+    #[inline]
     fn ino(&self) -> u64 {
         self.sys.ino()
     }

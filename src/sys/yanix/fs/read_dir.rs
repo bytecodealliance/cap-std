@@ -1,3 +1,5 @@
+#![allow(dead_code)] // TODO: When more things are implemented, remove these.
+
 use crate::fs::{Dir, DirEntry};
 use std::io;
 

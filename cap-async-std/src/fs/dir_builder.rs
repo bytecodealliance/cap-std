@@ -16,6 +16,7 @@ pub struct DirBuilder {
 
 impl DirBuilder {
     /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
+    #[inline]
     pub fn from_std(std: fs::DirBuilder) -> Self {
         Self { std }
     }

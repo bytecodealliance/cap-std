@@ -55,7 +55,7 @@ impl Catalog {
         addr: &SocketAddr,
         timeout: Duration,
     ) -> io::Result<TcpStream> {
-        self.cap.check_addr(&addr)?;
+        self.cap.check_addr(addr)?;
         net::TcpStream::connect_timeout(addr, timeout).map(TcpStream::from_std)
     }
 

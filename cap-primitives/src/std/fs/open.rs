@@ -64,7 +64,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
     // assert that the start path is a parent of the result path.
     #[cfg(debug_assertions)]
     if let Ok(result_file) = &result {
-        if let Some(result_path) = get_path(&result_file) {
+        if let Some(result_path) = get_path(result_file) {
             if let Some(start_path) = get_path(start) {
                 for (start_part, result_part) in
                     start_path.components().zip(result_path.components())
