@@ -9,13 +9,13 @@ use async_std::{
         io::{AsRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::{open, stat, FollowSymlinks};
+use cap_primitives::fs::{mkdir, open, stat, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
+use yanix::file::{linkat, unlinkat, AtFlag, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -60,13 +60,10 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        unsafe {
-            mkdirat(
-                self.std_file.as_raw_fd(),
-                path,
-                Mode::from_bits(0o777).unwrap(),
-            )
-        }
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        mkdir(&file, path)
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {

@@ -12,4 +12,5 @@ pub(crate) mod fs {
     pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 
     pub(crate) use crate::fs::stat_via_parent as stat_impl;
+    pub(crate) use crate::fs::mkdir_via_parent as mkdir_impl;
 }

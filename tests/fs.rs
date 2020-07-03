@@ -539,7 +539,6 @@ fn concurrent_recursive_mkdir() {
 */
 
 #[test]
-#[ignore] // `mkdir` is not sandboxed yet
 fn recursive_mkdir_slash() {
     let tmpdir = tmpdir();
     error!(
