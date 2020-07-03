@@ -4,7 +4,7 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::{mkdir, open, stat, FollowSymlinks};
+use cap_primitives::fs::{mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -13,7 +13,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, unlinkat, AtFlag, OFlag};
+use yanix::file::{linkat, AtFlag, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -100,7 +100,7 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
+        unlink(&self.std_file, path)
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {

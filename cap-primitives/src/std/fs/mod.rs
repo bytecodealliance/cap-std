@@ -15,6 +15,8 @@ mod open_parent;
 mod permissions;
 mod stat;
 mod stat_via_parent;
+mod unlink;
+mod unlink_via_parent;
 
 #[cfg(debug_assertions)]
 pub(crate) use get_path::*;
@@ -23,6 +25,7 @@ pub(crate) use mkdir_via_parent::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
 pub(crate) use stat_via_parent::*;
+pub(crate) use unlink_via_parent::*;
 
 pub use file_type::*;
 pub use follow_symlinks::*;
@@ -32,3 +35,4 @@ pub use open::*;
 pub use open_options::*;
 pub use permissions::*;
 pub use stat::*;
+pub use unlink::*;

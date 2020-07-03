@@ -9,13 +9,13 @@ use async_std::{
         io::{AsRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::{mkdir, open, stat, FollowSymlinks};
+use cap_primitives::fs::{mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, unlinkat, AtFlag, OFlag};
+use yanix::file::{linkat, AtFlag, OFlag};
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -120,7 +120,10 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        unlink(&file, path)
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {
