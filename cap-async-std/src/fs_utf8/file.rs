@@ -1,4 +1,4 @@
-use crate::fs::Metadata;
+use crate::fs::{Metadata, Permissions};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -81,6 +81,16 @@ impl File {
     }
 
     // async_std doesn't have `try_clone`.
+
+    /// Changes the permissions on the underlying file.
+    ///
+    /// This corresponds to [`std::fs::File::set_permissions`].
+    ///
+    /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
+    #[inline]
+    pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
+        self.cap_std.set_permissions(perm)
+    }
 }
 
 #[cfg(unix)]
