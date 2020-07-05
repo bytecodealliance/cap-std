@@ -120,7 +120,7 @@ pub(crate) fn open_manually(
 
                 match dirs.pop() {
                     Some(dir) => base = dir,
-                    None => return escape_via_dot_dot(),
+                    None => return escape_attempt(),
                 }
                 canonical_path.pop();
             }
@@ -199,9 +199,9 @@ fn absolute_path() -> io::Result<fs::File> {
 }
 
 #[cold]
-fn escape_via_dot_dot() -> io::Result<fs::File> {
+fn escape_attempt() -> io::Result<fs::File> {
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
-        "a \"..\" component of a path led outside of the filesystem",
+        "a path led outside of the filesystem",
     ))
 }

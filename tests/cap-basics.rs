@@ -36,11 +36,11 @@ fn cap_smoke_test() {
     error!(inner.open_file("green.txt"), "No such file");
     error!(
         inner.open_file("../inner/blue.txt"),
-        "a \"..\" component of a path led outside of the filesystem"
+        "a path led outside of the filesystem"
     );
     error!(
         inner.open_file("../inner/red.txt"),
-        "a \"..\" component of a path led outside of the filesystem"
+        "a path led outside of the filesystem"
     );
 
     check!(inner.open_dir(""));
@@ -55,21 +55,18 @@ fn cap_smoke_test() {
     check!(inner.open_dir("."));
     check!(inner.open_dir("./"));
     check!(inner.open_dir("./."));
-    error!(
-        inner.open_dir(".."),
-        "a \"..\" component of a path led outside of the filesystem"
-    );
+    error!(inner.open_dir(".."), "a path led outside of the filesystem");
     error!(
         inner.open_dir("../"),
-        "a \"..\" component of a path led outside of the filesystem"
+        "a path led outside of the filesystem"
     );
     error!(
         inner.open_dir("../."),
-        "a \"..\" component of a path led outside of the filesystem"
+        "a path led outside of the filesystem"
     );
     error!(
         inner.open_dir("./.."),
-        "a \"..\" component of a path led outside of the filesystem"
+        "a path led outside of the filesystem"
     );
 }
 
