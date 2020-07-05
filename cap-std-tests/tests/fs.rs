@@ -105,7 +105,7 @@ fn invalid_path_raises() {
     let filename = "file_that_does_not_exist.txt";
     let result = tmpdir.open(filename);
 
-    #[cfg(all(unix, not(target_os = "vxworks")))]
+    #[cfg(any(all(unix, not(target_os = "vxworks")), target_os = "wasi"))]
     error!(result, "No such file or directory");
     #[cfg(target_os = "vxworks")]
     error!(result, "no such file or directory");
@@ -120,7 +120,7 @@ fn file_test_iounlinking_invalid_path_should_raise_condition() {
 
     let result = tmpdir.remove_file(filename);
 
-    #[cfg(all(unix, not(target_os = "vxworks")))]
+    #[cfg(any(all(unix, not(target_os = "vxworks")), target_os = "wasi"))]
     error!(result, "No such file or directory");
     #[cfg(target_os = "vxworks")]
     error!(result, "no such file or directory");
@@ -345,7 +345,7 @@ fn set_get_unix_permissions() {
         .open(filename)
         .and_then(|file| file.set_permissions(fs::Permissions::from_mode(0o1777))));
     let metadata1 = check!(tmpdir.metadata(filename));
-    #[cfg(all(unix, not(target_os = "vxworks")))]
+    #[cfg(any(all(unix, not(target_os = "vxworks")), target_os = "wasi"))]
     assert_eq!(mask & metadata1.permissions().mode(), 0o1777);
     #[cfg(target_os = "vxworks")]
     assert_eq!(mask & metadata1.permissions().mode(), 0o0777);
@@ -1060,7 +1060,7 @@ fn open_flavors() {
 
     #[cfg(windows)]
     let invalid_options = 87; // ERROR_INVALID_PARAMETER
-    #[cfg(all(unix, not(target_os = "vxworks")))]
+    #[cfg(any(all(unix, not(target_os = "vxworks")), target_os = "wasi"))]
     let invalid_options = "Invalid argument";
     #[cfg(target_os = "vxworks")]
     let invalid_options = "invalid argument";

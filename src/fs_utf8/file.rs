@@ -1,8 +1,12 @@
 use crate::fs::{Metadata, Permissions};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(target_os = "wasi")]
+use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+#[cfg(target_os = "wasi")]
+use std::path::Path;
 use std::{fmt, fs, io, process};
 
 /// A reference to an open file on a filesystem.
@@ -240,22 +244,22 @@ impl std::os::unix::fs::FileExt for File {
 impl std::os::wasi::fs::FileExt for File {
     #[inline]
     fn read_at(&self, bufs: &mut [io::IoSliceMut], offset: u64) -> io::Result<usize> {
-        self.std.read_at(bufs, offset)
+        self.cap_std.read_at(bufs, offset)
     }
 
     #[inline]
     fn write_at(&self, bufs: &[io::IoSlice], offset: u64) -> io::Result<usize> {
-        self.std.write_at(bufs, offset)
+        self.cap_std.write_at(bufs, offset)
     }
 
     #[inline]
     fn tell(&self) -> std::result::Result<u64, std::io::Error> {
-        self.std.tell()
+        self.cap_std.tell()
     }
 
     #[inline]
     fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), std::io::Error> {
-        self.std.fdstat_set_flags(flags)
+        self.cap_std.fdstat_set_flags(flags)
     }
 
     #[inline]
@@ -264,22 +268,22 @@ impl std::os::wasi::fs::FileExt for File {
         rights: u64,
         inheriting: u64,
     ) -> std::result::Result<(), std::io::Error> {
-        self.std.fdstat_set_rights(rights, inheriting)
+        self.cap_std.fdstat_set_rights(rights, inheriting)
     }
 
     #[inline]
     fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), std::io::Error> {
-        self.std.advise(offset, len, advice)
+        self.cap_std.advise(offset, len, advice)
     }
 
     #[inline]
     fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), std::io::Error> {
-        self.std.allocate(offset, len)
+        self.cap_std.allocate(offset, len)
     }
 
     #[inline]
     fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
-        self.std.create_directory(dir)
+        self.cap_std.create_directory(dir)
     }
 
     #[inline]
@@ -287,7 +291,7 @@ impl std::os::wasi::fs::FileExt for File {
         &self,
         path: P,
     ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
-        self.std.read_link(path)
+        self.cap_std.read_link(path)
     }
 
     #[inline]
@@ -296,17 +300,17 @@ impl std::os::wasi::fs::FileExt for File {
         lookup_flags: u32,
         path: P,
     ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
-        self.std.metadata_at(lookup_flags, path)
+        self.cap_std.metadata_at(lookup_flags, path)
     }
 
     #[inline]
     fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
-        self.std.remove_file(path)
+        self.cap_std.remove_file(path)
     }
 
     #[inline]
     fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
-        self.std.remove_directory(path)
+        self.cap_std.remove_directory(path)
     }
 }
 

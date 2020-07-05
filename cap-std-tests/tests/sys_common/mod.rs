@@ -28,7 +28,7 @@ macro_rules! error {
     };
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 #[allow(unused)]
 macro_rules! error {
     ($e:expr, $s:expr) => {
