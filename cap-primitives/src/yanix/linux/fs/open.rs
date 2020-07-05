@@ -73,7 +73,12 @@ fn openat2_or_open_manually(
                 ) {
                     -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
                         libc::EAGAIN => continue,
-                        libc::EXDEV => return escape_attempt(),
+                        libc::EXDEV => {
+                            if path.is_absolute() {
+                                return absolute_path();
+                            }
+                            return escape_attempt();
+                        }
                         libc::ENOSYS => {
                             // ENOSYS means SYS_OPENAT2 is not available; mark it so,
                             // exit the loop, and fallback to `open_manually_wrapper`.
@@ -128,6 +133,14 @@ fn escape_attempt() -> io::Result<fs::File> {
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
         "a path led outside of the filesystem",
+    ))
+}
+
+#[cold]
+fn absolute_path() -> io::Result<fs::File> {
+    Err(io::Error::new(
+        io::ErrorKind::PermissionDenied,
+        "an absolute path could not be resolved",
     ))
 }
 
