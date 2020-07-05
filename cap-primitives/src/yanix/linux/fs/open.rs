@@ -42,18 +42,23 @@ fn openat2_or_open_manually(
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    let oflags = compute_oflags(options);
-    let mode = options.ext.mode;
-
-    let path_cstr = CString::new(path.as_os_str().as_bytes())?;
-    let open_how = OpenHow {
-        oflag: u64::from(oflags.bits() as u32),
-        mode: u64::from(mode),
-        resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
-    };
-
     static INVALID: AtomicBool = AtomicBool::new(false);
     if !INVALID.load(SeqCst) {
+        let oflags = compute_oflags(options);
+        let mode = options.ext.mode;
+
+        // Check for empty path, and if empty, change to ".".
+        let path = if path == Path::new("") {
+            &Path::new(".")
+        } else {
+            path
+        };
+        let path_cstr = CString::new(path.as_os_str().as_bytes())?;
+        let open_how = OpenHow {
+            oflag: u64::from(oflags.bits() as u32),
+            mode: u64::from(mode),
+            resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
+        };
         // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
         // while it's running, so use a loop to retry it a few times. But not too many
         // times, because there's no limit on how often this can happen.
