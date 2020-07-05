@@ -78,7 +78,7 @@ fn openat2_or_open_manually(
                         errno => return other_error(errno),
                     },
                     ret => {
-                        let fd = ret as RawFd;
+                        let file = fs::File::from_raw_fd(ret as RawFd);
 
                         #[cfg(debug_assertions)]
                         {
@@ -93,12 +93,12 @@ fn openat2_or_open_manually(
                             )
                             .expect("open_manually failed when open_openat2 succeeded");
                             debug_assert!(
-                                is_same_file(start, &check)?,
+                                is_same_file(&file, &check)?,
                                 "open_manually should open the same inode as open_openat2"
                             );
                         }
 
-                        return Ok(fs::File::from_raw_fd(fd));
+                        return Ok(file);
                     }
                 }
             }

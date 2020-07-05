@@ -44,12 +44,23 @@ impl Dir {
         open(&self.std_file, path, options).map(File::from_std)
     }
 
+    pub(crate) fn open_file(&self, path: &Path) -> io::Result<File> {
+        // We need mode manually set to 0 here to avoid `openat2` errors.
+        // According to the man pages, unless oflags contain `O_CREAT` or
+        // `O_TMPFILE`, mode *has* to be 0.
+        self.open_file_with(path, OpenOptions::new().read(true).mode(0))
+    }
+
     pub(crate) fn open_dir(&self, path: &Path) -> io::Result<crate::fs::Dir> {
         self.open_file_with(
             path,
+            // We need mode manually set to 0 here to avoid `openat2` errors.
+            // According to the man pages, unless oflags contain `O_CREAT` or
+            // `O_TMPFILE`, mode *has* to be 0.
             OpenOptions::new()
                 .read(true)
-                .custom_flags(OFlag::DIRECTORY.bits()),
+                .custom_flags(OFlag::DIRECTORY.bits())
+                .mode(0),
         )
         .map(|file| crate::fs::Dir::from_std_file(file.std))
     }
