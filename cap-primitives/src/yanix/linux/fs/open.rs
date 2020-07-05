@@ -19,7 +19,7 @@ use std::{
         io::{AsRawFd, FromRawFd, RawFd},
     },
     path::Path,
-    ptr,
+    sync::atomic::{AtomicBool, Ordering::SeqCst},
 };
 
 const SYS_OPENAT2: i64 = 437;
@@ -35,8 +35,13 @@ struct OpenHow {
 }
 const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
-/// Call the `openat2` system call.
-fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
+/// Call the `openat2` system call. If the syscall is unavailable, mark it so for future
+/// calls, and fallback to `open_manually_wrapper`
+fn openat2_or_open_manually(
+    start: &fs::File,
+    path: &Path,
+    options: &OpenOptions,
+) -> io::Result<fs::File> {
     let oflags = compute_oflags(options);
     let mode = options.ext.mode;
 
@@ -47,45 +52,54 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
         resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
     };
 
-    // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
-    // while it's running, so use a loop to retry it a few times. But not too many
-    // times, because there's no limit on how often this can happen.
-    for _ in 0..4 {
-        unsafe {
-            match libc::syscall(
-                SYS_OPENAT2,
-                start.as_raw_fd(),
-                path_cstr.as_ptr(),
-                &open_how,
-                SIZEOF_OPEN_HOW,
-            ) {
-                -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
-                    libc::EAGAIN => continue,
-                    libc::EXDEV => return escape_attempt(),
-                    errno => return other_error(errno),
-                },
-                ret => {
-                    let fd = ret as RawFd;
+    static INVALID: AtomicBool = AtomicBool::new(false);
+    if !INVALID.load(SeqCst) {
+        // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
+        // while it's running, so use a loop to retry it a few times. But not too many
+        // times, because there's no limit on how often this can happen.
+        for _ in 0..4 {
+            unsafe {
+                match libc::syscall(
+                    SYS_OPENAT2,
+                    start.as_raw_fd(),
+                    path_cstr.as_ptr(),
+                    &open_how,
+                    SIZEOF_OPEN_HOW,
+                ) {
+                    -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
+                        libc::EAGAIN => continue,
+                        libc::EXDEV => return escape_attempt(),
+                        libc::ENOSYS => {
+                            // ENOSYS means SYS_OPENAT2 is not available; mark it so,
+                            // exit the loop, and fallback to `open_manually_wrapper`.
+                            INVALID.store(true, SeqCst);
+                            break;
+                        }
+                        errno => return other_error(errno),
+                    },
+                    ret => {
+                        let fd = ret as RawFd;
 
-                    #[cfg(debug_assertions)]
-                    {
-                        let check = open_manually_wrapper(
-                            start,
-                            path,
-                            options
-                                .clone()
-                                .create(false)
-                                .create_new(false)
-                                .truncate(false),
-                        )
-                        .expect("open_manually failed when open_openat2 succeeded");
-                        debug_assert!(
-                            is_same_file(start, &check)?,
-                            "open_manually should open the same inode as open_openat2"
-                        );
+                        #[cfg(debug_assertions)]
+                        {
+                            let check = open_manually_wrapper(
+                                start,
+                                path,
+                                options
+                                    .clone()
+                                    .create(false)
+                                    .create_new(false)
+                                    .truncate(false),
+                            )
+                            .expect("open_manually failed when open_openat2 succeeded");
+                            debug_assert!(
+                                is_same_file(start, &check)?,
+                                "open_manually should open the same inode as open_openat2"
+                            );
+                        }
+
+                        return Ok(fs::File::from_raw_fd(fd));
                     }
-
-                    return Ok(fs::File::from_raw_fd(fd));
                 }
             }
         }
@@ -95,37 +109,13 @@ fn open_openat2(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Res
     open_manually_wrapper(start, path, options)
 }
 
-lazy_static! {
-    static ref OPEN: fn(&fs::File, &Path, &OpenOptions) -> io::Result<fs::File> = {
-        // Test if `openat2` is supported. If so, we can use `open_openat2`.
-        // Otherwise, fall back to `open_manually`.
-        unsafe {
-            if let -1 = libc::syscall(
-                SYS_OPENAT2,
-                -1,
-                ptr::null::<libc::c_void>(),
-                ptr::null::<libc::c_void>(),
-                0,
-            ) {
-                if let libc::ENOSYS = io::Error::last_os_error().raw_os_error().unwrap() {
-                    // We're on an older Linux.
-                } else {
-                    return open_openat2;
-                }
-            }
-        }
-
-        open_manually_wrapper
-    };
-}
-
 #[inline]
 pub(crate) fn open_impl(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    OPEN(start, path, options)
+    openat2_or_open_manually(start, path, options)
 }
 
 #[cold]
