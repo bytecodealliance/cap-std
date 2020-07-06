@@ -1008,7 +1008,6 @@ fn truncate_works() {
 }
 
 #[test]
-#[ignore] // cap-std's OpenOptions doesn't handle all the flags correctly yet
 fn open_flavors() {
     use cap_std::fs::OpenOptions as OO;
     fn c<T: Clone>(t: &T) -> T {

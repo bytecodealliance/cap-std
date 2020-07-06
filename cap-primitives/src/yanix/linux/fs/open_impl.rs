@@ -44,7 +44,7 @@ pub(crate) fn open_impl(
 ) -> io::Result<fs::File> {
     static INVALID: AtomicBool = AtomicBool::new(false);
     if !INVALID.load(Relaxed) {
-        let oflags = compute_oflags(options);
+        let oflags = compute_oflags(options)?;
 
         // TODO use `yanix::file::OFlags` when `TMPFILE` is introduced
         // Until then, since `O_TMPFILE := 0x20000000 | libc::O_DIRECTORY`,

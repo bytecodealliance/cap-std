@@ -15,7 +15,7 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    let oflags = compute_oflags(options);
+    let oflags = compute_oflags(options)?;
 
     #[allow(clippy::useless_conversion)]
     let mode = Mode::from_bits_truncate(options.ext.mode as _);
