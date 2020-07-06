@@ -90,7 +90,6 @@ pub(crate) fn open_impl(
                             INVALID.store(true, Relaxed);
                             break;
                         }
-                        libc::ELOOP => return symlink_disallowed(),
                         errno => return other_error(errno),
                     },
                     ret => {
@@ -130,14 +129,6 @@ fn escape_attempt() -> io::Result<fs::File> {
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
         "a path led outside of the filesystem",
-    ))
-}
-
-#[cold]
-fn symlink_disallowed() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "symlink disallowed when nofollow requested",
     ))
 }
 
