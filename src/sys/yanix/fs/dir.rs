@@ -4,7 +4,11 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
+#[cfg(unix)]
+use cap_primitives::fs::symlink;
 use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
+#[cfg(windows)]
+use cap_primitives::fs::{symlink_dir, symlink_file};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -128,13 +132,24 @@ impl Dir {
         )
     }
 
+    #[cfg(any(
+        unix,
+        target_os = "redox",
+        target_os = "vxwords",
+        target_os = "fuchsia"
+    ))]
     pub(crate) fn symlink(&self, src: &Path, dst: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::symlink({:?}, {}, {})",
-            self.std_file,
-            src.display(),
-            dst.display()
-        )
+        symlink(src, &self.std_file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_file(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        symlink_file(src, &self.std_file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_dir(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        symlink_dir(src, &self.std_file, dst)
     }
 
     pub(crate) fn bind_unix_listener(&self, path: &Path) -> io::Result<UnixListener> {

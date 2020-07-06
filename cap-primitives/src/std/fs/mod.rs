@@ -19,6 +19,8 @@ mod open_parent;
 mod permissions;
 mod stat;
 mod stat_via_parent;
+mod symlink;
+mod symlink_via_parent;
 mod unlink;
 mod unlink_via_parent;
 
@@ -31,6 +33,7 @@ pub(crate) use mkdir_via_parent::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
 pub(crate) use stat_via_parent::*;
+pub(crate) use symlink_via_parent::*;
 pub(crate) use unlink_via_parent::*;
 
 pub use canonicalize::*;
@@ -43,4 +46,5 @@ pub use open::*;
 pub use open_options::*;
 pub use permissions::*;
 pub use stat::*;
+pub use symlink::*;
 pub use unlink::*;

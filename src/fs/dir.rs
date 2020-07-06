@@ -356,10 +356,40 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    #[cfg(unix)]
+    #[cfg(any(
+        unix,
+        target_os = "wasi",
+        target_os = "redox",
+        target_os = "vxwords",
+        target_os = "fuchsia"
+    ))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         self.sys.symlink(src.as_ref(), dst.as_ref())
+    }
+
+    /// Creates a new file symbolic link on a filesystem.
+    ///
+    /// This corresponds to [`std::os::windows::fs::symlink_file`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
+    #[cfg(windows)]
+    #[inline]
+    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
+        self.cap_std.symlink_file(src.as_ref(), dst.as_ref())
+    }
+
+    /// Creates a new directory symlink on a filesystem.
+    ///
+    /// This corresponds to [`std::os::windows::fs::symlink_dir`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
+    #[cfg(windows)]
+    #[inline]
+    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
+        self.cap_std.symlink_dir(src.as_ref(), dst.as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
