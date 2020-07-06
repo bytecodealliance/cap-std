@@ -45,9 +45,13 @@ pub(crate) fn open_impl(
     static INVALID: AtomicBool = AtomicBool::new(false);
     if !INVALID.load(Relaxed) {
         let oflags = compute_oflags(options);
-        
+
         // TODO use `yanix::file::OFlags` when `TMPFILE` is introduced
-        let mode = if oflags.bits() & (libc::O_CREAT | libc::O_TMPFILE) != 0 {
+        // Until then, since `O_TMPFILE := 0x20000000 | libc::O_DIRECTORY`,
+        // we need to compare for bit equality.
+        let mode = if (oflags.bits() & libc::O_CREAT == libc::O_CREAT)
+            || (oflags.bits() & libc::O_TMPFILE == libc::O_TMPFILE) != 0
+        {
             options.ext.mode
         } else {
             0
