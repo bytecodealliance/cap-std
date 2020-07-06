@@ -8,7 +8,7 @@ use crate::{
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-use std::{fs, io};
+use std::{fmt, fs, io};
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -136,7 +136,9 @@ impl Dir {
     /// [`std::fs::copy`]: https://doc.rust-lang.org/std/fs/fn.copy.html
     #[inline]
     pub fn copy<P: AsRef<str>, Q: AsRef<str>>(&self, from: P, to: Q) -> io::Result<u64> {
-        self.cap_std.copy(from.as_ref(), to.as_ref())
+        let from = from_utf8(from)?;
+        let to = from_utf8(to)?;
+        self.cap_std.copy(from, to)
     }
 
     /// Creates a new hard link on a filesystem.
@@ -189,11 +191,8 @@ impl Dir {
     /// [`std::fs::read`]: https://doc.rust-lang.org/std/fs/fn.read.html
     #[inline]
     pub fn read_file<P: AsRef<str>>(&self, path: P) -> io::Result<Vec<u8>> {
-        use io::Read;
-        let mut file = self.open_file(path)?;
-        let mut bytes = Vec::with_capacity(initial_buffer_size(&file));
-        file.read_to_end(&mut bytes)?;
-        Ok(bytes)
+        let path = from_utf8(path)?;
+        self.cap_std.read_file(path)
     }
 
     /// Reads a symbolic link, returning the file that the link points to.
@@ -264,7 +263,9 @@ impl Dir {
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
     pub fn rename<P: AsRef<str>, Q: AsRef<str>>(&self, from: P, to: Q) -> io::Result<()> {
-        self.cap_std.rename(from.as_ref(), to.as_ref())
+        let from = from_utf8(from)?;
+        let to = from_utf8(to)?;
+        self.cap_std.rename(from, to)
     }
 
     /// Changes the permissions found on a file or a directory.
@@ -303,9 +304,8 @@ impl Dir {
         path: P,
         contents: C,
     ) -> io::Result<()> {
-        use io::Write;
-        let mut file = self.create_file(path)?;
-        file.write_all(contents.as_ref())
+        let path = from_utf8(path)?;
+        self.cap_std.write_file(path, contents)
     }
 
     /// Creates the specified directory with the options configured in this builder.
@@ -333,7 +333,9 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.cap_std.symlink(src.as_ref(), dst.as_ref())
+        let src = from_utf8(src)?;
+        let dst = from_utf8(dst)?;
+        self.cap_std.symlink(src, dst)
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -419,6 +421,52 @@ impl Dir {
             cap_std: self.cap_std.try_clone()?,
         })
     }
+
+    /// Returns `true` if the path points at an existing entity.
+    ///
+    /// This corresponds to [`std::path::Path::exists`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::exists`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.exists
+    #[inline]
+    pub fn exists<P: AsRef<str>>(&self, path: P) -> bool {
+        let path = match from_utf8(&path) {
+            Ok(path) => path,
+            Err(_) => return false,
+        };
+        self.cap_std.exists(path)
+    }
+
+    /// Returns `true` if the path exists on disk and is pointing at a regular file.
+    ///
+    /// This corresponds to [`std::path::Path::is_file`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// [`std::path::Path::is_file`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file
+    #[inline]
+    pub fn is_file<P: AsRef<str>>(&self, path: P) -> bool {
+        let path = match from_utf8(&path) {
+            Ok(path) => path,
+            Err(_) => return false,
+        };
+        self.cap_std.is_file(path)
+    }
+
+    /// Checks if `path` is a directory.
+    ///
+    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to `Dir`
+    /// is a directory. This function will traverse symbolic links to query information about the
+    /// destination file. In case of broken symbolic links, this will return `false`.
+    ///
+    /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
+    #[inline]
+    pub fn is_dir<P: AsRef<str>>(&self, path: P) -> bool {
+        let path = match from_utf8(&path) {
+            Ok(path) => path,
+            Err(_) => return false,
+        };
+        self.cap_std.is_dir(path)
+    }
 }
 
 #[cfg(unix)]
@@ -463,14 +511,8 @@ impl IntoRawHandle for Dir {
     }
 }
 
-/// Indicates how large a buffer to pre-allocate before reading the entire file.
-///
-/// Derived from the function of the same name in libstd.
-fn initial_buffer_size(file: &File) -> usize {
-    // Allocate one extra byte so the buffer doesn't need to grow before the
-    // final `read` call at the end of the file.  Don't worry about `usize`
-    // overflow because reading will fail regardless in that case.
-    file.metadata().map(|m| m.len() as usize + 1).unwrap_or(0)
+impl fmt::Debug for Dir {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
 }
-
-// TODO: impl Debug for Dir? But don't expose Dir's path...

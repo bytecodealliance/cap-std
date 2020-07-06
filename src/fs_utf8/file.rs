@@ -3,7 +3,7 @@ use crate::fs::Metadata;
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-use std::{fs, io, process};
+use std::{fmt, fs, io, process};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -313,4 +313,8 @@ impl std::os::windows::fs::FileExt for File {
     }
 }
 
-// TODO: impl Debug for File? But don't expose File's path...
+impl fmt::Debug for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
+}

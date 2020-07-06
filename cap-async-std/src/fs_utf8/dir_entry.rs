@@ -2,7 +2,7 @@ use crate::{
     fs::{FileType, Metadata},
     fs_utf8::to_utf8,
 };
-use std::io;
+use std::{fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -63,9 +63,14 @@ impl<'dir> DirEntry<'dir> {
 
 #[cfg(unix)]
 impl<'dir> async_std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+    #[inline]
     fn ino(&self) -> u64 {
         self.cap_std.ino()
     }
 }
 
-// TODO: impl Debug for DirEntry? But don't expose DirEntry's path...
+impl<'dir> fmt::Debug for DirEntry<'dir> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
+}

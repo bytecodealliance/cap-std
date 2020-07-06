@@ -7,7 +7,7 @@ use async_std::{
     fs, io,
     task::{Context, Poll},
 };
-use std::pin::Pin;
+use std::{fmt, pin::Pin};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -200,4 +200,8 @@ impl io::Seek for File {
 
 // async_std doesn't have `FileExt`.
 
-// TODO: impl Debug for File? But don't expose File's path...
+impl fmt::Debug for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
+}

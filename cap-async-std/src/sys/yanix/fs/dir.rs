@@ -67,15 +67,6 @@ impl Dir {
         unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
     }
 
-    pub(crate) fn copy(&self, from: &Path, to: &Path) -> io::Result<u64> {
-        unimplemented!(
-            "Dir::copy({:?}, {}, {})",
-            self.std_file,
-            from.display(),
-            to.display()
-        )
-    }
-
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
         let src_file = unsafe { self.as_sync_file() };
         let dst_file = unsafe { dst_dir.as_sync_file() };
