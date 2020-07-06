@@ -104,7 +104,7 @@ pub(crate) fn open_manually(
 
     while let Some(c) = components.pop() {
         match c {
-            OwnedComponent::PrefixOrRootDir => return absolute_path(),
+            OwnedComponent::PrefixOrRootDir => return escape_attempt(),
             OwnedComponent::CurDir => {
                 // If the "." is the entire string, open it. Otherwise just skip it.
                 if components.is_empty() {
@@ -120,7 +120,7 @@ pub(crate) fn open_manually(
 
                 match dirs.pop() {
                     Some(dir) => base = dir,
-                    None => return escape_via_dot_dot(),
+                    None => return escape_attempt(),
                 }
                 canonical_path.pop();
             }
@@ -191,17 +191,9 @@ pub(crate) fn open_manually(
 }
 
 #[cold]
-fn absolute_path() -> io::Result<fs::File> {
+fn escape_attempt() -> io::Result<fs::File> {
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
-        "an absolute path could not be resolved",
-    ))
-}
-
-#[cold]
-fn escape_via_dot_dot() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "a \"..\" component of a path led outside of the filesystem",
+        "a path led outside of the filesystem",
     ))
 }
