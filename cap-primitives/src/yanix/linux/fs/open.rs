@@ -50,7 +50,7 @@ pub(crate) fn open_impl(
         // Until then, since `O_TMPFILE := 0x20000000 | libc::O_DIRECTORY`,
         // we need to compare for bit equality.
         let mode = if (oflags.bits() & libc::O_CREAT == libc::O_CREAT)
-            || (oflags.bits() & libc::O_TMPFILE == libc::O_TMPFILE) != 0
+            || (oflags.bits() & libc::O_TMPFILE == libc::O_TMPFILE)
         {
             options.ext.mode
         } else {
