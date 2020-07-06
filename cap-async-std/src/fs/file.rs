@@ -1,3 +1,4 @@
+use crate::fs::Metadata;
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -69,8 +70,8 @@ impl File {
     ///
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
-    pub async fn metadata(&self) -> io::Result<fs::Metadata> {
-        self.std.metadata().await
+    pub async fn metadata(&self) -> io::Result<Metadata> {
+        self.std.metadata().await.map(Metadata::from_std)
     }
 
     // async_std doesn't have `try_clone`.

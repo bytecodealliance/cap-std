@@ -4,7 +4,7 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::open;
+use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -13,7 +13,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
+use yanix::file::OFlag;
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -55,13 +55,7 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        unsafe {
-            mkdirat(
-                self.std_file.as_raw_fd(),
-                path,
-                Mode::from_bits(0o777).unwrap(),
-            )
-        }
+        mkdir(&self.std_file, path)
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
@@ -69,20 +63,12 @@ impl Dir {
         unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
-        unsafe {
-            linkat(
-                self.std_file.as_raw_fd(),
-                src,
-                dst_dir.std_file.as_raw_fd(),
-                dst,
-                AtFlag::from_bits(0).unwrap(),
-            )
-        }
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+        link(&self.std_file, src, &dst_dir.std_file, dst)
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
+        stat(&self.std_file, path, FollowSymlinks::Yes)
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
@@ -106,7 +92,7 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
+        unlink(&self.std_file, path)
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {

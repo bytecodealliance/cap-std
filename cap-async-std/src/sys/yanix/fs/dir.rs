@@ -9,13 +9,13 @@ use async_std::{
         io::{AsRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::open;
+use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
-use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
+use yanix::file::OFlag;
 
 pub(crate) struct Dir {
     std_file: fs::File,
@@ -60,13 +60,10 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        unsafe {
-            mkdirat(
-                self.std_file.as_raw_fd(),
-                path,
-                Mode::from_bits(0o777).unwrap(),
-            )
-        }
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        mkdir(&file, path)
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
@@ -83,20 +80,20 @@ impl Dir {
         )
     }
 
-    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Self, dst: &Path) -> io::Result<()> {
-        unsafe {
-            linkat(
-                self.std_file.as_raw_fd(),
-                src,
-                dst_dir.std_file.as_raw_fd(),
-                dst,
-                AtFlag::from_bits(0).unwrap(),
-            )
-        }
+    pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
+        use std::os::unix::io::FromRawFd;
+        let src_file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let dst_file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(dst_dir.std_file.as_raw_fd()) });
+        link(&src_file, src, &dst_file, dst)
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!("Dir::metadata({:?}, {})", self.std_file, path.display())
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        stat(&file, path, FollowSymlinks::Yes)
     }
 
     pub(crate) fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
@@ -120,7 +117,10 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        unsafe { unlinkat(self.std_file.as_raw_fd(), path, AtFlag::empty()) }
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        unlink(&file, path)
     }
 
     pub(crate) fn rename(&self, from: &Path, to: &Path) -> io::Result<()> {

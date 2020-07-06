@@ -17,11 +17,8 @@ pub use dir_entry::*;
 pub use file::*;
 pub use read_dir::*;
 
-// Re-export things from `std::fs` that we can use as-is.
-pub use std::fs::{FileType, Metadata, Permissions};
-
 // Re-export things from `cap_std::fs` that we can use as-is.
-pub use crate::fs::OpenOptions;
+pub use crate::fs::{FileType, Metadata, OpenOptions, Permissions};
 
 fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     // For now, for WASI use the same logic as other OS's, but

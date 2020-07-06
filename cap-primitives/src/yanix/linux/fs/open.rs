@@ -132,7 +132,6 @@ fn escape_attempt() -> io::Result<fs::File> {
     ))
 }
 
-#[cold]
 fn other_error(errno: i32) -> io::Result<fs::File> {
     Err(io::Error::from_raw_os_error(errno))
 }

@@ -380,14 +380,14 @@ fn file_test_io_seek_read_write() {
     check!(tmpdir.remove_file(filename));
 }
 
-/*
 #[test]
 fn file_test_stat_is_correct_on_is_file() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_file.txt";
     {
         let mut opts = OpenOptions::new();
-        let mut fs = check!(opts.read(true).write(true).create(true).open(filename));
+        let mut fs =
+            check!(tmpdir.open_file_with(filename, opts.read(true).write(true).create(true)));
         let msg = "hw";
         fs.write(msg.as_bytes()).unwrap();
 
@@ -396,29 +396,27 @@ fn file_test_stat_is_correct_on_is_file() {
     }
     let stat_res_fn = check!(tmpdir.metadata(filename));
     assert!(stat_res_fn.is_file());
-    let stat_res_meth = check!(filename.metadata());
-    assert!(stat_res_meth.is_file());
     check!(tmpdir.remove_file(filename));
 }
 
 #[test]
+#[ignore] // `remove_dir` not yet implemented
 fn file_test_stat_is_correct_on_is_dir() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_dir";
-    check!(fs::create_dir(filename));
-    let stat_res_fn = check!(fs::metadata(filename));
+    check!(tmpdir.create_dir(filename));
+    let stat_res_fn = check!(tmpdir.metadata(filename));
     assert!(stat_res_fn.is_dir());
-    let stat_res_meth = check!(filename.metadata());
-    assert!(stat_res_meth.is_dir());
     check!(tmpdir.remove_dir(filename));
 }
 
 #[test]
+#[ignore] // `remove_dir` not yet implemented
 fn file_test_fileinfo_false_when_checking_is_file_on_a_directory() {
     let tmpdir = tmpdir();
     let dir = "fileinfo_false_on_dir";
-    check!(fs::create_dir(dir));
-    assert!(!dir.is_file());
+    check!(tmpdir.create_dir(dir));
+    assert!(!tmpdir.is_file(dir));
     check!(tmpdir.remove_dir(dir));
 }
 
@@ -427,23 +425,23 @@ fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
     let tmpdir = tmpdir();
     let file = "fileinfo_check_exists_b_and_a.txt";
     check!(check!(tmpdir.create_file(file)).write(b"foo"));
-    assert!(file.exists());
+    assert!(tmpdir.exists(file));
     check!(tmpdir.remove_file(file));
-    assert!(!file.exists());
+    assert!(!tmpdir.exists(file));
 }
 
 #[test]
+#[ignore] // `remove_dir` not yet implemented
 fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
     let tmpdir = tmpdir();
     let dir = "before_and_after_dir";
-    assert!(!dir.exists());
-    check!(fs::create_dir(dir));
-    assert!(dir.exists());
-    assert!(dir.is_dir());
+    assert!(!tmpdir.exists(dir));
+    check!(tmpdir.create_dir(dir));
+    assert!(tmpdir.exists(dir));
+    assert!(tmpdir.is_dir(dir));
     check!(tmpdir.remove_dir(dir));
-    assert!(!dir.exists());
+    assert!(!tmpdir.exists(dir));
 }
-*/
 
 #[test]
 #[ignore] // `read_dir` not yet implemented in cap-std
@@ -541,10 +539,12 @@ fn concurrent_recursive_mkdir() {
 */
 
 #[test]
-#[ignore] // is_dir is not yet fully implemented in cap-std
 fn recursive_mkdir_slash() {
     let tmpdir = tmpdir();
-    check!(tmpdir.create_dir_all(Path::new("/")));
+    error!(
+        tmpdir.create_dir_all(Path::new("/")),
+        "a path led outside of the filesystem"
+    );
 }
 
 #[test]
@@ -883,6 +883,7 @@ fn readlink_not_symlink() {
         Err(..) => {}
     }
 }
+*/
 
 #[test]
 fn links_work() {
@@ -890,32 +891,33 @@ fn links_work() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(File::create(&input)).write("foobar".as_bytes()));
-    check!(fs::hard_link(&input, &out));
+    check!(check!(tmpdir.create_file(&input)).write("foobar".as_bytes()));
+    check!(tmpdir.hard_link(&input, &tmpdir, &out));
     assert_eq!(
-        check!(fs::metadata(&out)).len(),
-        check!(fs::metadata(&input)).len()
+        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(&input)).len()
     );
     assert_eq!(
-        check!(fs::metadata(&out)).len(),
-        check!(input.metadata()).len()
+        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(input)).len()
     );
     let mut v = Vec::new();
-    check!(check!(File::open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&out)).read_to_end(&mut v));
     assert_eq!(v, b"foobar".to_vec());
 
     // can't link to yourself
-    match fs::hard_link(&input, &input) {
+    match tmpdir.hard_link(&input, &tmpdir, &input) {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
     // can't link to something that doesn't exist
-    match fs::hard_link(&tmpdir.join("foo"), &tmpdir.join("bar")) {
+    match tmpdir.hard_link("foo", &tmpdir, "bar") {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
 }
 
+/*
 #[test]
 fn chmod_works() {
     let tmpdir = tmpdir();
@@ -1221,7 +1223,7 @@ fn file_try_clone() {
 }
 
 #[test]
-#[ignore] // `metadata` not yet implemented in cap-std
+#[ignore] // `set_permissions` not yet implemented
 #[cfg(not(windows))]
 fn unlink_readonly() {
     let tmpdir = tmpdir();
