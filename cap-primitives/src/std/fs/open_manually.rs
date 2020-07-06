@@ -141,18 +141,14 @@ pub(crate) fn open_manually(
                         dirs.push(prev_base);
                         canonical_path.push(one);
                     }
-                    Err(e) => match e.raw_os_error() {
-                        Some(libc::ELOOP) | Some(libc::EMLINK) if use_options.nofollow => {
-                            return Err(io::Error::from_raw_os_error(libc::ELOOP))
-                        }
-                        Some(libc::ELOOP) | Some(libc::EMLINK) => {
-                            let destination =
-                                resolve_symlink_at(base.as_file(), &one, symlink_count)?;
-                            components
-                                .extend(destination.components().map(to_owned_component).rev());
-                        }
-                        _ => return Err(e),
-                    },
+                    Err(OpenUncheckedError::SymlinkDisallowed) if use_options.nofollow => {
+                        return symlink_disallowed()
+                    }
+                    Err(OpenUncheckedError::SymlinkDisallowed) => {
+                        let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
+                        components.extend(destination.components().map(to_owned_component).rev());
+                    }
+                    Err(OpenUncheckedError::Io(e)) => return Err(e),
                 }
             }
         }
@@ -200,4 +196,27 @@ fn escape_attempt() -> io::Result<fs::File> {
         io::ErrorKind::PermissionDenied,
         "a path led outside of the filesystem",
     ))
+}
+
+#[cold]
+fn symlink_disallowed() -> io::Result<fs::File> {
+    Err(OpenUncheckedError::SymlinkDisallowed.into())
+}
+
+#[derive(Debug)]
+pub(crate) enum OpenUncheckedError {
+    Io(io::Error),
+    SymlinkDisallowed,
+}
+
+impl From<OpenUncheckedError> for io::Error {
+    fn from(err: OpenUncheckedError) -> Self {
+        match err {
+            OpenUncheckedError::Io(e) => e,
+            OpenUncheckedError::SymlinkDisallowed => io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "symlink disallowed when nofollow requested",
+            ),
+        }
+    }
 }

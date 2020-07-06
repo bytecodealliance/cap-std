@@ -53,6 +53,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             Err(result_error) => match result_error.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
+                    let unchecked_error = io::Error::from(unchecked_error);
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());
                 }

@@ -1,12 +1,9 @@
 use super::compute_oflags;
 use crate::fs::OpenOptions;
-use std::{
-    ffi::OsStr,
-    path::Path,
-    fs, io,
-};
+use crate::std::fs::OpenUncheckedError;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
+use std::{ffi::OsStr, fs, io, path::Path};
 use yanix::file::{openat, Mode};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
@@ -14,7 +11,7 @@ pub(crate) fn open_unchecked(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
-) -> io::Result<fs::File> {
+) -> Result<fs::File, OpenUncheckedError> {
     let oflags = compute_oflags(options)?;
 
     #[allow(clippy::useless_conversion)]
@@ -27,8 +24,15 @@ pub(crate) fn open_unchecked(
         path.as_ref()
     };
 
-    unsafe {
-        let fd = openat(start.as_raw_fd(), path, oflags, mode)?;
-        Ok(fs::File::from_raw_fd(fd))
+    let err = unsafe {
+        match openat(start.as_raw_fd(), path, oflags, mode) {
+            Ok(fd) => return Ok(fs::File::from_raw_fd(fd)),
+            Err(err) => err,
+        }
+    };
+    match err.raw_os_error() {
+        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::SymlinkDisallowed),
+        None => Err(OpenUncheckedError::Io(err)),
+        Some(e) => Err(OpenUncheckedError::Io(io::Error::from_raw_os_error(e))),
     }
 }
