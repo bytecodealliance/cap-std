@@ -104,7 +104,7 @@ pub(crate) fn open_manually(
 
     while let Some(c) = components.pop() {
         match c {
-            OwnedComponent::PrefixOrRootDir => return absolute_path(),
+            OwnedComponent::PrefixOrRootDir => return escape_attempt(),
             OwnedComponent::CurDir => {
                 // If the "." is the entire string, open it. Otherwise just skip it.
                 if components.is_empty() {
@@ -188,14 +188,6 @@ pub(crate) fn open_manually(
     }
 
     base.into_file()
-}
-
-#[cold]
-fn absolute_path() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "an absolute path could not be resolved",
-    ))
 }
 
 #[cold]

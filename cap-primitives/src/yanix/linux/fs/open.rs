@@ -19,7 +19,7 @@ use std::{
         io::{AsRawFd, FromRawFd, RawFd},
     },
     path::Path,
-    sync::atomic::{AtomicBool, Ordering::SeqCst},
+    sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
 
 const SYS_OPENAT2: i64 = 437;
@@ -37,15 +37,21 @@ const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
 /// Call the `openat2` system call. If the syscall is unavailable, mark it so for future
 /// calls, and fallback to `open_manually_wrapper`
-fn openat2_or_open_manually(
+pub(crate) fn open_impl(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
     static INVALID: AtomicBool = AtomicBool::new(false);
-    if !INVALID.load(SeqCst) {
+    if !INVALID.load(Relaxed) {
         let oflags = compute_oflags(options);
-        let mode = options.ext.mode;
+        
+        // TODO use `yanix::file::OFlags` when `TMPFILE` is introduced
+        let mode = if oflags.bits() & (libc::O_CREAT | libc::O_TMPFILE) != 0 {
+            options.ext.mode
+        } else {
+            0
+        };
 
         // Check for empty path, and if empty, change to ".".
         let path = if path == Path::new("") {
@@ -73,16 +79,11 @@ fn openat2_or_open_manually(
                 ) {
                     -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
                         libc::EAGAIN => continue,
-                        libc::EXDEV => {
-                            if path.is_absolute() {
-                                return absolute_path();
-                            }
-                            return escape_attempt();
-                        }
+                        libc::EXDEV => return escape_attempt(),
                         libc::ENOSYS => {
                             // ENOSYS means SYS_OPENAT2 is not available; mark it so,
                             // exit the loop, and fallback to `open_manually_wrapper`.
-                            INVALID.store(true, SeqCst);
+                            INVALID.store(true, Relaxed);
                             break;
                         }
                         errno => return other_error(errno),
@@ -119,28 +120,11 @@ fn openat2_or_open_manually(
     open_manually_wrapper(start, path, options)
 }
 
-#[inline]
-pub(crate) fn open_impl(
-    start: &fs::File,
-    path: &Path,
-    options: &OpenOptions,
-) -> io::Result<fs::File> {
-    openat2_or_open_manually(start, path, options)
-}
-
 #[cold]
 fn escape_attempt() -> io::Result<fs::File> {
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
         "a path led outside of the filesystem",
-    ))
-}
-
-#[cold]
-fn absolute_path() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "an absolute path could not be resolved",
     ))
 }
 

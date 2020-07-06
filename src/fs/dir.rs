@@ -48,9 +48,7 @@ impl Dir {
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
     #[inline]
     pub fn open_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        // We're delegating to a sys-dependent open_file due to `openat2` being really strict
-        // about mixing oflags and mode bits.
-        self.sys.open_file(path.as_ref())
+        self.open_file_with(path, OpenOptions::new().read(true))
     }
 
     /// Opens a file at `path` with the options specified by `self`.

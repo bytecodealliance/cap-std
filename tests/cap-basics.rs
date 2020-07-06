@@ -46,11 +46,11 @@ fn cap_smoke_test() {
     check!(inner.open_dir(""));
     error!(
         inner.open_dir("/"),
-        "an absolute path could not be resolved"
+        "a path led outside of the filesystem"
     );
     error!(
         inner.open_dir("/etc/services"),
-        "an absolute path could not be resolved"
+        "a path led outside of the filesystem"
     );
     check!(inner.open_dir("."));
     check!(inner.open_dir("./"));
