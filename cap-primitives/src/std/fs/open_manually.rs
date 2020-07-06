@@ -60,11 +60,28 @@ impl<'path_buf> CanonicalPath<'path_buf> {
         }
     }
 
-    fn pop(&mut self) {
+    fn pop(&mut self) -> bool {
         #[cfg(debug_assertions)]
         self.debug.pop();
         if let Some(path) = &mut self.path {
-            path.pop();
+            path.pop()
+        } else {
+            true
+        }
+    }
+
+    /// The complete canonical path has been scanned. Set `path` to `None`
+    /// so that it isn't cleared when `self` is dropped.
+    fn complete(&mut self) {
+        self.path = None;
+    }
+}
+
+impl<'path_buf> Drop for CanonicalPath<'path_buf> {
+    fn drop(&mut self) {
+        if let Some(path) = &mut self.path {
+            path.clear();
+            self.path = None;
         }
     }
 }
@@ -109,8 +126,6 @@ pub(crate) fn open_manually(
                 // If the "." is the entire string, open it. Otherwise just skip it.
                 if components.is_empty() {
                     components.push(OwnedComponent::Normal(OsString::from(".")))
-                } else {
-                    canonical_path.push(OsString::from("."));
                 }
                 continue;
             }
@@ -122,7 +137,7 @@ pub(crate) fn open_manually(
                     Some(dir) => base = dir,
                     None => return escape_attempt(),
                 }
-                canonical_path.pop();
+                assert!(canonical_path.pop());
             }
             OwnedComponent::Normal(one) => {
                 let dir_options = OpenOptions::new().read(true).clone();
@@ -139,7 +154,9 @@ pub(crate) fn open_manually(
                     Ok(file) => {
                         let prev_base = mem::replace(&mut base, MaybeOwnedFile::Owned(file));
                         dirs.push(prev_base);
-                        canonical_path.push(one);
+                        if one != "." {
+                            canonical_path.push(one);
+                        }
                     }
                     Err(OpenUncheckedError::Symlink(err)) if use_options.nofollow => {
                         return Err(err)
@@ -148,7 +165,15 @@ pub(crate) fn open_manually(
                         let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                     }
-                    Err(OpenUncheckedError::Other(e)) => return Err(e),
+                    Err(OpenUncheckedError::Other(e)) => {
+                        // An error occurred. If this was the last component, record it as the
+                        // last component of the canonical path, even if we couldn't open it.
+                        if components.is_empty() {
+                            canonical_path.push(one);
+                            canonical_path.complete();
+                        }
+                        return Err(e);
+                    }
                 }
             }
         }
@@ -187,6 +212,7 @@ pub(crate) fn open_manually(
         ),
     }
 
+    canonical_path.complete();
     base.into_file()
 }
 

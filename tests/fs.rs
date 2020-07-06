@@ -1242,16 +1242,15 @@ fn mkdir_trailing_slash() {
     check!(tmpdir.create_dir_all(&path.join("a/")));
 }
 
-/*
 #[test]
 fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
-    let tmpdir = fs::canonicalize(tmpdir.path()).unwrap();
-    let file = "test";
-    File::create(&file).unwrap();
-    assert_eq!(fs::canonicalize(&file).unwrap(), file);
+    let file = Path::new("test");
+    tmpdir.create_file(&file).unwrap();
+    assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
 }
 
+/*
 #[test]
 fn realpath_works() {
     let tmpdir = tmpdir();
@@ -1265,10 +1264,10 @@ fn realpath_works() {
     let link = dir.join("link");
     let linkdir = "test3";
 
-    File::create(&file).unwrap();
-    fs::create_dir(&dir).unwrap();
-    symlink_file(&file, &link).unwrap();
-    symlink_dir(&dir, &linkdir).unwrap();
+    tmpdir.create_file(&file).unwrap();
+    tmpdir.create_dir(&dir).unwrap();
+    symlink_file(Path::new("..").join(&file), &tmpdir, &link).unwrap();
+    symlink_dir(&dir, &tmpdir, &linkdir).unwrap();
 
     assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
 

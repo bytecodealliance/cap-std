@@ -4,7 +4,7 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
+use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -59,8 +59,7 @@ impl Dir {
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
+        canonicalize(&self.std_file, path)
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {

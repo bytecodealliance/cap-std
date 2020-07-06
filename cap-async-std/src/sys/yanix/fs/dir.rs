@@ -9,7 +9,7 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
+use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
 use std::{
     fmt,
     mem::ManuallyDrop,
@@ -63,8 +63,10 @@ impl Dir {
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        canonicalize(&file, path)
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {

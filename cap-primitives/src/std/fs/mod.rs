@@ -1,5 +1,7 @@
 //! Filesystem utilities.
 
+mod canonicalize;
+mod canonicalize_manually;
 mod file_type;
 mod follow_symlinks;
 #[cfg(debug_assertions)]
@@ -20,6 +22,7 @@ mod stat_via_parent;
 mod unlink;
 mod unlink_via_parent;
 
+pub(crate) use canonicalize_manually::*;
 #[cfg(debug_assertions)]
 pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
@@ -30,6 +33,7 @@ pub(crate) use open_parent::*;
 pub(crate) use stat_via_parent::*;
 pub(crate) use unlink_via_parent::*;
 
+pub use canonicalize::*;
 pub use file_type::*;
 pub use follow_symlinks::*;
 pub use link::*;

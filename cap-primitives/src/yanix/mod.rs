@@ -19,4 +19,5 @@ pub(crate) mod fs {
     pub(crate) use crate::fs::mkdir_via_parent as mkdir_impl;
     pub(crate) use crate::fs::unlink_via_parent as unlink_impl;
     pub(crate) use crate::fs::link_via_parent as link_impl;
+    pub(crate) use crate::fs::canonicalize_manually as canonicalize_impl;
 }
