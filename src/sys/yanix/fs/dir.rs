@@ -114,11 +114,7 @@ impl Dir {
     }
 
     pub(crate) fn symlink_metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!(
-            "Dir::symlink_metadata({:?}, {:?})",
-            self.std_file,
-            path.display()
-        )
+        stat(&self.std_file, path, FollowSymlinks::No)
     }
 
     pub(crate) fn create_with_dir_builder(

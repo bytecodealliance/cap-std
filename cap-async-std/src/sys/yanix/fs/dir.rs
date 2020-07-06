@@ -122,11 +122,10 @@ impl Dir {
     }
 
     pub(crate) fn symlink_metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!(
-            "Dir::symlink_metadata({:?}, {:?})",
-            self.std_file,
-            path.display()
-        )
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        stat(&file, path, FollowSymlinks::No)
     }
 
     pub(crate) fn create_with_dir_builder(
