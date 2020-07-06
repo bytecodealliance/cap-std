@@ -28,6 +28,19 @@ libc = "0.2.71"
 
 [target.'cfg(windows)'.dependencies]
 winx = "0.18.0"
+winapi = { version = "^0.3", features = [
+    "std",
+    "errhandlingapi",
+    "handleapi",
+    "processthreadsapi",
+    "profileapi",
+    "securitybaseapi",
+    "winbase",
+    "winerror",
+    "ws2def",
+    "fileapi",
+    "aclapi"
+] }
 
 [badges]
 maintenance = { status = "actively-developed" }

@@ -161,28 +161,32 @@ impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
 impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
     #[inline]
     fn access_mode(&mut self, access: u32) -> &mut Self {
-        todo!("OpenOptionsExt::access_mode for Windows")
+        self.ext.access_mode(access);
+        self
     }
 
     #[inline]
     fn share_mode(&mut self, val: u32) -> &mut Self {
-        todo!("OpenOptionsExt::share_mode for Windows")
+        self.ext.share_mode(val);
+        self
     }
 
     #[inline]
     fn custom_flags(&mut self, flags: u32) -> &mut Self {
-        todo!("OpenOptionsExt::custom_flags for Windows")
+        self.ext.custom_flags(flags);
+        self
     }
 
     #[inline]
     fn attributes(&mut self, val: u32) -> &mut Self {
-        todo!("OpenOptionsExt::attributes for Windows")
+        self.ext.attributes(val);
+        self
     }
 
     #[inline]
-    fn security_qos_flags(&mut self, flags: u32) -> &mut fs::OpenOptions {
-        todo!(
-            "we need to change the return type of OpenOptionsExt::security_qos_flags in libstd before we can implement this"
+    fn security_qos_flags(&mut self, flags: u32) -> &mut std::fs::OpenOptions {
+        unimplemented!(
+            "can't implement OpenOptionsExt::security_qos_flags because the return type is wrong"
         )
     }
 }

@@ -77,7 +77,7 @@ impl FileType {
         Self(Inner::Unknown)
     }
 
-    /// Creates a `FileType` for which `is_dir()` returns `true`.
+    /// Creates a `FileType` from extension type.
     #[inline]
     pub(crate) const fn ext(ext: FileTypeExt) -> Self {
         Self(Inner::Ext(ext))
@@ -161,14 +161,15 @@ impl std::os::vxworks::fs::FileTypeExt for FileType {
 }
 
 #[cfg(windows)]
+#[cfg(feature = "windows_file_type_ext")]
 impl std::os::windows::fs::FileTypeExt for FileType {
     #[inline]
     fn is_symlink_dir(&self) -> bool {
-        todo!("FileTypeExt::is_symlink_dir for Windows")
+        self.0 == Inner::Ext(FileTypeExt::SymlinkFile)
     }
 
     #[inline]
     fn is_symlink_file(&self) -> bool {
-        todo!("FileTypeExt::is_symlink_file for Windows")
+        self.0 == Inner::Ext(FileTypeExt::SymlinkDir)
     }
 }

@@ -7,6 +7,8 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
+#![cfg_attr(target_os = "windows", feature(windows_by_handle))]
+#![cfg_attr(target_os = "windows", feature(windows_file_type_ext))]
 
 use cfg_if::cfg_if;
 
