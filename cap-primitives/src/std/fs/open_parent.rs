@@ -1,5 +1,8 @@
 use crate::fs::{open_manually, MaybeOwnedFile, OpenOptions};
-use std::{io, path::Path};
+use std::{
+    io,
+    path::{Component, Path},
+};
 
 /// The primary purpose of this function is to open the "parent" of `path`. `start`
 /// is updated to hold the newly opened file descriptor, and the basename of `path`
@@ -29,7 +32,15 @@ pub(crate) fn open_parent<'path>(
 
     *start = MaybeOwnedFile::Owned(parent);
 
-    Ok(path.file_name().map(AsRef::as_ref))
+    // This would use `path.file_name()`, except that returns `None` on `.`. We
+    // want to see the `.` so that `None` can always mean `..`.
+    let file_name = path.components().next_back().and_then(|p| match p {
+        Component::Normal(p) => Some(p),
+        Component::CurDir => Some(Component::CurDir.as_os_str()),
+        _ => None,
+    });
+
+    Ok(file_name.map(AsRef::as_ref))
 }
 
 #[cold]

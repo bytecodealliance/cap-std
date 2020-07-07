@@ -7,7 +7,9 @@ use std::{
 #[cfg(any(unix, target_os = "fuchsia"))]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
-    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+    cap_primitives::fs::{
+        canonicalize, link, mkdir, open, rename, stat, symlink, unlink, FollowSymlinks,
+    },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 
@@ -354,13 +356,13 @@ impl Dir {
     ///
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        todo!(
-            "Dir::rename({:?}, {}, {})",
-            self.std_file,
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
+    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<()> {
+        rename(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
     }
 
     /// Changes the permissions found on a file or a directory.

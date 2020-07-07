@@ -19,5 +19,6 @@ pub(crate) mod fs {
         canonicalize_manually as canonicalize_impl, link_via_parent as link_impl,
         mkdir_via_parent as mkdir_impl, stat_via_parent as stat_impl,
         symlink_via_parent as symlink_impl, unlink_via_parent as unlink_impl,
+        rename_via_parent as rename_impl
     };
 }

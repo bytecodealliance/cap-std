@@ -360,13 +360,13 @@ impl Dir {
     ///
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        todo!(
-            "Dir::rename({:?}, {}, {})",
-            self.std_file,
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
+    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<()> {
+        self.sys.rename(from.as_ref(), &to_dir.sys, to.as_ref())
     }
 
     /// Changes the permissions found on a file or a directory.
