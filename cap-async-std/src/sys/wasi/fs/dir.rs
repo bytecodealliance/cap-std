@@ -11,7 +11,6 @@ use async_std::{
 };
 use std::{
     fmt,
-    mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
 //use yanix::file::{linkat, mkdirat, unlinkat, AtFlag, Mode, OFlag};
