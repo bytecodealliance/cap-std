@@ -3,7 +3,7 @@
 #[cfg(debug_assertions)]
 use super::get_path;
 #[cfg(debug_assertions)]
-use crate::fs::{is_same_file, open_unchecked};
+use crate::fs::{is_same_file, open_unchecked, OpenUncheckedError};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
 
@@ -53,7 +53,12 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             Err(result_error) => match result_error.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
-                    let unchecked_error = io::Error::from(unchecked_error);
+                    let unchecked_error = match unchecked_error {
+                        OpenUncheckedError::Io(err) => err,
+                        OpenUncheckedError::Symlink => {
+                            io::Error::new(io::ErrorKind::Other, "unexpected ELOOP or EMLINK")
+                        }
+                    };
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());
                 }

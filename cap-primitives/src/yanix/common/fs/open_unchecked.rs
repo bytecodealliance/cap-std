@@ -3,7 +3,7 @@ use crate::fs::OpenOptions;
 use crate::std::fs::OpenUncheckedError;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
-use std::{ffi::OsStr, fs, io, path::Path};
+use std::{ffi::OsStr, fs, path::Path};
 use yanix::file::{openat, Mode};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
@@ -31,8 +31,7 @@ pub(crate) fn open_unchecked(
         }
     };
     match err.raw_os_error() {
-        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::SymlinkDisallowed),
-        None => Err(OpenUncheckedError::Io(err)),
-        Some(e) => Err(OpenUncheckedError::Io(io::Error::from_raw_os_error(e))),
+        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink),
+        _ => Err(OpenUncheckedError::Io(err)),
     }
 }
