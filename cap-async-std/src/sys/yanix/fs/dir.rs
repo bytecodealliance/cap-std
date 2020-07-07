@@ -6,7 +6,7 @@ use async_std::{
     fs, io,
     os::unix::{
         fs::OpenOptionsExt,
-        io::{AsRawFd, IntoRawFd},
+        io::{AsRawFd, FromRawFd, IntoRawFd},
     },
 };
 use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
@@ -43,9 +43,7 @@ impl Dir {
     }
 
     pub(crate) fn open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let file = unsafe { self.as_sync_file() };
         open(&file, path, options).map(|file| unsafe { File::from_raw_fd(file.into_raw_fd()) })
     }
 
@@ -60,9 +58,7 @@ impl Dir {
     }
 
     pub(crate) fn create_dir(&self, path: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let file = unsafe { self.as_sync_file() };
         mkdir(&file, path)
     }
 
@@ -81,18 +77,13 @@ impl Dir {
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let src_file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
-        let dst_file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(dst_dir.std_file.as_raw_fd()) });
+        let src_file = unsafe { self.as_sync_file() };
+        let dst_file = unsafe { dst_dir.as_sync_file() };
         link(&src_file, src, &dst_file, dst)
     }
 
     pub(crate) fn metadata(&self, path: &Path) -> io::Result<Metadata> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let file = unsafe { self.as_sync_file() };
         stat(&file, path, FollowSymlinks::Yes)
     }
 
@@ -117,9 +108,7 @@ impl Dir {
     }
 
     pub(crate) fn remove_file(&self, path: &Path) -> io::Result<()> {
-        use std::os::unix::io::FromRawFd;
-        let file =
-            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        let file = unsafe { self.as_sync_file() };
         unlink(&file, path)
     }
 
@@ -221,6 +210,19 @@ impl Dir {
     }
 
     // async_std doesn't have `try_clone`.
+
+    /// Utility for returning `self`'s `async_std::fs::File` member as a
+    /// `std::fs::File` for synchronous operations.
+    ///
+    /// # Safety
+    ///
+    /// Callers must avoid using `self`'s `async_std::fs::File` while the
+    /// resulting `std::fs::File` is live, and must ensure that the resulting
+    /// `std::fs::File` outlives `self`'s `async_std::fs::File`.
+    #[inline]
+    unsafe fn as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
+        ManuallyDrop::new(std::fs::File::from_raw_fd(self.std_file.as_raw_fd()))
+    }
 }
 
 impl fmt::Debug for Dir {
