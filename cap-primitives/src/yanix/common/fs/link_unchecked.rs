@@ -16,7 +16,6 @@ pub(crate) fn link_unchecked(
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     // POSIX's `linkat` with an empty path returns `ENOENT`, so use "." instead.
-    // TODO: Use `AT_EMPTY_PATH` instead, on platforms that support it?
     let new_path = if new_path.components().next().is_none() {
         OsStr::new(".")
     } else {

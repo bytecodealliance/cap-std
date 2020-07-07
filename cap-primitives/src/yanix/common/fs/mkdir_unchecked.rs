@@ -12,7 +12,6 @@ pub(crate) fn mkdir_unchecked(
     path: &Path,
 ) -> io::Result<()> {
     // POSIX's `mkdirat` with an empty path returns `ENOENT`, so use "." instead.
-    // TODO: Use `AT_EMPTY_PATH` instead, on platforms that support it?
     let path = if path.components().next().is_none() {
         OsStr::new(".")
     } else {
