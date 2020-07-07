@@ -340,7 +340,6 @@ fn file_test_io_read_write_at() {
 }
 
 #[test]
-#[ignore] // set_permissions not implemented in cap-std yet
 #[cfg(unix)]
 fn set_get_unix_permissions() {
     use std::os::unix::fs::PermissionsExt;
@@ -350,11 +349,19 @@ fn set_get_unix_permissions() {
     check!(tmpdir.create_dir(filename));
     let mask = 0o7777;
 
-    check!(tmpdir.set_permissions(filename, fs::Permissions::from_mode(0)));
+    // Modification: cap-std doesn't have a `set_permissions` that operates on
+    // paths, so open the file and call `set_permissions` on it that way. And
+    // use a non-zero mode so that we can actually open it to reset the
+    // permissions below.
+    check!(tmpdir
+        .open(filename)
+        .and_then(|file| file.set_permissions(fs::Permissions::from_mode(0o400))));
     let metadata0 = check!(tmpdir.metadata(filename));
-    assert_eq!(mask & metadata0.permissions().mode(), 0);
+    assert_eq!(mask & metadata0.permissions().mode(), 0o400);
 
-    check!(tmpdir.set_permissions(filename, fs::Permissions::from_mode(0o1777)));
+    check!(tmpdir
+        .open(filename)
+        .and_then(|file| file.set_permissions(fs::Permissions::from_mode(0o1777))));
     let metadata1 = check!(tmpdir.metadata(filename));
     #[cfg(all(unix, not(target_os = "vxworks")))]
     assert_eq!(mask & metadata1.permissions().mode(), 0o1777);
@@ -718,7 +725,6 @@ fn copy_src_does_not_exist() {
 }
 
 #[test]
-#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_ok() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -749,7 +755,6 @@ fn copy_file_dst_dir() {
 }
 
 #[test]
-#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_dst_exists() {
     let tmpdir = tmpdir();
     let input = "in";
@@ -777,7 +782,6 @@ fn copy_file_src_dir() {
 }
 
 #[test]
-#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_preserves_perm_bits() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -786,11 +790,15 @@ fn copy_file_preserves_perm_bits() {
     let attr = check!(check!(tmpdir.create(&input)).metadata());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir.set_permissions(&input, p));
+    check!(tmpdir.open(&input).and_then(|file| file.set_permissions(p)));
     check!(tmpdir.copy(&input, &out));
     assert!(check!(tmpdir.metadata(out)).permissions().readonly());
-    check!(tmpdir.set_permissions(&input, attr.permissions()));
-    check!(tmpdir.set_permissions(&out, attr.permissions()));
+    check!(tmpdir
+        .open(&input)
+        .and_then(|file| file.set_permissions(attr.permissions())));
+    check!(tmpdir
+        .open(&out)
+        .and_then(|file| file.set_permissions(attr.permissions())));
 }
 
 #[test]
@@ -806,7 +814,6 @@ fn copy_file_preserves_streams() {
 }
 
 #[test]
-#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_returns_metadata_len() {
     let tmp = tmpdir();
     let in_path = "in.txt";
@@ -819,7 +826,6 @@ fn copy_file_returns_metadata_len() {
 }
 
 #[test]
-#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
     if !got_symlink_permission(&tmp) {
@@ -960,7 +966,6 @@ fn links_work() {
 }
 
 #[test]
-#[ignore] // chmod is not implemented yet
 fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
@@ -970,21 +975,25 @@ fn chmod_works() {
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir.set_permissions(&file, p.clone()));
+    check!(tmpdir
+        .open(&file)
+        .and_then(|file| file.set_permissions(p.clone())));
     let attr = check!(tmpdir.metadata(&file));
     assert!(attr.permissions().readonly());
 
-    match tmpdir.set_permissions("foo", p.clone()) {
+    match tmpdir
+        .open("foo")
+        .and_then(|file| file.set_permissions(p.clone()))
+    {
         Ok(..) => panic!("wanted an error"),
         Err(..) => {}
     }
 
     p.set_readonly(false);
-    check!(tmpdir.set_permissions(&file, p));
+    check!(tmpdir.open(&file).and_then(|file| file.set_permissions(p)));
 }
 
 #[test]
-#[ignore] // chmod is not implemented yet
 fn fchmod_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
@@ -1252,7 +1261,6 @@ fn file_try_clone() {
 }
 
 #[test]
-#[ignore] // `set_permissions` not yet implemented
 #[cfg(not(windows))]
 fn unlink_readonly() {
     let tmpdir = tmpdir();
@@ -1260,7 +1268,9 @@ fn unlink_readonly() {
     check!(tmpdir.create(&path));
     let mut perm = check!(tmpdir.metadata(&path)).permissions();
     perm.set_readonly(true);
-    check!(tmpdir.set_permissions(&path, perm));
+    check!(tmpdir
+        .open(&path)
+        .and_then(|file| file.set_permissions(perm)));
     check!(tmpdir.remove_file(&path));
 }
 
@@ -1413,7 +1423,6 @@ fn create_dir_all_with_junctions() {
 }
 
 #[test]
-#[ignore] // not yet implemented in cap-std
 fn metadata_access_times() {
     let tmpdir = tmpdir();
 

@@ -23,13 +23,31 @@ pub struct Permissions {
 impl Permissions {
     /// Constructs a new instance of `Self` from the given `std::fs::Permissions`.
     #[inline]
-    pub(crate) fn from_std(std: fs::Permissions) -> Self {
+    pub fn from_std(std: fs::Permissions) -> Self {
         Self {
             readonly: std.readonly(),
 
             #[cfg(any(unix, target_os = "vxworks"))]
             ext: PermissionsExt::from_std(std),
         }
+    }
+
+    /// Consumes `self` and produces a new instance of `std::fs::Permissions`.
+    #[inline]
+    pub fn into_std(self) -> fs::Permissions {
+        #[cfg(windows)]
+        let permissions = {
+            let mut permissions = new_permissions();
+            permissions.set_readonly(self.readonly());
+        };
+
+        #[cfg(unix)]
+        let permissions = {
+            use std::os::unix::fs::PermissionsExt;
+            fs::Permissions::from_mode(self.ext.mode())
+        };
+
+        permissions
     }
 
     /// Returns `true` if these permissions describe a readonly (unwritable) file.
@@ -49,8 +67,27 @@ impl Permissions {
     /// [`std::fs::Permissions::set_readonly`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html#method.set_readonly
     #[inline]
     pub fn set_readonly(&mut self, readonly: bool) {
-        self.readonly = readonly
+        self.readonly = readonly;
+
+        #[cfg(any(unix, target_os = "vxworks"))]
+        self.ext.set_readonly(readonly);
     }
+}
+
+/// On Windows there's no way to construct a new `Permissions` object, so
+/// try to find a file we can open.
+#[cfg(windows)]
+fn new_permissions() -> fs::Permissions {
+    if let Ok(metadata) = std::fs::metadata(Component::CurDir.as_os_str()) {
+        return metadata.permissions();
+    }
+    if let Ok(metadata) = std::fs::metadata(Component::ParentDir.as_os_str()) {
+        return metadata.permissions();
+    }
+    if let Ok(metadata) = std::fs::metadata(Component::RootDir.as_os_str()) {
+        return metadata.permissions();
+    }
+    panic!("Can't find a path to open to construct a `Permissions` object");
 }
 
 #[cfg(unix)]

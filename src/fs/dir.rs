@@ -1,4 +1,4 @@
-use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use std::{
     fmt, fs, io,
     path::{Path, PathBuf},
@@ -32,7 +32,10 @@ use std::os::wasi::{
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model.
+/// absolute paths don't interoperate well with the capability model. And it lacks
+/// a `set_permissions` method because popular host platforms don't have a way to
+/// perform that operation in a manner compatible with cap-std's sandbox; instead,
+/// open the file and call [`File::set_permissions`].
 pub struct Dir {
     std_file: fs::File,
 }
@@ -213,7 +216,7 @@ impl Dir {
         let perm = reader.metadata()?.permissions();
 
         let ret = io::copy(&mut reader, &mut writer)?;
-        self.set_permissions(to, perm)?;
+        writer.set_permissions(perm)?;
         Ok(ret)
     }
 
@@ -363,22 +366,6 @@ impl Dir {
         to: Q,
     ) -> io::Result<()> {
         rename(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
-    }
-
-    /// Changes the permissions found on a file or a directory.
-    ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
-    #[inline]
-    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        todo!(
-            "Dir::set_permissions({:?}, {}, {:?})",
-            self.std_file,
-            path.as_ref().display(),
-            perm
-        )
     }
 
     /// Query the metadata about a file without following symlinks.

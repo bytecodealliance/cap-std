@@ -71,7 +71,7 @@ impl File {
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        self.std.metadata().map(Metadata::from_std)
+        self.std.metadata().map(metadata_from_std)
     }
 
     /// Creates a new `File` instance that shares the same underlying file handle as the existing
@@ -92,8 +92,28 @@ impl File {
     /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        todo!("File::set_permissions({:?})", perm)
+        self.std.set_permissions(permissions_into_std(perm))
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
+    Metadata::from_std(metadata)
+}
+
+#[cfg(target_os = "wasi")]
+fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
+    metadata
+}
+
+#[cfg(not(target_os = "wasi"))]
+fn permissions_into_std(permissions: Permissions) -> fs::Permissions {
+    permissions.into_std()
+}
+
+#[cfg(target_os = "wasi")]
+fn permissions_into_std(permissions: Permissions) -> fs::Permissions {
+    permissions
 }
 
 #[cfg(any(unix, target_os = "wasi"))]

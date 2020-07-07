@@ -1,4 +1,4 @@
-use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use std::{
     fmt,
@@ -10,7 +10,9 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+    cap_primitives::fs::{
+        canonicalize, link, mkdir, open, rename, stat, symlink, unlink, FollowSymlinks,
+    },
 };
 
 #[cfg(windows)]
@@ -32,7 +34,10 @@ use async_std::os::wasi::{
 /// TODO: Windows support.
 ///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model.
+/// absolute paths don't interoperate well with the capability model. And it lacks
+/// a `set_permissions` method because popular host platforms don't have a way to
+/// perform that operation in a manner compatible with cap-std's sandbox; instead,
+/// open the file and call [`File::set_permissions`].
 pub struct Dir {
     std_file: fs::File,
 }
@@ -218,7 +223,7 @@ impl Dir {
         let perm = reader.metadata().await?.permissions();
 
         let ret = io::copy(&mut reader, &mut writer).await?;
-        self.set_permissions(to, perm)?;
+        writer.set_permissions(perm).await?;
         Ok(ret)
     }
 
@@ -366,23 +371,9 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        self.sys.rename(from.as_ref(), &to_dir.sys, to.as_ref())
-    }
-
-    /// Changes the permissions found on a file or a directory.
-    ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
-    #[inline]
-    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        todo!(
-            "Dir::set_permissions({:?}, {}, {:?})",
-            self.std_file,
-            path.as_ref().display(),
-            perm
-        )
+        let file = unsafe { self.as_sync_file() };
+        let to_file = unsafe { to_dir.as_sync_file() };
+        rename(&file, from.as_ref(), &to_file, to.as_ref())
     }
 
     /// Query the metadata about a file without following symlinks.

@@ -12,7 +12,7 @@ impl PermissionsExt {
     pub(crate) fn from_std(std: fs::Permissions) -> Self {
         use std::os::unix::fs::PermissionsExt;
         Self {
-            mode: std.mode() as libc::mode_t,
+            mode: std.mode() as libc::mode_t & 0o7777,
         }
     }
 
@@ -21,7 +21,9 @@ impl PermissionsExt {
     pub(crate) const fn from_libc(mode: libc::mode_t) -> Permissions {
         Permissions {
             readonly: Self::readonly(mode),
-            ext: Self { mode: mode & 0o777 },
+            ext: Self {
+                mode: mode & 0o7777,
+            },
         }
     }
 
@@ -29,6 +31,18 @@ impl PermissionsExt {
     #[inline]
     pub(crate) const fn readonly(mode: libc::mode_t) -> bool {
         mode & 0o222 == 0
+    }
+
+    /// Test whether the given `libc::mode_t` lacks write permissions.
+    #[inline]
+    pub(crate) fn set_readonly(&mut self, readonly: bool) {
+        if readonly {
+            // remove write permission for all classes; equivalent to `chmod a-w <file>`
+            self.mode &= !0o222;
+        } else {
+            // add write permission for all classes; equivalent to `chmod a+w <file>`
+            self.mode |= 0o222;
+        }
     }
 }
 
@@ -38,12 +52,12 @@ impl std::os::unix::fs::PermissionsExt for PermissionsExt {
     }
 
     fn set_mode(&mut self, mode: u32) {
-        self.mode = mode as libc::mode_t
+        self.mode = mode as libc::mode_t & 0o7777;
     }
 
     fn from_mode(mode: u32) -> Self {
         Self {
-            mode: mode as libc::mode_t,
+            mode: mode as libc::mode_t & 0o7777,
         }
     }
 }
