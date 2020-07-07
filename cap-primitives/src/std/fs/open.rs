@@ -54,10 +54,8 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
                     let unchecked_error = match unchecked_error {
-                        OpenUncheckedError::Io(err) => err,
-                        OpenUncheckedError::Symlink => {
-                            io::Error::new(io::ErrorKind::Other, "unexpected ELOOP or EMLINK")
-                        }
+                        OpenUncheckedError::Other(err) => err,
+                        OpenUncheckedError::Symlink(err) => err,
                     };
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());

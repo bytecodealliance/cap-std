@@ -12,7 +12,7 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> Result<fs::File, OpenUncheckedError> {
-    let oflags = compute_oflags(options).map_err(OpenUncheckedError::Io)?;
+    let oflags = compute_oflags(options).map_err(OpenUncheckedError::Other)?;
 
     #[allow(clippy::useless_conversion)]
     let mode = Mode::from_bits_truncate(options.ext.mode as _);
@@ -31,7 +31,7 @@ pub(crate) fn open_unchecked(
         }
     };
     match err.raw_os_error() {
-        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink),
-        _ => Err(OpenUncheckedError::Io(err)),
+        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink(err)),
+        _ => Err(OpenUncheckedError::Other(err)),
     }
 }

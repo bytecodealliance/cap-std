@@ -141,14 +141,14 @@ pub(crate) fn open_manually(
                         dirs.push(prev_base);
                         canonical_path.push(one);
                     }
-                    Err(OpenUncheckedError::Symlink) if use_options.nofollow => {
-                        return symlink_disallowed()
+                    Err(OpenUncheckedError::Symlink(err)) if use_options.nofollow => {
+                        return Err(err)
                     }
-                    Err(OpenUncheckedError::Symlink) => {
+                    Err(OpenUncheckedError::Symlink(_)) => {
                         let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                     }
-                    Err(OpenUncheckedError::Io(e)) => return Err(e),
+                    Err(OpenUncheckedError::Other(e)) => return Err(e),
                 }
             }
         }
@@ -198,16 +198,8 @@ fn escape_attempt() -> io::Result<fs::File> {
     ))
 }
 
-#[cold]
-fn symlink_disallowed() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::Other,
-        "symlink disallowed when nofollow requested",
-    ))
-}
-
 #[derive(Debug)]
 pub(crate) enum OpenUncheckedError {
-    Io(io::Error),
-    Symlink,
+    Other(io::Error),
+    Symlink(io::Error),
 }
