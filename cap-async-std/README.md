@@ -41,8 +41,6 @@ Things to think about:
    `read_link`, `read_dir`, `symlink_metadata`, `canonicalize`. Is it
    worth having our own version of `Path` just to exclude those? Such a
    thing could also exclude absolute paths.
- - Should we provide any of Rust's Unix-specific APIs on Windows, using
-   winx and emulation?
  - Should we propose adding things to Rust's libstd which would help streamline this library?
     - A way to construct an arbitrary [`std::fs::FileType`] and [`std::fs::Metadata`]?
     - A way to read the options out of a [`std::fs::OpenOptions`] and [`std::fs::DirBuilder`]?

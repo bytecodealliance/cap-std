@@ -200,6 +200,4 @@ impl io::Seek for File {
 
 // async_std doesn't have `FileExt`.
 
-// TODO: Use winx to implement "unix" FileExt api on Windows?
-
 // TODO: impl Debug for File? But don't expose File's path...
