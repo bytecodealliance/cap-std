@@ -141,18 +141,14 @@ pub(crate) fn open_manually(
                         dirs.push(prev_base);
                         canonical_path.push(one);
                     }
-                    Err(e) => match e.raw_os_error() {
-                        Some(libc::ELOOP) | Some(libc::EMLINK) if use_options.nofollow => {
-                            return Err(io::Error::from_raw_os_error(libc::ELOOP))
-                        }
-                        Some(libc::ELOOP) | Some(libc::EMLINK) => {
-                            let destination =
-                                resolve_symlink_at(base.as_file(), &one, symlink_count)?;
-                            components
-                                .extend(destination.components().map(to_owned_component).rev());
-                        }
-                        _ => return Err(e),
-                    },
+                    Err(OpenUncheckedError::Symlink(err)) if use_options.nofollow => {
+                        return Err(err)
+                    }
+                    Err(OpenUncheckedError::Symlink(_)) => {
+                        let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
+                        components.extend(destination.components().map(to_owned_component).rev());
+                    }
+                    Err(OpenUncheckedError::Other(e)) => return Err(e),
                 }
             }
         }
@@ -200,4 +196,10 @@ fn escape_attempt() -> io::Result<fs::File> {
         io::ErrorKind::PermissionDenied,
         "a path led outside of the filesystem",
     ))
+}
+
+#[derive(Debug)]
+pub(crate) enum OpenUncheckedError {
+    Other(io::Error),
+    Symlink(io::Error),
 }
