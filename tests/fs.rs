@@ -874,7 +874,6 @@ fn symlinks_work() {
 }
 
 #[test]
-#[ignore] // `Dir::read_link` not yet implemented in cap-std
 fn symlink_noexist() {
     // Symlinks can point to things that don't exist
     let tmpdir = tmpdir();
@@ -889,7 +888,6 @@ fn symlink_noexist() {
 }
 
 #[test]
-#[ignore] // readlink is not implemented yet
 fn read_link() {
     let tmpdir = tmpdir();
     if cfg!(windows) {
@@ -924,7 +922,6 @@ fn read_link() {
 }
 
 #[test]
-#[ignore] // `Dir::read_link` not yet implemented
 fn readlink_not_symlink() {
     let tmpdir = tmpdir();
     match tmpdir.read_link(".") {

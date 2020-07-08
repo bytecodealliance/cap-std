@@ -8,7 +8,7 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, rename, stat, symlink, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink, unlink, FollowSymlinks,
     },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
@@ -290,11 +290,7 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        todo!(
-            "Dir::read_link({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        readlink(&self.std_file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
