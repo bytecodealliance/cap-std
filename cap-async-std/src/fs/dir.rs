@@ -6,21 +6,24 @@ use std::{
     path::{Path, PathBuf},
 };
 
-cfg_if::cfg_if! {
-    if #[cfg(any(unix, target_os = "fuchsia"))] {
-        use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-        use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks};
-        use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-    } else if #[cfg(windows)] {
-        use cap_primitives::fs::{symlink_dir, symlink_file};
-        use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-    } else if #[cfg(target_os = "wasi")] {
-        use async_std::os::wasi::{
-            fs::OpenOptionsExt,
-            io::{AsRawFd, IntoRawFd},
-        };
-    }
-}
+#[cfg(any(unix, target_os = "fuchsia"))]
+use {
+    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
+    async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+};
+
+#[cfg(windows)]
+use {
+    async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+    cap_primitives::fs::{symlink_dir, symlink_file},
+};
+
+#[cfg(target_os = "wasi")]
+use async_std::os::wasi::{
+    fs::OpenOptionsExt,
+    io::{AsRawFd, IntoRawFd},
+};
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -76,23 +79,13 @@ impl Dir {
         Self::_open_file_with(&file, path.as_ref(), options)
     }
 
-    #[cfg(any(unix, target_os = "fuchsia"))]
+    #[cfg(not(target_os = "wasi"))]
     fn _open_file_with(
         file: &std::fs::File,
         path: &Path,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        open(file, path.as_ref(), options).map(|f| unsafe { File::from_raw_fd(f.into_raw_fd()) })
-    }
-
-    #[cfg(windows)]
-    fn _open_file_with(
-        file: &std::fs::File,
-        path: &Path,
-        options: &OpenOptions,
-    ) -> io::Result<File> {
-        open(file, path.as_ref(), options)
-            .map(|f| unsafe { File::from_raw_handle(f.into_raw_handle()) })
+        open(file, path, options).map(|f| File::from_std(f.into()))
     }
 
     #[cfg(target_os = "wasi")]
@@ -101,7 +94,7 @@ impl Dir {
         path: &Path,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        options.open_at(&self.std_file, path).map(File::from_std)
+        options.open_at(&self.std_file, path).map(|f| File::from_std(f.into()))
     }
 
     /// Attempts to open a directory.

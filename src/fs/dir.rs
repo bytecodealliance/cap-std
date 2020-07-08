@@ -4,21 +4,24 @@ use std::{
     path::{Path, PathBuf},
 };
 
-cfg_if::cfg_if! {
-    if #[cfg(any(unix, target_os = "fuchsia"))] {
-        use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-        use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks};
-        use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-    } else if #[cfg(windows)] {
-        use cap_primitives::fs::{symlink_dir, symlink_file};
-        use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-    } else if #[cfg(target_os = "wasi")] {
-        use std::os::wasi::{
-            fs::OpenOptionsExt,
-            io::{AsRawFd, IntoRawFd},
-        };
-    }
-}
+#[cfg(any(unix, target_os = "fuchsia"))]
+use {
+    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
+    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+    std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+};
+
+#[cfg(windows)]
+use {
+    cap_primitives::fs::{symlink_dir, symlink_file},
+    std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+};
+
+#[cfg(target_os = "wasi")]
+use std::os::wasi::{
+    fs::OpenOptionsExt,
+    io::{AsRawFd, IntoRawFd},
+};
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -75,7 +78,7 @@ impl Dir {
 
     #[cfg(not(target_os = "wasi"))]
     fn _open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        open(&self.std_file, path.as_ref(), options).map(File::from_std)
+        open(&self.std_file, path, options).map(File::from_std)
     }
 
     #[cfg(target_os = "wasi")]
