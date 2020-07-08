@@ -95,7 +95,6 @@ impl Dir {
             .map(|f| unsafe { File::from_raw_handle(f.into_raw_handle()) })
     }
 
-    // TODO this should probably be delegated to `cap-primitives`
     #[cfg(target_os = "wasi")]
     fn _open_file_with(
         file: &std::fs::File,

@@ -78,7 +78,6 @@ impl Dir {
         open(&self.std_file, path.as_ref(), options).map(File::from_std)
     }
 
-    // TODO this should probably be delegated to `cap-primitives`
     #[cfg(target_os = "wasi")]
     fn _open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         options.open_at(&self.std_file, path).map(File::from_std)
