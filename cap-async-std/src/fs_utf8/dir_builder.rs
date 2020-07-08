@@ -1,3 +1,5 @@
+use async_std::fs;
+
 /// A builder used to create directories in various manners.
 ///
 /// This corresponds to [`std::fs::DirBuilder`].
@@ -14,12 +16,14 @@ pub struct DirBuilder {
 
 impl DirBuilder {
     /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
-    pub fn from_std(std: async_std::fs::DirBuilder) -> Self {
+    #[inline]
+    pub const fn from_std(std: fs::DirBuilder) -> Self {
         Self::from_cap_std(crate::fs::DirBuilder::from_std(std))
     }
 
     /// Constructs a new instance of `Self` from the given `cap_std::fs::File`.
-    pub fn from_cap_std(cap_std: crate::fs::DirBuilder) -> Self {
+    #[inline]
+    pub const fn from_cap_std(cap_std: crate::fs::DirBuilder) -> Self {
         Self { cap_std }
     }
 

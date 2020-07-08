@@ -27,7 +27,7 @@ use async_std::os::wasi::{
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Add OFlag::CLOEXEC to yanix and use it in `open_file` and friends.
+/// TODO: Add `OFlag::CLOEXEC` to yanix and use it in `open_file` and friends.
 ///
 /// TODO: Windows support.
 ///

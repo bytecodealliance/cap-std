@@ -14,8 +14,8 @@
 //! This combined a lack of absolute paths provides a natural
 //! capability-oriented interface.
 //!
-//! [`async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/index.html
-//! [`async_std::fs`'s free functions]: https://docs.rs/async-std/latest/async_std/fs/index.html#functions
+//! [`async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/
+//! [`async_std::fs`'s free functions]: https://docs.rs/async-std/latest/async_std/fs/#functions
 //! [`Dir`]: struct.Dir.html
 
 mod dir;

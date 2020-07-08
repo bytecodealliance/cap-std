@@ -24,7 +24,6 @@
 //! [`Dir`]: fs/struct.Dir.html
 //! [`Catalog`]: net/struct.Catalog.html
 
-#![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 

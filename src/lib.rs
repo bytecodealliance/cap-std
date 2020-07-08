@@ -20,7 +20,7 @@
 //! On WASI, use of this library closely reflects the underlying system
 //! API, so it avoids compatibility layers.
 //!
-//! [`std`]: https://doc.rust-lang.org/std/index.html
+//! [`std`]: https://doc.rust-lang.org/std/
 //! [`Dir`]: fs/struct.Dir.html
 //! [`Catalog`]: net/struct.Catalog.html
 

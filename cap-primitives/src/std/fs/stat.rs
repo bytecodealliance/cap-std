@@ -1,4 +1,4 @@
-//! This defines `stat`, the primary entrypoint to sandboxed `stat`.
+//! This defines `stat`, the primary entrypoint to sandboxed metadata querying.
 
 #[cfg(debug_assertions)]
 use super::get_path;
@@ -9,8 +9,10 @@ use std::{fs, io, path::Path};
 
 /// Perform an `fstatat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
+#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[inline]
 pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Metadata> {
-    // Call `stat`.
+    // Call the underlying implementation.
     let result = stat_impl(start, path, follow);
 
     // Do an unsandboxed lookup and check that we found the same result.

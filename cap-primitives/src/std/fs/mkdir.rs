@@ -1,4 +1,4 @@
-//! This defines `mkdir`, the primary entrypoint to sandboxed `mkdir`.
+//! This defines `mkdir`, the primary entrypoint to sandboxed directory creation.
 
 use crate::fs::mkdir_impl;
 #[cfg(debug_assertions)]
@@ -7,8 +7,10 @@ use std::{fs, io, path::Path};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
+#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[inline]
 pub fn mkdir(start: &fs::File, path: &Path) -> io::Result<()> {
-    // Call `mkdir`.
+    // Call the underlying implementation.
     let result = mkdir_impl(start, path);
 
     // Do an unsandboxed lookup and check that we found the same result.

@@ -6,7 +6,7 @@
 //! connect to, this crates has methods on [`Catalog`] which operate on addresses
 //! which must be present in the catalog.
 //!
-//! [`std::net`]: https://doc.rust-lang.org/std/net/index.html
+//! [`std::net`]: https://doc.rust-lang.org/std/net/
 //! [`Catalog`]: struct.Catalog.html
 
 mod catalog;
