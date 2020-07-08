@@ -184,9 +184,8 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
     }
 
     #[inline]
-    fn security_qos_flags(&mut self, flags: u32) -> &mut std::fs::OpenOptions {
-        unimplemented!(
-            "can't implement OpenOptionsExt::security_qos_flags because the return type is wrong"
-        )
+    fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
+        self.ext.security_qos_flags(flags);
+        self
     }
 }

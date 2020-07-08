@@ -4,6 +4,11 @@ mod metadata_ext;
 mod open_options_ext;
 mod open_unchecked;
 mod resolve_symlink_at;
+mod stat_unchecked;
+mod symlink_unchecked;
+mod unlink_unchecked;
+mod link_unchecked;
+mod mkdir_unchecked;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use file_type_ext::*;
@@ -12,3 +17,15 @@ pub(crate) use metadata_ext::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use resolve_symlink_at::*;
+pub(crate) use stat_unchecked::*;
+pub(crate) use symlink_unchecked::*;
+pub(crate) use unlink_unchecked::*;
+pub(crate) use link_unchecked::*;
+pub(crate) use mkdir_unchecked::*;
+
+pub(crate) use crate::fs::stat_via_parent as stat_impl;
+pub(crate) use crate::fs::mkdir_via_parent as mkdir_impl;
+pub(crate) use crate::fs::unlink_via_parent as unlink_impl;
+pub(crate) use crate::fs::link_via_parent as link_impl;
+pub(crate) use crate::fs::canonicalize_manually as canonicalize_impl;
+pub(crate) use crate::fs::symlink_via_parent as symlink_impl;
