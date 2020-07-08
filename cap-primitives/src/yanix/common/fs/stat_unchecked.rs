@@ -1,10 +1,5 @@
 use crate::fs::{FollowSymlinks, Metadata, MetadataExt};
-use std::{
-    path::Path,
-    ffi::OsStr,
-    fs, io,
-    os::unix::io::AsRawFd,
-};
+use std::{ffi::OsStr, fs, io, os::unix::io::AsRawFd, path::Path};
 use yanix::file::{fstatat, AtFlag};
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform sandboxing.

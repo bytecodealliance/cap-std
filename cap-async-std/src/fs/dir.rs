@@ -1,17 +1,28 @@
-#[cfg(unix)]
-use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-use crate::{
-    fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
-    sys,
-};
-#[cfg(unix)]
-use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(windows)]
-use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
 use async_std::{fs, io};
 use std::{
     fmt,
+    mem::ManuallyDrop,
     path::{Path, PathBuf},
+};
+
+#[cfg(any(unix, target_os = "fuchsia"))]
+use {
+    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
+    async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+};
+
+#[cfg(windows)]
+use {
+    async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+    cap_primitives::fs::{symlink_dir, symlink_file},
+};
+
+#[cfg(target_os = "wasi")]
+use async_std::os::wasi::{
+    fs::OpenOptionsExt,
+    io::{AsRawFd, IntoRawFd},
 };
 
 /// A reference to an open directory on a filesystem.
@@ -23,22 +34,20 @@ use std::{
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model.
 pub struct Dir {
-    sys: sys::fs::Dir,
+    std_file: fs::File,
 }
 
 impl Dir {
     /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
     #[inline]
     pub fn from_std_file(std_file: fs::File) -> Self {
-        Self {
-            sys: sys::fs::Dir::from_std_file(std_file),
-        }
+        Self { std_file }
     }
 
     /// Consumes `self` and returns an `async_std::fs::File`.
     #[inline]
     pub fn into_std_file(self) -> fs::File {
-        self.sys.into_std_file()
+        self.std_file
     }
 
     /// Attempts to open a file in read-only mode.
@@ -66,13 +75,47 @@ impl Dir {
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        self.sys.open_file_with(path.as_ref(), options)
+        let file = unsafe { self.as_sync_file() };
+        Self::_open_file_with(&file, path.as_ref(), options)
+    }
+
+    #[cfg(not(target_os = "wasi"))]
+    fn _open_file_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
+        open(file, path, options).map(|f| File::from_std(f.into()))
+    }
+
+    #[cfg(target_os = "wasi")]
+    fn _open_file_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
+        options
+            .open_at(&self.std_file, path)
+            .map(|f| File::from_std(f.into()))
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self.sys.open_dir(path.as_ref())
+        self._open_dir(path.as_ref())
+    }
+
+    #[cfg(unix)]
+    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
+        use std::os::unix::fs::OpenOptionsExt;
+        use yanix::file::OFlag;
+        self.open_file_with(
+            path,
+            OpenOptions::new()
+                .read(true)
+                .custom_flags(OFlag::DIRECTORY.bits()),
+        )
+        .map(|file| crate::fs::Dir::from_std_file(file.std))
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -83,7 +126,8 @@ impl Dir {
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.create_dir(path.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        mkdir(&file, path.as_ref())
     }
 
     /// Recursively create a directory and all of its parent components if they are missing.
@@ -147,7 +191,8 @@ impl Dir {
     /// [`std::fs::canonicalize`]: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        self.sys.canonicalize(path.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        canonicalize(&file, path.as_ref())
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission
@@ -189,7 +234,9 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        self.sys.hard_link(src.as_ref(), &dst_dir.sys, dst.as_ref())
+        let src_file = unsafe { self.as_sync_file() };
+        let dst_file = unsafe { dst_dir.as_sync_file() };
+        link(&src_file, src.as_ref(), &dst_file, dst.as_ref())
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.
@@ -200,7 +247,8 @@ impl Dir {
     /// [`std::fs::metadata`]: https://doc.rust-lang.org/std/fs/fn.metadata.html
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        self.sys.metadata(path.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        stat(&file, path.as_ref(), FollowSymlinks::Yes)
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -211,7 +259,11 @@ impl Dir {
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        self.sys.read_dir(path.as_ref())
+        unimplemented!(
+            "Dir::read_dir({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -237,7 +289,11 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        self.sys.read_link(path.as_ref())
+        unimplemented!(
+            "Dir::read_link({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Read the entire contents of a file into a string.
@@ -262,7 +318,11 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.remove_dir(path.as_ref())
+        unimplemented!(
+            "Dir::remove_dir({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -273,7 +333,11 @@ impl Dir {
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
     pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.remove_dir_all(path.as_ref())
+        unimplemented!(
+            "Dir::remove_dir_all({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Removes a file from a filesystem.
@@ -284,7 +348,8 @@ impl Dir {
     /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self.sys.remove_file(path.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        unlink(&file, path.as_ref())
     }
 
     /// Rename a file or directory to a new name, replacing the original file if to already exists.
@@ -295,7 +360,12 @@ impl Dir {
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
     pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        self.sys.rename(from.as_ref(), to.as_ref())
+        unimplemented!(
+            "Dir::rename({:?}, {}, {})",
+            self.std_file,
+            from.as_ref().display(),
+            to.as_ref().display()
+        )
     }
 
     /// Changes the permissions found on a file or a directory.
@@ -306,7 +376,12 @@ impl Dir {
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
     #[inline]
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        self.sys.set_permissions(path.as_ref(), perm)
+        unimplemented!(
+            "Dir::set_permissions({:?}, {}, {:?})",
+            self.std_file,
+            path.as_ref().display(),
+            perm
+        )
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -317,7 +392,8 @@ impl Dir {
     /// [`std::fs::symlink_metadata`]: https://doc.rust-lang.org/std/fs/fn.symlink_metadata.html
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        self.sys.symlink_metadata(path.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        stat(&file, path.as_ref(), FollowSymlinks::No)
     }
 
     /// Write a slice as the entire contents of a file.
@@ -345,10 +421,14 @@ impl Dir {
     #[inline]
     pub fn create_with_dir_builder<P: AsRef<Path>>(
         &self,
-        dir_builder: &DirBuilder,
+        _dir_builder: &DirBuilder,
         path: P,
     ) -> io::Result<()> {
-        self.sys.create_with_dir_builder(dir_builder, path.as_ref())
+        unimplemented!(
+            "Dir::create_with_dir_builder({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Creates a new symbolic link on a filesystem.
@@ -366,7 +446,8 @@ impl Dir {
     ))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.sys.symlink(src.as_ref(), dst.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        symlink(src.as_ref(), &file, dst.as_ref())
     }
 
     /// Creates a new file symbolic link on a filesystem.
@@ -378,7 +459,8 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.cap_std.symlink_file(src.as_ref(), dst.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        symlink_file(src.as_ref(), &file, dst.as_ref())
     }
 
     /// Creates a new directory symlink on a filesystem.
@@ -390,7 +472,8 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.cap_std.symlink_dir(src.as_ref(), dst.as_ref())
+        let file = unsafe { self.as_sync_file() };
+        symlink_dir(src.as_ref(), &file, dst.as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -402,7 +485,11 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
-        self.sys.bind_unix_listener(path.as_ref())
+        unimplemented!(
+            "Dir::bind_unix_listener({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Connects to the socket named by path.
@@ -414,7 +501,11 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
-        self.sys.connect_unix_stream(path.as_ref())
+        unimplemented!(
+            "Dir::connect_unix_stream({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Creates a Unix datagram socket bound to the given path.
@@ -426,7 +517,11 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
-        self.sys.bind_unix_datagram(path.as_ref())
+        unimplemented!(
+            "Dir::bind_unix_datagram({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Connects the socket to the specified address.
@@ -439,10 +534,14 @@ impl Dir {
     #[inline]
     pub fn connect_unix_datagram<P: AsRef<Path>>(
         &self,
-        unix_datagram: &UnixDatagram,
+        _unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        self.sys.connect_unix_datagram(unix_datagram, path.as_ref())
+        unimplemented!(
+            "Dir::connect_unix_datagram({:?}, {})",
+            self.std_file,
+            path.as_ref().display()
+        )
     }
 
     /// Sends data on the socket to the specified address.
@@ -455,12 +554,16 @@ impl Dir {
     #[inline]
     pub fn send_to_unix_datagram_addr<P: AsRef<Path>>(
         &self,
-        unix_datagram: &UnixDatagram,
+        _unix_datagram: &UnixDatagram,
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        self.sys
-            .send_to_unix_datagram_addr(unix_datagram, buf, path.as_ref())
+        unimplemented!(
+            "Dir::send_to_unix_datagram_addr({:?}, {:?}, {})",
+            self.std_file,
+            buf,
+            path.as_ref().display()
+        )
     }
 
     // async_std doesn't have `try_clone`.
@@ -498,6 +601,38 @@ impl Dir {
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
         self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
     }
+
+    // async_std doesn't have `try_clone`.
+
+    /// Utility for returning `self`'s `async_std::fs::File` member as a
+    /// `std::fs::File` for synchronous operations.
+    ///
+    /// # Safety
+    ///
+    /// Callers must avoid using `self`'s `async_std::fs::File` while the
+    /// resulting `std::fs::File` is live, and must ensure that the resulting
+    /// `std::fs::File` outlives `self`'s `async_std::fs::File`.
+    #[inline]
+    unsafe fn as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
+        self._as_sync_file()
+    }
+
+    #[cfg(any(
+        unix,
+        target_os = "redox",
+        target_os = "vxworks",
+        target_os = "fuchsia"
+    ))]
+    unsafe fn _as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
+        ManuallyDrop::new(std::fs::File::from_raw_fd(self.std_file.as_raw_fd()))
+    }
+
+    #[cfg(windows)]
+    unsafe fn _as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
+        ManuallyDrop::new(std::fs::File::from_raw_handle(
+            self.std_file.as_raw_handle(),
+        ))
+    }
 }
 
 #[cfg(unix)]
@@ -520,7 +655,7 @@ impl FromRawHandle for Dir {
 impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
-        self.sys.as_raw_fd()
+        self.std_file.as_raw_fd()
     }
 }
 
@@ -528,7 +663,7 @@ impl AsRawFd for Dir {
 impl AsRawHandle for Dir {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
-        self.sys.as_raw_handle()
+        self.std_file.as_raw_handle()
     }
 }
 
@@ -536,7 +671,7 @@ impl AsRawHandle for Dir {
 impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
-        self.sys.into_raw_fd()
+        self.std_file.into_raw_fd()
     }
 }
 
@@ -544,7 +679,7 @@ impl IntoRawFd for Dir {
 impl IntoRawHandle for Dir {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
-        self.sys.into_raw_handle()
+        self.std_file.into_raw_handle()
     }
 }
 
@@ -564,6 +699,57 @@ async fn initial_buffer_size(file: &File) -> usize {
 impl fmt::Debug for Dir {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.sys.fmt(f)
+        let mut b = f.debug_struct("Dir");
+        fmt_debug_dir(&self.std_file, &mut b);
+        b.finish()
     }
+}
+
+#[cfg(any(unix, target_os = "fuchsia"))]
+fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
+    unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
+        let mode = yanix::fcntl::get_status_flags(fd);
+        if mode.is_err() {
+            return None;
+        }
+        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+            yanix::file::OFlag::RDONLY => Some((true, false)),
+            yanix::file::OFlag::RDWR => Some((true, true)),
+            yanix::file::OFlag::WRONLY => Some((false, true)),
+            _ => None,
+        }
+    }
+
+    let fd = fd.as_raw_fd();
+    b.field("fd", &fd);
+    if let Some((read, write)) = unsafe { get_mode(fd) } {
+        b.field("read", &read).field("write", &write);
+    }
+}
+
+#[cfg(target_os = "wasi")]
+fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
+    unsafe fn get_mode(fd: std::os::wasi::io::RawFd) -> Option<(bool, bool)> {
+        let mode = yanix::fcntl::get_status_flags(fd);
+        if mode.is_err() {
+            return None;
+        }
+        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+            yanix::file::OFlag::RDONLY => Some((true, false)),
+            yanix::file::OFlag::RDWR => Some((true, true)),
+            yanix::file::OFlag::WRONLY => Some((false, true)),
+            _ => None,
+        }
+    }
+
+    let fd = fd.as_raw_fd();
+    b.field("fd", &fd);
+    if let Some((read, write)) = unsafe { get_mode(fd) } {
+        b.field("read", &read).field("write", &write);
+    }
+}
+
+#[cfg(windows)]
+fn fmt_debug_dir(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
+    // TODO fill in the blanks
 }

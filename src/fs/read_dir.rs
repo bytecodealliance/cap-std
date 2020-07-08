@@ -1,4 +1,6 @@
-use crate::{fs::DirEntry, sys};
+#![allow(dead_code)] // TODO: When more things are implemented, remove these.
+
+use crate::fs::{Dir, DirEntry};
 use std::io;
 
 /// Iterator over the entries in a directory.
@@ -16,7 +18,7 @@ use std::io;
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir<'dir> {
-    sys: sys::fs::ReadDir<'dir>,
+    dir: &'dir Dir,
 }
 
 impl<'dir> Iterator for ReadDir<'dir> {
@@ -24,7 +26,7 @@ impl<'dir> Iterator for ReadDir<'dir> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.sys.next()
+        unimplemented!("ReadDir::next()")
     }
 }
 

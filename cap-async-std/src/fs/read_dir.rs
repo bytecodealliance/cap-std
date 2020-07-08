@@ -1,4 +1,4 @@
-use crate::{fs::DirEntry, sys};
+use crate::fs::{Dir, DirEntry};
 use async_std::io;
 
 /// Iterator over the entries in a directory.
@@ -16,7 +16,7 @@ use async_std::io;
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir<'dir> {
-    sys: sys::fs::ReadDir<'dir>,
+    dir: &'dir Dir,
 }
 
 impl<'dir> Iterator for ReadDir<'dir> {
@@ -24,7 +24,7 @@ impl<'dir> Iterator for ReadDir<'dir> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.sys.next()
+        unimplemented!("ReadDir::next()")
     }
 }
 

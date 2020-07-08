@@ -1,9 +1,9 @@
-use std::fs;
 use crate::fs::Permissions;
+use std::fs;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct PermissionsExt {
-    mode: libc::mode_t
+    mode: libc::mode_t,
 }
 
 impl PermissionsExt {
@@ -12,7 +12,7 @@ impl PermissionsExt {
     pub(crate) fn from_std(std: fs::Permissions) -> Self {
         use std::os::unix::fs::PermissionsExt;
         Self {
-            mode: std.mode() as libc::mode_t
+            mode: std.mode() as libc::mode_t,
         }
     }
 
@@ -21,7 +21,7 @@ impl PermissionsExt {
     pub(crate) const fn from_libc(mode: libc::mode_t) -> Permissions {
         Permissions {
             readonly: Self::readonly(mode),
-            ext: Self { mode: mode & 0o777 }
+            ext: Self { mode: mode & 0o777 },
         }
     }
 
@@ -42,6 +42,8 @@ impl std::os::unix::fs::PermissionsExt for PermissionsExt {
     }
 
     fn from_mode(mode: u32) -> Self {
-        Self { mode: mode as libc::mode_t }
+        Self {
+            mode: mode as libc::mode_t,
+        }
     }
 }

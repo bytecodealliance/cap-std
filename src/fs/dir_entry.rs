@@ -1,8 +1,5 @@
-use crate::{
-    fs::{FileType, Metadata},
-    sys,
-};
-use std::{ffi, fmt, io};
+use crate::fs::{Dir, FileType, Metadata};
+use std::{ffi, fmt, io, path::PathBuf};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -19,7 +16,11 @@ use std::{ffi, fmt, io};
 ///
 /// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry<'dir> {
-    sys: sys::fs::DirEntry<'dir>,
+    dir: &'dir Dir,
+    name: PathBuf,
+    file_type: FileType,
+    #[cfg(any(unix, target_os = "fuchsia", target_os = "vxworks"))]
+    ino: u64,
 }
 
 impl<'dir> DirEntry<'dir> {
@@ -30,7 +31,7 @@ impl<'dir> DirEntry<'dir> {
     /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        self.sys.metadata()
+        self.dir.metadata(&self.name)
     }
 
     /// Returns the file type for the file that this entry points at.
@@ -40,7 +41,7 @@ impl<'dir> DirEntry<'dir> {
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
-        self.sys.file_type()
+        Ok(self.file_type)
     }
 
     /// Returns the bare file name of this directory entry without any other leading path component.
@@ -50,7 +51,7 @@ impl<'dir> DirEntry<'dir> {
     /// [`std::fs::DirEntry::file_name`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_name
     #[inline]
     pub fn file_name(&self) -> ffi::OsString {
-        self.sys.file_name()
+        self.name.clone().into_os_string()
     }
 }
 
@@ -58,7 +59,7 @@ impl<'dir> DirEntry<'dir> {
 impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
     #[inline]
     fn ino(&self) -> u64 {
-        self.sys.ino()
+        self.ino
     }
 }
 

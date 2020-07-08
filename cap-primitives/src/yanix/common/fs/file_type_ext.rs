@@ -1,5 +1,5 @@
-use std::fs;
 use crate::fs::FileType;
+use std::fs;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum Inner {
