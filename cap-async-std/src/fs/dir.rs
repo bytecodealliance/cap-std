@@ -94,7 +94,9 @@ impl Dir {
         path: &Path,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        options.open_at(&self.std_file, path).map(|f| File::from_std(f.into()))
+        options
+            .open_at(&self.std_file, path)
+            .map(|f| File::from_std(f.into()))
     }
 
     /// Attempts to open a directory.

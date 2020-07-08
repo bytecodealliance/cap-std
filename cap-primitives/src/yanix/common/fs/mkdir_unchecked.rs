@@ -1,16 +1,8 @@
-use std::{
-    ffi::OsStr,
-    fs, io,
-    path::Path,
-    os::unix::io::AsRawFd,
-};
+use std::{ffi::OsStr, fs, io, os::unix::io::AsRawFd, path::Path};
 use yanix::file::{mkdirat, Mode};
 
 /// *Unsandboxed* function similar to `mkdir`, but which does not perform sandboxing.
-pub(crate) fn mkdir_unchecked(
-    start: &fs::File,
-    path: &Path,
-) -> io::Result<()> {
+pub(crate) fn mkdir_unchecked(start: &fs::File, path: &Path) -> io::Result<()> {
     // POSIX's `mkdirat` with an empty path returns `ENOENT`, so use "." instead.
     let path = if path.as_os_str().is_empty() {
         OsStr::new(".")

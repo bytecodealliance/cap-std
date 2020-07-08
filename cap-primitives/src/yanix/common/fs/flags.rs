@@ -1,6 +1,6 @@
 use crate::fs::OpenOptions;
-use yanix::file::OFlag;
 use std::io;
+use yanix::file::OFlag;
 
 pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlag> {
     // TODO: Add `CLOEXEC` when yanix is updated.
@@ -43,11 +43,13 @@ fn get_creation_mode(options: &OpenOptions) -> io::Result<libc::c_int> {
         }
     }
 
-    Ok(match (options.create, options.truncate, options.create_new) {
-        (false, false, false) => 0,
-        (true, false, false) => libc::O_CREAT,
-        (false, true, false) => libc::O_TRUNC,
-        (true, true, false) => libc::O_CREAT | libc::O_TRUNC,
-        (_, _, true) => libc::O_CREAT | libc::O_EXCL,
-    })
+    Ok(
+        match (options.create, options.truncate, options.create_new) {
+            (false, false, false) => 0,
+            (true, false, false) => libc::O_CREAT,
+            (false, true, false) => libc::O_TRUNC,
+            (true, true, false) => libc::O_CREAT | libc::O_TRUNC,
+            (_, _, true) => libc::O_CREAT | libc::O_EXCL,
+        },
+    )
 }

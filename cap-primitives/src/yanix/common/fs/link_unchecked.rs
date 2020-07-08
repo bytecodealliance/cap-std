@@ -1,10 +1,5 @@
 use crate::fs::FollowSymlinks;
-use std::{
-    path::Path,
-    ffi::OsStr,
-    fs, io,
-    os::unix::io::AsRawFd,
-};
+use std::{ffi::OsStr, fs, io, os::unix::io::AsRawFd, path::Path};
 use yanix::file::{linkat, AtFlag};
 
 /// *Unsandboxed* function similar to `link`, but which does not perform sandboxing.
@@ -32,5 +27,13 @@ pub(crate) fn link_unchecked(
         FollowSymlinks::No => AtFlag::empty(),
     };
 
-    unsafe { linkat(old_start.as_raw_fd(), old_path, new_start.as_raw_fd(), new_path, flags) }
+    unsafe {
+        linkat(
+            old_start.as_raw_fd(),
+            old_path,
+            new_start.as_raw_fd(),
+            new_path,
+            flags,
+        )
+    }
 }

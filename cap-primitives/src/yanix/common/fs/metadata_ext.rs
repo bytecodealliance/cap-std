@@ -1,9 +1,9 @@
 #![allow(clippy::useless_conversion)]
 
+use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
 use std::convert::TryFrom;
 use std::fs;
-use std::time::{SystemTime, Duration};
-use crate::fs::{FileTypeExt, PermissionsExt, Metadata};
+use std::time::{Duration, SystemTime};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -78,7 +78,7 @@ impl MetadataExt {
                 ctime_nsec: mode.st_ctime_nsec,
                 blksize: u64::try_from(mode.st_blksize).unwrap(),
                 blocks: u64::try_from(mode.st_blocks).unwrap(),
-            }
+            },
         }
     }
 
@@ -90,7 +90,10 @@ impl MetadataExt {
 }
 
 fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
-    SystemTime::UNIX_EPOCH.checked_add(Duration::new(u64::try_from(sec).unwrap(), u32::try_from(nsec).unwrap()))
+    SystemTime::UNIX_EPOCH.checked_add(Duration::new(
+        u64::try_from(sec).unwrap(),
+        u32::try_from(nsec).unwrap(),
+    ))
 }
 
 impl std::os::unix::fs::MetadataExt for MetadataExt {
