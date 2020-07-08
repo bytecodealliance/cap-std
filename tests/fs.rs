@@ -9,29 +9,74 @@ use std::io::prelude::*;
 
 use cap_std::fs::{self, OpenOptions};
 use std::{
-    io::{ErrorKind, SeekFrom},
+    io::{self, ErrorKind, SeekFrom},
     path::{Path, PathBuf},
     str,
 };
 /*use std::thread;*/
-use sys_common::io::tmpdir;
+use sys_common::io::{tmpdir, TempDir};
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
-/*
-#[cfg(unix)]
-use cap_std::os::unix::fs::symlink as symlink_dir;
-#[cfg(unix)]
-use cap_std::os::unix::fs::symlink as symlink_file;
-#[cfg(unix)]
-use cap_std::os::unix::fs::symlink as symlink_junction;
+#[cfg(any(
+    unix,
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "vxwords",
+    target_os = "fuchsia"
+))]
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+    tmpdir.symlink(src, dst)
+}
+#[cfg(any(
+    unix,
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "vxwords",
+    target_os = "fuchsia"
+))]
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink(src, dst)
+}
+#[cfg(any(
+    unix,
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "vxwords",
+    target_os = "fuchsia"
+))]
+fn symlink_junction<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink(src, dst)
+}
 #[cfg(windows)]
-use cap_std::os::windows::fs::{symlink_dir, symlink_file};
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+    tmpdir.symlink_dir(src, dst)
+}
 #[cfg(windows)]
-use cap_std::sys::fs::symlink_junction;
-*/
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink_file(src, dst)
+}
+#[cfg(windows)]
+fn symlink_junction<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    unimplemented!("symlink_junction")
+}
 
-/*
 // Several test fail on windows if the user does not have permission to
 // create symlinks (the `SeCreateSymbolicLinkPrivilege`). Instead of
 // disabling these test on Windows, use this function to test whether we
@@ -44,14 +89,13 @@ pub fn got_symlink_permission(tmpdir: &TempDir) -> bool {
     }
     let link = "some_hopefully_unique_link_name";
 
-    match symlink_file(r"nonexisting_target", link) {
+    match symlink_file(r"nonexisting_target", tmpdir, link) {
         Ok(_) => true,
         // ERROR_PRIVILEGE_NOT_HELD = 1314
         Err(ref err) if err.raw_os_error() == Some(1314) => false,
         Err(_) => true,
     }
 }
-*/
 
 #[test]
 fn file_test_io_smoke_test() {
@@ -297,7 +341,7 @@ fn file_test_io_read_write_at() {
 }
 
 #[test]
-#[ignore] // not implemented in cap-std yet
+#[ignore] // set_permissions not implemented in cap-std yet
 #[cfg(unix)]
 fn set_get_unix_permissions() {
     use std::os::unix::fs::PermissionsExt;
@@ -359,7 +403,7 @@ fn file_test_io_seek_read_write() {
         assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 14);
     }
     {
-        let mut read = check!(File::open(filename));
+        let mut read = check!(tmpdir.open_file(filename));
         assert_eq!(check!(read.seek_read(&mut buf, 0)), content.len());
         assert_eq!(str::from_utf8(&buf[..content.len()]), Ok(content));
         assert_eq!(check!(read.seek(SeekFrom::Current(0))), 14);
@@ -559,7 +603,6 @@ fn recursive_mkdir_empty() {
     check!(tmpdir.create_dir_all(Path::new("")));
 }
 
-/*
 #[test]
 #[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir() {
@@ -570,30 +613,31 @@ fn recursive_rmdir() {
     let d2 = PathBuf::from("d2");
     let canary = d2.join("do_not_delete");
     check!(tmpdir.create_dir_all(&dtt));
-    check!(tmpdir.create_dir_all(d2));
+    check!(tmpdir.create_dir_all(&d2));
     check!(check!(tmpdir.create_file(&canary)).write(b"foo"));
-    check!(symlink_junction(d2, &dt.join("d2")));
-    let _ = symlink_file(&canary, &d1.join("canary"));
+    check!(symlink_junction(d2, &tmpdir, &dt.join("d2")));
+    let _ = symlink_file(&canary, &tmpdir, &d1.join("canary"));
     check!(tmpdir.remove_dir_all(&d1));
 
-    assert!(!d1.is_dir());
-    assert!(canary.exists());
+    assert!(!tmpdir.is_dir(d1));
+    assert!(tmpdir.exists(canary));
 }
 
 #[test]
+#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
     let tmpdir = tmpdir();
     let link = "d1";
     let dir = "d2";
-    let canary = dir.join("do_not_delete");
-    check!(fs::create_dir_all(&dir));
-    check!(check!(File::create(&canary)).write(b"foo"));
-    check!(symlink_junction(&dir, link));
-    check!(fs::remove_dir_all(link));
+    let canary = "do_not_delete";
+    check!(tmpdir.create_dir_all(&dir));
+    check!(check!(tmpdir.create_file(&canary)).write(b"foo"));
+    check!(symlink_junction(&dir, &tmpdir, link));
+    check!(tmpdir.remove_dir_all(link));
 
-    assert!(!link.is_dir());
-    assert!(canary.exists());
+    assert!(!tmpdir.is_dir(link));
+    assert!(tmpdir.exists(canary));
 }
 
 #[test]
@@ -607,9 +651,9 @@ fn recursive_rmdir_of_file_symlink() {
 
     let f1 = "f1";
     let f2 = "f2";
-    check!(check!(File::create(&f1)).write(b"foo"));
-    check!(symlink_file(&f1, &f2));
-    match fs::remove_dir_all(&f2) {
+    check!(check!(tmpdir.create_file(&f1)).write(b"foo"));
+    check!(symlink_file(&f1, &tmpdir, &f2));
+    match tmpdir.remove_dir_all(&f2) {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
@@ -617,36 +661,36 @@ fn recursive_rmdir_of_file_symlink() {
 
 #[test]
 fn unicode_path_is_dir() {
-    assert!(Path::new(".").is_dir());
-    assert!(!Path::new("test/stdtest/fs.rs").is_dir());
-
     let tmpdir = tmpdir();
 
-    let mut dirpath = tmpdir.path().to_path_buf();
+    assert!(tmpdir.is_dir(Path::new(".")));
+    assert!(!tmpdir.is_dir(Path::new("test/stdtest/fs.rs")));
+
+    let mut dirpath = PathBuf::new();
     dirpath.push("test-가一ー你好");
-    check!(fs::create_dir(&dirpath));
-    assert!(dirpath.is_dir());
+    check!(tmpdir.create_dir(&dirpath));
+    assert!(tmpdir.is_dir(&dirpath));
 
     let mut filepath = dirpath;
     filepath.push("unicode-file-\u{ac00}\u{4e00}\u{30fc}\u{4f60}\u{597d}.rs");
-    check!(File::create(&filepath)); // ignore return; touch only
-    assert!(!filepath.is_dir());
-    assert!(filepath.exists());
+    check!(tmpdir.create_file(&filepath)); // ignore return; touch only
+    assert!(!tmpdir.is_dir(&filepath));
+    assert!(tmpdir.exists(filepath));
 }
 
 #[test]
 fn unicode_path_exists() {
-    assert!(Path::new(".").exists());
-    assert!(!Path::new("test/nonexistent-bogus-path").exists());
-
     let tmpdir = tmpdir();
-    let unicode = tmpdir.path();
+
+    assert!(tmpdir.exists(Path::new(".")));
+    assert!(!tmpdir.exists(Path::new("test/nonexistent-bogus-path")));
+
+    let unicode = PathBuf::new();
     let unicode = unicode.join("test-각丁ー再见");
-    check!(fs::create_dir(&unicode));
-    assert!(unicode.exists());
-    assert!(!Path::new("test/unicode-bogus-path-각丁ー再见").exists());
+    check!(tmpdir.create_dir(&unicode));
+    assert!(tmpdir.exists(unicode));
+    assert!(!tmpdir.exists(Path::new("test/unicode-bogus-path-각丁ー再见")));
 }
-*/
 
 #[test]
 fn copy_file_does_not_exist() {
@@ -657,8 +701,8 @@ fn copy_file_does_not_exist() {
     match tmpdir.copy(&from, &to) {
         Ok(..) => panic!(),
         Err(..) => {
-            assert!(!from.exists());
-            assert!(!to.exists());
+            assert!(!tmpdir.exists(from));
+            assert!(!tmpdir.exists(to));
         }
     }
 }
@@ -670,7 +714,7 @@ fn copy_src_does_not_exist() {
     let to = "out.txt";
     check!(check!(tmpdir.create_file(&to)).write(b"hello"));
     assert!(tmpdir.copy(&from, &to).is_err());
-    assert!(!from.exists());
+    assert!(!tmpdir.exists(from));
     let mut v = Vec::new();
     check!(check!(tmpdir.open_file(&to)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
@@ -777,29 +821,29 @@ fn copy_file_returns_metadata_len() {
     assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
 
-/*
 #[test]
+#[ignore] // `Dir::set_permissions` not yet implemented in cap-std
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
     if !got_symlink_permission(&tmp) {
         return;
     };
 
-    let in_path = tmp.join("in.txt");
-    let out_path = tmp.join("out.txt");
-    let out_path_symlink = tmp.join("out_symlink.txt");
+    let in_path = "in.txt";
+    let out_path = "out.txt";
+    let out_path_symlink = "out_symlink.txt";
 
-    check!(tmpdir.write_file(&in_path, "foo"));
-    check!(tmpdir.write_file(&out_path, "bar"));
-    check!(symlink_file(&out_path, &out_path_symlink));
+    check!(tmp.write_file(&in_path, "foo"));
+    check!(tmp.write_file(&out_path, "bar"));
+    check!(symlink_file(&out_path, &tmp, &out_path_symlink));
 
-    check!(tmpdir.copy(&in_path, &out_path_symlink));
+    check!(tmp.copy(&in_path, &out_path_symlink));
 
-    assert!(check!(out_path_symlink.symlink_metadata())
+    assert!(check!(tmp.symlink_metadata(out_path_symlink))
         .file_type()
         .is_symlink());
-    assert_eq!(check!(tmpdir.read_file(&out_path_symlink)), b"foo".to_vec());
-    assert_eq!(check!(tmpdir.read_file(&out_path)), b"foo".to_vec());
+    assert_eq!(check!(tmp.read_file(&out_path_symlink)), b"foo".to_vec());
+    assert_eq!(check!(tmp.read_file(&out_path)), b"foo".to_vec());
 }
 
 #[test]
@@ -812,19 +856,22 @@ fn symlinks_work() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(File::create(&input)).write("foobar".as_bytes()));
-    check!(symlink_file(&input, &out));
-    assert!(check!(out.symlink_metadata()).file_type().is_symlink());
+    check!(check!(tmpdir.create_file(&input)).write("foobar".as_bytes()));
+    check!(symlink_file(&input, &tmpdir, &out));
+    assert!(check!(tmpdir.symlink_metadata(out))
+        .file_type()
+        .is_symlink());
     assert_eq!(
-        check!(fs::metadata(&out)).len(),
-        check!(fs::metadata(&input)).len()
+        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(&input)).len()
     );
     let mut v = Vec::new();
-    check!(check!(File::open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open_file(&out)).read_to_end(&mut v));
     assert_eq!(v, b"foobar".to_vec());
 }
 
 #[test]
+#[ignore] // `Dir::read_link` not yet implemented in cap-std
 fn symlink_noexist() {
     // Symlinks can point to things that don't exist
     let tmpdir = tmpdir();
@@ -834,56 +881,54 @@ fn symlink_noexist() {
 
     // Use a relative path for testing. Symlinks get normalized by Windows,
     // so we may not get the same path back for absolute paths
-    check!(symlink_file(&"foo", "bar"));
-    assert_eq!(
-        check!(fs::read_link(&tmpdir.join("bar"))).to_str().unwrap(),
-        "foo"
-    );
+    check!(symlink_file(&"foo", &tmpdir, "bar"));
+    assert_eq!(check!(tmpdir.read_link("bar")).to_str().unwrap(), "foo");
 }
 
 #[test]
+#[ignore] // readlink is not implemented yet
 fn read_link() {
+    let tmpdir = tmpdir();
     if cfg!(windows) {
         // directory symlink
         assert_eq!(
-            check!(fs::read_link(r"C:\Users\All Users"))
+            check!(tmpdir.read_link(r"C:\Users\All Users"))
                 .to_str()
                 .unwrap(),
             r"C:\ProgramData"
         );
         // junction
         assert_eq!(
-            check!(fs::read_link(r"C:\Users\Default User"))
+            check!(tmpdir.read_link(r"C:\Users\Default User"))
                 .to_str()
                 .unwrap(),
             r"C:\Users\Default"
         );
         // junction with special permissions
         assert_eq!(
-            check!(fs::read_link(r"C:\Documents and Settings\"))
+            check!(tmpdir.read_link(r"C:\Documents and Settings\"))
                 .to_str()
                 .unwrap(),
             r"C:\Users"
         );
     }
-    let tmpdir = tmpdir();
     let link = "link";
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_file(&"foo", &link));
-    assert_eq!(check!(fs::read_link(&link)).to_str().unwrap(), "foo");
+    check!(symlink_file(&"foo", &tmpdir, &link));
+    assert_eq!(check!(tmpdir.read_link(&link)).to_str().unwrap(), "foo");
 }
 
 #[test]
+#[ignore] // `Dir::read_link` not yet implemented
 fn readlink_not_symlink() {
     let tmpdir = tmpdir();
-    match fs::read_link(tmpdir.path()) {
+    match tmpdir.read_link(".") {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
 }
-*/
 
 #[test]
 fn links_work() {
@@ -917,31 +962,32 @@ fn links_work() {
     }
 }
 
-/*
 #[test]
+#[ignore] // chmod is not implemented yet
 fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
 
-    check!(File::create(&file));
-    let attr = check!(fs::metadata(&file));
+    check!(tmpdir.create_file(&file));
+    let attr = check!(tmpdir.metadata(&file));
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(fs::set_permissions(&file, p.clone()));
-    let attr = check!(fs::metadata(&file));
+    check!(tmpdir.set_permissions(&file, p.clone()));
+    let attr = check!(tmpdir.metadata(&file));
     assert!(attr.permissions().readonly());
 
-    match fs::set_permissions(&tmpdir.join("foo"), p.clone()) {
+    match tmpdir.set_permissions("foo", p.clone()) {
         Ok(..) => panic!("wanted an error"),
         Err(..) => {}
     }
 
     p.set_readonly(false);
-    check!(fs::set_permissions(&file, p));
+    check!(tmpdir.set_permissions(&file, p));
 }
 
 #[test]
+#[ignore] // chmod is not implemented yet
 fn fchmod_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
@@ -958,7 +1004,6 @@ fn fchmod_works() {
     p.set_readonly(false);
     check!(file.set_permissions(p));
 }
-*/
 
 #[test]
 fn sync_doesnt_kill_anything() {
@@ -1242,14 +1287,12 @@ fn mkdir_trailing_slash() {
     check!(tmpdir.create_dir_all(&path.join("a/")));
 }
 
-/*
 #[test]
 fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
-    let tmpdir = fs::canonicalize(tmpdir.path()).unwrap();
-    let file = "test";
-    File::create(&file).unwrap();
-    assert_eq!(fs::canonicalize(&file).unwrap(), file);
+    let file = Path::new("test");
+    tmpdir.create_file(&file).unwrap();
+    assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
 }
 
 #[test]
@@ -1259,24 +1302,27 @@ fn realpath_works() {
         return;
     };
 
-    let tmpdir = fs::canonicalize(tmpdir.path()).unwrap();
-    let file = "test";
-    let dir = "test2";
+    let file = PathBuf::from("test");
+    let dir = PathBuf::from("test2");
     let link = dir.join("link");
-    let linkdir = "test3";
+    let linkdir = PathBuf::from("test3");
 
-    File::create(&file).unwrap();
-    fs::create_dir(&dir).unwrap();
-    symlink_file(&file, &link).unwrap();
-    symlink_dir(&dir, &linkdir).unwrap();
+    tmpdir.create_file(&file).unwrap();
+    tmpdir.create_dir(&dir).unwrap();
+    symlink_file(Path::new("..").join(&file), &tmpdir, &link).unwrap();
+    symlink_dir(&dir, &tmpdir, &linkdir).unwrap();
 
-    assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
+    assert!(tmpdir
+        .symlink_metadata(&link)
+        .unwrap()
+        .file_type()
+        .is_symlink());
 
-    assert_eq!(fs::canonicalize(&tmpdir).unwrap(), tmpdir);
-    assert_eq!(fs::canonicalize(&file).unwrap(), file);
-    assert_eq!(fs::canonicalize(&link).unwrap(), file);
-    assert_eq!(fs::canonicalize(&linkdir).unwrap(), dir);
-    assert_eq!(fs::canonicalize(&linkdir.join("link")).unwrap(), file);
+    assert_eq!(tmpdir.canonicalize(".").unwrap(), PathBuf::from(""));
+    assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
+    assert_eq!(tmpdir.canonicalize(&link).unwrap(), file);
+    assert_eq!(tmpdir.canonicalize(&linkdir).unwrap(), dir);
+    assert_eq!(tmpdir.canonicalize(&linkdir.join("link")).unwrap(), file);
 }
 
 #[test]
@@ -1286,30 +1332,28 @@ fn realpath_works_tricky() {
         return;
     };
 
-    let tmpdir = fs::canonicalize(tmpdir.path()).unwrap();
-    let a = "a";
+    let a = PathBuf::from("a");
     let b = a.join("b");
     let c = b.join("c");
     let d = a.join("d");
     let e = d.join("e");
     let f = a.join("f");
 
-    fs::create_dir_all(&b).unwrap();
-    fs::create_dir_all(&d).unwrap();
-    File::create(&f).unwrap();
+    tmpdir.create_dir_all(&b).unwrap();
+    tmpdir.create_dir_all(&d).unwrap();
+    tmpdir.create_file(&f).unwrap();
     if cfg!(not(windows)) {
-        symlink_file("../d/e", &c).unwrap();
-        symlink_file("../f", &e).unwrap();
+        symlink_file("../d/e", &tmpdir, &c).unwrap();
+        symlink_file("../f", &tmpdir, &e).unwrap();
     }
     if cfg!(windows) {
-        symlink_file(r"..\d\e", &c).unwrap();
-        symlink_file(r"..\f", &e).unwrap();
+        symlink_file(r"..\d\e", &tmpdir, &c).unwrap();
+        symlink_file(r"..\f", &tmpdir, &e).unwrap();
     }
 
-    assert_eq!(fs::canonicalize(&c).unwrap(), f);
-    assert_eq!(fs::canonicalize(&e).unwrap(), f);
+    assert_eq!(tmpdir.canonicalize(&c).unwrap(), f);
+    assert_eq!(tmpdir.canonicalize(&e).unwrap(), f);
 }
-*/
 
 #[test]
 #[ignore] // `read_dir` not yet implemented in cap-std
@@ -1355,36 +1399,34 @@ fn read_dir_not_found() {
     assert_eq!(res.err().unwrap().kind(), ErrorKind::NotFound);
 }
 
-/*
 #[test]
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();
     let target = "target";
 
-    let junction = "junction";
+    let junction = PathBuf::from("junction");
     let b = junction.join("a/b");
 
-    let link = "link";
+    let link = PathBuf::from("link");
     let d = link.join("c/d");
 
-    fs::create_dir(&target).unwrap();
+    tmpdir.create_dir(&target).unwrap();
 
-    check!(symlink_junction(&target, &junction));
-    check!(fs::create_dir_all(&b));
+    check!(symlink_junction(&target, &tmpdir, &junction));
+    check!(tmpdir.create_dir_all(&b));
     // the junction itself is not a directory, but `is_dir()` on a Path
     // follows links
-    assert!(junction.is_dir());
-    assert!(b.exists());
+    assert!(tmpdir.is_dir(junction));
+    assert!(tmpdir.exists(b));
 
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_dir(&target, &link));
-    check!(fs::create_dir_all(&d));
-    assert!(link.is_dir());
-    assert!(d.exists());
+    check!(symlink_dir(&target, &tmpdir, &link));
+    check!(tmpdir.create_dir_all(&d));
+    assert!(tmpdir.is_dir(link));
+    assert!(tmpdir.exists(d));
 }
-*/
 
 #[test]
 #[ignore] // not yet implemented in cap-std

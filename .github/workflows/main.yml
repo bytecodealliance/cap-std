@@ -39,7 +39,7 @@ jobs:
         rustup update stable
         rustup default stable
     - name: Build
-      run: cargo build --all --release -vv
+      run: cargo build --all --all-features --release -vv
 
   test:
     name: Test
@@ -58,5 +58,5 @@ jobs:
         rustup update stable
         rustup default stable
     - name: Test
-      run: cargo test --all
+      run: cargo test --all-features --all
 

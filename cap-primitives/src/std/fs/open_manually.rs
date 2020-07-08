@@ -46,25 +46,49 @@ struct CanonicalPath<'path_buf> {
 impl<'path_buf> CanonicalPath<'path_buf> {
     fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
         Self {
-            path,
             #[cfg(debug_assertions)]
             debug: PathBuf::new(),
+
+            path,
         }
     }
 
     fn push(&mut self, one: OsString) {
         #[cfg(debug_assertions)]
         self.debug.push(one.clone());
+
         if let Some(path) = &mut self.path {
             path.push(one)
         }
     }
 
-    fn pop(&mut self) {
+    fn pop(&mut self) -> bool {
         #[cfg(debug_assertions)]
         self.debug.pop();
+
         if let Some(path) = &mut self.path {
-            path.pop();
+            path.pop()
+        } else {
+            true
+        }
+    }
+
+    /// The complete canonical path has been scanned. Set `path` to `None`
+    /// so that it isn't cleared when `self` is dropped.
+    fn complete(&mut self) {
+        self.path = None;
+    }
+}
+
+impl<'path_buf> Drop for CanonicalPath<'path_buf> {
+    fn drop(&mut self) {
+        // If `self.path` is still `Some` here, it means that we haven't called
+        // `complete()` yet, meaning the `CanonicalPath` is being dropped before
+        // the complete path has been processed. In that case, clear `path` to
+        // indicate that we weren't able to obtain a complete path.
+        if let Some(path) = &mut self.path {
+            path.clear();
+            self.path = None;
         }
     }
 }
@@ -85,6 +109,12 @@ pub(crate) fn open_manually_wrapper(
 /// each component individually, and resolving symbolic links manually. This
 /// implementation can also optionally produce the canonical path computed along
 /// the way.
+///
+/// Callers can request the canonical path by passing `Some` to
+/// `canonical_path`.  If the complete canonical path is processed, even if
+/// `open_manually` returns an `Err`, it will be stored in the provided
+/// `&mut PathBuf`. If an error occurs before the complete canonical path is
+/// processed, the provided `&mut PathBuf` is cleared to empty.
 pub(crate) fn open_manually(
     start: &fs::File,
     path: &Path,
@@ -109,8 +139,6 @@ pub(crate) fn open_manually(
                 // If the "." is the entire string, open it. Otherwise just skip it.
                 if components.is_empty() {
                     components.push(OwnedComponent::Normal(OsString::from(".")))
-                } else {
-                    canonical_path.push(OsString::from("."));
                 }
                 continue;
             }
@@ -122,7 +150,7 @@ pub(crate) fn open_manually(
                     Some(dir) => base = dir,
                     None => return escape_attempt(),
                 }
-                canonical_path.pop();
+                assert!(canonical_path.pop());
             }
             OwnedComponent::Normal(one) => {
                 let dir_options = OpenOptions::new().read(true).clone();
@@ -139,7 +167,9 @@ pub(crate) fn open_manually(
                     Ok(file) => {
                         let prev_base = mem::replace(&mut base, MaybeOwnedFile::Owned(file));
                         dirs.push(prev_base);
-                        canonical_path.push(one);
+                        if one != "." {
+                            canonical_path.push(one);
+                        }
                     }
                     Err(OpenUncheckedError::Symlink(err)) if use_options.nofollow => {
                         return Err(err)
@@ -148,7 +178,15 @@ pub(crate) fn open_manually(
                         let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                     }
-                    Err(OpenUncheckedError::Other(e)) => return Err(e),
+                    Err(OpenUncheckedError::Other(e)) => {
+                        // An error occurred. If this was the last component, record it as the
+                        // last component of the canonical path, even if we couldn't open it.
+                        if components.is_empty() {
+                            canonical_path.push(one);
+                            canonical_path.complete();
+                        }
+                        return Err(e);
+                    }
                 }
             }
         }
@@ -187,6 +225,7 @@ pub(crate) fn open_manually(
         ),
     }
 
+    canonical_path.complete();
     base.into_file()
 }
 

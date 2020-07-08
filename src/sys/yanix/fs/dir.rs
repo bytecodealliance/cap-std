@@ -4,7 +4,11 @@ use crate::{
     fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir},
     os::unix::net::{UnixDatagram, UnixListener, UnixStream},
 };
-use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
+#[cfg(unix)]
+use cap_primitives::fs::symlink;
+use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
+#[cfg(windows)]
+use cap_primitives::fs::{symlink_dir, symlink_file};
 use std::{
     fmt, fs, io,
     os::unix::{
@@ -59,8 +63,7 @@ impl Dir {
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
+        canonicalize(&self.std_file, path)
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
@@ -114,11 +117,7 @@ impl Dir {
     }
 
     pub(crate) fn symlink_metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!(
-            "Dir::symlink_metadata({:?}, {:?})",
-            self.std_file,
-            path.display()
-        )
+        stat(&self.std_file, path, FollowSymlinks::No)
     }
 
     pub(crate) fn create_with_dir_builder(
@@ -133,13 +132,24 @@ impl Dir {
         )
     }
 
+    #[cfg(any(
+        unix,
+        target_os = "redox",
+        target_os = "vxwords",
+        target_os = "fuchsia"
+    ))]
     pub(crate) fn symlink(&self, src: &Path, dst: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::symlink({:?}, {}, {})",
-            self.std_file,
-            src.display(),
-            dst.display()
-        )
+        symlink(src, &self.std_file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_file(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        symlink_file(src, &self.std_file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_dir(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        symlink_dir(src, &self.std_file, dst)
     }
 
     pub(crate) fn bind_unix_listener(&self, path: &Path) -> io::Result<UnixListener> {

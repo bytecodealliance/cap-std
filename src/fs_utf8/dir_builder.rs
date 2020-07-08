@@ -51,7 +51,7 @@ impl DirBuilder {
 #[cfg(unix)]
 impl std::os::unix::fs::DirBuilderExt for DirBuilder {
     #[inline]
-    fn mode(&mut self, mode: libc::mode_t) -> &mut Self {
+    fn mode(&mut self, mode: u32) -> &mut Self {
         self.cap_std.mode(mode);
         self
     }

@@ -9,7 +9,11 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd},
     },
 };
-use cap_primitives::fs::{link, mkdir, open, stat, unlink, FollowSymlinks};
+#[cfg(unix)]
+use cap_primitives::fs::symlink;
+use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
+#[cfg(windows)]
+use cap_primitives::fs::{symlink_dir, symlink_file};
 use std::{
     fmt,
     mem::ManuallyDrop,
@@ -63,17 +67,10 @@ impl Dir {
     }
 
     pub(crate) fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        // TODO Implement canoncalize without returning an absolute path.
-        unimplemented!("Dir::canonicalize({:?}, {})", self.std_file, path.display())
-    }
-
-    pub(crate) fn copy(&self, from: &Path, to: &Path) -> io::Result<u64> {
-        unimplemented!(
-            "Dir::copy({:?}, {}, {})",
-            self.std_file,
-            from.display(),
-            to.display()
-        )
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        canonicalize(&file, path)
     }
 
     pub(crate) fn hard_link(&self, src: &Path, dst_dir: &Dir, dst: &Path) -> io::Result<()> {
@@ -131,11 +128,10 @@ impl Dir {
     }
 
     pub(crate) fn symlink_metadata(&self, path: &Path) -> io::Result<Metadata> {
-        unimplemented!(
-            "Dir::symlink_metadata({:?}, {:?})",
-            self.std_file,
-            path.display()
-        )
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        stat(&file, path, FollowSymlinks::No)
     }
 
     pub(crate) fn create_with_dir_builder(
@@ -150,13 +146,33 @@ impl Dir {
         )
     }
 
+    #[cfg(any(
+        unix,
+        target_os = "redox",
+        target_os = "vxwords",
+        target_os = "fuchsia"
+    ))]
     pub(crate) fn symlink(&self, src: &Path, dst: &Path) -> io::Result<()> {
-        unimplemented!(
-            "Dir::symlink({:?}, {}, {})",
-            self.std_file,
-            src.display(),
-            dst.display()
-        )
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        symlink(src, &file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_file(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        symlink_file(src, &self.std_file, dst)
+    }
+
+    #[cfg(windows)]
+    pub(crate) fn symlink_dir(&self, src: &Path, dst: &Path) -> io::Result<()> {
+        use std::os::unix::io::FromRawFd;
+        let file =
+            ManuallyDrop::new(unsafe { std::fs::File::from_raw_fd(self.std_file.as_raw_fd()) });
+        symlink_dir(src.as_ref(), &self.std_file, dst.as_ref())
     }
 
     pub(crate) fn bind_unix_listener(&self, path: &Path) -> io::Result<UnixListener> {

@@ -1,4 +1,4 @@
-use crate::fs::Metadata;
+use crate::fs::{Metadata, Permissions};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -83,6 +83,16 @@ impl File {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         Ok(Self::from_std(self.std.try_clone()?))
+    }
+
+    /// Changes the permissions on the underlying file.
+    ///
+    /// This corresponds to [`std::fs::File::set_permissions`].
+    ///
+    /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
+    #[inline]
+    pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
+        unimplemented!("File::set_permissions({:?})", perm)
     }
 }
 

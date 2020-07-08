@@ -1,9 +1,9 @@
-use crate::fs::Metadata;
+use crate::fs::{Metadata, Permissions};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-use std::{fs, io, process};
+use std::{fmt, fs, io, process};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -85,6 +85,16 @@ impl File {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         Ok(Self::from_cap_std(self.cap_std.try_clone()?))
+    }
+
+    /// Changes the permissions on the underlying file.
+    ///
+    /// This corresponds to [`std::fs::File::set_permissions`].
+    ///
+    /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
+    #[inline]
+    pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
+        self.cap_std.set_permissions(perm)
     }
 }
 
@@ -313,4 +323,8 @@ impl std::os::windows::fs::FileExt for File {
     }
 }
 
-// TODO: impl Debug for File? But don't expose File's path...
+impl fmt::Debug for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
+}
