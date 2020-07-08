@@ -6,6 +6,11 @@ use std::fs;
 /// This corresponds to [`std::fs::Permissions`].
 ///
 /// [`std::fs::Permissions`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html
+///
+/// <details>
+/// We need to define our own version because the libstd `Permissions` doesn't have
+/// a public constructor that we can use.
+/// </details>
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Permissions {
     pub(crate) readonly: bool,

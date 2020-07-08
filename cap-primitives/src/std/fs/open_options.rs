@@ -11,6 +11,11 @@ use crate::fs::OpenOptionsExt;
 /// [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::open_file_with`]: struct.Dir.html#method.open_file_with
+///
+/// <details>
+/// We need to define our own version because the libstd `OpenOptions` doesn't have
+/// public accessors that we can use.
+/// </details>
 #[derive(Debug, Clone)]
 pub struct OpenOptions {
     pub(crate) read: bool,

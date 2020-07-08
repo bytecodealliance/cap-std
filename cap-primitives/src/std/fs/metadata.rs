@@ -6,6 +6,11 @@ use std::{fs, io, time::SystemTime};
 /// This corresponds to [`std::fs::Metadata`].
 ///
 /// [`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
+///
+/// <details>
+/// We need to define our own version because the libstd `Metadata` doesn't have
+/// a public constructor that we can use.
+/// </details>
 #[derive(Debug, Clone)]
 pub struct Metadata {
     pub(crate) file_type: FileType,
