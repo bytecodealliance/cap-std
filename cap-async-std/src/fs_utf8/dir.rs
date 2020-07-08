@@ -458,11 +458,10 @@ impl Dir {
     /// [`std::path::Path::exists`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.exists
     #[inline]
     pub fn exists<P: AsRef<str>>(&self, path: P) -> bool {
-        let path = match from_utf8(&path) {
-            Ok(path) => path,
-            Err(_) => return false,
-        };
-        self.cap_std.exists(path)
+        match from_utf8(&path) {
+            Ok(path) => self.cap_std.exists(path),
+            Err(_) => false,
+        }
     }
 
     /// Returns `true` if the path exists on disk and is pointing at a regular file.
@@ -473,11 +472,10 @@ impl Dir {
     /// [`std::path::Path::is_file`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file
     #[inline]
     pub fn is_file<P: AsRef<str>>(&self, path: P) -> bool {
-        let path = match from_utf8(&path) {
-            Ok(path) => path,
-            Err(_) => return false,
-        };
-        self.cap_std.is_file(path)
+        match from_utf8(&path) {
+            Ok(path) => self.cap_std.is_file(path),
+            Err(_) => false,
+        }
     }
 
     /// Checks if `path` is a directory.
@@ -489,11 +487,10 @@ impl Dir {
     /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
     #[inline]
     pub fn is_dir<P: AsRef<str>>(&self, path: P) -> bool {
-        let path = match from_utf8(&path) {
-            Ok(path) => path,
+        match from_utf8(&path) {
+            Ok(path) => self.cap_std.is_dir(path),
             Err(_) => return false,
-        };
-        self.cap_std.is_dir(path)
+        }
     }
 }
 
