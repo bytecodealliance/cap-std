@@ -2,7 +2,7 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use std::{io, net, time::Duration};
 
 /// A UDP socket.
@@ -330,7 +330,7 @@ impl FromRawFd for UdpSocket {
 impl FromRawSocket for UdpSocket {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_socket(handle))
+        Self::from_std(net::UdpSocket::from_raw_socket(socket))
     }
 }
 
@@ -359,10 +359,10 @@ impl IntoRawFd for UdpSocket {
 }
 
 #[cfg(windows)]
-impl IntoRawHandle for UdpSocket {
+impl IntoRawSocket for UdpSocket {
     #[inline]
-    fn into_raw_handle(self) -> RawHandle {
-        self.std.into_raw_handle()
+    fn into_raw_socket(self) -> RawSocket {
+        self.std.into_raw_socket()
     }
 }
 

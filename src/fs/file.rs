@@ -325,28 +325,34 @@ impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
-
-        if cfg!(any(unix, target_os = "wasi", target_os = "fuchsia")) {
-            unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
-                let mode = yanix::fcntl::get_status_flags(fd);
-                if mode.is_err() {
-                    return None;
-                }
-                match mode.unwrap() & yanix::file::OFlag::ACCMODE {
-                    yanix::file::OFlag::RDONLY => Some((true, false)),
-                    yanix::file::OFlag::RDWR => Some((true, true)),
-                    yanix::file::OFlag::WRONLY => Some((false, true)),
-                    _ => None,
-                }
-            }
-
-            let fd = self.std.as_raw_fd();
-            b.field("fd", &fd);
-            if let Some((read, write)) = unsafe { get_mode(fd) } {
-                b.field("read", &read).field("write", &write);
-            }
-        }
-
+        fmt_debug_file(self.std, &mut b);
         b.finish()
     }
+}
+
+#[cfg(any(unix, target_os = "wasi", target_os = "fuchsia"))]
+fn fmt_debug_file(fd: impl AsRawFd, b: &mut fmt::DebugStruct) {
+    unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
+        let mode = yanix::fcntl::get_status_flags(fd);
+        if mode.is_err() {
+            return None;
+        }
+        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+            yanix::file::OFlag::RDONLY => Some((true, false)),
+            yanix::file::OFlag::RDWR => Some((true, true)),
+            yanix::file::OFlag::WRONLY => Some((false, true)),
+            _ => None,
+        }
+    }
+
+    let fd = fd.as_raw_fd();
+    b.field("fd", &fd);
+    if let Some((read, write)) = unsafe { get_mode(fd) } {
+        b.field("read", &read).field("write", &write);
+    }
+}
+
+#[cfg(windows)]
+fn fmt_debug_file(fd: impl AsRawHandle, b: &mut fmt::DebugStruct) {
+    // TODO fill in the blanks
 }

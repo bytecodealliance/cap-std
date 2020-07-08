@@ -591,7 +591,7 @@ impl FromRawFd for Dir {
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     #[inline]
-    unsafe fn from_raw_fd(handle: RawHandle) -> Self {
+    unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))
     }
 }
