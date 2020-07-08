@@ -1,19 +1,24 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
-#[cfg(unix)]
-use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-#[cfg(unix)]
-use cap_primitives::fs::symlink;
-use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, unlink, FollowSymlinks};
-#[cfg(windows)]
-use cap_primitives::fs::{symlink_dir, symlink_file};
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(windows)]
-use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{
     fmt, fs, io,
     path::{Path, PathBuf},
 };
+
+cfg_if::cfg_if! {
+    if #[cfg(any(unix, target_os = "fuchsia"))] {
+        use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
+        use cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks};
+        use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+    } else if #[cfg(windows)] {
+        use cap_primitives::fs::{symlink_dir, symlink_file};
+        use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+    } else if #[cfg(target_os = "wasi")] {
+        use std::os::wasi::{
+            fs::OpenOptionsExt,
+            io::{AsRawFd, IntoRawFd},
+        };
+    }
+}
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -65,7 +70,18 @@ impl Dir {
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
+        self._open_file_with(path.as_ref(), options)
+    }
+
+    #[cfg(not(target_os = "wasi"))]
+    fn _open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         open(&self.std_file, path.as_ref(), options).map(File::from_std)
+    }
+
+    // TODO this should probably be delegated to `cap-primitives`
+    #[cfg(target_os = "wasi")]
+    fn _open_file_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
+        options.open_at(&self.std_file, path).map(File::from_std)
     }
 
     /// Attempts to open a directory.
@@ -74,7 +90,7 @@ impl Dir {
         self._open_dir(path.as_ref())
     }
 
-    #[cfg(unix)]
+    #[cfg(any(unix, target_os = "fuchsia"))]
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::unix::fs::OpenOptionsExt;
         use yanix::file::OFlag;
@@ -642,6 +658,28 @@ impl fmt::Debug for Dir {
 #[cfg(any(unix, target_os = "fuchsia"))]
 fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
     unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
+        let mode = yanix::fcntl::get_status_flags(fd);
+        if mode.is_err() {
+            return None;
+        }
+        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
+            yanix::file::OFlag::RDONLY => Some((true, false)),
+            yanix::file::OFlag::RDWR => Some((true, true)),
+            yanix::file::OFlag::WRONLY => Some((false, true)),
+            _ => None,
+        }
+    }
+
+    let fd = fd.as_raw_fd();
+    b.field("fd", &fd);
+    if let Some((read, write)) = unsafe { get_mode(fd) } {
+        b.field("read", &read).field("write", &write);
+    }
+}
+
+#[cfg(target_os = "wasi")]
+fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
+    unsafe fn get_mode(fd: std::os::wasi::io::RawFd) -> Option<(bool, bool)> {
         let mode = yanix::fcntl::get_status_flags(fd);
         if mode.is_err() {
             return None;
