@@ -196,8 +196,6 @@ impl io::Seek for File {
 
 // async_std doesn't have `FileExt`.
 
-// TODO: Use winx to implement "unix" FileExt api on Windows?
-
 impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

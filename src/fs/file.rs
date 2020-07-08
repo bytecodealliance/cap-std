@@ -311,8 +311,6 @@ impl std::os::windows::fs::FileExt for File {
     }
 }
 
-// TODO: Use winx to implement "unix" FileExt api on Windows?
-
 impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

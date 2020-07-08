@@ -14,7 +14,6 @@ pub(crate) fn stat_unchecked(
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
     // POSIX's `fstatat` with an empty path returns `ENOENT`, so use "." instead.
-    // TODO: Use `AT_EMPTY_PATH` instead, on platforms that support it?
     let path = if path.components().next().is_none() {
         OsStr::new(".")
     } else {

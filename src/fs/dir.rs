@@ -80,8 +80,6 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
-    ///
-    /// TODO: Should this return a `Dir` with the newly created directory?
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self.sys.create_dir(path.as_ref())

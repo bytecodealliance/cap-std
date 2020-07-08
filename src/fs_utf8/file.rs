@@ -313,6 +313,4 @@ impl std::os::windows::fs::FileExt for File {
     }
 }
 
-// TODO: Use winx to implement "unix" FileExt api on Windows?
-
 // TODO: impl Debug for File? But don't expose File's path...
