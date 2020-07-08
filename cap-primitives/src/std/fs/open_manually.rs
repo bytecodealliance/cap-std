@@ -46,15 +46,17 @@ struct CanonicalPath<'path_buf> {
 impl<'path_buf> CanonicalPath<'path_buf> {
     fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
         Self {
-            path,
             #[cfg(debug_assertions)]
             debug: PathBuf::new(),
+
+            path,
         }
     }
 
     fn push(&mut self, one: OsString) {
         #[cfg(debug_assertions)]
         self.debug.push(one.clone());
+
         if let Some(path) = &mut self.path {
             path.push(one)
         }
@@ -63,6 +65,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     fn pop(&mut self) -> bool {
         #[cfg(debug_assertions)]
         self.debug.pop();
+
         if let Some(path) = &mut self.path {
             path.pop()
         } else {
@@ -79,6 +82,10 @@ impl<'path_buf> CanonicalPath<'path_buf> {
 
 impl<'path_buf> Drop for CanonicalPath<'path_buf> {
     fn drop(&mut self) {
+        // If `self.path` is still `Some` here, it means that we haven't called
+        // `complete()` yet, meaning the `CanonicalPath` is being dropped before
+        // the complete path has been processed. In that case, clear `path` to
+        // indicate that we weren't able to obtain a complete path.
         if let Some(path) = &mut self.path {
             path.clear();
             self.path = None;
@@ -102,6 +109,12 @@ pub(crate) fn open_manually_wrapper(
 /// each component individually, and resolving symbolic links manually. This
 /// implementation can also optionally produce the canonical path computed along
 /// the way.
+///
+/// Callers can request the canonical path by passing `Some` to
+/// `canonical_path`.  If the complete canonical path is processed, even if
+/// `open_manually` returns an `Err`, it will be stored in the provided
+/// `&mut PathBuf`. If an error occurs before the complete canonical path is
+/// processed, the provided `&mut PathBuf` is cleared to empty.
 pub(crate) fn open_manually(
     start: &fs::File,
     path: &Path,
