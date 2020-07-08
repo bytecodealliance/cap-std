@@ -63,7 +63,7 @@ impl MetadataExt {
 
             ext: Self {
                 dev: u64::try_from(mode.st_dev).unwrap(),
-                ino: mode.st_ino,
+                ino: mode.st_ino.into(),
                 mode: u32::from(mode.st_mode),
                 nlink: u64::from(mode.st_nlink),
                 uid: mode.st_uid,
@@ -101,7 +101,7 @@ impl std::os::unix::fs::MetadataExt for MetadataExt {
 
     #[inline]
     fn ino(&self) -> u64 {
-        self.ino
+        self.ino.into()
     }
 
     #[inline]
