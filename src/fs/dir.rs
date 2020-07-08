@@ -25,8 +25,6 @@ use std::os::wasi::{
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Add `OFlag::CLOEXEC` to yanix and use it in `open_file` and friends.
-///
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since

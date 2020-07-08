@@ -13,8 +13,6 @@ use std::fmt;
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Add `OFlag::CLOEXEC` to yanix and use it in `open_file` and friends.
-///
 /// TODO: Windows support.
 ///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
