@@ -1,8 +1,22 @@
-//! A fully UTF-8 filesystem API modeled after `cap_std::fs`.
+//! A fully UTF-8 filesystem API modeled after [`cap_async_std::fs`].
 //!
-//! It uses [ARF strings] to encode non-UTF-8-encodable filenames.
+//! Where `cap_async_std::fs` would use `Path` and `PathBuf`, this `fs_utf8` module
+//! uses `str` and `String`, meaning that all paths are valid UTF-8.
 //!
-//! [`cap_std::fs`]: ../fs/index.html
+//! But wait, POSIX doesn't require filenames to be UTF-8! What happens if
+//! there's a file with a non-UTF-8 name? To address this, this module uses
+//! [ARF strings] to encode non-UTF-8-encodable filenames as UTF-8. See the
+//! link for details, but the big picture is that all possible byte sequences
+//! are losslessly representable. The easy case of a file with a valid UTF-8
+//! name is easy, and the tricky case of a valid with an invalid UTF-8 name
+//! is possible -- it may take more work to handle properly, especially if
+//! you want to do interesting path manipulation, but it is possible.
+//!
+//! TODO: This whole scheme is still under development.
+//!
+//! If you don't want this, use the regular [`cap_async_std::fs`] module instead.
+//!
+//! [`cap_async_std::fs`]: ../fs/index.html
 //! [ARF strings]: https://crates.io/crates/arf-strings
 
 mod dir;
