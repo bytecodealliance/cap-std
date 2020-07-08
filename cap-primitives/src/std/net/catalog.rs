@@ -27,7 +27,7 @@ pub struct Catalog {
 
 impl Catalog {
     pub fn check_addr(&self, addr: &net::SocketAddr) -> io::Result<()> {
-        unimplemented!("Catalog::check_addr({:?})", addr)
+        todo!("Catalog::check_addr({:?})", addr)
         //self.grants.iter().any(|grant| grant.
         //PermissionDenied
     }

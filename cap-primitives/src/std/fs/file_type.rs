@@ -159,11 +159,11 @@ impl std::os::vxworks::fs::FileTypeExt for FileType {
 impl std::os::windows::fs::FileTypeExt for FileType {
     #[inline]
     fn is_symlink_dir(&self) -> bool {
-        unimplemnted!("FileTypeExt::is_symlink_dir for Windows")
+        todo!("FileTypeExt::is_symlink_dir for Windows")
     }
 
     #[inline]
     fn is_symlink_file(&self) -> bool {
-        unimplemnted!("FileTypeExt::is_symlink_file for Windows")
+        todo!("FileTypeExt::is_symlink_file for Windows")
     }
 }
