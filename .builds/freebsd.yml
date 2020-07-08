@@ -1,16 +1,18 @@
 image: freebsd/latest
-packages:
-  - rustup
 sources:
   - https://github.com/sunfishcode/cap-std
 tasks:
   - setup: |
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain=none --profile=minimal
+      source $HOME/.cargo/env
       rustup toolchain install stable
       rustup default stable
   - build: |
+      source $HOME/.cargo/env
       cd cap-std
       cargo build --all --release -vv
   - test: |
+      source $HOME/.cargo/env
       cd cap-std
       cargo test --all
 
