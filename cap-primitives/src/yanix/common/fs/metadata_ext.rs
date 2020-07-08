@@ -101,7 +101,7 @@ impl std::os::unix::fs::MetadataExt for MetadataExt {
 
     #[inline]
     fn ino(&self) -> u64 {
-        self.ino.into()
+        self.ino
     }
 
     #[inline]
