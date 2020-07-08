@@ -27,8 +27,6 @@
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 
-mod sys;
-
 pub mod fs;
 #[cfg(feature = "fs_utf8")]
 pub mod fs_utf8;
