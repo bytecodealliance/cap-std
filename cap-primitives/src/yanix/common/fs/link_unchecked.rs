@@ -16,12 +16,12 @@ pub(crate) fn link_unchecked(
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     // POSIX's `linkat` with an empty path returns `ENOENT`, so use "." instead.
-    let new_path = if new_path.components().next().is_none() {
+    let new_path = if new_path.as_os_str().is_empty() {
         OsStr::new(".")
     } else {
         new_path.as_ref()
     };
-    let old_path = if old_path.components().next().is_none() {
+    let old_path = if old_path.as_os_str().is_empty() {
         OsStr::new(".")
     } else {
         old_path.as_ref()

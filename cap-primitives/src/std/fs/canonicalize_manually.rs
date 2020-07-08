@@ -20,7 +20,7 @@ pub fn canonicalize_manually(start: &fs::File, path: &Path) -> io::Result<PathBu
         &mut symlink_count,
         Some(&mut canonical_path),
     ) {
-        if canonical_path.components().next().is_none() {
+        if canonical_path.as_os_str().is_empty() {
             return Err(e);
         }
     }

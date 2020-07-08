@@ -18,7 +18,7 @@ pub(crate) fn open_unchecked(
     let mode = Mode::from_bits_truncate(options.ext.mode as _);
 
     // POSIX's `openat` with an empty path returns `ENOENT`, so use "." instead.
-    let path = if path.components().next().is_none() {
+    let path = if path.as_os_str().is_empty() {
         OsStr::new(".")
     } else {
         path.as_ref()
