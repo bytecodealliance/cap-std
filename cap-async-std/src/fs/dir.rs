@@ -611,7 +611,7 @@ impl Dir {
     ///
     /// Callers must avoid using `self`'s `async_std::fs::File` while the
     /// resulting `std::fs::File` is live, and must ensure that the resulting
-    /// `std::fs::File` outlives `self`'s `async_std::fs::File`.
+    /// `std::fs::File` doesn't outlive `self`'s `async_std::fs::File`.
     #[inline]
     unsafe fn as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
         self._as_sync_file()
