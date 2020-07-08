@@ -77,18 +77,31 @@ impl Dir {
     }
 
     #[cfg(any(unix, target_os = "fuchsia"))]
-    fn _open_file_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
+    fn _open_file_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
         open(file, path.as_ref(), options).map(|f| unsafe { File::from_raw_fd(f.into_raw_fd()) })
     }
 
     #[cfg(windows)]
-    fn _open_file_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        open(file, path.as_ref(), options).map(|f| unsafe { File::from_raw_handle(f.into_raw_handle()) })
+    fn _open_file_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
+        open(file, path.as_ref(), options)
+            .map(|f| unsafe { File::from_raw_handle(f.into_raw_handle()) })
     }
 
     // TODO this should probably be delegated to `cap-primitives`
     #[cfg(target_os = "wasi")]
-    fn _open_file_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
+    fn _open_file_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
         options.open_at(&self.std_file, path).map(File::from_std)
     }
 
