@@ -1280,7 +1280,6 @@ fn unlink_readonly() {
 }
 
 #[test]
-#[ignore] // `create_dir_all` not yet implemented in cap-std
 fn mkdir_trailing_slash() {
     let tmpdir = tmpdir();
     let path = PathBuf::from("file");
