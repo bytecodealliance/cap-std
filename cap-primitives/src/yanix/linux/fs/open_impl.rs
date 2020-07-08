@@ -7,10 +7,7 @@
 
 #[cfg(debug_assertions)]
 use crate::fs::is_same_file;
-use crate::{
-    fs::OpenOptions,
-    fs::{compute_oflags, open_manually_wrapper},
-};
+use crate::fs::{compute_oflags, open_manually_wrapper, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,
