@@ -71,17 +71,12 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
     if let Ok(result_file) = &result {
         if let Some(result_path) = get_path(result_file) {
             if let Some(start_path) = get_path(start) {
-                for (start_part, result_part) in
-                    start_path.components().zip(result_path.components())
-                {
-                    assert_eq!(
-                        start_part,
-                        result_part,
-                        "sandbox escape: start='{}' result='{}'",
-                        start_path.display(),
-                        result_path.display()
-                    );
-                }
+                assert!(
+                    result_path.starts_with(start_path),
+                    "sandbox escape: start='{:?}' result='{}'",
+                    start,
+                    result_path.display()
+                );
             }
         }
     }
