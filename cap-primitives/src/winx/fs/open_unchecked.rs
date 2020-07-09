@@ -1,8 +1,5 @@
-use crate::fs::{OpenUncheckedError, OpenOptions};
-use std::{
-    path::Path,
-    fs,
-};
+use crate::fs::{OpenOptions, OpenUncheckedError};
+use std::{fs, path::Path};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
 pub(crate) fn open_unchecked(

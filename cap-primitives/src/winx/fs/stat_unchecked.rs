@@ -1,8 +1,5 @@
 use crate::fs::{FollowSymlinks, Metadata};
-use std::{
-    path::Path,
-    fs, io,
-};
+use std::{fs, io, path::Path};
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform sandboxing.
 pub(crate) fn stat_unchecked(

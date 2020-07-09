@@ -39,8 +39,12 @@ impl MetadataExt {
         // To determine whether two open handles represent the same file, combine the identifier and the volume serial
         // number for each file and compare them.
         // [MSDN]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/ns-fileapi-by_handle_file_information
-        let self_vsn = self.volume_serial_number.expect("could extract volume serial number of `self`");
-        let other_vsn = other.volume_serial_number.expect("could extract volume serial number of `other`");
+        let self_vsn = self
+            .volume_serial_number
+            .expect("could extract volume serial number of `self`");
+        let other_vsn = other
+            .volume_serial_number
+            .expect("could extract volume serial number of `other`");
         let self_file_index = self.file_index.expect("could extract file index `self`");
         let other_file_index = other.file_index.expect("could extract file index `other`");
         self_vsn == other_vsn && self_file_index == other_file_index
