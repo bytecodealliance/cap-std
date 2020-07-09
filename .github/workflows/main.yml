@@ -14,13 +14,10 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Install Rust
-      run: |
-        rustup update stable
-        rustup default stable
-        rustup component add rustfmt
-    - name: Cargo fmt
-      run: cargo fmt --all -- --check
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: stable
+    - run: cargo fmt --all -- --check
 
   build:
     name: Build
@@ -53,12 +50,10 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    steps:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - name: Build
-      run: cargo build --all --all-features --release -vv
+    - run: cargo build --all --all-features --release -vv
 
   test:
     name: Test
@@ -92,10 +87,8 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    steps:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - name: Test
-      run: cargo test --all-features --all
+    - run: cargo test --all-features --all
 
