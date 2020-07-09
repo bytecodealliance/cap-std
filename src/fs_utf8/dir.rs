@@ -293,11 +293,7 @@ impl Dir {
     ///
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
     #[inline]
-    pub fn write<P: AsRef<str>, C: AsRef<[u8]>>(
-        &self,
-        path: P,
-        contents: C,
-    ) -> io::Result<()> {
+    pub fn write<P: AsRef<str>, C: AsRef<[u8]>>(&self, path: P, contents: C) -> io::Result<()> {
         let path = from_utf8(path)?;
         self.cap_std.write(path, contents)
     }

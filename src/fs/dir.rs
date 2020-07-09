@@ -382,11 +382,7 @@ impl Dir {
     ///
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
     #[inline]
-    pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(
-        &self,
-        path: P,
-        contents: C,
-    ) -> io::Result<()> {
+    pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(&self, path: P, contents: C) -> io::Result<()> {
         use io::Write;
         let mut file = self.create(path)?;
         file.write_all(contents.as_ref())
