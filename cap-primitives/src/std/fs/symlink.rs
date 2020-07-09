@@ -1,7 +1,7 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
 #[cfg(debug_assertions)]
-use crate::fs::{get_path, stat_unchecked, FollowSymlinks};
+use crate::fs::{stat_unchecked, FollowSymlinks};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
@@ -29,7 +29,7 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
                 io::ErrorKind::AlreadyExists | io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(new_start),
+                    new_start,
                     new_path.display(),
                     e
                 ),
@@ -38,7 +38,7 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
         Err(unchecked_error) => match &result {
             Ok(()) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}",
-                get_path(new_start),
+                new_start,
                 new_path.display(),
                 unchecked_error
             ),

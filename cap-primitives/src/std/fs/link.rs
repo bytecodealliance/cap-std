@@ -2,9 +2,9 @@
 
 use crate::fs::link_impl;
 #[cfg(debug_assertions)]
-use crate::fs::FollowSymlinks;
+use crate::fs::stat_unchecked;
 #[cfg(debug_assertions)]
-use crate::fs::{get_path, stat_unchecked};
+use crate::fs::FollowSymlinks;
 use std::{fs, io, path::Path};
 
 /// Perform a `linkat`-like operation, ensuring that the resolution of the path
@@ -30,7 +30,7 @@ pub fn link(
                 io::ErrorKind::AlreadyExists | io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(new_start),
+                    new_start,
                     new_path.display(),
                     e
                 ),
@@ -39,7 +39,7 @@ pub fn link(
         Err(unchecked_error) => match &result {
             Ok(()) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}",
-                get_path(new_start),
+                new_start,
                 new_path.display(),
                 unchecked_error
             ),

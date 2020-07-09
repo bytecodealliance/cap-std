@@ -1,8 +1,6 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-#[cfg(debug_assertions)]
-use crate::fs::get_path;
 use crate::fs::{is_same_file, open_unchecked, resolve_symlink_at, MaybeOwnedFile, OpenOptions};
 use std::{
     borrow::ToOwned,
@@ -208,17 +206,17 @@ pub(crate) fn open_manually(
             assert!(
                 is_same_file(base.as_file(), &unchecked_file)?,
                 "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; got='{:?}' expected='{:?}'",
-                get_path(start),
+                start,
                 path.display(),
                 canonical_path.debug.display(),
-                get_path(base.as_file()),
-                get_path(&unchecked_file),
+                base.as_file(),
+                &unchecked_file,
             );
         }
         Err(unchecked_error) => panic!(
             "unexpected success opening result={:?} start='{:?}', path='{}'; canonical_path='{}'; expected {:?}",
             base.as_file(),
-            get_path(start),
+            start,
             path.display(),
             canonical_path.debug.display(),
             unchecked_error,

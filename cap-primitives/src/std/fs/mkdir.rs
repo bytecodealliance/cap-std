@@ -2,7 +2,7 @@
 
 use crate::fs::mkdir_impl;
 #[cfg(debug_assertions)]
-use crate::fs::{get_path, stat_unchecked, FollowSymlinks};
+use crate::fs::{stat_unchecked, FollowSymlinks};
 use std::{fs, io, path::Path};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
@@ -23,7 +23,7 @@ pub fn mkdir(start: &fs::File, path: &Path) -> io::Result<()> {
                 io::ErrorKind::AlreadyExists | io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(start),
+                    start,
                     path.display(),
                     e
                 ),
@@ -32,7 +32,7 @@ pub fn mkdir(start: &fs::File, path: &Path) -> io::Result<()> {
         Err(unchecked_error) => match &result {
             Ok(()) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}",
-                get_path(start),
+                start,
                 path.display(),
                 unchecked_error
             ),

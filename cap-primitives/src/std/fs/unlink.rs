@@ -2,7 +2,7 @@
 
 use crate::fs::unlink_impl;
 #[cfg(debug_assertions)]
-use crate::fs::{get_path, stat_unchecked, FollowSymlinks};
+use crate::fs::{stat_unchecked, FollowSymlinks};
 use std::{fs, io, path::Path};
 
 /// Perform a `unlinkat`-like operation, ensuring that the resolution of the path
@@ -20,14 +20,14 @@ pub fn unlink(start: &fs::File, path: &Path) -> io::Result<()> {
         Ok(_) => match &result {
             Ok(()) => panic!(
                 "file still exists after unlink start='{:?}', path='{}'",
-                get_path(start),
+                start,
                 path.display()
             ),
             Err(e) => match e.kind() {
                 io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(start),
+                    start,
                     path.display(),
                     e
                 ),

@@ -31,14 +31,14 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             Ok(result_file) => {
                 assert!(is_same_file(result_file, &unchecked_file)?,
                     "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
-                    get_path(start), path.display(), get_path(result_file), get_path(&unchecked_file));
+                    start, path.display(), result_file, &unchecked_file);
             }
             Err(e) => match e.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 io::ErrorKind::AlreadyExists if options.create_new => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(start),
+                    start,
                     path.display(),
                     e
                 ),
@@ -47,7 +47,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
         Err(unchecked_error) => match &result {
             Ok(result_file) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
-                get_path(start),
+                start,
                 path.display(),
                 unchecked_error,
                 result_file

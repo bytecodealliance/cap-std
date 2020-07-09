@@ -1,8 +1,6 @@
 //! This defines `stat`, the primary entrypoint to sandboxed metadata querying.
 
 #[cfg(debug_assertions)]
-use super::get_path;
-#[cfg(debug_assertions)]
 use crate::fs::stat_unchecked;
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
@@ -23,13 +21,13 @@ pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result
             Ok(result_metadata) => {
                 assert!(result_metadata.is_same_file(&unchecked_metadata),
                     "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
-                    get_path(start), path.display(), result_metadata, unchecked_metadata);
+                    start, path.display(), result_metadata, unchecked_metadata);
             }
             Err(e) => match e.kind() {
                 io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(start),
+                    start,
                     path.display(),
                     e
                 ),
@@ -38,7 +36,7 @@ pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result
         Err(unchecked_error) => match &result {
             Ok(result_metadata) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
-                get_path(start),
+                start,
                 path.display(),
                 unchecked_error,
                 result_metadata
