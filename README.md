@@ -22,7 +22,7 @@ interfaces you are used to, but in a capability-based version.
 
 Conventional operating systems have a concept of resource handles, or file
 descriptors, which are values that can be passed around within and sometimes
-etween programs, and which represent access to external resources. However,
+between programs, and which represent access to external resources. However,
 programs typically have *ambient authority* to request a file or network handle
 simply by providing its name:
 
