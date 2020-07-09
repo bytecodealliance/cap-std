@@ -24,39 +24,78 @@ jobs:
 
   build:
     name: Build
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu, macOS]
+        build: [stable, beta, nightly, windows, macos]
+        include:
+          - build: stable
+            os: ubuntu-latest
+            rust: stable
+          - build: beta
+            os: ubuntu-latest
+            rust: beta
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+          - build: macos
+            os: macos-latest
+            rust: stable
+          # Enable once we figure out how to build stable on Windows
+          # - build: windows
+          #   os: windows-latest
+          #   rust: stable
+          - build: windows
+            os: windows-latest
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Install Rust
-      shell: bash
-      run: |
-        rustup update stable
-        rustup default stable
+    steps:
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
     - name: Build
       run: cargo build --all --all-features --release -vv
 
   test:
     name: Test
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu, macOS]
+        build: [stable, beta, nightly, windows, macos]
+        include:
+          - build: stable
+            os: ubuntu-latest
+            rust: stable
+          - build: beta
+            os: ubuntu-latest
+            rust: beta
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+          - build: macos
+            os: macos-latest
+            rust: stable
+          # Enable once we figure out how to build stable on Windows,
+          # tests build and run
+          # - build: windows
+          #   os: windows-latest
+          #   rust: stable
+          # - build: windows
+          #   os: windows-latest
+          #   rust: nightly
 
     steps:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Install Rust
-      shell: bash
-      run: |
-        rustup update stable
-        rustup default stable
+    steps:
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
     - name: Test
       run: cargo test --all-features --all
 
