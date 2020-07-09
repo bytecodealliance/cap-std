@@ -77,7 +77,7 @@ open files, rather than bare filenames, declares its intent to only open files
 underneath that `Dir`. And, `Dir` automatically protects against any paths
 which might include `..` or symlinks that might lead outside of that `Dir`.
 
-`cap-std` also has another role, within WASI, because cap-std's filesystem
+`cap-std` also has another role, within WASI, because `cap-std`'s filesystem
 APIs closely follow WASI's sandboxing APIs. On WASI, cap-std becomes a very
 thin layer, thinner than libstd's filesystem APIs because it doesn't need
 extra code to handle absolute paths.
