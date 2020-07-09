@@ -91,7 +91,7 @@ internally utilize `openat2` for fast path resolution as well.
 Otherwise, opens each component of a path individually, in order to specially
 handle `..` and symlinks. The algorithm is carefully designed to minimize
 system calls, so opening `red/green/blue` performs just 5 system calls - it
-opens "red", "green", and then "blue", and closes the handles for "red" and
+opens `red`, `green`, and then `blue`, and closes the handles for `red` and
 "green".
 
 [`openat2`]: https://lwn.net/Articles/796868/
