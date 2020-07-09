@@ -13,61 +13,62 @@ fn cap_smoke_test() {
     let inner = check!(tmpdir.open_dir("dir/inner"));
 
     check!(tmpdir.open("red.txt"));
-    error!(tmpdir.open("blue.txt"), "No such file");
-    error!(tmpdir.open("green.txt"), "No such file");
+    error_contains!(tmpdir.open("blue.txt"), "No such file");
+    error_contains!(tmpdir.open("green.txt"), "No such file");
 
     check!(tmpdir.open("./red.txt"));
-    error!(tmpdir.open("./blue.txt"), "No such file");
-    error!(tmpdir.open("./green.txt"), "No such file");
+    error_contains!(tmpdir.open("./blue.txt"), "No such file");
+    error_contains!(tmpdir.open("./green.txt"), "No such file");
 
-    error!(tmpdir.open("dir/red.txt"), "No such file");
+    error_contains!(tmpdir.open("dir/red.txt"), "No such file");
     check!(tmpdir.open("dir/green.txt"));
-    error!(tmpdir.open("dir/blue.txt"), "No such file");
+    error_contains!(tmpdir.open("dir/blue.txt"), "No such file");
 
-    error!(tmpdir.open("dir/inner/red.txt"), "No such file");
-    error!(tmpdir.open("dir/inner/green.txt"), "No such file");
+    error_contains!(tmpdir.open("dir/inner/red.txt"), "No such file");
+    error_contains!(tmpdir.open("dir/inner/green.txt"), "No such file");
     check!(tmpdir.open("dir/inner/blue.txt"));
 
     check!(tmpdir.open("dir/../red.txt"));
     check!(tmpdir.open("dir/inner/../../red.txt"));
     check!(tmpdir.open("dir/inner/../inner/../../red.txt"));
 
-    error!(inner.open("red.txt"), "No such file");
-    error!(inner.open("green.txt"), "No such file");
-    error!(
+    error_contains!(inner.open("red.txt"), "No such file");
+    error_contains!(inner.open("green.txt"), "No such file");
+    error_contains!(
         inner.open("../inner/blue.txt"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         inner.open("../inner/red.txt"),
         "a path led outside of the filesystem"
     );
 
     check!(inner.open_dir(""));
-    error!(inner.open_dir("/"), "a path led outside of the filesystem");
-    error!(
+    error_contains!(inner.open_dir("/"), "a path led outside of the filesystem");
+    error_contains!(
         inner.open_dir("/etc/services"),
         "a path led outside of the filesystem"
     );
     check!(inner.open_dir("."));
     check!(inner.open_dir("./"));
     check!(inner.open_dir("./."));
-    error!(inner.open_dir(".."), "a path led outside of the filesystem");
-    error!(
+    error_contains!(inner.open_dir(".."), "a path led outside of the filesystem");
+    error_contains!(
         inner.open_dir("../"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         inner.open_dir("../."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         inner.open_dir("./.."),
         "a path led outside of the filesystem"
     );
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 #[ignore] // symlinks not yet implemented
 fn symlinks() {
     let tmpdir = tmpdir();
@@ -100,6 +101,7 @@ fn symlinks() {
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 #[ignore] // symlinks not yet implemented
 fn symlink_loop() {
     let tmpdir = tmpdir();

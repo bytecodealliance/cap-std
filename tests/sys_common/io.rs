@@ -3,10 +3,40 @@
 //
 // Note that we use `std`, because this is infrastructure for running tests.
 
-use std::{env, fs, ops::Deref, path::PathBuf};
+use std::{
+    env, fs, io,
+    ops::Deref,
+    path::{Path, PathBuf},
+};
 use uuid::Uuid;
 
 pub struct TempDir(cap_std::fs::Dir, PathBuf);
+
+impl TempDir {
+    #[cfg(target_family = "unix")]
+    fn from_std(path: &Path) -> io::Result<Self> {
+        Ok(Self(
+            cap_std::fs::Dir::from_std_file(fs::File::open(&path)?),
+            path.to_owned(),
+        ))
+    }
+
+    #[cfg(windows)]
+    fn from_std(path: &Path) -> io::Result<Self> {
+        use std::os::windows::fs::OpenOptionsExt;
+        use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+        Ok(Self(
+            cap_std::fs::Dir::from_std_file(
+                fs::OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .attributes(FILE_FLAG_BACKUP_SEMANTICS)
+                    .open(&path)?,
+            ),
+            path.to_owned(),
+        ))
+    }
+}
 
 impl Drop for TempDir {
     fn drop(&mut self) {
@@ -26,10 +56,5 @@ pub fn tmpdir() -> TempDir {
     let p = env::temp_dir();
     let ret = p.join(&Uuid::new_v4().to_string());
     fs::create_dir(&ret).unwrap();
-    TempDir(
-        cap_std::fs::Dir::from_std_file(
-            fs::File::open(&ret).expect("expected to be able to open temporary directory"),
-        ),
-        ret,
-    )
+    TempDir::from_std(&ret).expect("expected to be able to open temporary directory")
 }

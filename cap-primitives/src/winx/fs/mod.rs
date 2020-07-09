@@ -13,6 +13,7 @@ mod symlink_unchecked;
 mod unlink_unchecked;
 
 pub(crate) mod errors;
+pub(crate) mod get_path;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use file_type_ext::*;
