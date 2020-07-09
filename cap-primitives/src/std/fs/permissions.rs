@@ -1,3 +1,4 @@
+#[cfg(any(unix, target_os = "vxworks"))]
 use crate::fs::PermissionsExt;
 use std::fs;
 
@@ -15,7 +16,7 @@ use std::fs;
 pub struct Permissions {
     pub(crate) readonly: bool,
 
-    #[cfg(any(unix, windows, target_os = "vxworks"))]
+    #[cfg(any(unix, target_os = "vxworks"))]
     pub(crate) ext: PermissionsExt,
 }
 
@@ -26,7 +27,7 @@ impl Permissions {
         Self {
             readonly: std.readonly(),
 
-            #[cfg(any(unix, windows, target_os = "vxworks"))]
+            #[cfg(any(unix, target_os = "vxworks"))]
             ext: PermissionsExt::from_std(std),
         }
     }

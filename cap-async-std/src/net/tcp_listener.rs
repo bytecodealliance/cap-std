@@ -2,7 +2,7 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
-use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use async_std::{io, net};
 
 /// A TCP socket server, listening for connections.
@@ -83,7 +83,7 @@ impl FromRawFd for TcpListener {
 impl FromRawSocket for TcpListener {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::TcpListener::from_raw_socket(handle))
+        Self::from_std(net::TcpListener::from_raw_socket(socket))
     }
 }
 
@@ -112,10 +112,10 @@ impl IntoRawFd for TcpListener {
 }
 
 #[cfg(windows)]
-impl IntoRawHandle for TcpListener {
+impl IntoRawSocket for TcpListener {
     #[inline]
-    fn into_raw_handle(self) -> RawHandle {
-        self.std.into_raw_handle()
+    fn into_raw_socket(self) -> RawSocket {
+        self.std.into_raw_socket()
     }
 }
 

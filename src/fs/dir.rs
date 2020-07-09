@@ -13,7 +13,9 @@ use {
 
 #[cfg(windows)]
 use {
-    cap_primitives::fs::{symlink_dir, symlink_file},
+    cap_primitives::fs::{
+        canonicalize, link, mkdir, open, stat, symlink_dir, symlink_file, unlink, FollowSymlinks,
+    },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
 
@@ -95,6 +97,19 @@ impl Dir {
             OpenOptions::new()
                 .read(true)
                 .custom_flags(OFlag::DIRECTORY.bits()),
+        )
+        .map(|file| crate::fs::Dir::from_std_file(file.std))
+    }
+
+    #[cfg(windows)]
+    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
+        use std::os::windows::fs::OpenOptionsExt;
+        use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+        self.open_with(
+            path,
+            OpenOptions::new()
+                .read(true)
+                .attributes(FILE_FLAG_BACKUP_SEMANTICS),
         )
         .map(|file| crate::fs::Dir::from_std_file(file.std))
     }
@@ -591,7 +606,7 @@ impl FromRawFd for Dir {
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     #[inline]
-    unsafe fn from_raw_fd(handle: RawHandle) -> Self {
+    unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))
     }
 }
@@ -693,5 +708,5 @@ fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
 
 #[cfg(windows)]
 fn fmt_debug_dir(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    // TODO fill in the blanks
+    b.field("TODO fill in the blanks", &fd.as_raw_handle());
 }
