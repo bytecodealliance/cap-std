@@ -31,6 +31,16 @@ fn rename_file_over_dot() -> String {
     rename_path_in_use()
 }
 
+#[cfg(target_os = "macos")]
+fn rename_dot_over_file() -> String {
+    io::Error::from_raw_os_error(libc::EINVAL).to_string()
+}
+
+#[cfg(not(target_os = "macos"))]
+fn rename_dot_over_file() -> String {
+    rename_path_in_use()
+}
+
 #[test]
 fn rename_basics() {
     let tmpdir = tmpdir();
@@ -118,7 +128,7 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename(".", &tmpdir, "nope.txt"),
-        &rename_path_in_use()
+        &rename_dot_over_file()
     );
     error!(
         tmpdir.rename("/", &tmpdir, "nope.txt"),
