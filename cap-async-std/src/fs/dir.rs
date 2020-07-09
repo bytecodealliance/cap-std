@@ -110,7 +110,7 @@ impl Dir {
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::windows::fs::OpenOptionsExt;
         use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
-        self.open_file_with(
+        self.open_with(
             path,
             OpenOptions::new()
                 .read(true)
