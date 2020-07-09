@@ -158,7 +158,7 @@ impl IntoRawFd for TcpStream {
 }
 
 #[cfg(windows)]
-impl IntoRawHandle for TcpStream {
+impl IntoRawSocket for TcpStream {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()

@@ -325,13 +325,13 @@ impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
-        fmt_debug_file(self.std, &mut b);
+        fmt_debug_file(&self.std, &mut b);
         b.finish()
     }
 }
 
 #[cfg(any(unix, target_os = "wasi", target_os = "fuchsia"))]
-fn fmt_debug_file(fd: impl AsRawFd, b: &mut fmt::DebugStruct) {
+fn fmt_debug_file(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
     unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
         let mode = yanix::fcntl::get_status_flags(fd);
         if mode.is_err() {
@@ -353,6 +353,6 @@ fn fmt_debug_file(fd: impl AsRawFd, b: &mut fmt::DebugStruct) {
 }
 
 #[cfg(windows)]
-fn fmt_debug_file(fd: impl AsRawHandle, b: &mut fmt::DebugStruct) {
+fn fmt_debug_file(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
     // TODO fill in the blanks
 }
