@@ -11,9 +11,8 @@ use cap_std::fs::{self, OpenOptions};
 use std::{
     io::{self, ErrorKind, SeekFrom},
     path::{Path, PathBuf},
-    str,
+    str, thread,
 };
-/*use std::thread;*/
 use sys_common::io::{tmpdir, TempDir};
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
@@ -558,8 +557,8 @@ fn recursive_mkdir_failure() {
     assert!(result.is_err());
 }
 
-/*
 #[test]
+#[ignore] // cap-primitives contains racy checks that fail under threads
 fn concurrent_recursive_mkdir() {
     for _ in 0..100 {
         let dir = tmpdir();
@@ -569,7 +568,7 @@ fn concurrent_recursive_mkdir() {
         }
         let mut join = vec![];
         for _ in 0..8 {
-            let dir = dir.clone();
+            let dir = check!(dir.try_clone());
             let name = name.clone();
             join.push(thread::spawn(move || {
                 check!(dir.create_dir_all(&name));
@@ -580,7 +579,6 @@ fn concurrent_recursive_mkdir() {
         join.drain(..).map(|join| join.join().unwrap()).count();
     }
 }
-*/
 
 #[test]
 fn recursive_mkdir_slash() {
@@ -1280,7 +1278,6 @@ fn unlink_readonly() {
 }
 
 #[test]
-#[ignore] // `create_dir_all` not yet implemented in cap-std
 fn mkdir_trailing_slash() {
     let tmpdir = tmpdir();
     let path = PathBuf::from("file");
