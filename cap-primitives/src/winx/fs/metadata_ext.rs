@@ -35,9 +35,10 @@ impl MetadataExt {
     #[cfg(debug_assertions)]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         // From [MSDN]:
-        // The identifier (low and high parts) and the volume serial number uniquely identify a file on a single computer.
-        // To determine whether two open handles represent the same file, combine the identifier and the volume serial
-        // number for each file and compare them.
+        // The identifier (low and high parts) and the volume serial number
+        // uniquely identify a file on a single computer. To determine whether
+        // two open handles represent the same file, combine the identifier
+        // and the volume serial number for each file and compare them.
         // [MSDN]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/ns-fileapi-by_handle_file_information
         let self_vsn = self
             .volume_serial_number

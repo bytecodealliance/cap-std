@@ -50,7 +50,9 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     #[cfg(windows)]
     let path = {
         use std::{ffi::OsString, os::windows::ffi::OsStringExt};
-        let utf8 = string.as_cstr().to_string_lossy(); // This is OK since we went through arf_strings first.
+        let utf8 = string.as_cstr().to_str().map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string")
+        })?;
         let utf16: Vec<_> = utf8.encode_utf16().collect();
         OsString::from_wide(&utf16)
     };

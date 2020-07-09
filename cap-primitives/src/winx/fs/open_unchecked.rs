@@ -7,5 +7,5 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> Result<fs::File, OpenUncheckedError> {
-    unimplemented!("open_unchecked")
+    todo!("open_unchecked")
 }

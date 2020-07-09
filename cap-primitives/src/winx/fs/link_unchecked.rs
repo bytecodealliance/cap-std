@@ -9,5 +9,5 @@ pub(crate) fn link_unchecked(
     new_path: &Path,
     follow: FollowSymlinks,
 ) -> io::Result<()> {
-    unimplemented!("link_unchecked")
+    todo!("link_unchecked")
 }

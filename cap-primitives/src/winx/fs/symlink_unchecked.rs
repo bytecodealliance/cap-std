@@ -6,7 +6,7 @@ pub(crate) fn symlink_file_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    unimplemented!("symlink_file_unchecked")
+    todo!("symlink_file_unchecked")
 }
 
 /// *Unsandboxed* function similar to `symlink_dir`, but which does not perform sandboxing.
@@ -15,5 +15,5 @@ pub(crate) fn symlink_dir_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    unimplemented!("symlink_dir_unchecked")
+    todo!("symlink_dir_unchecked")
 }

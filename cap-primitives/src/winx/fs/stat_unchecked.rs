@@ -7,5 +7,5 @@ pub(crate) fn stat_unchecked(
     path: &Path,
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
-    unimplemented!("stat_unchecked")
+    todo!("stat_unchecked")
 }

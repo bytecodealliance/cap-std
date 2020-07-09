@@ -354,5 +354,5 @@ fn fmt_debug_file(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
 
 #[cfg(windows)]
 fn fmt_debug_file(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    // TODO fill in the blanks
+    b.field("TODO fill in the blanks", &fd.as_raw_handle());
 }

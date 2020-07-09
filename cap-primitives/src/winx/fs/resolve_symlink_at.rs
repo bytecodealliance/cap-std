@@ -9,5 +9,5 @@ pub(crate) fn resolve_symlink_at(
     name: &OsStr,
     symlink_count: &mut u8,
 ) -> io::Result<PathBuf> {
-    unimplemented!("resolve_symlink_at")
+    todo!("resolve_symlink_at")
 }
