@@ -9,7 +9,7 @@ use std::{fs, io, path::Path};
     target_os = "redox",
     target_os = "vxworks"
 ))]
-pub fn symlink_via_parent(
+pub(crate) fn symlink_via_parent(
     old_path: &Path,
     new_start: &fs::File,
     new_path: &Path,
@@ -30,7 +30,7 @@ pub fn symlink_via_parent(
 /// Implement `symlink_file` by `open`ing up the parent component of the path and then
 /// calling `symlink_file` on the last component.
 #[cfg(windows)]
-pub fn symlink_file_via_parent(
+pub(crate) fn symlink_file_via_parent(
     old_path: &Path,
     new_start: &fs::File,
     new_path: &Path,
@@ -41,7 +41,7 @@ pub fn symlink_file_via_parent(
 /// Implement `symlink_dir` by `open`ing up the parent component of the path and then
 /// calling `symlink_dir` on the last component.
 #[cfg(windows)]
-pub fn symlink_dir_via_parent(
+pub(crate) fn symlink_dir_via_parent(
     old_path: &Path,
     new_start: &fs::File,
     new_path: &Path,

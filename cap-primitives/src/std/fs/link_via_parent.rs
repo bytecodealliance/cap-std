@@ -3,7 +3,7 @@ use std::{fs, io, path::Path};
 
 /// Implement `link` by `open`ing up the parent component of the path and then
 /// calling `linkat` on the last component.
-pub fn link_via_parent(
+pub(crate) fn link_via_parent(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,

@@ -3,7 +3,7 @@ use std::{fs, io, path::Path};
 
 /// Implement `mkdir` by `open`ing up the parent component of the path and then
 /// calling `mkdirat` on the last component.
-pub fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> {
+pub(crate) fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> {
     let mut symlink_count = 0;
     let mut start = MaybeOwnedFile::Borrowed(start);
 
