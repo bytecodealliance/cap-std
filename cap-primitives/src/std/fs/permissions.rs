@@ -55,7 +55,7 @@ impl Permissions {
     fn _into_std(self, file: &fs::File) -> io::Result<fs::Permissions> {
         let mut permissions = file.metadata()?.permissions();
         permissions.set_readonly(self.readonly());
-        permissions
+        Ok(permissions)
     }
 
     /// Returns `true` if these permissions describe a readonly (unwritable) file.
