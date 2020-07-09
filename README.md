@@ -79,7 +79,7 @@ which might include `..` or symlinks that might lead outside of that `Dir`.
 
 `cap-std` also has another role, within WASI, because `cap-std`'s filesystem
 APIs closely follow WASI's sandboxing APIs. In WASI, `cap-std` becomes a very
-thin layer, thinner than libstd's filesystem APIs because it doesn't need
+thin layer, thinner than `libstd`'s filesystem APIs because it doesn't need
 extra code to handle absolute paths.
 
 ## How fast is it?
