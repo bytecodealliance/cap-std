@@ -110,4 +110,4 @@ like. For more information on the technique, see the [`arf-strings` package].
 To try it, opt in by enabling the `fs_utf8` feature and using `std::fs_utf8`
 in place of `std::fs`.
 
-[`arf-strings` documentation]: https://github.com/bytecodealliance/arf-strings/
+[`arf-strings` package]: https://github.com/bytecodealliance/arf-strings/
