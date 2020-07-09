@@ -39,18 +39,20 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     // in the future, the idea is we could avoid this.
     let string = arf_strings::PosixString::from_path_str(path.as_ref())
         .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string"))?;
-    let bytes = string.as_cstr().to_bytes();
 
     #[cfg(any(unix, target_os = "redox", target_os = "wasi"))]
     let path = {
         use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
+        let bytes = string.as_cstr().to_bytes();
         OsStr::from_bytes(bytes).to_owned()
     };
 
     #[cfg(windows)]
     let path = {
-        use std::{ffi::OsString, os::windows::prelude::*};
-        OsString::from_wide(bytes)
+        use std::{ffi::OsString, os::windows::ffi::OsStringExt};
+        let utf8 = string.as_cstr().to_string_lossy(); // This is OK since we went through arf_strings first.
+        let utf16: Vec<_> = utf8.encode_utf16().collect();
+        OsString::from_wide(&utf16)
     };
 
     Ok(path.into())
@@ -68,7 +70,14 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
     };
 
     #[cfg(windows)]
-    let cstr = { panic!("windows not yet implemented") };
+    let cstr = {
+        use std::{ffi::CString, os::windows::ffi::OsStrExt};
+        let utf16: Vec<_> = osstr.encode_wide().collect();
+        let str = String::from_utf16(&utf16).map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string")
+        })?;
+        CString::new(str)?
+    };
 
     Ok(arf_strings::WasiString::from_maybe_nonutf8_cstr(&cstr)
         .as_str()

@@ -1,14 +1,17 @@
-#[cfg(unix)]
-use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use crate::{
     fs::OpenOptions,
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, Permissions, ReadDir},
 };
+use std::{fmt, fs, io};
+
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use {
+    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
+    std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+};
+
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
-use std::{fmt, fs, io};
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -501,7 +504,7 @@ impl FromRawFd for Dir {
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     #[inline]
-    unsafe fn from_raw_fd(handle: RawHandle) -> Self {
+    unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))
     }
 }
