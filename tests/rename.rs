@@ -11,7 +11,13 @@ fn no_such_file_or_directory() -> String {
     io::Error::from_raw_os_error(libc::ENOENT).to_string()
 }
 
-fn directory_not_empty() -> String {
+#[cfg(target_os = "macos")]
+fn rename_file_over_dir() -> String {
+    io::Error::from_raw_os_error(libc::EISDIR).to_string()
+}
+
+#[cfg(not(target_os = "macos"))]
+fn rename_file_over_dir() -> String {
     io::Error::from_raw_os_error(libc::ENOTEMPTY).to_string()
 }
 
@@ -45,7 +51,7 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar"),
-        &directory_not_empty()
+        &rename_file_over_dir()
     );
     check!(tmpdir.rename("foo/bar", &tmpdir, "foo/bar"));
     check!(tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "file.txt"));
