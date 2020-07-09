@@ -1,6 +1,7 @@
 #![macro_use]
 pub mod io;
 
+#[allow(unused)]
 macro_rules! check {
     ($e:expr) => {
         match $e {
