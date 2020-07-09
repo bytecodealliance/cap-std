@@ -14,8 +14,8 @@
 //! This combined a lack of absolute paths provides a natural
 //! capability-oriented interface.
 //!
-//! [`std::fs`]: https://doc.rust-lang.org/std/fs/index.html
-//! [`std::fs`'s free functions]: https://doc.rust-lang.org/std/fs/index.html#functions
+//! [`std::fs`]: https://doc.rust-lang.org/std/fs/
+//! [`std::fs`'s free functions]: https://doc.rust-lang.org/std/fs/#functions
 //! [`Dir`]: struct.Dir.html
 
 mod dir;

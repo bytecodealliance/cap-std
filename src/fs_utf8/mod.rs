@@ -16,7 +16,7 @@
 //!
 //! If you don't want this, use the regular [`cap_std::fs`] module instead.
 //!
-//! [`cap_std::fs`]: ../fs/index.html
+//! [`cap_std::fs`]: ../fs/
 //! [ARF strings]: https://crates.io/crates/arf-strings
 
 mod dir;

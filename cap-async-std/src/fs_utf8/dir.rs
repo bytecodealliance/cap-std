@@ -13,8 +13,6 @@ use std::fmt;
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Add OFlag::CLOEXEC to yanix and use it in `open_file` and friends.
-///
 /// TODO: Windows support.
 ///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
@@ -49,7 +47,7 @@ impl Dir {
     #[inline]
     pub fn open_file<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
         let path = from_utf8(path)?;
-        self.cap_std.open_file(&path).map(File::from_cap_std)
+        self.cap_std.open_file(path).map(File::from_cap_std)
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -68,7 +66,7 @@ impl Dir {
     ) -> io::Result<File> {
         let path = from_utf8(path)?;
         self.cap_std
-            .open_file_with(&path, options)
+            .open_file_with(path, options)
             .map(File::from_cap_std)
     }
 
@@ -76,7 +74,7 @@ impl Dir {
     #[inline]
     pub fn open_dir<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
         let path = from_utf8(path)?;
-        self.cap_std.open_dir(&path).map(Self::from_cap_std)
+        self.cap_std.open_dir(path).map(Self::from_cap_std)
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -88,7 +86,7 @@ impl Dir {
     #[inline]
     pub fn create_dir<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.create_dir(&path)
+        self.cap_std.create_dir(path)
     }
 
     /// Recursively create a directory and all of its parent components if they are missing.
@@ -100,7 +98,7 @@ impl Dir {
     #[inline]
     pub fn create_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.create_dir_all(&path)
+        self.cap_std.create_dir_all(path)
     }
 
     /// Opens a file in write-only mode.
@@ -112,7 +110,7 @@ impl Dir {
     #[inline]
     pub fn create_file<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
         let path = from_utf8(path)?;
-        self.cap_std.create_file(&path).map(File::from_cap_std)
+        self.cap_std.create_file(path).map(File::from_cap_std)
     }
 
     /// Returns the canonical form of a path with all intermediate components normalized
@@ -125,7 +123,7 @@ impl Dir {
     #[inline]
     pub fn canonicalize<P: AsRef<str>>(&self, path: P) -> io::Result<String> {
         let path = from_utf8(path)?;
-        self.cap_std.canonicalize(&path).and_then(to_utf8)
+        self.cap_std.canonicalize(path).and_then(to_utf8)
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission
@@ -152,7 +150,7 @@ impl Dir {
     pub fn hard_link<P: AsRef<str>, Q: AsRef<str>>(
         &self,
         src: P,
-        dst_dir: &Dir,
+        dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
         let src = from_utf8(src)?;
@@ -169,7 +167,7 @@ impl Dir {
     #[inline]
     pub fn metadata<P: AsRef<str>>(&self, path: P) -> io::Result<Metadata> {
         let path = from_utf8(path)?;
-        self.cap_std.metadata(&path)
+        self.cap_std.metadata(path)
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -181,7 +179,7 @@ impl Dir {
     #[inline]
     pub fn read_dir<P: AsRef<str>>(&self, path: P) -> io::Result<ReadDir> {
         let path = from_utf8(path)?;
-        self.cap_std.read_dir(&path).map(ReadDir::from_cap_std)
+        self.cap_std.read_dir(path).map(ReadDir::from_cap_std)
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -193,7 +191,7 @@ impl Dir {
     #[inline]
     pub async fn read_file<P: AsRef<str>>(&self, path: P) -> io::Result<Vec<u8>> {
         let path = from_utf8(path)?;
-        self.cap_std.read_file(&path).await
+        self.cap_std.read_file(path).await
     }
 
     /// Reads a symbolic link, returning the file that the link points to.
@@ -205,7 +203,7 @@ impl Dir {
     #[inline]
     pub fn read_link<P: AsRef<str>>(&self, path: P) -> io::Result<String> {
         let path = from_utf8(path)?;
-        self.cap_std.read_link(&path).and_then(to_utf8)
+        self.cap_std.read_link(path).and_then(to_utf8)
     }
 
     /// Read the entire contents of a file into a string.
@@ -217,7 +215,7 @@ impl Dir {
     #[inline]
     pub async fn read_to_string<P: AsRef<str>>(&self, path: P) -> io::Result<String> {
         let path = from_utf8(path)?;
-        self.cap_std.read_to_string(&path).await
+        self.cap_std.read_to_string(path).await
     }
 
     /// Removes an existing, empty directory.
@@ -229,7 +227,7 @@ impl Dir {
     #[inline]
     pub fn remove_dir<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.remove_dir(&path)
+        self.cap_std.remove_dir(path)
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -241,7 +239,7 @@ impl Dir {
     #[inline]
     pub fn remove_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.remove_dir_all(&path)
+        self.cap_std.remove_dir_all(path)
     }
 
     /// Removes a file from a filesystem.
@@ -253,7 +251,7 @@ impl Dir {
     #[inline]
     pub fn remove_file<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.remove_file(&path)
+        self.cap_std.remove_file(path)
     }
 
     /// Rename a file or directory to a new name, replacing the original file if to already exists.
@@ -278,7 +276,7 @@ impl Dir {
     #[inline]
     pub fn set_permissions<P: AsRef<str>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.set_permissions(&path, perm)
+        self.cap_std.set_permissions(path, perm)
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -290,7 +288,7 @@ impl Dir {
     #[inline]
     pub fn symlink_metadata<P: AsRef<str>>(&self, path: P) -> io::Result<Metadata> {
         let path = from_utf8(path)?;
-        self.cap_std.symlink_metadata(&path)
+        self.cap_std.symlink_metadata(path)
     }
 
     /// Write a slice as the entire contents of a file.
@@ -320,7 +318,7 @@ impl Dir {
         dir_builder: &DirBuilder,
         path: P,
     ) -> io::Result<()> {
-        let path = from_utf8(&path)?;
+        let path = from_utf8(path)?;
         self.cap_std
             .create_with_dir_builder(&dir_builder.cap_std, path)
     }
@@ -383,7 +381,7 @@ impl Dir {
     #[inline]
     pub fn bind_unix_listener<P: AsRef<str>>(&self, path: P) -> io::Result<UnixListener> {
         let path = from_utf8(path)?;
-        self.cap_std.bind_unix_listener(&path)
+        self.cap_std.bind_unix_listener(path)
     }
 
     /// Connects to the socket named by path.
@@ -396,7 +394,7 @@ impl Dir {
     #[inline]
     pub fn connect_unix_stream<P: AsRef<str>>(&self, path: P) -> io::Result<UnixStream> {
         let path = from_utf8(path)?;
-        self.cap_std.connect_unix_stream(&path)
+        self.cap_std.connect_unix_stream(path)
     }
 
     /// Creates a Unix datagram socket bound to the given path.
@@ -409,7 +407,7 @@ impl Dir {
     #[inline]
     pub fn bind_unix_datagram<P: AsRef<str>>(&self, path: P) -> io::Result<UnixDatagram> {
         let path = from_utf8(path)?;
-        self.cap_std.bind_unix_datagram(&path)
+        self.cap_std.bind_unix_datagram(path)
     }
 
     /// Connects the socket to the specified address.
@@ -426,7 +424,7 @@ impl Dir {
         path: P,
     ) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.connect_unix_datagram(unix_datagram, &path)
+        self.cap_std.connect_unix_datagram(unix_datagram, path)
     }
 
     /// Sends data on the socket to the specified address.
@@ -443,7 +441,7 @@ impl Dir {
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        let path = from_utf8(&path)?;
+        let path = from_utf8(path)?;
         self.cap_std
             .send_to_unix_datagram_addr(unix_datagram, buf, path)
     }
@@ -458,7 +456,7 @@ impl Dir {
     /// [`std::path::Path::exists`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.exists
     #[inline]
     pub fn exists<P: AsRef<str>>(&self, path: P) -> bool {
-        match from_utf8(&path) {
+        match from_utf8(path) {
             Ok(path) => self.cap_std.exists(path),
             Err(_) => false,
         }
@@ -472,7 +470,7 @@ impl Dir {
     /// [`std::path::Path::is_file`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file
     #[inline]
     pub fn is_file<P: AsRef<str>>(&self, path: P) -> bool {
-        match from_utf8(&path) {
+        match from_utf8(path) {
             Ok(path) => self.cap_std.is_file(path),
             Err(_) => false,
         }
@@ -487,15 +485,16 @@ impl Dir {
     /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
     #[inline]
     pub fn is_dir<P: AsRef<str>>(&self, path: P) -> bool {
-        match from_utf8(&path) {
+        match from_utf8(path) {
             Ok(path) => self.cap_std.is_dir(path),
-            Err(_) => return false,
+            Err(_) => false,
         }
     }
 }
 
 #[cfg(unix)]
 impl FromRawFd for Dir {
+    #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self::from_std_file(fs::File::from_raw_fd(fd))
     }
@@ -503,6 +502,7 @@ impl FromRawFd for Dir {
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
+    #[inline]
     unsafe fn from_raw_fd(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))
     }
@@ -510,6 +510,7 @@ impl FromRawHandle for Dir {
 
 #[cfg(unix)]
 impl AsRawFd for Dir {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.cap_std.as_raw_fd()
     }
@@ -517,6 +518,7 @@ impl AsRawFd for Dir {
 
 #[cfg(windows)]
 impl AsRawHandle for Dir {
+    #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.cap_std.as_raw_handle()
     }
@@ -524,6 +526,7 @@ impl AsRawHandle for Dir {
 
 #[cfg(unix)]
 impl IntoRawFd for Dir {
+    #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.cap_std.into_raw_fd()
     }
@@ -531,6 +534,7 @@ impl IntoRawFd for Dir {
 
 #[cfg(windows)]
 impl IntoRawHandle for Dir {
+    #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.cap_std.into_raw_handle()
     }

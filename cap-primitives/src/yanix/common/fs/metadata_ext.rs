@@ -1,9 +1,11 @@
 #![allow(clippy::useless_conversion)]
 
 use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
-use std::convert::TryFrom;
-use std::fs;
-use std::time::{Duration, SystemTime};
+use std::{
+    convert::TryFrom,
+    fs,
+    time::{Duration, SystemTime},
+};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {

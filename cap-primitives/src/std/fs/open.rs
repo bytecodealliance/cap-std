@@ -1,4 +1,4 @@
-//! This defines `open`, the primary entrypoint to sandboxed `open`.
+//! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
 
 #[cfg(debug_assertions)]
 use super::get_path;
@@ -9,8 +9,10 @@ use std::{fs, io, path::Path};
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
+#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
-    // Call `open`.
+    // Call the underlying implementation.
     let result = open_impl(start, path, options);
 
     // Do an unsandboxed lookup and check that we found the same result.
@@ -54,8 +56,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
                     let unchecked_error = match unchecked_error {
-                        OpenUncheckedError::Other(err) => err,
-                        OpenUncheckedError::Symlink(err) => err,
+                        OpenUncheckedError::Other(err) | OpenUncheckedError::Symlink(err) => err,
                     };
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());

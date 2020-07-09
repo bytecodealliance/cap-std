@@ -1,6 +1,5 @@
 use super::compute_oflags;
-use crate::fs::OpenOptions;
-use crate::std::fs::OpenUncheckedError;
+use crate::{fs::OpenOptions, std::fs::OpenUncheckedError};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::{ffi::OsStr, fs, path::Path};

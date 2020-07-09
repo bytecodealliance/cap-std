@@ -24,7 +24,7 @@ impl<'dir> Iterator for ReadDir<'dir> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        unimplemented!("ReadDir::next()")
+        todo!("ReadDir::next()")
     }
 }
 

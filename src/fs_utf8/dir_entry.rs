@@ -41,7 +41,7 @@ impl<'dir> DirEntry<'dir> {
 
     /// Returns the file type for the file that this entry points at.
     ///
-    /// This to [`std::fs::DirEntry::file_type`].
+    /// This corresponds to [`std::fs::DirEntry::file_type`].
     ///
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
@@ -63,6 +63,7 @@ impl<'dir> DirEntry<'dir> {
 
 #[cfg(unix)]
 impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+    #[inline]
     fn ino(&self) -> u64 {
         self.cap_std.ino()
     }

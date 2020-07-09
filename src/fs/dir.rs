@@ -25,8 +25,6 @@ use std::os::wasi::{
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Add OFlag::CLOEXEC to yanix and use it in `open_file` and friends.
-///
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
@@ -246,7 +244,7 @@ impl Dir {
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        unimplemented!(
+        todo!(
             "Dir::read_dir({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -276,7 +274,7 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        unimplemented!(
+        todo!(
             "Dir::read_link({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -305,7 +303,7 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::remove_dir({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -320,7 +318,7 @@ impl Dir {
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
     pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::remove_dir_all({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -346,7 +344,7 @@ impl Dir {
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
     pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::rename({:?}, {}, {})",
             self.std_file,
             from.as_ref().display(),
@@ -362,7 +360,7 @@ impl Dir {
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
     #[inline]
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::set_permissions({:?}, {}, {:?})",
             self.std_file,
             path.as_ref().display(),
@@ -409,7 +407,7 @@ impl Dir {
         _dir_builder: &DirBuilder,
         path: P,
     ) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::create_with_dir_builder({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -467,7 +465,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
-        unimplemented!(
+        todo!(
             "Dir::bind_unix_listener({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -483,7 +481,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
-        unimplemented!(
+        todo!(
             "Dir::connect_unix_stream({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -499,7 +497,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
-        unimplemented!(
+        todo!(
             "Dir::bind_unix_datagram({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -519,7 +517,7 @@ impl Dir {
         _unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        unimplemented!(
+        todo!(
             "Dir::connect_unix_datagram({:?}, {})",
             self.std_file,
             path.as_ref().display()
@@ -540,7 +538,7 @@ impl Dir {
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        unimplemented!(
+        todo!(
             "Dir::send_to_unix_datagram_addr({:?}, {:?}, {})",
             self.std_file,
             buf,

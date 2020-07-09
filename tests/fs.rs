@@ -73,7 +73,7 @@ fn symlink_junction<P: AsRef<Path>, Q: AsRef<Path>>(
     tmpdir: &TempDir,
     dst: Q,
 ) -> io::Result<()> {
-    unimplemented!("symlink_junction")
+    todo!("symlink_junction")
 }
 
 // Several test fail on windows if the user does not have permission to

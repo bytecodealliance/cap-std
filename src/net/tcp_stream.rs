@@ -67,7 +67,7 @@ impl TcpStream {
         self.std.set_read_timeout(dur)
     }
 
-    /// pub fn set_write_timeout(&self, dur: Option<Duration>) -> Result<()>
+    /// Sets the write timeout to the timeout specified.
     ///
     /// This corresponds to [`std::net::TcpStream::set_write_timeout`].
     ///
