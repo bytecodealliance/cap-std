@@ -92,27 +92,32 @@ impl File {
     /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        self.std.set_permissions(permissions_into_std(perm))
+        self.std
+            .set_permissions(permissions_into_std(&self.std, perm)?)
     }
 }
 
 #[cfg(not(target_os = "wasi"))]
+#[inline]
 fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
     Metadata::from_std(metadata)
 }
 
 #[cfg(target_os = "wasi")]
+#[inline]
 fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
     metadata
 }
 
 #[cfg(not(target_os = "wasi"))]
-fn permissions_into_std(permissions: Permissions) -> fs::Permissions {
-    permissions.into_std()
+#[inline]
+fn permissions_into_std(file: &fs::File, permissions: Permissions) -> io::Result<fs::Permissions> {
+    permissions.into_std(file)
 }
 
 #[cfg(target_os = "wasi")]
-fn permissions_into_std(permissions: Permissions) -> fs::Permissions {
+#[inline]
+fn permissions_into_std(_file: &fs::File, permissions: Permissions) -> io::Result<fs::Permissions> {
     permissions
 }
 

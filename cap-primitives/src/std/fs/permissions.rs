@@ -1,6 +1,6 @@
 #[cfg(any(unix, target_os = "vxworks"))]
 use crate::fs::PermissionsExt;
-use std::fs;
+use std::{fs, io};
 
 /// Representation of the various permissions on a file.
 ///
@@ -33,20 +33,28 @@ impl Permissions {
     }
 
     /// Consumes `self` and produces a new instance of `std::fs::Permissions`.
+    ///
+    /// <details>
+    /// The `file` parameter works around the fact that we can't construct a
+    /// `Permissions` object ourselves on Windows.
+    /// </details>
     #[inline]
-    pub fn into_std(self) -> fs::Permissions {
-        #[cfg(windows)]
-        let permissions = {
-            let mut permissions = new_permissions();
-            permissions.set_readonly(self.readonly());
-        };
+    pub fn into_std(self, file: &fs::File) -> io::Result<fs::Permissions> {
+        self._into_std(file)
+    }
 
-        #[cfg(unix)]
-        let permissions = {
-            use std::os::unix::fs::PermissionsExt;
-            fs::Permissions::from_mode(self.ext.mode())
-        };
+    #[cfg(unix)]
+    #[inline]
+    fn _into_std(self, _file: &fs::File) -> io::Result<fs::Permissions> {
+        use std::os::unix::fs::PermissionsExt;
+        Ok(fs::Permissions::from_mode(self.ext.mode()))
+    }
 
+    #[cfg(windows)]
+    #[inline]
+    fn _into_std(self, file: &fs::File) -> io::Result<fs::Permissions> {
+        let mut permissions = file.metadata()?.permissions();
+        permissions.set_readonly(self.readonly());
         permissions
     }
 
@@ -72,22 +80,6 @@ impl Permissions {
         #[cfg(any(unix, target_os = "vxworks"))]
         self.ext.set_readonly(readonly);
     }
-}
-
-/// On Windows there's no way to construct a new `Permissions` object, so
-/// try to find a file we can open.
-#[cfg(windows)]
-fn new_permissions() -> fs::Permissions {
-    if let Ok(metadata) = std::fs::metadata(Component::CurDir.as_os_str()) {
-        return metadata.permissions();
-    }
-    if let Ok(metadata) = std::fs::metadata(Component::ParentDir.as_os_str()) {
-        return metadata.permissions();
-    }
-    if let Ok(metadata) = std::fs::metadata(Component::RootDir.as_os_str()) {
-        return metadata.permissions();
-    }
-    panic!("Can't find a path to open to construct a `Permissions` object");
 }
 
 #[cfg(unix)]
