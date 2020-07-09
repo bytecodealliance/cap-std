@@ -1,6 +1,19 @@
 mod sys_common;
 
+use std::io;
 use sys_common::io::tmpdir;
+
+fn rename_path_in_use() -> String {
+    io::Error::from_raw_os_error(libc::EBUSY).to_string()
+}
+
+fn no_such_file_or_directory() -> String {
+    io::Error::from_raw_os_error(libc::ENOENT).to_string()
+}
+
+fn directory_not_empty() -> String {
+    io::Error::from_raw_os_error(libc::ENOTEMPTY).to_string()
+}
 
 #[test]
 fn rename_basics() {
@@ -16,11 +29,11 @@ fn rename_basics() {
     check!(tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar/renamed.txt"));
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, ".."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/../.."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "/tmp"),
@@ -28,11 +41,11 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar/baz/.."),
-        "No such file or directory"
+        &no_such_file_or_directory()
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar"),
-        "Directory not empty"
+        &directory_not_empty()
     );
     check!(tmpdir.rename("foo/bar", &tmpdir, "foo/bar"));
     check!(tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "file.txt"));
@@ -41,7 +54,7 @@ fn rename_basics() {
 
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/.."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/."),
@@ -49,11 +62,11 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../.."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../.."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../../something"),
@@ -65,11 +78,11 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, ".."),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "/"),
@@ -85,11 +98,11 @@ fn rename_basics() {
     );
     error!(
         tmpdir.rename("..", &tmpdir, "nope.txt"),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename(".", &tmpdir, "nope.txt"),
-        "Device or resource busy"
+        &rename_path_in_use()
     );
     error!(
         tmpdir.rename("/", &tmpdir, "nope.txt"),
