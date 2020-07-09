@@ -18,34 +18,107 @@ interfaces you are used to, but in a capability-based version.
 
 **It is a work in progress and many things aren't implemented yet.**
 
-## The story
+## Capability-based security
 
-The two most interesting features are `fs::Dir` and `net::Catalog` (name TBD).
-Dirs represent capabilities for accessing files beneath them, and "catalogs"
-represent capabilities for creating network connections.
+Operating systems have a concept of resource handles, or file descriptors, which
+are values that can be passed around within and sometimes between programs, and
+which represent access to external resources. Programs typically have the
+*ambient authority* to request any file or network handle simply by providing its
+name or address:
 
-This library has two potential uses in the WASI ecosystem. First, an implementation
-abstraction within wasi-common, abstracting over some [yanix]/[winx] differences. And
-second, a user library, for writing applications that use std-like APIs but that
-don't require a preopen-like layer.
+```
+    let file = File::open("/anything/you/want.txt")?;
+```
 
-Things to think about:
- - Should `try_clone` and other methods that consume resources require
-   a capability?
- - Should we provide a capability-oriented [`std::process::Command`]?
- - Rust's `Path` has several ambient-authority methods: `metadata`,
-   `read_link`, `read_dir`, `symlink_metadata`, `canonicalize`. Is it
-   worth having our own version of `Path` just to exclude those? Such a
-   thing could also exclude absolute paths.
- - Should we propose adding things to Rust's libstd which would help streamline this library?
-    - A way to construct an arbitrary [`std::fs::FileType`] and [`std::fs::Metadata`]?
-    - A way to read the options out of a [`std::fs::OpenOptions`] and [`std::fs::DirBuilder`]?
+There may be access-control lists, namespaces, firewalls, or virtualization
+mechanisms governing which resources can actually be accessed, but those are
+typically coarse-grained and configured outside of the application.
 
-[arf strings]: https://github.com/bytecodealliance/arf-strings/
-[`std::process::Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
-[`std::fs::FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
-[`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
-[`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
-[`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
-[yanix]: https://docs.rs/yanix
-[winx]: https://docs.rs/winx
+Capability-based security seeks to avoid ambient authority, to make sandboxing
+finer-grained and composable. To open a file, one needs a handle to a directory
+it's in:
+
+```
+    let file = dir.open("the/thing.txt")?;
+```
+
+Attempts to access paths not contained within the directory:
+
+```
+    let hidden = dir.open("../hidden.txt")?;
+
+    dir.symlink("/hidden.txt", "misdirection.txt")?;
+    let secret = dir.open("misdirection.txt")?;
+```
+
+return `PermissionDenied` errors.
+
+This allows applications to configure their own access, without setting up
+a separate host process or requiring external configuration.
+
+## How do I obtain a `Dir`?
+
+If every resource requires some other resource to obtain, how does one obtain
+the first resource?
+
+For now, `cap-std`'s answer is that you use conventional ambient authority
+methods such as `std::fs::File::open` to open directories, and then you can
+call `Dir::from_std_file`.
+
+In the future, this space may get more interesting :-).
+
+## How do I use a `Dir`?
+
+Once you have a `Dir`, it's very similar to the Rust standard library:
+
+ - Instead of using `File::open(...)`, call `dir.open(...)`.
+ - Instead of using `File::create(...)`, call `dir.create(...)`.
+ - Instead of using `fs::metadata(...)`, call `dir.metadata(...)`.
+
+and so on.
+
+## What can I use `cap-std` for?
+
+`cap-std` is not a sandbox for untrusted Rust code. Among other things,
+untrusted Rust code could use `unsafe` or the unsandboxed APIs in `std::fs`.
+
+`cap-std` allows code to declare its intent, and opt in to protection from
+malicious path names. Code which takes a `Dir` from which to open files,
+rather than taking bare filenames, declares its intent to only open files
+underneath that `Dir`. And, `Dir` automatically protects against paths which
+might include `..` or symlinks that might lead outside of that `Dir`.
+
+`cap-std` also has another role, within WASI, because `cap-std`'s filesystem
+APIs closely follow WASI's sandboxing APIs. In WASI, `cap-std` becomes a very
+thin layer, thinner than `libstd`'s filesystem APIs because it doesn't need
+extra code to handle absolute paths.
+
+## How fast is it?
+
+On Linux 5.6 and newer, `cap-std` uses the [`openat2`] to implement `open`
+and with a single system call in common cases. Several other operations
+internally utilize `openat2` for fast path resolution as well.
+
+Otherwise, `cap-std` opens each component of a path individually, in order to
+specially handle `..` and symlinks. The algorithm is carefully designed to
+minimize system calls, so opening `red/green/blue` performs just 5 system
+calls—it opens `red`, `green`, and then `blue`, and closes the handles for
+`red` and `green`.
+
+[`openat2`]: https://lwn.net/Articles/796868/
+
+## What about networking?
+
+This library contains a few sketches of how to apply similar ideas to
+networking, but it's very incomplete at this time. If you're interested in
+this area, let's talk about what this might become!
+
+## What is `cap_std::fs_utf8`?
+
+It's an experiment in what an API with UTF-8 filesystem paths (but which
+still allow you to access any file with any byte-sequence name) might look
+like. For more information on the technique, see the [`arf-strings` package].
+To try it, opt in by enabling the `fs_utf8` feature and using `std::fs_utf8`
+in place of `std::fs`.
+
+[`arf-strings` package]: https://github.com/bytecodealliance/arf-strings/

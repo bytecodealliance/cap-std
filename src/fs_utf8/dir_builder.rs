@@ -10,6 +10,11 @@ use std::fs;
 ///
 /// [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
 /// [`Dir::create_with_dir_builder`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_with_dir_builder
+///
+/// <details>
+/// We need to define our own version because the libstd `DirBuilder` doesn't have
+/// public accessors that we can use.
+/// </details>
 pub struct DirBuilder {
     pub(crate) cap_std: crate::fs::DirBuilder,
 }

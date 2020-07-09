@@ -44,9 +44,9 @@ impl Dir {
     ///
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
     #[inline]
-    pub fn open_file<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
+    pub fn open<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
         let path = from_utf8(path)?;
-        self.cap_std.open_file(path).map(File::from_cap_std)
+        self.cap_std.open(path).map(File::from_cap_std)
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -58,14 +58,10 @@ impl Dir {
     ///
     /// [`std::fs::OpenOptions::open`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.open
     #[inline]
-    pub fn open_file_with<P: AsRef<str>>(
-        &self,
-        path: P,
-        options: &OpenOptions,
-    ) -> io::Result<File> {
+    pub fn open_with<P: AsRef<str>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
         let path = from_utf8(path)?;
         self.cap_std
-            .open_file_with(path, options)
+            .open_with(path, options)
             .map(File::from_cap_std)
     }
 
@@ -107,9 +103,9 @@ impl Dir {
     ///
     /// [`std::fs::File::create`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.create
     #[inline]
-    pub fn create_file<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
+    pub fn create<P: AsRef<str>>(&self, path: P) -> io::Result<File> {
         let path = from_utf8(path)?;
-        self.cap_std.create_file(path).map(File::from_cap_std)
+        self.cap_std.create(path).map(File::from_cap_std)
     }
 
     /// Returns the canonical form of a path with all intermediate components normalized
@@ -188,9 +184,9 @@ impl Dir {
     ///
     /// [`std::fs::read`]: https://doc.rust-lang.org/std/fs/fn.read.html
     #[inline]
-    pub fn read_file<P: AsRef<str>>(&self, path: P) -> io::Result<Vec<u8>> {
+    pub fn read<P: AsRef<str>>(&self, path: P) -> io::Result<Vec<u8>> {
         let path = from_utf8(path)?;
-        self.cap_std.read_file(path)
+        self.cap_std.read(path)
     }
 
     /// Reads a symbolic link, returning the file that the link points to.
@@ -297,13 +293,9 @@ impl Dir {
     ///
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
     #[inline]
-    pub fn write_file<P: AsRef<str>, C: AsRef<[u8]>>(
-        &self,
-        path: P,
-        contents: C,
-    ) -> io::Result<()> {
+    pub fn write<P: AsRef<str>, C: AsRef<[u8]>>(&self, path: P, contents: C) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.write_file(path, contents)
+        self.cap_std.write(path, contents)
     }
 
     /// Creates the specified directory with the options configured in this builder.

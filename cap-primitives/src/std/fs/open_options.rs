@@ -6,11 +6,16 @@ use crate::fs::OpenOptionsExt;
 ///
 /// Note that this `OpenOptions` has no `open` method. To open a file with
 /// an `OptionOptions`, you must first obtain a [`Dir`] containing the path, and
-/// then call [`Dir::open_file_with`].
+/// then call [`Dir::open_with`].
 ///
 /// [`std::fs::OpenOptions`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
 /// [`Dir`]: struct.Dir.html
-/// [`Dir::open_file_with`]: struct.Dir.html#method.open_file_with
+/// [`Dir::open_with`]: struct.Dir.html#method.open_with
+///
+/// <details>
+/// We need to define our own version because the libstd `OpenOptions` doesn't have
+/// public accessors that we can use.
+/// </details>
 #[derive(Debug, Clone)]
 pub struct OpenOptions {
     pub(crate) read: bool,

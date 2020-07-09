@@ -28,6 +28,11 @@ enum Inner {
 /// This corresponds to [`std::fs::FileType`].
 ///
 /// [`std::fs::FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
+///
+/// <details>
+/// We need to define our own version because the libstd `FileType` doesn't have
+/// a public constructor that we can use.
+/// </details>
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct FileType(Inner);
 
