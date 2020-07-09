@@ -25,11 +25,19 @@ pub fn link(
     #[cfg(debug_assertions)]
     match stat_unchecked(new_start, new_path, FollowSymlinks::No) {
         Ok(metadata) => match &result {
-            Ok(()) => assert!(!metadata.file_type().is_symlink()),
+            Ok(()) => match stat_unchecked(old_start, old_path, FollowSymlinks::No) {
+                Ok(old_metadata) => assert!(metadata.is_same_file(&old_metadata)),
+                Err(e) => panic!(
+                    "couldn't stat old path after link: start='{:?}' path='{}': {:?}",
+                    old_start,
+                    old_path.display(),
+                    e,
+                ),
+            },
             Err(e) => match e.kind() {
                 io::ErrorKind::AlreadyExists | io::ErrorKind::PermissionDenied => (),
                 _ => panic!(
-                    "unexpected error opening start='{:?}', path='{}': {:?}",
+                    "unexpected error opening start='{:?}' path='{}': {:?}",
                     new_start,
                     new_path.display(),
                     e
