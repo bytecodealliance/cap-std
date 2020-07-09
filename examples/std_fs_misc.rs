@@ -8,7 +8,7 @@ use std::path::Path;
 
 // A simple implementation of `% cat path`
 fn cat(dir: &mut Dir, path: &Path) -> io::Result<String> {
-    let mut f = dir.open_file(path)?;
+    let mut f = dir.open(path)?;
     let mut s = String::new();
     match f.read_to_string(&mut s) {
         Ok(_) => Ok(s),
@@ -18,14 +18,14 @@ fn cat(dir: &mut Dir, path: &Path) -> io::Result<String> {
 
 // A simple implementation of `% echo s > path`
 fn echo(s: &str, dir: &mut Dir, path: &Path) -> io::Result<()> {
-    let mut f = dir.create_file(path)?;
+    let mut f = dir.create(path)?;
 
     f.write_all(s.as_bytes())
 }
 
 // A simple implementation of `% touch path` (ignores existing files)
 fn touch(dir: &mut Dir, path: &Path) -> io::Result<()> {
-    match dir.open_file_with(path, OpenOptions::new().create(true).write(true)) {
+    match dir.open_with(path, OpenOptions::new().create(true).write(true)) {
         Ok(_) => Ok(()),
         Err(e) => Err(e),
     }

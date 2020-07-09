@@ -55,8 +55,8 @@ impl Dir {
     ///
     /// [`std::fs::File::open`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.open
     #[inline]
-    pub fn open_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.open_file_with(path, OpenOptions::new().read(true))
+    pub fn open<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+        self.open_with(path, OpenOptions::new().read(true))
     }
 
     /// Opens a file at `path` with the options specified by `self`.
@@ -68,30 +68,18 @@ impl Dir {
     ///
     /// [`std::fs::OpenOptions::open`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.open
     #[inline]
-    pub fn open_file_with<P: AsRef<Path>>(
-        &self,
-        path: P,
-        options: &OpenOptions,
-    ) -> io::Result<File> {
+    pub fn open_with<P: AsRef<Path>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
         let file = unsafe { self.as_sync_file() };
-        Self::_open_file_with(&file, path.as_ref(), options)
+        Self::_open_with(&file, path.as_ref(), options)
     }
 
     #[cfg(not(target_os = "wasi"))]
-    fn _open_file_with(
-        file: &std::fs::File,
-        path: &Path,
-        options: &OpenOptions,
-    ) -> io::Result<File> {
+    fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
         open(file, path, options).map(|f| File::from_std(f.into()))
     }
 
     #[cfg(target_os = "wasi")]
-    fn _open_file_with(
-        file: &std::fs::File,
-        path: &Path,
-        options: &OpenOptions,
-    ) -> io::Result<File> {
+    fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
         options
             .open_at(&self.std_file, path)
             .map(|f| File::from_std(f.into()))
@@ -107,7 +95,7 @@ impl Dir {
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::unix::fs::OpenOptionsExt;
         use yanix::file::OFlag;
-        self.open_file_with(
+        self.open_with(
             path,
             OpenOptions::new()
                 .read(true)
@@ -173,8 +161,8 @@ impl Dir {
     ///
     /// [`std::fs::File::create`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.create
     #[inline]
-    pub fn create_file<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.open_file_with(
+    pub fn create<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+        self.open_with(
             path,
             OpenOptions::new().write(true).create(true).truncate(true),
         )
@@ -210,8 +198,8 @@ impl Dir {
             ));
         }
 
-        let mut reader = self.open_file(from)?;
-        let mut writer = self.create_file(to.as_ref())?;
+        let mut reader = self.open(from)?;
+        let mut writer = self.create(to.as_ref())?;
         let perm = reader.metadata().await?.permissions();
 
         let ret = io::copy(&mut reader, &mut writer).await?;
@@ -271,9 +259,9 @@ impl Dir {
     ///
     /// [`std::fs::read`]: https://doc.rust-lang.org/std/fs/fn.read.html
     #[inline]
-    pub async fn read_file<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
+    pub async fn read<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
         use async_std::prelude::*;
-        let mut file = self.open_file(path)?;
+        let mut file = self.open(path)?;
         let mut bytes = Vec::with_capacity(initial_buffer_size(&file).await);
         file.read_to_end(&mut bytes).await?;
         Ok(bytes)
@@ -304,7 +292,7 @@ impl Dir {
     pub async fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
         use async_std::prelude::*;
         let mut s = String::new();
-        self.open_file(path)?.read_to_string(&mut s).await?;
+        self.open(path)?.read_to_string(&mut s).await?;
         Ok(s)
     }
 
@@ -401,13 +389,13 @@ impl Dir {
     ///
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
     #[inline]
-    pub async fn write_file<P: AsRef<Path>, C: AsRef<[u8]>>(
+    pub async fn write<P: AsRef<Path>, C: AsRef<[u8]>>(
         &self,
         path: P,
         contents: C,
     ) -> io::Result<()> {
         use async_std::prelude::*;
-        let mut file = self.create_file(path)?;
+        let mut file = self.create(path)?;
         file.write_all(contents.as_ref()).await
     }
 

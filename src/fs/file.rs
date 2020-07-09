@@ -15,12 +15,12 @@ use std::{fmt, fs, io, process};
 ///
 /// Note that this `File` has no `open` or `create` methods. To open or create
 /// a file, you must first obtain a [`Dir`] containing the path, and then call
-/// [`Dir::open_file`] or [`Dir::create_file`].
+/// [`Dir::open`] or [`Dir::create`].
 ///
 /// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 /// [`Dir`]: struct.Dir.html
-/// [`Dir::open_file`]: struct.Dir.html#method.open_file
-/// [`Dir::create_file`]: struct.Dir.html#method.create_file
+/// [`Dir::open`]: struct.Dir.html#method.open
+/// [`Dir::create`]: struct.Dir.html#method.create
 pub struct File {
     pub(crate) std: fs::File,
 }
