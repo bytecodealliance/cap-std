@@ -260,9 +260,10 @@ pub(crate) fn open_manually<'start>(
                         return Err(err);
                     }
                     Err(OpenUncheckedError::Other(err)) => {
-                        // An error occurred. If this was the last component, record it as the
-                        // last component of the canonical path, even if we couldn't open it.
-                        if components.is_empty() {
+                        // An error occurred. If this was the last component, and the error wasn't
+                        // due to invalid inputs (eg. the path has an embedded NUL), record it as
+                        // the last component of the canonical path, even if we couldn't open it.
+                        if components.is_empty() && err.kind() != io::ErrorKind::InvalidInput {
                             canonical_path.push(&one);
                             canonical_path.complete();
                         }

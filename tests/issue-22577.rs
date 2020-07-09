@@ -1,0 +1,32 @@
+// This test module derived from Rust's src/test/ui/issues/issue-22577.rs
+// at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+
+// run-pass
+#![allow(dead_code)]
+// pretty-expanded FIXME #23616
+// ignore-cloudabi no std::fs
+
+use cap_std::{fs, net};
+
+fn assert_both<T: Send + Sync>() {}
+fn assert_send<T: Send>() {}
+
+#[test]
+fn issue_22577() {
+    assert_both::<fs::File>();
+    assert_both::<fs::Metadata>();
+    // TODO: Make cap_std's directory types Send and Sync.
+    //assert_both::<fs::ReadDir>();
+    //assert_both::<fs::DirEntry>();
+    assert_both::<fs::OpenOptions>();
+    assert_both::<fs::Permissions>();
+
+    assert_both::<net::TcpStream>();
+    assert_both::<net::TcpListener>();
+    assert_both::<net::UdpSocket>();
+    assert_both::<net::SocketAddr>();
+    assert_both::<net::SocketAddrV4>();
+    assert_both::<net::SocketAddrV6>();
+    assert_both::<net::Ipv4Addr>();
+    assert_both::<net::Ipv6Addr>();
+}
