@@ -16,7 +16,8 @@ use {
 #[cfg(windows)]
 use {
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, stat, symlink_dir, symlink_file, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
+        FollowSymlinks,
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
