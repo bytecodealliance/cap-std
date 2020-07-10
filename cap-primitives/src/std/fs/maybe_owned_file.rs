@@ -1,8 +1,6 @@
-#[cfg(debug_assertions)]
-use crate::fs::get_path;
-#[cfg(debug_assertions)]
-use std::path::PathBuf;
 use std::{fs, io, mem};
+#[cfg(debug_assertions)]
+use {crate::fs::get_path, std::path::PathBuf};
 
 enum Inner<'borrow> {
     Owned(fs::File),

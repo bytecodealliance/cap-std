@@ -1,11 +1,9 @@
 //! This defines `link`, the primary entrypoint to sandboxed hard-link creation.
 
 use crate::fs::link_impl;
-#[cfg(debug_assertions)]
-use crate::fs::stat_unchecked;
-#[cfg(debug_assertions)]
-use crate::fs::FollowSymlinks;
 use std::{fs, io, path::Path};
+#[cfg(debug_assertions)]
+use {crate::fs::stat_unchecked, crate::fs::FollowSymlinks};
 
 /// Perform a `linkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
