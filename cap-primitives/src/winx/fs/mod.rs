@@ -12,6 +12,8 @@ mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
 
+pub mod errors;
+
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use file_type_ext::*;
 pub(crate) use is_same_file::*;
