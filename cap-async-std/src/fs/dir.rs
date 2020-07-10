@@ -18,7 +18,8 @@ use {
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, stat, symlink_dir, symlink_file, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
+        FollowSymlinks,
     },
 };
 
