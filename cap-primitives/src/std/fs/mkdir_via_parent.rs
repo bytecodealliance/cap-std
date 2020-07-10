@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 /// calling `mkdirat` on the last component.
 pub(crate) fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> {
     let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::Borrowed(start);
+    let mut start = MaybeOwnedFile::borrowed(start);
 
     let basename = match open_parent(&mut start, path, &mut symlink_count)? {
         // `mkdir` on `..` fails with `EEXIST`.

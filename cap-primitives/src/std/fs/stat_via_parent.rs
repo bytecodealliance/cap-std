@@ -15,7 +15,7 @@ pub(crate) fn stat_via_parent(
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
     let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::Borrowed(start);
+    let mut start = MaybeOwnedFile::borrowed(start);
     let mut path = Cow::Borrowed(path);
 
     loop {
@@ -23,15 +23,21 @@ pub(crate) fn stat_via_parent(
         let basename = match open_parent(&mut start, &path, &mut symlink_count)? {
             None => {
                 // `None` means the last component was `..` so open the full path and `fstat` it.
-                return open_manually(
+                let file = open_manually(
                     start.as_file(),
                     &path,
                     OpenOptions::new().read(true),
                     &mut symlink_count,
                     None,
-                )?
-                .metadata()
-                .map(Metadata::from_std);
+                )?;
+
+                let result = file.metadata().map(Metadata::from_std);
+
+                // Check that we're still within the containing path.
+                #[cfg(debug_assertions)]
+                start.descend_to(file);
+
+                return result;
             }
             // Otherwise we have a normal path.
             Some(basename) => basename,

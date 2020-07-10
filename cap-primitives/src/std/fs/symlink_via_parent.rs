@@ -16,7 +16,7 @@ pub(crate) fn symlink_via_parent(
 ) -> io::Result<()> {
     use crate::fs::symlink_unchecked;
     let mut symlink_count = 0;
-    let mut new_start = MaybeOwnedFile::Borrowed(new_start);
+    let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
     let new_basename = match open_parent(&mut new_start, new_path, &mut symlink_count)? {
         // `symlink` on `..` fails with `EEXIST`.

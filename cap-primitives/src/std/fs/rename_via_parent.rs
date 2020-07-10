@@ -10,8 +10,8 @@ pub fn rename_via_parent(
     new_path: &Path,
 ) -> io::Result<()> {
     let mut symlink_count = 0;
-    let mut old_start = MaybeOwnedFile::Borrowed(old_start);
-    let mut new_start = MaybeOwnedFile::Borrowed(new_start);
+    let mut old_start = MaybeOwnedFile::borrowed(old_start);
+    let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
     let old_basename = match open_parent(&mut old_start, old_path, &mut symlink_count)? {
         // `rename` on `..` fails since the path is in use.

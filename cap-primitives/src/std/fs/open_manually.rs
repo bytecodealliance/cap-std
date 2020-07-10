@@ -3,9 +3,8 @@
 
 use crate::fs::{is_same_file, open_unchecked, resolve_symlink_at, MaybeOwnedFile, OpenOptions};
 use std::{
-    borrow::ToOwned,
     ffi::OsString,
-    fs, io, mem,
+    fs, io,
     path::{Component, Path, PathBuf},
 };
 
@@ -26,7 +25,7 @@ fn to_owned_component(component: Component) -> OwnedComponent {
         Component::Prefix(_) | Component::RootDir => OwnedComponent::PrefixOrRootDir,
         Component::CurDir => OwnedComponent::CurDir,
         Component::ParentDir => OwnedComponent::ParentDir,
-        Component::Normal(os_str) => OwnedComponent::Normal((*os_str).to_owned()),
+        Component::Normal(os_str) => OwnedComponent::Normal(os_str.to_os_string()),
     }
 }
 
@@ -126,7 +125,7 @@ pub(crate) fn open_manually(
         .rev()
         .collect::<Vec<_>>();
 
-    let mut base = MaybeOwnedFile::Borrowed(start);
+    let mut base = MaybeOwnedFile::borrowed(start);
     let mut dirs = Vec::new();
     let mut canonical_path = CanonicalPath::new(canonical_path);
 
@@ -163,7 +162,7 @@ pub(crate) fn open_manually(
                     use_options.clone().nofollow(true),
                 ) {
                     Ok(file) => {
-                        let prev_base = mem::replace(&mut base, MaybeOwnedFile::Owned(file));
+                        let prev_base = base.descend_to(file);
                         dirs.push(prev_base);
                         if one != "." {
                             canonical_path.push(one);

@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 /// calling `unlinkat` on the last component.
 pub(crate) fn unlink_via_parent(start: &fs::File, path: &Path) -> io::Result<()> {
     let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::Borrowed(start);
+    let mut start = MaybeOwnedFile::borrowed(start);
 
     let basename = match open_parent(&mut start, path, &mut symlink_count)? {
         // `unlink` on `..` fails with `EISDIR`.
