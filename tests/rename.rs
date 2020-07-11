@@ -2,7 +2,12 @@ mod sys_common;
 
 use sys_common::io::tmpdir;
 
-#[cfg(all(unix, target_os = "vxworks", target_os = "redox", target_os = "fuchsia"))]
+#[cfg(any(
+    unix,
+    target_os = "vxworks",
+    target_os = "redox",
+    target_os = "fuchsia"
+))]
 fn rename_path_in_use() -> std::io::Error {
     io::Error::from_raw_os_error(libc::EBUSY)
 }
@@ -11,7 +16,12 @@ fn rename_path_in_use() -> i32 {
     todo!("work out error for rename_path_in_use condition")
 }
 
-#[cfg(all(unix, target_os = "vxworks", target_os = "redox", target_os = "fuchsia"))]
+#[cfg(any(
+    unix,
+    target_os = "vxworks",
+    target_os = "redox",
+    target_os = "fuchsia"
+))]
 fn no_such_file_or_directory() -> std::io::Error {
     io::Error::from_raw_os_error(libc::ENOENT)
 }
