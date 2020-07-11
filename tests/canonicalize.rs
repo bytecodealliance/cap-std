@@ -10,67 +10,67 @@ fn canonicalize_edge_cases() {
     assert_eq!(check!(tmpdir.canonicalize("./")), Path::new(""));
     assert_eq!(check!(tmpdir.canonicalize("./.")), Path::new(""));
     assert_eq!(check!(tmpdir.canonicalize("")), Path::new(""));
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/./"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/../"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/../."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/./."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/./.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/./../"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/../.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("/../../"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize(".."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("../"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("../."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("./.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("../.."),
         "a path led outside of the filesystem"
     );
@@ -106,11 +106,11 @@ fn canonicalize_edge_cases() {
         check!(tmpdir.canonicalize("foo/../foo/bar/")).to_str(),
         Some("foo/bar")
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("foo/../.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.canonicalize("foo/../../"),
         "a path led outside of the filesystem"
     );

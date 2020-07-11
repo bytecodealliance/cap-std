@@ -31,7 +31,12 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     Some(PathBuf::from(std::ffi::OsString::from_vec(buf)))
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "macos")))]
+#[cfg(target_os = "windows")]
+pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
+    crate::winx::fs::get_path::get_path(file).ok()
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
 pub(crate) fn get_path(_file: &fs::File) -> Option<PathBuf> {
     None
 }

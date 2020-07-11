@@ -11,6 +11,7 @@ macro_rules! check {
 }
 
 #[cfg(windows)]
+#[allow(unused)]
 macro_rules! error {
     ($e:expr, $s:expr) => {
         match $e {

@@ -62,9 +62,10 @@ async fn main() {
         println!("! {:?}", why.kind());
     });
 
-    println!("`ln -s ../b.txt a/c/b.txt`");
-    // Create a symbolic link, returns `io::Result<()>`
-    if cfg!(target_family = "unix") {
+    #[cfg(target_family = "unix")]
+    {
+        println!("`ln -s ../b.txt a/c/b.txt`");
+        // Create a symbolic link, returns `io::Result<()>`
         cwd.symlink("../b.txt", "a/c/b.txt").unwrap_or_else(|why| {
             println!("! {:?}", why.kind());
         });

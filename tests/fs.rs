@@ -69,9 +69,9 @@ fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
 }
 #[cfg(windows)]
 fn symlink_junction<P: AsRef<Path>, Q: AsRef<Path>>(
-    src: P,
-    tmpdir: &TempDir,
-    dst: Q,
+    _src: P,
+    _tmpdir: &TempDir,
+    _dst: Q,
 ) -> io::Result<()> {
     todo!("symlink_junction")
 }
@@ -387,7 +387,7 @@ fn file_test_io_seek_read_write() {
             .write(true)
             .read(true)
             .clone();
-        let mut rw = check!(oo.open(filename));
+        let mut rw = check!(tmpdir.open_with(filename, &oo));
         assert_eq!(check!(rw.seek_write(write1.as_bytes(), 5)), write1.len());
         assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 9);
         assert_eq!(check!(rw.seek_read(&mut buf, 5)), write1.len());
@@ -589,7 +589,7 @@ fn concurrent_recursive_mkdir() {
 #[test]
 fn recursive_mkdir_slash() {
     let tmpdir = tmpdir();
-    error!(
+    error_contains!(
         tmpdir.create_dir_all(Path::new("/")),
         "a path led outside of the filesystem"
     );
@@ -820,7 +820,7 @@ fn copy_file_returns_metadata_len() {
     let out_path = "out.txt";
     check!(check!(tmp.create(&in_path)).write(b"lettuce"));
     #[cfg(windows)]
-    check!(check!(tmp.create(tmp.join("in.txt:bunny"))).write(b"carrot"));
+    check!(check!(tmp.create("in.txt:bunny")).write(b"carrot"));
     let copied_len = check!(tmp.copy(&in_path, &out_path));
     assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
