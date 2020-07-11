@@ -88,8 +88,8 @@ impl File {
     ///
     /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
     #[inline]
-    pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        self.cap_std.set_permissions(perm)
+    pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
+        self.cap_std.set_permissions(perm).await
     }
 }
 

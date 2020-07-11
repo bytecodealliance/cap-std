@@ -37,3 +37,35 @@ pub use cap_primitives::fs::{FileType, Metadata, OpenOptions, Permissions};
 // Re-export things from `std` that we can use as-is.
 #[cfg(target_os = "wasi")]
 pub use std::fs::{FileType, Metadata, OpenOptions, Permissions};
+
+/// Utility for returning an `async_std::fs::File` as a `std::fs::File`
+/// for synchronous operations.
+///
+/// # Safety
+///
+/// Callers must avoid using the `async_std::fs::File` while the
+/// resulting `std::fs::File` is live, and must ensure that the resulting
+/// `std::fs::File` doesn't outlive the `async_std::fs::File`.
+#[inline]
+pub(crate) unsafe fn as_sync(
+    async_file: &async_std::fs::File,
+) -> std::mem::ManuallyDrop<std::fs::File> {
+    _as_sync(async_file)
+}
+
+#[cfg(any(
+    unix,
+    target_os = "redox",
+    target_os = "vxworks",
+    target_os = "fuchsia"
+))]
+unsafe fn _as_sync(async_file: &async_std::fs::File) -> std::mem::ManuallyDrop<std::fs::File> {
+    use std::os::unix::io::{AsRawFd, FromRawFd};
+    std::mem::ManuallyDrop::new(std::fs::File::from_raw_fd(async_file.as_raw_fd()))
+}
+
+#[cfg(windows)]
+unsafe fn _as_sync(async_file: &async_std::fs::File) -> std::mem::ManuallyDrop<std::fs::File> {
+    use std::os::windows::io::{AsRawHandle, FromRawHandle};
+    std::mem::ManuallyDrop::new(std::fs::File::from_raw_handle(async_file.as_raw_handle()))
+}

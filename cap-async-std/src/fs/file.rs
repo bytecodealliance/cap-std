@@ -1,4 +1,4 @@
-use crate::fs::{Metadata, Permissions};
+use crate::fs::{as_sync, Metadata, Permissions};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -84,8 +84,9 @@ impl File {
     ///
     /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
     #[inline]
-    pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        todo!("File::set_permissions({:?})", perm)
+    pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
+        let sync = unsafe { as_sync(&self.std) };
+        self.std.set_permissions(perm.into_std(&sync)?).await
     }
 }
 

@@ -1,8 +1,7 @@
-use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
+use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use std::{
     fmt,
-    mem::ManuallyDrop,
     path::{Path, PathBuf},
 };
 
@@ -10,14 +9,17 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+    cap_primitives::fs::{
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink, unlink, FollowSymlinks,
+    },
 };
 
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, stat, symlink_dir, symlink_file, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
+        FollowSymlinks,
     },
 };
 
@@ -32,7 +34,10 @@ use async_std::os::wasi::{
 /// TODO: Windows support.
 ///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model.
+/// absolute paths don't interoperate well with the capability model. And it lacks
+/// a `set_permissions` method because popular host platforms don't have a way to
+/// perform that operation in a manner compatible with cap-std's sandbox; instead,
+/// open the file and call [`File::set_permissions`].
 pub struct Dir {
     std_file: fs::File,
 }
@@ -71,7 +76,7 @@ impl Dir {
     /// [`std::fs::OpenOptions::open`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.open
     #[inline]
     pub fn open_with<P: AsRef<Path>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         Self::_open_with(&file, path.as_ref(), options)
     }
 
@@ -127,7 +132,7 @@ impl Dir {
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         mkdir(&file, path.as_ref())
     }
 
@@ -192,7 +197,7 @@ impl Dir {
     /// [`std::fs::canonicalize`]: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         canonicalize(&file, path.as_ref())
     }
 
@@ -218,7 +223,7 @@ impl Dir {
         let perm = reader.metadata().await?.permissions();
 
         let ret = io::copy(&mut reader, &mut writer).await?;
-        self.set_permissions(to, perm)?;
+        writer.set_permissions(perm).await?;
         Ok(ret)
     }
 
@@ -235,8 +240,8 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src_file = unsafe { self.as_sync_file() };
-        let dst_file = unsafe { dst_dir.as_sync_file() };
+        let src_file = unsafe { as_sync(&self.std_file) };
+        let dst_file = unsafe { as_sync(&dst_dir.std_file) };
         link(&src_file, src.as_ref(), &dst_file, dst.as_ref())
     }
 
@@ -248,7 +253,7 @@ impl Dir {
     /// [`std::fs::metadata`]: https://doc.rust-lang.org/std/fs/fn.metadata.html
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         stat(&file, path.as_ref(), FollowSymlinks::Yes)
     }
 
@@ -290,11 +295,8 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        todo!(
-            "Dir::read_link({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        let file = unsafe { as_sync(&self.std_file) };
+        readlink(&file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
@@ -349,7 +351,7 @@ impl Dir {
     /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         unlink(&file, path.as_ref())
     }
 
@@ -360,29 +362,15 @@ impl Dir {
     ///
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        todo!(
-            "Dir::rename({:?}, {}, {})",
-            self.std_file,
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
-    }
-
-    /// Changes the permissions found on a file or a directory.
-    ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
-    #[inline]
-    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        todo!(
-            "Dir::set_permissions({:?}, {}, {:?})",
-            self.std_file,
-            path.as_ref().display(),
-            perm
-        )
+    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<()> {
+        let file = unsafe { as_sync(&self.std_file) };
+        let to_file = unsafe { as_sync(&to_dir.std_file) };
+        rename(&file, from.as_ref(), &to_file, to.as_ref())
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -393,7 +381,7 @@ impl Dir {
     /// [`std::fs::symlink_metadata`]: https://doc.rust-lang.org/std/fs/fn.symlink_metadata.html
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         stat(&file, path.as_ref(), FollowSymlinks::No)
     }
 
@@ -447,7 +435,7 @@ impl Dir {
     ))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         symlink(src.as_ref(), &file, dst.as_ref())
     }
 
@@ -460,7 +448,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         symlink_file(src.as_ref(), &file, dst.as_ref())
     }
 
@@ -473,7 +461,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { self.as_sync_file() };
+        let file = unsafe { as_sync(&self.std_file) };
         symlink_dir(src.as_ref(), &file, dst.as_ref())
     }
 
@@ -604,36 +592,6 @@ impl Dir {
     }
 
     // async_std doesn't have `try_clone`.
-
-    /// Utility for returning `self`'s `async_std::fs::File` member as a
-    /// `std::fs::File` for synchronous operations.
-    ///
-    /// # Safety
-    ///
-    /// Callers must avoid using `self`'s `async_std::fs::File` while the
-    /// resulting `std::fs::File` is live, and must ensure that the resulting
-    /// `std::fs::File` doesn't outlive `self`'s `async_std::fs::File`.
-    #[inline]
-    unsafe fn as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
-        self._as_sync_file()
-    }
-
-    #[cfg(any(
-        unix,
-        target_os = "redox",
-        target_os = "vxworks",
-        target_os = "fuchsia"
-    ))]
-    unsafe fn _as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
-        ManuallyDrop::new(std::fs::File::from_raw_fd(self.std_file.as_raw_fd()))
-    }
-
-    #[cfg(windows)]
-    unsafe fn _as_sync_file(&self) -> ManuallyDrop<std::fs::File> {
-        ManuallyDrop::new(std::fs::File::from_raw_handle(
-            self.std_file.as_raw_handle(),
-        ))
-    }
 }
 
 #[cfg(unix)]

@@ -7,10 +7,14 @@ mod mkdir_unchecked;
 mod open_options_ext;
 mod open_unchecked;
 mod permissions_ext;
+mod readlink_unchecked;
+mod rename_unchecked;
 mod resolve_symlink_at;
 mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
+
+pub(crate) mod errors;
 
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
@@ -21,6 +25,8 @@ pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use permissions_ext::*;
+pub(crate) use readlink_unchecked::*;
+pub(crate) use rename_unchecked::*;
 pub(crate) use resolve_symlink_at::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;

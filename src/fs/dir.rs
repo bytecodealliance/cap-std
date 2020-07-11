@@ -1,4 +1,4 @@
-use crate::fs::{DirBuilder, File, Metadata, OpenOptions, Permissions, ReadDir};
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use std::{
     fmt, fs, io,
     path::{Path, PathBuf},
@@ -7,14 +7,17 @@ use std::{
 #[cfg(any(unix, target_os = "fuchsia"))]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
-    cap_primitives::fs::{canonicalize, link, mkdir, open, stat, symlink, unlink, FollowSymlinks},
+    cap_primitives::fs::{
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink, unlink, FollowSymlinks,
+    },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 
 #[cfg(windows)]
 use {
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, stat, symlink_dir, symlink_file, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
+        FollowSymlinks,
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
@@ -30,7 +33,10 @@ use std::os::wasi::{
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model.
+/// absolute paths don't interoperate well with the capability model. And it lacks
+/// a `set_permissions` method because popular host platforms don't have a way to
+/// perform that operation in a manner compatible with cap-std's sandbox; instead,
+/// open the file and call [`File::set_permissions`].
 pub struct Dir {
     std_file: fs::File,
 }
@@ -211,7 +217,7 @@ impl Dir {
         let perm = reader.metadata()?.permissions();
 
         let ret = io::copy(&mut reader, &mut writer)?;
-        self.set_permissions(to, perm)?;
+        writer.set_permissions(perm)?;
         Ok(ret)
     }
 
@@ -285,11 +291,7 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        todo!(
-            "Dir::read_link({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        readlink(&self.std_file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
@@ -354,29 +356,13 @@ impl Dir {
     ///
     /// [`std::fs::rename`]: https://doc.rust-lang.org/std/fs/fn.rename.html
     #[inline]
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to: Q) -> io::Result<()> {
-        todo!(
-            "Dir::rename({:?}, {}, {})",
-            self.std_file,
-            from.as_ref().display(),
-            to.as_ref().display()
-        )
-    }
-
-    /// Changes the permissions found on a file or a directory.
-    ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
-    #[inline]
-    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        todo!(
-            "Dir::set_permissions({:?}, {}, {:?})",
-            self.std_file,
-            path.as_ref().display(),
-            perm
-        )
+    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<()> {
+        rename(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
     }
 
     /// Query the metadata about a file without following symlinks.
