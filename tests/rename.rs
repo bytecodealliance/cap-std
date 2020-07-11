@@ -11,34 +11,32 @@ fn no_such_file_or_directory() -> String {
     io::Error::from_raw_os_error(libc::ENOENT).to_string()
 }
 
-#[cfg(target_os = "macos")]
-fn rename_file_over_dir() -> String {
-    io::Error::from_raw_os_error(libc::EISDIR).to_string()
-}
+cfg_if::cfg_if! {
+    if #[cfg(any(target_os = "macos", target_os = "netbsd", target_os = "freebsd", target_os = "openbsd", target_os = "ios", target_os = "dragonfly"))] {
+        fn rename_file_over_dir() -> String {
+            io::Error::from_raw_os_error(libc::EISDIR).to_string()
+        }
 
-#[cfg(not(target_os = "macos"))]
-fn rename_file_over_dir() -> String {
-    io::Error::from_raw_os_error(libc::ENOTEMPTY).to_string()
-}
+        fn rename_file_over_dot() -> String {
+            rename_file_over_dir()
+        }
 
-#[cfg(target_os = "macos")]
-fn rename_file_over_dot() -> String {
-    rename_file_over_dir()
-}
+        fn rename_dot_over_file() -> String {
+            io::Error::from_raw_os_error(libc::EINVAL).to_string()
+        }
+    } else {
+        fn rename_file_over_dir() -> String {
+            io::Error::from_raw_os_error(libc::ENOTEMPTY).to_string()
+        }
 
-#[cfg(not(target_os = "macos"))]
-fn rename_file_over_dot() -> String {
-    rename_path_in_use()
-}
+        fn rename_file_over_dot() -> String {
+            rename_path_in_use()
+        }
 
-#[cfg(target_os = "macos")]
-fn rename_dot_over_file() -> String {
-    io::Error::from_raw_os_error(libc::EINVAL).to_string()
-}
-
-#[cfg(not(target_os = "macos"))]
-fn rename_dot_over_file() -> String {
-    rename_path_in_use()
+        fn rename_dot_over_file() -> String {
+            rename_path_in_use()
+        }
+    }
 }
 
 #[test]
