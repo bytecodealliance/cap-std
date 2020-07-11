@@ -1,14 +1,23 @@
 mod sys_common;
 
-use std::io;
 use sys_common::io::tmpdir;
 
-fn rename_path_in_use() -> String {
-    io::Error::from_raw_os_error(libc::EBUSY).to_string()
+#[cfg(all(unix, target_os = "vxworks", target_os = "redox", target_os = "fuchsia"))]
+fn rename_path_in_use() -> std::io::Error {
+    io::Error::from_raw_os_error(libc::EBUSY)
+}
+#[cfg(windows)]
+fn rename_path_in_use() -> i32 {
+    todo!("work out error for rename_path_in_use condition")
 }
 
-fn no_such_file_or_directory() -> String {
-    io::Error::from_raw_os_error(libc::ENOENT).to_string()
+#[cfg(all(unix, target_os = "vxworks", target_os = "redox", target_os = "fuchsia"))]
+fn no_such_file_or_directory() -> std::io::Error {
+    io::Error::from_raw_os_error(libc::ENOENT)
+}
+#[cfg(windows)]
+fn no_such_file_or_directory() -> i32 {
+    todo!("work out error for no_such_file_or_directory")
 }
 
 /* // TODO: Platform-specific error code.
@@ -55,19 +64,19 @@ fn rename_basics() {
     check!(tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar/renamed.txt"));
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, ".."),
-        &rename_path_in_use()
+        rename_path_in_use()
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/../.."),
-        &rename_path_in_use()
+        rename_path_in_use()
     );
-    error!(
+    error_contains!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "/tmp"),
         "a path led outside of the filesystem"
     );
     error!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar/baz/.."),
-        &no_such_file_or_directory()
+        no_such_file_or_directory()
     );
     /* // TODO: Platform-specific error code.
     error!(
@@ -82,45 +91,45 @@ fn rename_basics() {
 
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/.."),
-        &rename_path_in_use()
+        rename_path_in_use()
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/."),
         "Is a directory"
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../.."),
-        &rename_path_in_use()
+        rename_path_in_use()
     );
     error!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../.."),
-        &rename_path_in_use()
+        rename_path_in_use()
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../../something"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, ""),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "/"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "/."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "/.."),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("/", &tmpdir, "nope.txt"),
         "a path led outside of the filesystem"
     );
-    error!(
+    error_contains!(
         tmpdir.rename("/..", &tmpdir, "nope.txt"),
         "a path led outside of the filesystem"
     );

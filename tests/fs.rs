@@ -819,8 +819,8 @@ fn copy_file_returns_metadata_len() {
     let in_path = "in.txt";
     let out_path = "out.txt";
     check!(check!(tmp.create(&in_path)).write(b"lettuce"));
-    // #[cfg(windows)]
-    // check!(check!(tmp.create(tmp.join("in.txt:bunny"))).write(b"carrot"));
+    #[cfg(windows)]
+    check!(check!(tmp.create("in.txt:bunny")).write(b"carrot"));
     let copied_len = check!(tmp.copy(&in_path, &out_path));
     assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
