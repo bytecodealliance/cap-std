@@ -13,7 +13,7 @@ pub(crate) fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> 
         Some(basename) => basename,
     };
 
-    mkdir_unchecked(start.as_file(), basename)
+    mkdir_unchecked(start.as_file(), basename.as_ref())
 }
 
 fn already_exists() -> io::Result<()> {
