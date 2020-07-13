@@ -27,8 +27,8 @@ pub fn rename_via_parent(
 
     rename_unchecked(
         old_start.as_file(),
-        old_basename,
+        old_basename.as_ref(),
         new_start.as_file(),
-        new_basename,
+        new_basename.as_ref(),
     )
 }

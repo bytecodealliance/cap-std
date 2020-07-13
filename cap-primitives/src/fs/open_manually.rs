@@ -1,7 +1,7 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-use crate::fs::{is_same_file, open_unchecked, resolve_symlink_at, MaybeOwnedFile, OpenOptions};
+use crate::fs::{is_same_file, open_unchecked, readlink_one, MaybeOwnedFile, OpenOptions};
 use std::{
     ffi::OsString,
     fs, io,
@@ -172,7 +172,7 @@ pub(crate) fn open_manually(
                         return Err(err)
                     }
                     Err(OpenUncheckedError::Symlink(_)) => {
-                        let destination = resolve_symlink_at(base.as_file(), &one, symlink_count)?;
+                        let destination = readlink_one(base.as_file(), &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                     }
                     Err(OpenUncheckedError::Other(e)) => {

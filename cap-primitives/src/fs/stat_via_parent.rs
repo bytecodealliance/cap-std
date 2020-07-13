@@ -1,7 +1,7 @@
 //! `stat` by resolving the parent directory and calling `fstatat`.
 
 use crate::fs::{
-    open_manually, open_parent, resolve_symlink_at, stat_unchecked, FollowSymlinks, MaybeOwnedFile,
+    open_manually, open_parent, readlink_one, stat_unchecked, FollowSymlinks, MaybeOwnedFile,
     Metadata, OpenOptions,
 };
 use std::{borrow::Cow, fs, io, path::Path};
@@ -44,7 +44,7 @@ pub(crate) fn stat_via_parent(
         };
 
         // Do the stat.
-        let metadata = stat_unchecked(start.as_file(), basename, FollowSymlinks::No)?;
+        let metadata = stat_unchecked(start.as_file(), basename.as_ref(), FollowSymlinks::No)?;
 
         // If the user didn't want us to follow a symlink in the last component, or we didn't
         // find a symlink, we're done.
@@ -52,11 +52,7 @@ pub(crate) fn stat_via_parent(
             return Ok(metadata);
         }
 
-        // Resolve the symlink and iterate.
-        path = Cow::Owned(resolve_symlink_at(
-            start.as_file(),
-            basename.as_ref(),
-            &mut symlink_count,
-        )?);
+        // Dereference the symlink and iterate.
+        path = Cow::Owned(readlink_one(start.as_file(), basename, &mut symlink_count)?);
     }
 }

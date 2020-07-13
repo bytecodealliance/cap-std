@@ -16,5 +16,5 @@ pub fn readlink_via_parent(start: &fs::File, path: &Path) -> io::Result<PathBuf>
         Some(basename) => basename,
     };
 
-    readlink_unchecked(start.as_file(), basename)
+    readlink_unchecked(start.as_file(), basename.as_ref())
 }
