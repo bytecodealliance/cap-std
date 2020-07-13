@@ -50,6 +50,8 @@ pub fn canonicalize(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
                 path.display(),
                 canonical_path.display()
             );
+            // TODO: When porting to Windows, check whether `start_abspath` not being
+            // a canonicalized path leads to `\\?\` extended path prefix differences.
             assert!(
                 result_abspath.starts_with(start_abspath),
                 "sandbox escape: start='{:?}' path='{}' result='{}'",
