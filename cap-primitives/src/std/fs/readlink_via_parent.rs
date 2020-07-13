@@ -8,7 +8,7 @@ use std::{
 /// calling `readlinkat` on the last component.
 pub fn readlink_via_parent(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::Borrowed(start);
+    let mut start = MaybeOwnedFile::borrowed(start);
 
     let basename = match open_parent(&mut start, path, &mut symlink_count)? {
         // `readlink` on `..` fails with `EINVAL`.

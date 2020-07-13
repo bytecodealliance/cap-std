@@ -3,15 +3,15 @@ use std::{fs, io, path::Path};
 
 /// Implement `link` by `open`ing up the parent component of the path and then
 /// calling `linkat` on the last component.
-pub fn link_via_parent(
+pub(crate) fn link_via_parent(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
     let mut symlink_count = 0;
-    let mut old_start = MaybeOwnedFile::Borrowed(old_start);
-    let mut new_start = MaybeOwnedFile::Borrowed(new_start);
+    let mut old_start = MaybeOwnedFile::borrowed(old_start);
+    let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
     let old_basename = match open_parent(&mut old_start, old_path, &mut symlink_count)? {
         // `link` on `..` fails with `EPERM`.

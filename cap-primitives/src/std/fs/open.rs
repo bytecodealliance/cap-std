@@ -1,11 +1,12 @@
 //! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
 
-#[cfg(debug_assertions)]
-use super::get_path;
-#[cfg(debug_assertions)]
-use crate::fs::{is_same_file, open_unchecked, OpenUncheckedError};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
+#[cfg(debug_assertions)]
+use {
+    super::get_path,
+    crate::fs::{is_same_file, open_unchecked, OpenUncheckedError},
+};
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
@@ -31,14 +32,14 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             Ok(result_file) => {
                 assert!(is_same_file(result_file, &unchecked_file)?,
                     "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
-                    get_path(start), path.display(), get_path(result_file), get_path(&unchecked_file));
+                    start, path.display(), result_file, &unchecked_file);
             }
             Err(e) => match e.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 io::ErrorKind::AlreadyExists if options.create_new => (),
                 _ => panic!(
                     "unexpected error opening start='{:?}', path='{}': {:?}",
-                    get_path(start),
+                    start,
                     path.display(),
                     e
                 ),
@@ -47,7 +48,7 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
         Err(unchecked_error) => match &result {
             Ok(result_file) => panic!(
                 "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
-                get_path(start),
+                start,
                 path.display(),
                 unchecked_error,
                 result_file
@@ -71,17 +72,12 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
     if let Ok(result_file) = &result {
         if let Some(result_path) = get_path(result_file) {
             if let Some(start_path) = get_path(start) {
-                for (start_part, result_part) in
-                    start_path.components().zip(result_path.components())
-                {
-                    assert_eq!(
-                        start_part,
-                        result_part,
-                        "sandbox escape: start='{}' result='{}'",
-                        start_path.display(),
-                        result_path.display()
-                    );
-                }
+                assert!(
+                    result_path.starts_with(start_path),
+                    "sandbox escape: start='{:?}' result='{}'",
+                    start,
+                    result_path.display()
+                );
             }
         }
     }

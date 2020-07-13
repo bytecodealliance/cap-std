@@ -9,7 +9,7 @@ use std::{
 
 /// Implement `canonicalize` by breaking up the path into components and resolving
 /// each component individually, and resolving symbolic links manually.
-pub fn canonicalize_manually(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+pub(crate) fn canonicalize_manually(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let mut symlink_count = 0;
     let mut canonical_path = PathBuf::new();
 

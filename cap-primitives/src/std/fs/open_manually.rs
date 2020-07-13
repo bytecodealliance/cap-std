@@ -1,13 +1,10 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-#[cfg(debug_assertions)]
-use crate::fs::get_path;
 use crate::fs::{is_same_file, open_unchecked, resolve_symlink_at, MaybeOwnedFile, OpenOptions};
 use std::{
-    borrow::ToOwned,
     ffi::OsString,
-    fs, io, mem,
+    fs, io,
     path::{Component, Path, PathBuf},
 };
 
@@ -28,7 +25,7 @@ fn to_owned_component(component: Component) -> OwnedComponent {
         Component::Prefix(_) | Component::RootDir => OwnedComponent::PrefixOrRootDir,
         Component::CurDir => OwnedComponent::CurDir,
         Component::ParentDir => OwnedComponent::ParentDir,
-        Component::Normal(os_str) => OwnedComponent::Normal((*os_str).to_owned()),
+        Component::Normal(os_str) => OwnedComponent::Normal(os_str.to_os_string()),
     }
 }
 
@@ -128,7 +125,7 @@ pub(crate) fn open_manually(
         .rev()
         .collect::<Vec<_>>();
 
-    let mut base = MaybeOwnedFile::Borrowed(start);
+    let mut base = MaybeOwnedFile::borrowed(start);
     let mut dirs = Vec::new();
     let mut canonical_path = CanonicalPath::new(canonical_path);
 
@@ -165,7 +162,7 @@ pub(crate) fn open_manually(
                     use_options.clone().nofollow(true),
                 ) {
                     Ok(file) => {
-                        let prev_base = mem::replace(&mut base, MaybeOwnedFile::Owned(file));
+                        let prev_base = base.descend_to(file);
                         dirs.push(prev_base);
                         if one != "." {
                             canonical_path.push(one);
@@ -208,17 +205,17 @@ pub(crate) fn open_manually(
             assert!(
                 is_same_file(base.as_file(), &unchecked_file)?,
                 "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; got='{:?}' expected='{:?}'",
-                get_path(start),
+                start,
                 path.display(),
                 canonical_path.debug.display(),
-                get_path(base.as_file()),
-                get_path(&unchecked_file),
+                base.as_file(),
+                &unchecked_file,
             );
         }
         Err(unchecked_error) => panic!(
             "unexpected success opening result={:?} start='{:?}', path='{}'; canonical_path='{}'; expected {:?}",
             base.as_file(),
-            get_path(start),
+            start,
             path.display(),
             canonical_path.debug.display(),
             unchecked_error,

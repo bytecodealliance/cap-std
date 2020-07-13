@@ -30,7 +30,7 @@ pub(crate) fn open_parent<'path>(
         None,
     )?;
 
-    *start = MaybeOwnedFile::Owned(parent);
+    start.descend_to(parent);
 
     // This would use `path.file_name()`, except that returns `None` on `.`. We
     // want to see the `.` so that `None` can always mean `..`.
