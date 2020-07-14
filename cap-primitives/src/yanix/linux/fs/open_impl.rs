@@ -54,12 +54,6 @@ pub(crate) fn open_impl(
             0
         };
 
-        // Check for empty path, and if empty, change to ".".
-        let path = if path == Path::new("") {
-            &Path::new(".")
-        } else {
-            path
-        };
         let path_cstr = CString::new(path.as_os_str().as_bytes())?;
         let open_how = OpenHow {
             oflag: u64::from(oflags.bits() as u32),
