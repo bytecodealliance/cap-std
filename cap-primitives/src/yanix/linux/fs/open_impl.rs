@@ -7,7 +7,7 @@
 
 #[cfg(debug_assertions)]
 use crate::fs::is_same_file;
-use crate::fs::{compute_oflags, open_manually_wrapper, OpenOptions};
+use crate::fs::{compute_oflags, errors, open_manually_wrapper, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,
@@ -74,7 +74,7 @@ pub(crate) fn open_impl(
                 ) {
                     -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
                         libc::EAGAIN => continue,
-                        libc::EXDEV => return escape_attempt(),
+                        libc::EXDEV => return Err(errors::escape_attempt()),
                         libc::ENOSYS => {
                             // ENOSYS means SYS_OPENAT2 is not available; mark it so,
                             // exit the loop, and fallback to `open_manually_wrapper`.
@@ -113,14 +113,6 @@ pub(crate) fn open_impl(
 
     // Fall back to the manual-resolution path.
     open_manually_wrapper(start, path, options)
-}
-
-#[cold]
-fn escape_attempt() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "a path led outside of the filesystem",
-    ))
 }
 
 fn other_error(errno: i32) -> io::Result<fs::File> {
