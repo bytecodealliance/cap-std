@@ -1,5 +1,5 @@
 [package]
-name = "cap-primitives-fuzz"
+name = "cap-std-fuzz"
 version = "0.0.0"
 edition = "2018"
 publish = false
@@ -16,3 +16,8 @@ cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
 [[bin]]
 name = "cap-primitives"
 path = "fuzz_targets/cap-primitives.rs"
+test = false
+doc = false
+
+# Work around https://github.com/rust-lang/cargo/issues/8338
+[workspace]

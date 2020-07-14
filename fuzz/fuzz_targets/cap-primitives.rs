@@ -1,7 +1,7 @@
 #![no_main]
+
 #[macro_use]
 extern crate libfuzzer_sys;
-extern crate cap_primitives;
 
 use arbitrary::Arbitrary;
 use cap_primitives::fs::{FollowSymlinks, OpenOptions};
