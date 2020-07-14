@@ -2,7 +2,6 @@ use crate::fs::OpenOptions;
 #[cfg(debug_assertions)]
 use std::path::PathBuf;
 use std::{ffi::OsStr, path::Path};
-use yanix::file::OFlag;
 
 // Rust's `Path` implicity strips redundant slashes and `.` components, however
 // they aren't redundant in one case: at the end of a path they indicate that a
