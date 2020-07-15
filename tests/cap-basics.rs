@@ -93,7 +93,10 @@ fn symlinks() {
         "No such file"
     );
     check!(tmpdir.open("link/inner/../inner/../../red.txt"));
-    error_contains!(inner.open("../inner/../inner/../../link/other.txt"), "a path led outside of the filesystem");
+    error_contains!(
+        inner.open("../inner/../inner/../../link/other.txt"),
+        "a path led outside of the filesystem"
+    );
 
     error_contains!(tmpdir.open("link/other.txt"), "No such file");
     error_contains!(tmpdir.open("badlink/../red.txt"), "No such file");
