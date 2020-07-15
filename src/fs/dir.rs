@@ -8,7 +8,8 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, rename, stat, symlink, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, rmdir, stat, symlink, unlink,
+        FollowSymlinks,
     },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
@@ -16,8 +17,8 @@ use {
 #[cfg(windows)]
 use {
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
-        FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, rename, rmdir, stat, symlink_dir, symlink_file,
+        unlink, FollowSymlinks,
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
@@ -318,11 +319,7 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        todo!(
-            "Dir::remove_dir({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        rmdir(&self.std_file, path.as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!

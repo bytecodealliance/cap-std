@@ -2,7 +2,7 @@ use crate::fs::{mkdir_unchecked, open_parent, strip_dir_suffix, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `mkdir` by `open`ing up the parent component of the path and then
-/// calling `mkdirat` on the last component.
+/// calling `mkdir_unchecked` on the last component.
 pub(crate) fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> {
     let mut symlink_count = 0;
     let mut start = MaybeOwnedFile::borrowed(start);

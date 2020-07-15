@@ -6,7 +6,13 @@ use std::{fs, path::PathBuf};
 
 #[cfg(target_os = "linux")]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
-    use std::os::unix::io::AsRawFd;
+    use std::os::unix::{fs::MetadataExt, io::AsRawFd};
+
+    // Linux appends the the string " (deleted)" when a file is deleted; avoid
+    // treating that as the actual name.
+    if file.metadata().ok()?.nlink() == 0 {
+        return None;
+    }
 
     let mut p = PathBuf::from("/proc/self/fd");
     p.push(&file.as_raw_fd().to_string());
