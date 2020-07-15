@@ -604,7 +604,6 @@ fn recursive_mkdir_empty() {
 }
 
 #[test]
-#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
     let d1 = PathBuf::from("d1");
@@ -624,7 +623,6 @@ fn recursive_rmdir() {
 }
 
 #[test]
-#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
     let tmpdir = tmpdir();

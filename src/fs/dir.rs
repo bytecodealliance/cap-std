@@ -8,8 +8,8 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, rename, rmdir, stat, symlink, unlink,
-        FollowSymlinks,
+        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
+        symlink, unlink, FollowSymlinks,
     },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
@@ -17,8 +17,8 @@ use {
 #[cfg(windows)]
 use {
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, rename, rmdir, stat, symlink_dir,
-        symlink_file, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
+        symlink_dir, symlink_file, unlink, FollowSymlinks,
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
@@ -208,6 +208,9 @@ impl Dir {
         // Implementation derived from `copy` in Rust's
         // src/libstd/sys_common/fs.rs at revision
         // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+        //
+        // TODO: Move this to cap_primitives and implement the platform-specific
+        // optimizations.
         if !self.is_file(from.as_ref()) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
@@ -326,11 +329,7 @@ impl Dir {
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
     pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        todo!(
-            "Dir::remove_dir_all({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        remove_dir_all(&self.std_file, path.as_ref())
     }
 
     /// Removes a file from a filesystem.
