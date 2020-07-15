@@ -2,7 +2,7 @@ use crate::fs::{open_parent, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `symlink` by `open`ing up the parent component of the path and then
-/// calling `symlinkat` on the last component.
+/// calling `symlink_unchecked` on the last component.
 #[cfg(any(
     unix,
     target_os = "fuchsia",

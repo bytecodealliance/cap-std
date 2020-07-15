@@ -6,7 +6,7 @@ use crate::fs::{
 use std::{borrow::Cow, fs, io, path::Path};
 
 /// Implement `stat` by `open`ing up the parent component of the path and then
-/// calling `fstatat` on the last component. If it's a symlink, repeat this
+/// calling `stat_unchecked` on the last component. If it's a symlink, repeat this
 /// process.
 pub(crate) fn stat_via_parent(
     start: &fs::File,

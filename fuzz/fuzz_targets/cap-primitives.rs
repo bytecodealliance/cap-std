@@ -33,6 +33,7 @@ enum Operation {
     Rename(usize, usize, usize, usize),
     Symlink(usize, usize, usize),
     Unlink(usize, usize),
+    Rmdir(usize, usize),
 }
 
 #[derive(Arbitrary, Debug)]
@@ -120,6 +121,13 @@ impl Plan {
                 }
                 Operation::Unlink(dirno, path) => {
                     cap_primitives::fs::unlink(
+                        &files[*dirno % files.len()],
+                        &paths[*path % paths.len()],
+                    )
+                    .ok();
+                }
+                Operation::Rmdir(dirno, path) => {
+                    cap_primitives::fs::rmdir(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                     )

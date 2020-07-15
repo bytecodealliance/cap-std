@@ -449,7 +449,6 @@ fn file_test_stat_is_correct_on_is_file() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_stat_is_correct_on_is_dir() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_dir";
@@ -460,7 +459,6 @@ fn file_test_stat_is_correct_on_is_dir() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_fileinfo_false_when_checking_is_file_on_a_directory() {
     let tmpdir = tmpdir();
     let dir = "fileinfo_false_on_dir";
@@ -480,7 +478,6 @@ fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
     let tmpdir = tmpdir();
     let dir = "before_and_after_dir";
