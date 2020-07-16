@@ -34,6 +34,7 @@ enum Operation {
     Symlink(usize, usize, usize),
     Unlink(usize, usize),
     Rmdir(usize, usize),
+    ReadDir(usize, usize),
 }
 
 #[derive(Arbitrary, Debug)]
@@ -132,6 +133,24 @@ impl Plan {
                         &paths[*path % paths.len()],
                     )
                     .ok();
+                }
+                Operation::ReadDir(dirno, path) => {
+                    let path = &paths[*path % paths.len()];
+                    if let Ok(read_dir) = cap_primitives::fs::read_dir(
+                        &files[*dirno % files.len()],
+                        path,
+                    ) {
+                        for child in read_dir {
+                            if let Ok(child) = child {
+                            cap_primitives::fs::stat(
+                                &files[*dirno % files.len()],
+                                &path.join(child.file_name()),
+                                FollowSymlinks::Yes,
+                            )
+                            .ok();
+                            }
+                        }
+                    }
                 }
             }
         }

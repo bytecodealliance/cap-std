@@ -11,21 +11,19 @@ use std::{fmt, io};
 /// Unlike `std::fs::DirEntry`, this API has no `DirEntry::path`, because
 /// absolute paths don't interoperate well with the capability model.
 ///
-/// And unlike `std::fs::DirEntry`, this API has a lifetime parameter.
-///
 /// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
 /// ambient paths.
 ///
 /// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
-pub struct DirEntry<'dir> {
-    cap_std: crate::fs::DirEntry<'dir>,
+pub struct DirEntry {
+    cap_std: crate::fs::DirEntry,
 }
 
-impl<'dir> DirEntry<'dir> {
+impl DirEntry {
     /// Constructs a new instance of `Self` from the given `cap_std::fs::DirEntry`.
     #[inline]
-    pub fn from_cap_std(cap_std: crate::fs::DirEntry<'dir>) -> Self {
+    pub fn from_cap_std(cap_std: crate::fs::DirEntry) -> Self {
         Self { cap_std }
     }
 
@@ -62,14 +60,14 @@ impl<'dir> DirEntry<'dir> {
 }
 
 #[cfg(unix)]
-impl<'dir> std::os::unix::fs::DirEntryExt for DirEntry<'dir> {
+impl std::os::unix::fs::DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {
         self.cap_std.ino()
     }
 }
 
-impl<'dir> fmt::Debug for DirEntry<'dir> {
+impl fmt::Debug for DirEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.cap_std.fmt(f)
     }

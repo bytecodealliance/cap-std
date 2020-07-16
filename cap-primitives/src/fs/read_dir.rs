@@ -1,18 +1,27 @@
-use crate::fs::DirEntry;
-use async_std::io;
-use std::fmt;
+use crate::fs::{DirEntry, ReadDirInner};
+use std::{fmt, fs, io, path::Path};
+
+/// Construct a `ReadDir` to iterate over the contents of a directory,
+/// ensuring that the resolution of the path never escapes the directory
+/// tree rooted at `start`.
+#[inline]
+pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
+    Ok(ReadDir {
+        inner: ReadDirInner::read_dir(start, path)?,
+    })
+}
 
 /// Iterator over the entries in a directory.
 ///
 /// This corresponds to [`std::fs::ReadDir`].
 ///
-/// Note that there is no `from_std` method, as `async_std::fs::ReadDir` doesn't
+/// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
-    inner: cap_primitives::fs::ReadDir,
+    inner: ReadDirInner,
 }
 
 impl Iterator for ReadDir {
