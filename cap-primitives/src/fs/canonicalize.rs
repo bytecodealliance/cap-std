@@ -31,7 +31,8 @@ fn check_canonicalize(start: &fs::File, path: &Path, result: &io::Result<PathBuf
         let canonical_result = open(start, canonical_path, OpenOptions::new().read(true));
         match (path_result, canonical_result) {
             (Ok(path_file), Ok(canonical_file)) => {
-                assert!(is_same_file(&path_file, &canonical_file).unwrap())
+                assert!(is_same_file(&path_file, &canonical_file)
+                    .expect("we should be able to stat paths that we just canonicalized"))
             }
             (Err(path_err), Err(canonical_err)) => {
                 assert_eq!(path_err.to_string(), canonical_err.to_string())
