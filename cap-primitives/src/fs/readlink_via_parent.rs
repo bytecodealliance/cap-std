@@ -1,4 +1,4 @@
-use crate::fs::{errors, open_parent, readlink_unchecked, MaybeOwnedFile};
+use crate::fs::{open_parent, readlink_unchecked, MaybeOwnedFile};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -10,11 +10,7 @@ pub fn readlink_via_parent(start: &fs::File, path: &Path) -> io::Result<PathBuf>
     let mut symlink_count = 0;
     let mut start = MaybeOwnedFile::borrowed(start);
 
-    let basename = match open_parent(&mut start, path, &mut symlink_count)? {
-        // `readlink` on `..` fails with `EINVAL`.
-        None => return Err(errors::readlink_not_symlink()),
-        Some(basename) => basename,
-    };
+    let basename = open_parent(&mut start, path, &mut symlink_count)?;
 
     readlink_unchecked(start.as_file(), basename.as_ref())
 }

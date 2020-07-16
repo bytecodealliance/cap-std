@@ -1,8 +1,7 @@
 //! `stat` by resolving the parent directory and calling `fstatat`.
 
 use crate::fs::{
-    open_manually, open_parent, readlink_one, stat_unchecked, FollowSymlinks, MaybeOwnedFile,
-    Metadata, OpenOptions,
+    open_parent, readlink_one, stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata,
 };
 use std::{borrow::Cow, fs, io, path::Path};
 
@@ -20,28 +19,7 @@ pub(crate) fn stat_via_parent(
 
     loop {
         // Split `path` into parent and basename and open the parent.
-        let basename = match open_parent(&mut start, &path, &mut symlink_count)? {
-            None => {
-                // `None` means the last component was `..` so open the full path and `fstat` it.
-                let file = open_manually(
-                    start.as_file(),
-                    &path,
-                    OpenOptions::new().read(true),
-                    &mut symlink_count,
-                    None,
-                )?;
-
-                let result = file.metadata().map(Metadata::from_std);
-
-                // Check that we're still within the containing path.
-                #[cfg(debug_assertions)]
-                start.descend_to(file);
-
-                return result;
-            }
-            // Otherwise we have a normal path.
-            Some(basename) => basename,
-        };
+        let basename = open_parent(&mut start, &path, &mut symlink_count)?;
 
         // Do the stat.
         let metadata = stat_unchecked(start.as_file(), basename.as_ref(), FollowSymlinks::No)?;

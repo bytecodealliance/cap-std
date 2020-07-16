@@ -7,15 +7,7 @@ pub(crate) fn unlink_via_parent(start: &fs::File, path: &Path) -> io::Result<()>
     let mut symlink_count = 0;
     let mut start = MaybeOwnedFile::borrowed(start);
 
-    let basename = match open_parent(&mut start, path, &mut symlink_count)? {
-        // `unlink` on `..` fails with `EISDIR`.
-        None => return is_directory(),
-        Some(basename) => basename,
-    };
+    let basename = open_parent(&mut start, path, &mut symlink_count)?;
 
     unlink_unchecked(start.as_file(), basename.as_ref())
-}
-
-fn is_directory() -> io::Result<()> {
-    Err(io::Error::new(io::ErrorKind::Other, "is a directory"))
 }

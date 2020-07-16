@@ -3,7 +3,7 @@
 
 use crate::fs::readlink_impl;
 #[cfg(debug_assertions)]
-use crate::fs::readlink_unchecked;
+use crate::fs::{readlink_unchecked, stat, FollowSymlinks};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -17,38 +17,53 @@ pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
     let result = readlink_impl(start, path);
 
-    // Do an unsandboxed lookup and check that we found the same result.
+    #[cfg(debug_assertions)]
+    let unchecked = readlink_unchecked(start, path);
+
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    match readlink_unchecked(start, path) {
-        Ok(unchecked_target) => match &result {
-            Ok(result_target) => debug_assert_eq!(result_target, &unchecked_target),
-            Err(e) => match e.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => panic!(
-                    "unexpected error opening start='{:?}', path='{}': {:?}",
-                    start,
-                    path.display(),
-                    e
-                ),
-            },
-        },
-        Err(unchecked_error) => match &result {
-            Ok(_) => panic!(
-                "unexpected success opening start='{:?}', path='{}'; expected {:?}",
-                start,
-                path.display(),
-                unchecked_error
-            ),
-            Err(result_error) => match result_error.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => {
-                    assert_eq!(result_error.to_string(), unchecked_error.to_string());
-                    assert_eq!(result_error.kind(), unchecked_error.kind());
-                }
-            },
-        },
-    }
+    check_readlink(start, path, &result, &unchecked);
 
     result
+}
+
+#[allow(clippy::enum_glob_use)]
+#[cfg(debug_assertions)]
+fn check_readlink(
+    start: &fs::File,
+    path: &Path,
+    result: &io::Result<PathBuf>,
+    unchecked: &io::Result<PathBuf>,
+) {
+    use super::map_result;
+    use io::ErrorKind::*;
+
+    match (map_result(result), map_result(unchecked)) {
+        (Ok(target), Ok(unchecked_target)) => {
+            assert_eq!(target, unchecked_target);
+        }
+
+        (Err((PermissionDenied, message)), _) => {
+            match map_result(&stat(start, path, FollowSymlinks::No)) {
+                Err((PermissionDenied, canon_message)) => {
+                    assert_eq!(message, canon_message);
+                }
+                _ => panic!("readlink failed where canonicalize succeeded"),
+            }
+        }
+
+        (Err((_kind, _message)), Err((_unchecked_kind, _unchecked_message))) => {
+            /* TODO: Check error messages.
+            assert_eq!(kind, unchecked_kind);
+            assert_eq!(message, unchecked_message);
+            */
+        }
+
+        other => panic!(
+            "unexpected result from readlink start='{:?}', path='{}':\n{:#?}",
+            start,
+            path.display(),
+            other,
+        ),
+    }
 }

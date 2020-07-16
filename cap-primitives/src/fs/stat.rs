@@ -1,7 +1,7 @@
 //! This defines `stat`, the primary entrypoint to sandboxed metadata querying.
 
 #[cfg(debug_assertions)]
-use crate::fs::stat_unchecked;
+use crate::fs::{canonicalize, stat_unchecked};
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
@@ -13,43 +13,63 @@ pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result
     // Call the underlying implementation.
     let result = stat_impl(start, path, follow);
 
-    // Do an unsandboxed lookup and check that we found the same result.
+    #[cfg(debug_assertions)]
+    let stat = stat_unchecked(start, path, follow);
+
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    match stat_unchecked(start, path, follow) {
-        Ok(unchecked_metadata) => match &result {
-            Ok(result_metadata) => {
-                assert!(result_metadata.is_same_file(&unchecked_metadata),
-                    "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
-                    start, path.display(), result_metadata, unchecked_metadata);
-            }
-            Err(e) => match e.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => panic!(
-                    "unexpected error opening start='{:?}', path='{}': {:?}",
-                    start,
-                    path.display(),
-                    e
-                ),
-            },
-        },
-        Err(unchecked_error) => match &result {
-            Ok(result_metadata) => panic!(
-                "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
-                start,
-                path.display(),
-                unchecked_error,
-                result_metadata
-            ),
-            Err(result_error) => match result_error.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => {
-                    assert_eq!(result_error.to_string(), unchecked_error.to_string());
-                    assert_eq!(result_error.kind(), unchecked_error.kind());
-                }
-            },
-        },
-    }
+    check_stat(start, path, follow, &result, &stat);
 
     result
+}
+
+#[allow(clippy::enum_glob_use)]
+#[cfg(debug_assertions)]
+fn check_stat(
+    start: &fs::File,
+    path: &Path,
+    follow: FollowSymlinks,
+    result: &io::Result<Metadata>,
+    stat: &io::Result<Metadata>,
+) {
+    use super::map_result;
+    use io::ErrorKind::*;
+
+    match (map_result(result), map_result(stat)) {
+        (Ok(metadata), Ok(unchecked_metadata)) => {
+            assert!(
+                metadata.is_same_file(&unchecked_metadata),
+                "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
+                start,
+                path.display(),
+                metadata,
+                unchecked_metadata
+            );
+        }
+
+        (Err((PermissionDenied, message)), _) => {
+            if let FollowSymlinks::Yes = follow {
+                match map_result(&canonicalize(start, path)) {
+                    Err((PermissionDenied, canon_message)) => {
+                        assert_eq!(message, canon_message);
+                    }
+                    _ => panic!("stat failed where canonicalize succeeded"),
+                }
+            } else {
+                // TODO: Check that stat in the no-follow case got the right error.
+            }
+        }
+
+        (Err((kind, message)), Err((unchecked_kind, unchecked_message))) => {
+            assert_eq!(kind, unchecked_kind);
+            assert_eq!(message, unchecked_message);
+        }
+
+        other => panic!(
+            "unexpected result from stat start='{:?}', path='{}':\n{:#?}",
+            start,
+            path.display(),
+            other,
+        ),
+    }
 }

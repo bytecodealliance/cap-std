@@ -66,3 +66,11 @@ pub use rename::*;
 pub use stat::*;
 pub use symlink::*;
 pub use unlink::*;
+
+#[cfg(debug_assertions)]
+fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::ErrorKind, String)> {
+    match result {
+        Ok(t) => Ok(t.clone()),
+        Err(e) => Err((e.kind(), e.to_string())),
+    }
+}

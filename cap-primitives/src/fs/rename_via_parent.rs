@@ -1,4 +1,4 @@
-use crate::fs::{errors, open_parent, rename_unchecked, MaybeOwnedFile};
+use crate::fs::{open_parent, rename_unchecked, strip_dir_suffix, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `rename` by `open`ing up the parent component of the path and then
@@ -13,17 +13,13 @@ pub fn rename_via_parent(
     let mut old_start = MaybeOwnedFile::borrowed(old_start);
     let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
-    let old_basename = match open_parent(&mut old_start, old_path, &mut symlink_count)? {
-        // `rename` on `..` fails since the path is in use.
-        None => return Err(errors::rename_path_in_use()),
-        Some(old_basename) => old_basename,
-    };
+    // As a special case, `rename` ignores a trailing slash rather than treating
+    // it as equivalent to a trailing slash-dot, so strip any trailing slashes.
+    let old_path = strip_dir_suffix(old_path);
+    let new_path = strip_dir_suffix(new_path);
 
-    let new_basename = match open_parent(&mut new_start, new_path, &mut symlink_count)? {
-        // `rename` on `..` fails since the path is in use.
-        None => return Err(errors::rename_path_in_use()),
-        Some(new_basename) => new_basename,
-    };
+    let old_basename = open_parent(&mut old_start, old_path, &mut symlink_count)?;
+    let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     rename_unchecked(
         old_start.as_file(),

@@ -1,11 +1,21 @@
 use std::io;
 
 #[cold]
-pub(crate) fn readlink_not_symlink() -> io::Error {
-    todo!("reading_not_symlink")
+pub(crate) fn no_such_file_or_directory() -> io::Error {
+    todo!("no_such_file_or_directory")
 }
 
 #[cold]
-pub(crate) fn rename_path_in_use() -> io::Error {
-    todo!("rename_path_in_use")
+pub(crate) fn is_directory() -> io::Error {
+    todo!("is_directory")
+}
+
+#[cold]
+pub(crate) fn is_not_directory() -> io::Error {
+    todo!("is_not_directory")
+}
+
+#[cold]
+pub(crate) fn escape_attempt() -> io::Error {
+    todo!("escape_attempt")
 }

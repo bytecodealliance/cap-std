@@ -1,3 +1,4 @@
+mod dir_options;
 mod file_type_ext;
 mod flags;
 mod is_same_file;
@@ -23,7 +24,7 @@ cfg_if::cfg_if! {
 }
 
 pub(crate) use crate::fs::{
-    canonicalize_manually as canonicalize_impl, link_via_parent as link_impl,
+    canonicalize_manually_and_follow as canonicalize_impl, link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl, readlink_via_parent as readlink_impl,
     rename_via_parent as rename_impl, stat_via_parent as stat_impl,
     symlink_via_parent as symlink_impl, unlink_via_parent as unlink_impl,
@@ -31,6 +32,7 @@ pub(crate) use crate::fs::{
 
 pub(crate) mod errors;
 
+pub(crate) use dir_options::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
 pub(crate) use is_same_file::*;

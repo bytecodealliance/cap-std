@@ -1,7 +1,10 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
 #[cfg(debug_assertions)]
-use crate::fs::{stat_unchecked, FollowSymlinks};
+use crate::fs::{
+    canonicalize, canonicalize_manually, stat_unchecked, symlink_unchecked, FollowSymlinks,
+    Metadata,
+};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
@@ -16,43 +19,99 @@ use std::{fs, io, path::Path};
 #[inline]
 pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_impl;
+
+    #[cfg(debug_assertions)]
+    let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);
+
     // Call the underlying implementation.
     let result = symlink_impl(old_path, new_start, new_path);
 
-    // Do an unsandboxed lookup and check that we found the same result.
+    #[cfg(debug_assertions)]
+    let stat_after = stat_unchecked(new_start, new_path, FollowSymlinks::No);
+
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    match stat_unchecked(new_start, new_path, FollowSymlinks::No) {
-        Ok(metadata) => match &result {
-            Ok(()) => debug_assert!(metadata.file_type().is_symlink()),
-            Err(e) => match e.kind() {
-                io::ErrorKind::AlreadyExists | io::ErrorKind::PermissionDenied => (),
-                _ => panic!(
-                    "unexpected error opening start='{:?}', path='{}': {:?}",
-                    new_start,
-                    new_path.display(),
-                    e
-                ),
-            },
-        },
-        Err(unchecked_error) => match &result {
-            Ok(()) => panic!(
-                "unexpected success opening start='{:?}', path='{}'; expected {:?}",
-                new_start,
-                new_path.display(),
-                unchecked_error
-            ),
-            Err(result_error) => match result_error.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => {
-                    assert_eq!(result_error.to_string(), unchecked_error.to_string());
-                    assert_eq!(result_error.kind(), unchecked_error.kind());
-                }
-            },
-        },
-    }
+    check_symlink(
+        old_path,
+        new_start,
+        new_path,
+        &stat_before,
+        &result,
+        &stat_after,
+    );
 
     result
+}
+
+#[allow(clippy::enum_glob_use)]
+#[cfg(debug_assertions)]
+fn check_symlink(
+    old_path: &Path,
+    new_start: &fs::File,
+    new_path: &Path,
+    stat_before: &io::Result<Metadata>,
+    result: &io::Result<()>,
+    stat_after: &io::Result<Metadata>,
+) {
+    use super::map_result;
+    use io::ErrorKind::*;
+
+    match (
+        map_result(stat_before),
+        map_result(result),
+        map_result(stat_after),
+    ) {
+        (Err((NotFound, _)), Ok(()), Ok(metadata)) => {
+            assert!(metadata.file_type().is_symlink());
+            let canon = canonicalize_manually(new_start, new_path, FollowSymlinks::No).unwrap();
+            assert!(stat_unchecked(new_start, &canon, FollowSymlinks::No)
+                .unwrap()
+                .is_same_file(&metadata));
+        }
+
+        (Ok(metadata_before), Err((AlreadyExists, _)), Ok(metadata_after)) => {
+            assert!(metadata_before.is_same_file(&metadata_after));
+        }
+
+        (_, Err((_kind, _message)), _) => match map_result(&canonicalize(new_start, new_path)) {
+            Ok(canon) => match map_result(&symlink_unchecked(old_path, new_start, &canon)) {
+                Err((_unchecked_kind, _unchecked_message)) => {
+                    /* TODO: Check error messages.
+                    assert_eq!(
+                        kind,
+                        unchecked_kind,
+                        "unexpected error kind from symlink new_start='{:?}', \
+                         new_path='{}':\nstat_before={:#?}\nresult={:#?}\nstat_after={:#?}",
+                        new_start,
+                        new_path.display(),
+                        stat_before,
+                        result,
+                        stat_after
+                    );
+                    assert_eq!(message, unchecked_message);
+                    */
+                }
+                _ => panic!("unsandboxed symlink success"),
+            },
+            Err((_canon_kind, _canon_message)) => {
+                /* TODO: Check error messages.
+                assert_eq!(kind, canon_kind);
+                assert_eq!(message, canon_message);
+                */
+            }
+        },
+
+        _other => {
+            /* TODO: Check error messages.
+            panic!(
+                "inconsistent symlink checks: new_start='{:?}' new_path='{}':\n{:#?}",
+                new_start,
+                new_path.display(),
+                other,
+            )
+            */
+        }
+    }
 }
 
 /// Perform a `symlink_file`-like operation, ensuring that the resolution of the path

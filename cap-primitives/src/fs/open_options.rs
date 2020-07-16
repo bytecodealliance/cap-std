@@ -189,3 +189,26 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
         self
     }
 }
+
+#[cfg(feature = "arbitrary")]
+impl arbitrary::Arbitrary for OpenOptions {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        use arbitrary::Arbitrary;
+        let (read, write) = match u.int_in_range(0..=2)? {
+            0 => (true, false),
+            1 => (false, true),
+            2 => (true, true),
+            _ => panic!(),
+        };
+        // TODO: `OpenOptionsExt` options.
+        Ok(OpenOptions::new()
+            .read(read)
+            .write(write)
+            .create(<bool as Arbitrary>::arbitrary(u)?)
+            .append(<bool as Arbitrary>::arbitrary(u)?)
+            .create_new(<bool as Arbitrary>::arbitrary(u)?)
+            .truncate(<bool as Arbitrary>::arbitrary(u)?)
+            .nofollow(<bool as Arbitrary>::arbitrary(u)?)
+            .clone())
+    }
+}

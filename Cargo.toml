@@ -47,4 +47,5 @@ fs_utf8 = ["arf-strings"]
 members = [
   "cap-primitives",
   "cap-async-std",
+  "fuzz",
 ]

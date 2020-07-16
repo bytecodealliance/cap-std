@@ -1,0 +1,18 @@
+[package]
+name = "cap-primitives-fuzz"
+version = "0.0.0"
+edition = "2018"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.3.2"
+arbitrary = { version = "0.4.5", features = ["derive"] }
+tempfile = "3.1.0"
+cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
+
+[[bin]]
+name = "cap-primitives"
+path = "fuzz_targets/cap-primitives.rs"

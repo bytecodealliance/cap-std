@@ -32,7 +32,7 @@ pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
 
 pub(crate) use crate::fs::{
-    canonicalize_manually as canonicalize_impl, link_via_parent as link_impl,
+    canonicalize_manually_and_follow as canonicalize_impl, link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl, readlink_via_parent as readlink_impl,
     rename_via_parent as rename_impl, stat_via_parent as stat_impl,
     symlink_dir_via_parent as symlink_dir_impl, symlink_file_via_parent as symlink_file_impl,
