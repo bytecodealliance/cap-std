@@ -13,7 +13,7 @@ pub(crate) fn unlink_via_parent(start: &fs::File, path: &Path) -> io::Result<()>
         Some(basename) => basename,
     };
 
-    unlink_unchecked(start.as_file(), basename)
+    unlink_unchecked(start.as_file(), basename.as_ref())
 }
 
 fn is_directory() -> io::Result<()> {

@@ -35,7 +35,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
 
 #[cfg(target_os = "windows")]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
-    crate::winx::fs::get_path::get_path(file).ok()
+    crate::winx::fs::get_path_impl(file).ok()
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]

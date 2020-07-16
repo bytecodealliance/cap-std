@@ -26,9 +26,9 @@ pub(crate) fn link_via_parent(
 
     link_unchecked(
         old_start.as_file(),
-        old_basename,
+        old_basename.as_ref(),
         new_start.as_file(),
-        new_basename,
+        new_basename.as_ref(),
         FollowSymlinks::No,
     )
 }

@@ -1,5 +1,6 @@
 use crate::fs::{open_manually, MaybeOwnedFile, OpenOptions};
 use std::{
+    ffi::OsStr,
     io,
     path::{Component, Path},
 };
@@ -16,7 +17,7 @@ pub(crate) fn open_parent<'path>(
     start: &mut MaybeOwnedFile,
     path: &'path Path,
     symlink_count: &mut u8,
-) -> io::Result<Option<&'path Path>> {
+) -> io::Result<Option<&'path OsStr>> {
     let parent_path = match path.parent() {
         None => return Err(escape_attempt()),
         Some(parent_path) => parent_path,
@@ -40,7 +41,7 @@ pub(crate) fn open_parent<'path>(
         _ => None,
     });
 
-    Ok(file_name.map(AsRef::as_ref))
+    Ok(file_name)
 }
 
 #[cold]
