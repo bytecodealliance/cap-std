@@ -92,3 +92,17 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: cargo test --all-features --all
 
+  fuzz_targets:
+    name: Fuzz Targets
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: nightly
+    - run: cargo install cargo-fuzz --vers "^0.8"
+    - run: cargo fetch
+      working-directory: ./fuzz
+    - run: cargo fuzz build --dev
