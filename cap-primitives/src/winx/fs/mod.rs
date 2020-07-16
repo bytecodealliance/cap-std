@@ -1,4 +1,5 @@
 mod file_type_ext;
+mod get_path;
 mod is_same_file;
 mod link_unchecked;
 mod metadata_ext;
