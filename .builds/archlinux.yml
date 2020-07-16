@@ -12,5 +12,4 @@ tasks:
       cargo build --all --release -vv
   - test: |
       cd cap-std
-      cargo test --all
-
+      cargo test --all-features --all
