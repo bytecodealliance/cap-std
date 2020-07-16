@@ -17,7 +17,7 @@ pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use file_type_ext::*;
-pub(crate) use get_path::*;
+pub(crate) use get_path::get_path as get_path_impl;
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
 pub(crate) use metadata_ext::*;

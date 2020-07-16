@@ -1,4 +1,8 @@
-use std::{ffi::OsStr, fs, io, path::PathBuf};
+use std::{
+    ffi::OsStr,
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 const MAX_SYMLINK_EXPANSIONS: u8 = 40;
 
