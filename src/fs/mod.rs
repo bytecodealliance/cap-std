@@ -20,20 +20,16 @@
 
 mod dir;
 mod dir_builder;
-mod dir_entry;
 mod file;
-mod read_dir;
 
 pub use dir::*;
 pub use dir_builder::*;
-pub use dir_entry::*;
 pub use file::*;
-pub use read_dir::*;
 
 // Re-export things from `cap_primitives` that we can use as-is.
 #[cfg(not(target_os = "wasi"))]
-pub use cap_primitives::fs::{FileType, Metadata, OpenOptions, Permissions};
+pub use cap_primitives::fs::{DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir};
 
 // Re-export things from `std` that we can use as-is.
 #[cfg(target_os = "wasi")]
-pub use std::fs::{FileType, Metadata, OpenOptions, Permissions};
+pub use std::fs::{DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir};

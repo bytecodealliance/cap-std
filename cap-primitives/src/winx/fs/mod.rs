@@ -1,3 +1,4 @@
+mod dir_entry_inner;
 mod dir_options;
 mod file_type_ext;
 mod get_path;
@@ -7,6 +8,7 @@ mod metadata_ext;
 mod mkdir_unchecked;
 mod open_options_ext;
 mod open_unchecked;
+mod read_dir_inner;
 mod readlink_one;
 mod readlink_unchecked;
 mod rename_unchecked;
@@ -18,6 +20,7 @@ mod unlink_unchecked;
 pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use get_path::get_path as get_path_impl;
@@ -27,6 +30,7 @@ pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
+pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_one::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use rename_unchecked::*;

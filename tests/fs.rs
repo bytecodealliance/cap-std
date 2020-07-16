@@ -490,7 +490,6 @@ fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";
@@ -1344,7 +1343,6 @@ fn realpath_works_tricky() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_methods() {
     let tmpdir = tmpdir();
 
@@ -1368,7 +1366,6 @@ fn dir_entry_methods() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_debug() {
     let tmpdir = tmpdir();
     tmpdir.create("b").unwrap();
@@ -1380,10 +1377,9 @@ fn dir_entry_debug() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn read_dir_not_found() {
     let tmpdir = tmpdir();
-    let res = tmpdir.read_dir("/path/that/does/not/exist");
+    let res = tmpdir.read_dir("path/that/does/not/exist");
     assert_eq!(res.err().unwrap().kind(), ErrorKind::NotFound);
 }
 

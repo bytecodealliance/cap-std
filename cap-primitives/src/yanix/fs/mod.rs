@@ -1,3 +1,4 @@
+mod dir_entry_inner;
 mod dir_options;
 mod file_type_ext;
 mod flags;
@@ -8,6 +9,7 @@ mod mkdir_unchecked;
 mod open_options_ext;
 mod open_unchecked;
 mod permissions_ext;
+mod read_dir_inner;
 mod readlink_one;
 mod readlink_unchecked;
 mod rename_unchecked;
@@ -33,6 +35,7 @@ pub(crate) use crate::fs::{
 
 pub(crate) mod errors;
 
+pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
@@ -43,6 +46,7 @@ pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use permissions_ext::*;
+pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_one::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use rename_unchecked::*;
