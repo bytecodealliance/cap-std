@@ -1,3 +1,4 @@
+mod dir_options;
 mod file_type_ext;
 mod get_path;
 mod is_same_file;
@@ -16,6 +17,7 @@ mod unlink_unchecked;
 pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+pub(crate) use dir_options::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use get_path::get_path as get_path_impl;
 pub(crate) use is_same_file::*;
@@ -32,7 +34,7 @@ pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
 
 pub(crate) use crate::fs::{
-    canonicalize_manually as canonicalize_impl, link_via_parent as link_impl,
+    canonicalize_manually_and_follow as canonicalize_impl, link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl, readlink_via_parent as readlink_impl,
     rename_via_parent as rename_impl, stat_via_parent as stat_impl,
     symlink_dir_via_parent as symlink_dir_impl, symlink_file_via_parent as symlink_file_impl,

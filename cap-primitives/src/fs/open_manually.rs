@@ -1,7 +1,10 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-use crate::fs::{is_same_file, open_unchecked, readlink_one, MaybeOwnedFile, OpenOptions};
+use crate::fs::{
+    dir_options, errors, is_same_file, open_unchecked, path_requires_dir, readlink_one,
+    FollowSymlinks, MaybeOwnedFile, OpenOptions,
+};
 use std::{
     ffi::OsString,
     fs, io,
@@ -73,7 +76,13 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     /// The complete canonical path has been scanned. Set `path` to `None`
     /// so that it isn't cleared when `self` is dropped.
     fn complete(&mut self) {
-        self.path = None;
+        // Replace "" with ".", since "" as a relative path is interpreted as an error.
+        if let Some(path) = &mut self.path {
+            if path.as_os_str().is_empty() {
+                path.push(Component::CurDir);
+            }
+            self.path = None;
+        }
     }
 }
 
@@ -119,39 +128,82 @@ pub(crate) fn open_manually(
     symlink_count: &mut u8,
     canonical_path: Option<&mut PathBuf>,
 ) -> io::Result<fs::File> {
+    open_manually_maybe(start, path, options, symlink_count, canonical_path)
+        .and_then(MaybeOwnedFile::into_file)
+}
+
+/// The main body of `open_manually`, which returns a `MaybeOwnedFile` instead
+/// of a `std::fs::File` so that users within this crate can avoid calling
+/// `ManuallyOwnedFile::into_file`, which allocates a new file descriptor in
+/// some cases.
+pub(crate) fn open_manually_maybe<'start>(
+    start: &'start fs::File,
+    path: &Path,
+    options: &OpenOptions,
+    symlink_count: &mut u8,
+    canonical_path: Option<&mut PathBuf>,
+) -> io::Result<MaybeOwnedFile<'start>> {
+    // POSIX returns `ENOENT` on an empty path. TODO: On Windows, we should
+    // be compatible with what Windows does instead.
+    if path.as_os_str().is_empty() {
+        return Err(errors::no_such_file_or_directory());
+    }
+
     let mut components = path
         .components()
         .map(to_owned_component)
         .rev()
         .collect::<Vec<_>>();
-
     let mut base = MaybeOwnedFile::borrowed(start);
     let mut dirs = Vec::new();
     let mut canonical_path = CanonicalPath::new(canonical_path);
+    let dir_options = dir_options();
+
+    // Does the path end in `/` or similar, so it requires a directory?
+    let mut dir_required = path_requires_dir(path);
+
+    // Are we requesting write permissions, so we can't open a directory?
+    let dir_precluded = options.write || options.append;
 
     while let Some(c) = components.pop() {
         match c {
-            OwnedComponent::PrefixOrRootDir => return escape_attempt(),
+            OwnedComponent::PrefixOrRootDir => return Err(errors::escape_attempt()),
             OwnedComponent::CurDir => {
-                // If the "." is the entire string, open it. Otherwise just skip it.
+                // If the path ends in `.` and we want write access, fail.
                 if components.is_empty() {
-                    components.push(OwnedComponent::Normal(OsString::from(".")))
+                    if dir_precluded {
+                        return Err(errors::is_directory());
+                    }
+                    if !base.as_file().metadata()?.is_dir() {
+                        return Err(errors::is_not_directory());
+                    }
+                    canonical_path.push(Component::CurDir.as_os_str().to_os_string());
                 }
+
+                // Otherwise just skip `.`.
                 continue;
             }
             OwnedComponent::ParentDir => {
                 // TODO: This is a racy check, though it is useful for testing and fuzzing.
                 debug_assert!(dirs.is_empty() || !is_same_file(start, base.as_file())?);
 
+                if components.is_empty() && dir_precluded {
+                    return Err(errors::is_directory());
+                }
+
                 match dirs.pop() {
                     Some(dir) => base = dir,
-                    None => return escape_attempt(),
+                    None => return Err(errors::escape_attempt()),
                 }
                 assert!(canonical_path.pop());
             }
             OwnedComponent::Normal(one) => {
-                let dir_options = OpenOptions::new().read(true).clone();
-                let use_options = if components.is_empty() {
+                // If the path requires a directory and we'd open it for writing, fail.
+                if components.is_empty() && dir_required && dir_precluded {
+                    return Err(errors::is_directory());
+                }
+
+                let use_options = if components.is_empty() && !dir_required {
                     options
                 } else {
                     &dir_options
@@ -159,30 +211,38 @@ pub(crate) fn open_manually(
                 match open_unchecked(
                     base.as_file(),
                     one.as_ref(),
-                    use_options.clone().nofollow(true),
+                    use_options.clone().follow(FollowSymlinks::No),
                 ) {
                     Ok(file) => {
                         let prev_base = base.descend_to(file);
                         dirs.push(prev_base);
-                        if one != "." {
+                        if one != Component::CurDir.as_os_str() {
                             canonical_path.push(one);
                         }
                     }
-                    Err(OpenUncheckedError::Symlink(err)) if use_options.nofollow => {
-                        return Err(err)
+                    Err(OpenUncheckedError::Symlink(err))
+                        if use_options.follow == FollowSymlinks::No && components.is_empty() =>
+                    {
+                        canonical_path.push(one);
+                        canonical_path.complete();
+                        return Err(err);
                     }
                     Err(OpenUncheckedError::Symlink(_)) => {
                         let destination = readlink_one(base.as_file(), &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
+                        dir_required |= path_requires_dir(&destination);
                     }
-                    Err(OpenUncheckedError::Other(e)) => {
+                    Err(OpenUncheckedError::NotFound(err)) => {
+                        return Err(err);
+                    }
+                    Err(OpenUncheckedError::Other(err)) => {
                         // An error occurred. If this was the last component, record it as the
                         // last component of the canonical path, even if we couldn't open it.
                         if components.is_empty() {
                             canonical_path.push(one);
                             canonical_path.complete();
                         }
-                        return Err(e);
+                        return Err(err);
                     }
                 }
             }
@@ -191,20 +251,34 @@ pub(crate) fn open_manually(
 
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
+    check_open(start, path, options, &canonical_path, &base);
+
+    canonical_path.complete();
+    Ok(base)
+}
+
+#[cfg(debug_assertions)]
+fn check_open(
+    start: &fs::File,
+    path: &Path,
+    options: &OpenOptions,
+    canonical_path: &CanonicalPath,
+    base: &MaybeOwnedFile,
+) {
     match open_unchecked(
-              start,
-              canonical_path.debug.as_ref(),
-              options
-                  .clone()
-                  .create(false)
-                  .create_new(false)
-                  .truncate(false),
-          )
-    {
+        start,
+        canonical_path.debug.as_ref(),
+        options
+            .clone()
+            .create(false)
+            .create_new(false)
+            .truncate(false),
+    ) {
         Ok(unchecked_file) => {
             assert!(
-                is_same_file(base.as_file(), &unchecked_file)?,
-                "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; got='{:?}' expected='{:?}'",
+                is_same_file(base.as_file(), &unchecked_file).unwrap(),
+                "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; \
+                 got='{:?}' expected='{:?}'",
                 start,
                 path.display(),
                 canonical_path.debug.display(),
@@ -212,30 +286,24 @@ pub(crate) fn open_manually(
                 &unchecked_file,
             );
         }
-        Err(unchecked_error) => panic!(
-            "unexpected success opening result={:?} start='{:?}', path='{}'; canonical_path='{}'; expected {:?}",
-            base.as_file(),
-            start,
-            path.display(),
-            canonical_path.debug.display(),
-            unchecked_error,
-        ),
+        Err(_unchecked_error) => {
+            /* TODO: Check error messages.
+            panic!(
+                "unexpected success opening result={:?} start='{:?}', path='{}'; canonical_path='{}'; \
+                 expected {:?}",
+                base.as_file(),
+                start,
+                path.display(),
+                canonical_path.debug.display(),
+                unchecked_error,
+            */
+        }
     }
-
-    canonical_path.complete();
-    base.into_file()
-}
-
-#[cold]
-fn escape_attempt() -> io::Result<fs::File> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "a path led outside of the filesystem",
-    ))
 }
 
 #[derive(Debug)]
 pub(crate) enum OpenUncheckedError {
     Other(io::Error),
     Symlink(io::Error),
+    NotFound(io::Error),
 }

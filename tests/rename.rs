@@ -2,6 +2,7 @@ mod sys_common;
 
 use sys_common::io::tmpdir;
 
+/*
 #[cfg(any(
     unix,
     target_os = "vxworks",
@@ -15,6 +16,7 @@ fn rename_path_in_use() -> String {
 fn rename_path_in_use() -> String {
     todo!("work out error for rename_path_in_use condition")
 }
+*/
 
 #[cfg(any(
     unix,
@@ -74,11 +76,11 @@ fn rename_basics() {
     check!(tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/bar/renamed.txt"));
     error_contains!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, ".."),
-        &rename_path_in_use()
+        "a path led outside of the filesystem"
     );
     error_contains!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "foo/../.."),
-        &rename_path_in_use()
+        "a path led outside of the filesystem"
     );
     error_contains!(
         tmpdir.rename("foo/bar/renamed.txt", &tmpdir, "/tmp"),
@@ -99,30 +101,29 @@ fn rename_basics() {
     assert!(!tmpdir.exists("foo/bar/renamed.txt"));
     assert!(tmpdir.exists("file.txt"));
 
+    /* // TODO: Platform-specific error code.
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/.."),
         &rename_path_in_use()
     );
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/."),
-        "Is a directory"
+        &rename_path_in_use()
     );
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../.."),
         &rename_path_in_use()
     );
+    */
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../.."),
-        &rename_path_in_use()
+        "a path led outside of the filesystem"
     );
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "foo/bar/../../../something"),
         "a path led outside of the filesystem"
     );
-    error_contains!(
-        tmpdir.rename("file.txt", &tmpdir, ""),
-        "a path led outside of the filesystem"
-    );
+    error_contains!(tmpdir.rename("file.txt", &tmpdir, ""), "No such file");
     error_contains!(
         tmpdir.rename("file.txt", &tmpdir, "/"),
         "a path led outside of the filesystem"

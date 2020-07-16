@@ -1,4 +1,4 @@
-use crate::fs::OpenOptionsExt;
+use crate::fs::{FollowSymlinks, OpenOptionsExt};
 
 /// Options and flags which can be used to configure how a file is opened.
 ///
@@ -24,7 +24,7 @@ pub struct OpenOptions {
     pub(crate) truncate: bool,
     pub(crate) create: bool,
     pub(crate) create_new: bool,
-    pub(crate) nofollow: bool,
+    pub(crate) follow: FollowSymlinks,
 
     #[cfg(any(unix, windows, target_os = "vxworks"))]
     pub(crate) ext: OpenOptionsExt,
@@ -46,7 +46,7 @@ impl OpenOptions {
             truncate: false,
             create: false,
             create_new: false,
-            nofollow: false,
+            follow: FollowSymlinks::Yes,
 
             #[cfg(any(unix, windows, target_os = "vxworks"))]
             ext: OpenOptionsExt::new(),
@@ -119,10 +119,10 @@ impl OpenOptions {
         self
     }
 
-    /// Sets the option to suppress following of symlinks.
+    /// Sets the option to enable or suppress following of symlinks.
     #[inline]
-    pub(crate) fn nofollow(&mut self, nofollow: bool) -> &mut Self {
-        self.nofollow = nofollow;
+    pub(crate) fn follow(&mut self, follow: FollowSymlinks) -> &mut Self {
+        self.follow = follow;
         self
     }
 }
@@ -187,5 +187,28 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
     fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
         self.ext.security_qos_flags(flags);
         self
+    }
+}
+
+#[cfg(feature = "arbitrary")]
+impl arbitrary::Arbitrary for OpenOptions {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
+        use arbitrary::Arbitrary;
+        let (read, write) = match u.int_in_range(0..=2)? {
+            0 => (true, false),
+            1 => (false, true),
+            2 => (true, true),
+            _ => panic!(),
+        };
+        // TODO: `OpenOptionsExt` options.
+        Ok(OpenOptions::new()
+            .read(read)
+            .write(write)
+            .create(<bool as Arbitrary>::arbitrary(u)?)
+            .append(<bool as Arbitrary>::arbitrary(u)?)
+            .create_new(<bool as Arbitrary>::arbitrary(u)?)
+            .truncate(<bool as Arbitrary>::arbitrary(u)?)
+            .follow(<FollowSymlinks as Arbitrary>::arbitrary(u)?)
+            .clone())
     }
 }

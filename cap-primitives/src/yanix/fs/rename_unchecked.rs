@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, fs, io, os::unix::io::AsRawFd, path::Path};
+use std::{fs, io, os::unix::io::AsRawFd, path::Path};
 use yanix::file::renameat;
 
 /// *Unsandboxed* function similar to `rename`, but which does not perform sandboxing.
@@ -8,18 +8,6 @@ pub(crate) fn rename_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    // POSIX's `renameat` with an empty path returns `ENOENT`, so use "." instead.
-    let old_path = if old_path.as_os_str().is_empty() {
-        OsStr::new(".")
-    } else {
-        old_path.as_ref()
-    };
-    let new_path = if new_path.as_os_str().is_empty() {
-        OsStr::new(".")
-    } else {
-        new_path.as_ref()
-    };
-
     unsafe {
         renameat(
             old_start.as_raw_fd(),

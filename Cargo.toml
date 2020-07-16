@@ -47,4 +47,6 @@ fs_utf8 = ["arf-strings"]
 members = [
   "cap-primitives",
   "cap-async-std",
+  # Work around https://github.com/rust-lang/cargo/issues/8338.
+  #"fuzz",
 ]

@@ -43,7 +43,7 @@ fn cap_smoke_test() {
         "a path led outside of the filesystem"
     );
 
-    check!(inner.open_dir(""));
+    error_contains!(inner.open_dir(""), "No such file");
     error_contains!(inner.open_dir("/"), "a path led outside of the filesystem");
     error_contains!(
         inner.open_dir("/etc/services"),

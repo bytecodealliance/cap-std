@@ -1309,7 +1309,7 @@ fn realpath_works() {
         .file_type()
         .is_symlink());
 
-    assert_eq!(tmpdir.canonicalize(".").unwrap(), PathBuf::from(""));
+    assert_eq!(tmpdir.canonicalize(".").unwrap(), PathBuf::from("."));
     assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
     assert_eq!(tmpdir.canonicalize(&link).unwrap(), file);
     assert_eq!(tmpdir.canonicalize(&linkdir).unwrap(), dir);

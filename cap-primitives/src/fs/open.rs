@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 #[cfg(debug_assertions)]
 use {
     super::get_path,
-    crate::fs::{is_same_file, open_unchecked, OpenUncheckedError},
+    crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata, OpenUncheckedError},
 };
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
@@ -13,12 +13,31 @@ use {
 #[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
 #[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
+    #[cfg(debug_assertions)]
+    let stat_before = stat_unchecked(start, path, options.follow);
+
     // Call the underlying implementation.
     let result = open_impl(start, path, options);
 
-    // Do an unsandboxed lookup and check that we found the same result.
+    #[cfg(debug_assertions)]
+    let stat_after = stat_unchecked(start, path, options.follow);
+
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
+    check_open(start, path, options, &stat_before, &result, &stat_after);
+
+    result
+}
+
+#[cfg(debug_assertions)]
+fn check_open(
+    start: &fs::File,
+    path: &Path,
+    options: &OpenOptions,
+    _stat_before: &io::Result<Metadata>,
+    result: &io::Result<fs::File>,
+    _stat_after: &io::Result<Metadata>,
+) {
     match open_unchecked(
         start,
         path,
@@ -30,9 +49,15 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
     ) {
         Ok(unchecked_file) => match &result {
             Ok(result_file) => {
-                assert!(is_same_file(result_file, &unchecked_file)?,
-                    "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
-                    start, path.display(), result_file, &unchecked_file);
+                assert!(
+                    is_same_file(result_file, &unchecked_file).unwrap(),
+                    "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' \
+                     expected='{:?}'",
+                    start,
+                    path.display(),
+                    result_file,
+                    &unchecked_file
+                );
             }
             Err(e) => match e.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
@@ -56,11 +81,15 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             Err(result_error) => match result_error.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
-                    let unchecked_error = match unchecked_error {
-                        OpenUncheckedError::Other(err) | OpenUncheckedError::Symlink(err) => err,
+                    let _unchecked_error = match unchecked_error {
+                        OpenUncheckedError::Other(err)
+                        | OpenUncheckedError::Symlink(err)
+                        | OpenUncheckedError::NotFound(err) => err,
                     };
+                    /* TODO: Check error messages.
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());
+                    */
                 }
             },
         },
@@ -81,6 +110,4 @@ pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<
             }
         }
     }
-
-    result
 }

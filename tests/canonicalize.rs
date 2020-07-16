@@ -6,10 +6,11 @@ use sys_common::io::tmpdir;
 #[test]
 fn canonicalize_edge_cases() {
     let tmpdir = tmpdir();
-    assert_eq!(check!(tmpdir.canonicalize(".")), Path::new(""));
-    assert_eq!(check!(tmpdir.canonicalize("./")), Path::new(""));
-    assert_eq!(check!(tmpdir.canonicalize("./.")), Path::new(""));
-    assert_eq!(check!(tmpdir.canonicalize("")), Path::new(""));
+    assert_eq!(check!(tmpdir.canonicalize(".")), Path::new("."));
+    assert_eq!(check!(tmpdir.canonicalize("./")), Path::new("."));
+    assert_eq!(check!(tmpdir.canonicalize("./.")), Path::new("."));
+    error_contains!(tmpdir.canonicalize(""), "No such file");
+    error_contains!(tmpdir.canonicalize("foo"), "No such file");
     error_contains!(
         tmpdir.canonicalize("/"),
         "a path led outside of the filesystem"
@@ -82,9 +83,9 @@ fn canonicalize_edge_cases() {
     assert_eq!(check!(tmpdir.canonicalize("foo/.")), Path::new("foo"));
     assert_eq!(check!(tmpdir.canonicalize("foo/./")), Path::new("foo"));
     assert_eq!(check!(tmpdir.canonicalize("foo/./")).to_str(), Some("foo"));
-    assert_eq!(check!(tmpdir.canonicalize("foo/..")), Path::new(""));
-    assert_eq!(check!(tmpdir.canonicalize("foo/../")), Path::new(""));
-    assert_eq!(check!(tmpdir.canonicalize("foo/../.")), Path::new(""));
+    assert_eq!(check!(tmpdir.canonicalize("foo/..")), Path::new("."));
+    assert_eq!(check!(tmpdir.canonicalize("foo/../")), Path::new("."));
+    assert_eq!(check!(tmpdir.canonicalize("foo/../.")), Path::new("."));
     assert_eq!(check!(tmpdir.canonicalize("foo/bar")), Path::new("foo/bar"));
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar/")),
@@ -114,4 +115,5 @@ fn canonicalize_edge_cases() {
         tmpdir.canonicalize("foo/../../"),
         "a path led outside of the filesystem"
     );
+    error_contains!(tmpdir.canonicalize("foo/bar/qux"), "No such file");
 }

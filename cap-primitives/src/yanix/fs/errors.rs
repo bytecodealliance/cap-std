@@ -1,11 +1,24 @@
 use std::io;
 
 #[cold]
-pub(crate) fn readlink_not_symlink() -> io::Error {
-    io::Error::from_raw_os_error(libc::EINVAL)
+pub(crate) fn no_such_file_or_directory() -> io::Error {
+    io::Error::from_raw_os_error(libc::ENOENT)
 }
 
 #[cold]
-pub(crate) fn rename_path_in_use() -> io::Error {
-    io::Error::from_raw_os_error(libc::EBUSY)
+pub(crate) fn is_directory() -> io::Error {
+    io::Error::from_raw_os_error(libc::EISDIR)
+}
+
+#[cold]
+pub(crate) fn is_not_directory() -> io::Error {
+    io::Error::from_raw_os_error(libc::ENOTDIR)
+}
+
+#[cold]
+pub(crate) fn escape_attempt() -> io::Error {
+    io::Error::new(
+        io::ErrorKind::PermissionDenied,
+        "a path led outside of the filesystem",
+    )
 }

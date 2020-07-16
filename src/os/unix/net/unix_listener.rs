@@ -114,9 +114,8 @@ impl IntoRawFd for UnixListener {
 }
 
 impl<'a> IntoIterator for &'a UnixListener {
-    type Item = io::Result<UnixStream>;
-
     type IntoIter = Incoming<'a>;
+    type Item = io::Result<UnixStream>;
 
     #[inline]
     fn into_iter(self) -> Incoming<'a> {

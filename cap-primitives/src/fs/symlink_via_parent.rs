@@ -18,11 +18,7 @@ pub(crate) fn symlink_via_parent(
     let mut symlink_count = 0;
     let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
-    let new_basename = match open_parent(&mut new_start, new_path, &mut symlink_count)? {
-        // `symlink` on `..` fails with `EEXIST`.
-        None => return already_exists(),
-        Some(new_basename) => new_basename,
-    };
+    let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     symlink_unchecked(old_path, new_start.as_file(), new_basename.as_ref())
 }
@@ -47,11 +43,4 @@ pub(crate) fn symlink_dir_via_parent(
     new_path: &Path,
 ) -> io::Result<()> {
     todo!("symlink_dir_via_parent")
-}
-
-fn already_exists() -> io::Result<()> {
-    Err(io::Error::new(
-        io::ErrorKind::AlreadyExists,
-        "directory already exists",
-    ))
 }

@@ -13,16 +13,8 @@ pub(crate) fn link_via_parent(
     let mut old_start = MaybeOwnedFile::borrowed(old_start);
     let mut new_start = MaybeOwnedFile::borrowed(new_start);
 
-    let old_basename = match open_parent(&mut old_start, old_path, &mut symlink_count)? {
-        // `link` on `..` fails with `EPERM`.
-        None => return is_directory(),
-        Some(basename) => basename,
-    };
-    let new_basename = match open_parent(&mut new_start, new_path, &mut symlink_count)? {
-        // `link` on `..` fails with `EEXIST`.
-        None => return already_exists(),
-        Some(basename) => basename,
-    };
+    let old_basename = open_parent(&mut old_start, old_path, &mut symlink_count)?;
+    let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     link_unchecked(
         old_start.as_file(),
@@ -31,20 +23,4 @@ pub(crate) fn link_via_parent(
         new_basename.as_ref(),
         FollowSymlinks::No,
     )
-}
-
-#[cold]
-fn is_directory() -> io::Result<()> {
-    Err(io::Error::new(
-        io::ErrorKind::PermissionDenied,
-        "directories cannot have hard links",
-    ))
-}
-
-#[cold]
-fn already_exists() -> io::Result<()> {
-    Err(io::Error::new(
-        io::ErrorKind::AlreadyExists,
-        "link destination already exists",
-    ))
 }
