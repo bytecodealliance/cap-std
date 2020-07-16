@@ -191,6 +191,8 @@ pub(crate) fn open_manually_maybe<'start>(
                     return Err(errors::is_directory());
                 }
 
+                // We hold onto all the parent directory descriptors so that we
+                // don't have to re-open anything when we encounter a `..`.
                 match dirs.pop() {
                     Some(dir) => base = dir,
                     None => return Err(errors::escape_attempt()),

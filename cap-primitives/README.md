@@ -16,4 +16,12 @@ and [`cap-async-std`] are built on.
 [`cap-std`]: https://crates.io/crates/cap-std
 [`cap-async-std`]: https://crates.io/crates/cap-async-std
 
-**It is a work in progress and many things aren't implemented yet.**
+At the moment, `cap-primitives` is only lightly reviewed for correctness and
+security. It should not be considered mature or "battle-tested". Use at your own
+risk.
+
+The filesystem module, `fs`, is known to work on Linux, macOS, and FreeBSD, and
+probably can be easily ported to other modern Unix-family platforms. Ports to
+Windows and WASI platforms are in development, though not yet usable.
+
+The networking module, `net`, is not yet usable.

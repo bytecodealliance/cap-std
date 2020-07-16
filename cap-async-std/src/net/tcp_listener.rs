@@ -7,13 +7,13 @@ use async_std::{io, net};
 
 /// A TCP socket server, listening for connections.
 ///
-/// This corresponds to [`std::net::TcpListener`].
+/// This corresponds to [`async_std::net::TcpListener`].
 ///
 /// Note that this `TcpListener` has no `bind` method. To bind it to a socket
 /// address, you must first obtain a [`Catalog`] permitting the address, and
 /// then call [`Catalog::bind_tcp_listener`].
 ///
-/// [`std::net::TcpListener`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html
+/// [`async_std::net::TcpListener`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpListener.html
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::bind_tcp_listener`]: struct.Catalog.html#method.bind_tcp_listener
 pub struct TcpListener {
@@ -29,9 +29,9 @@ impl TcpListener {
 
     /// Returns the local socket address of this listener.
     ///
-    /// This corresponds to [`std::net::TcpListener::local_addr`].
+    /// This corresponds to [`async_std::net::TcpListener::local_addr`].
     ///
-    /// [`std::net::TcpListener::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.local_addr
+    /// [`async_std::net::TcpListener::local_addr`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpListener.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -41,9 +41,9 @@ impl TcpListener {
 
     /// Accept a new incoming connection from this listener.
     ///
-    /// This corresponds to [`std::net::TcpListener::accept`].
+    /// This corresponds to [`async_std::net::TcpListener::accept`].
     ///
-    /// [`std::net::TcpListener::accept`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.accept
+    /// [`async_std::net::TcpListener::accept`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpListener.html#method.accept
     #[inline]
     pub async fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
         self.std
@@ -54,9 +54,9 @@ impl TcpListener {
 
     /// Returns an iterator over the connections being received on this listener.
     ///
-    /// This corresponds to [`std::net::TcpListener::incoming`].
+    /// This corresponds to [`async_std::net::TcpListener::incoming`].
     ///
-    /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
+    /// [`async_std::net::TcpListener::incoming`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
         Incoming::from_std(self.std.incoming())

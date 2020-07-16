@@ -9,9 +9,9 @@ use std::pin::Pin;
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///
-/// This corresponds to [`std::os::unix::net::Incoming`].
+/// This corresponds to [`async_std::os::unix::net::Incoming`].
 ///
-/// [`std::os::unix::net::Incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.Incoming.html
+/// [`async_std::os::unix::net::Incoming`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.Incoming.html
 /// [`UnixListener`]: struct.UnixListener.html
 pub struct Incoming<'a> {
     std: unix::net::Incoming<'a>,
