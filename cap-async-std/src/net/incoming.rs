@@ -39,4 +39,4 @@ impl<'a> Stream for Incoming<'a> {
     }
 }
 
-// TODO: impl Debug for Incoming?
+// TODO: impl Debug for Incoming
