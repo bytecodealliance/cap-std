@@ -1,10 +1,15 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
 #[cfg(debug_assertions)]
-use crate::fs::{
-    canonicalize, canonicalize_manually, stat_unchecked, symlink_unchecked, FollowSymlinks,
-    Metadata,
-};
+#[cfg(any(
+    unix,
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vxworks"
+))]
+use crate::fs::symlink_unchecked;
+#[cfg(debug_assertions)]
+use crate::fs::{canonicalize, canonicalize_manually, stat_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
@@ -45,6 +50,12 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
 
 #[allow(clippy::enum_glob_use)]
 #[cfg(debug_assertions)]
+#[cfg(any(
+    unix,
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vxworks"
+))]
 fn check_symlink(
     old_path: &Path,
     new_start: &fs::File,
