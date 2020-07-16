@@ -30,8 +30,8 @@ The networking module, `net`, is not yet usable.
 Operating systems have a concept of resource handles, or file descriptors, which
 are values that can be passed around within and sometimes between programs, and
 which represent access to external resources. Programs typically have the
-*ambient authority* to request any file or network handle simply by providing its
-name or address:
+*ambient authority* to request any file or network handle simply by providing
+its name or address:
 
 ```
     let file = File::open("/anything/you/want.txt")?;
@@ -60,8 +60,8 @@ Attempts to access paths not contained within the directory:
 
 return `PermissionDenied` errors.
 
-This allows applications to configure their own access, without setting up
-a separate host process or requiring external configuration.
+This allows applications to configure their own access, without setting up a
+separate host process or requiring external configuration.
 
 ## How do I obtain a `Dir`?
 
@@ -69,8 +69,8 @@ If every resource requires some other resource to obtain, how does one obtain
 the first resource?
 
 For now, `cap-std`'s answer is that you use conventional ambient authority
-methods such as `std::fs::File::open` to open directories, and then you can
-call `Dir::from_std_file`.
+methods such as `std::fs::File::open` to open directories, and then you can call
+`Dir::from_std_file`.
 
 In the future, this space may get more interesting :-).
 
@@ -90,10 +90,10 @@ and so on.
 untrusted Rust code could use `unsafe` or the unsandboxed APIs in `std::fs`.
 
 `cap-std` allows code to declare its intent, and opt in to protection from
-malicious path names. Code which takes a `Dir` from which to open files,
-rather than taking bare filenames, declares its intent to only open files
-underneath that `Dir`. And, `Dir` automatically protects against paths which
-might include `..` or symlinks that might lead outside of that `Dir`.
+malicious path names. Code which takes a `Dir` from which to open files, rather
+than taking bare filenames, declares its intent to only open files underneath
+that `Dir`. And, `Dir` automatically protects against paths which might include
+`..`, symlinks, or absolute paths that might lead outside of that `Dir`.
 
 `cap-std` also has another role, within WASI, because `cap-std`'s filesystem
 APIs closely follow WASI's sandboxing APIs. In WASI, `cap-std` becomes a very
@@ -102,30 +102,30 @@ extra code to handle absolute paths.
 
 ## How fast is it?
 
-On Linux 5.6 and newer, `cap-std` uses the [`openat2`] to implement `open`
-and with a single system call in common cases. Several other operations
-internally utilize `openat2` for fast path resolution as well.
+On Linux 5.6 and newer, `cap-std` uses [`openat2`] to implement `open` and with
+a single system call in common cases. Several other operations internally
+utilize `openat2` for fast path resolution as well.
 
 Otherwise, `cap-std` opens each component of a path individually, in order to
 specially handle `..` and symlinks. The algorithm is carefully designed to
 minimize system calls, so opening `red/green/blue` performs just 5 system
-calls—it opens `red`, `green`, and then `blue`, and closes the handles for
-`red` and `green`.
+calls—it opens `red`, `green`, and then `blue`, and closes the handles for `red`
+and `green`.
 
 [`openat2`]: https://lwn.net/Articles/796868/
 
 ## What about networking?
 
 This library contains a few sketches of how to apply similar ideas to
-networking, but it's very incomplete at this time. If you're interested in
-this area, let's talk about what this might become!
+networking, but it's very incomplete at this time. If you're interested in this
+area, let's talk about what this might become!
 
 ## What is `cap_std::fs_utf8`?
 
-It's an experiment in what an API with UTF-8 filesystem paths (but which
-still allow you to access any file with any byte-sequence name) might look
-like. For more information on the technique, see the [`arf-strings` package].
-To try it, opt in by enabling the `fs_utf8` feature and using `std::fs_utf8`
-in place of `std::fs`.
+It's an experiment in what an API with UTF-8 filesystem paths (but which still
+allow you to access any file with any byte-sequence name) might look like. For
+more information on the technique, see the [`arf-strings` package]. To try it,
+opt in by enabling the `fs_utf8` feature and using `std::fs_utf8` in place of
+`std::fs`.
 
 [`arf-strings` package]: https://github.com/bytecodealliance/arf-strings/

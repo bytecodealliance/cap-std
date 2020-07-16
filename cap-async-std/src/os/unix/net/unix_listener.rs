@@ -9,13 +9,13 @@ use async_std::{
 
 /// A structure representing a Unix domain socket server.
 ///
-/// This corresponds to [`std::os::unix::net::UnixListener`].
+/// This corresponds to [`async_std::os::unix::net::UnixListener`].
 ///
 /// Note that this `UnixListener` has no `bind` method. To bind it to a socket
 /// address, you must first obtain a [`Dir`] containing the path, and
 /// then call [`Dir::bind_unix_listener`].
 ///
-/// [`std::os::unix::net::UnixListener`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html
+/// [`async_std::os::unix::net::UnixListener`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::bind_unix_listener`]: struct.Dir.html#method.bind_unix_listener
 pub struct UnixListener {
@@ -31,9 +31,9 @@ impl UnixListener {
 
     /// Accepts a new incoming connection to this listener.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixListener::accept`].
+    /// This corresponds to [`async_std::os::unix::net::UnixListener::accept`].
     ///
-    /// [`std::os::unix::net::UnixListener::accept`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.accept
+    /// [`async_std::os::unix::net::UnixListener::accept`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.accept
     #[inline]
     pub async fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
         self.std
@@ -46,9 +46,9 @@ impl UnixListener {
 
     /// Returns the local socket address of this listener.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixListener::local_addr`].
+    /// This corresponds to [`async_std::os::unix::net::UnixListener::local_addr`].
     ///
-    /// [`std::os::unix::net::UnixListener::local_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.local_addr
+    /// [`async_std::os::unix::net::UnixListener::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -60,9 +60,9 @@ impl UnixListener {
 
     /// Returns an iterator over incoming connections.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixListener::incoming`].
+    /// This corresponds to [`async_std::os::unix::net::UnixListener::incoming`].
     ///
-    /// [`std::os::unix::net::UnixListener::incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.incoming
+    /// [`async_std::os::unix::net::UnixListener::incoming`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
         Incoming::from_std(self.std.incoming())

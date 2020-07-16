@@ -11,13 +11,13 @@ use std::pin::Pin;
 
 /// A Unix stream socket.
 ///
-/// This corresponds to [`std::os::unix::net::UnixStream`].
+/// This corresponds to [`async_std::os::unix::net::UnixStream`].
 ///
 /// Note that this `UnixStream` has no `connect` method. To create a `UnixStream`,
 /// you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::connect_unix_stream`].
 ///
-/// [`std::os::unix::net::UnixStream`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html
+/// [`async_std::os::unix::net::UnixStream`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::connect_unix_stream`]: struct.Dir.html#method.connect_unix_stream
 pub struct UnixStream {
@@ -33,11 +33,11 @@ impl UnixStream {
 
     /// Creates an unnamed pair of connected sockets.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::pair`].
+    /// This corresponds to [`async_std::os::unix::net::UnixStream::pair`].
     ///
     /// TODO: should this require a capability?
     ///
-    /// [`std::os::unix::net::UnixStream::pair`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.pair
+    /// [`async_std::os::unix::net::UnixStream::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
         unix::net::UnixStream::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
@@ -47,9 +47,9 @@ impl UnixStream {
 
     /// Returns the socket address of the local half of this connection.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::local_addr`].
+    /// This corresponds to [`async_std::os::unix::net::UnixStream::local_addr`].
     ///
-    /// [`std::os::unix::net::UnixStream::local_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.local_addr
+    /// [`async_std::os::unix::net::UnixStream::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -57,9 +57,9 @@ impl UnixStream {
 
     /// Returns the socket address of the remote half of this connection.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::peer_addr`].
+    /// This corresponds to [`async_std::os::unix::net::UnixStream::peer_addr`].
     ///
-    /// [`std::os::unix::net::UnixStream::peer_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.peer_addr
+    /// [`async_std::os::unix::net::UnixStream::peer_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.peer_addr
     #[inline]
     pub fn peer_addr(&self) -> io::Result<SocketAddr> {
         self.std.peer_addr()
@@ -79,9 +79,9 @@ impl UnixStream {
 
     /// Shuts down the read, write, or both halves of this connection.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::shutdown`].
+    /// This corresponds to [`async_std::os::unix::net::UnixStream::shutdown`].
     ///
-    /// [`std::os::unix::net::UnixStream::shutdown`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.shutdown
+    /// [`async_std::os::unix::net::UnixStream::shutdown`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
         self.std.shutdown(how)
