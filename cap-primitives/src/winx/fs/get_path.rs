@@ -17,12 +17,12 @@ pub(crate) fn get_path(file: &fs::File) -> io::Result<PathBuf> {
     // strip extended prefix; otherwise we will error out on any relative
     // components with `out_path`
     let wide: Vec<_> = path.as_os_str().encode_wide().collect();
-    if let Some(prefix) = wide.get(0..4) {
-        if &[92, 92, 63, 92] == prefix {
-            return Ok(PathBuf::from(OsString::from_wide(&wide)));
-        }
-    }
-    Ok(PathBuf::from(OsString::from_wide(&wide)))
+    let wide_final = if wide.starts_with(&['\\' as u16, '\\' as _, '?' as _, '\\' as _]) {
+        &wide[4..]
+    } else {
+        &wide
+    };
+    Ok(PathBuf::from(OsString::from_wide(wide_final)))
 }
 
 /// Convenience function for calling `get_path` and concatenating the result
