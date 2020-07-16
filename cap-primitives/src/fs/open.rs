@@ -5,9 +5,7 @@ use std::{fs, io, path::Path};
 #[cfg(debug_assertions)]
 use {
     super::get_path,
-    crate::fs::{
-        is_same_file, open_unchecked, stat_unchecked, FollowSymlinks, Metadata, OpenUncheckedError,
-    },
+    crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata, OpenUncheckedError},
 };
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
@@ -16,13 +14,13 @@ use {
 #[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
     #[cfg(debug_assertions)]
-    let stat_before = stat_unchecked(start, path, FollowSymlinks::follow(!options.nofollow));
+    let stat_before = stat_unchecked(start, path, options.follow);
 
     // Call the underlying implementation.
     let result = open_impl(start, path, options);
 
     #[cfg(debug_assertions)]
-    let stat_after = stat_unchecked(start, path, FollowSymlinks::follow(!options.nofollow));
+    let stat_after = stat_unchecked(start, path, options.follow);
 
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]

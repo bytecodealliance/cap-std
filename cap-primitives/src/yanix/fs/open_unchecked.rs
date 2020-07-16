@@ -1,5 +1,5 @@
 use super::compute_oflags;
-use crate::fs::{is_dir_options, stat_unchecked, FollowSymlinks, OpenOptions, OpenUncheckedError};
+use crate::fs::{is_dir_options, stat_unchecked, OpenOptions, OpenUncheckedError};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::{fs, path::Path};
@@ -27,7 +27,7 @@ pub(crate) fn open_unchecked(
         Some(libc::ENOENT) => Err(OpenUncheckedError::NotFound(err)),
         Some(libc::ENOTDIR) => {
             if is_dir_options(options)
-                && stat_unchecked(start, path, FollowSymlinks::follow(!options.nofollow))
+                && stat_unchecked(start, path, options.follow)
                     .map(|m| m.file_type().is_symlink())
                     .unwrap_or(false)
             {

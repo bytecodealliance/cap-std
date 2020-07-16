@@ -3,7 +3,7 @@
 
 use crate::fs::{
     dir_options, errors, is_same_file, open_unchecked, path_requires_dir, readlink_one,
-    MaybeOwnedFile, OpenOptions,
+    FollowSymlinks, MaybeOwnedFile, OpenOptions,
 };
 use std::{
     ffi::OsString,
@@ -211,7 +211,7 @@ pub(crate) fn open_manually_maybe<'start>(
                 match open_unchecked(
                     base.as_file(),
                     one.as_ref(),
-                    use_options.clone().nofollow(true),
+                    use_options.clone().follow(FollowSymlinks::No),
                 ) {
                     Ok(file) => {
                         let prev_base = base.descend_to(file);
@@ -221,7 +221,7 @@ pub(crate) fn open_manually_maybe<'start>(
                         }
                     }
                     Err(OpenUncheckedError::Symlink(err))
-                        if use_options.nofollow && components.is_empty() =>
+                        if use_options.follow == FollowSymlinks::No && components.is_empty() =>
                     {
                         canonical_path.push(one);
                         canonical_path.complete();

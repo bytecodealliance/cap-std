@@ -1,4 +1,4 @@
-use crate::fs::OpenOptions;
+use crate::fs::{FollowSymlinks, OpenOptions};
 use std::io;
 use yanix::file::OFlag;
 
@@ -7,7 +7,7 @@ pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlag> {
     let mut oflags = OFlag::empty();
     oflags |= OFlag::from_bits(get_access_mode(options)?).unwrap();
     oflags |= OFlag::from_bits(get_creation_mode(options)?).unwrap();
-    if options.nofollow {
+    if options.follow == FollowSymlinks::No {
         oflags |= OFlag::NOFOLLOW;
     }
     oflags |= OFlag::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")

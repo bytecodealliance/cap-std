@@ -30,7 +30,7 @@ pub(crate) fn canonicalize_manually(
     if let Err(e) = open_manually(
         start,
         path,
-        follow.options(OpenOptions::new().read(true)),
+        OpenOptions::new().read(true).follow(follow),
         &mut symlink_count,
         Some(&mut canonical_path),
     ) {
