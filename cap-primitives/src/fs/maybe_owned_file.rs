@@ -57,17 +57,19 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         }
     }
 
-    pub(crate) fn as_file(&'borrow self) -> &'borrow fs::File {
-        match &self.inner {
-            Inner::Owned(f) => f,
-            Inner::Borrowed(f) => f,
-        }
-    }
-
     pub(crate) fn into_file(self) -> io::Result<fs::File> {
         match self.inner {
             Inner::Owned(file) => Ok(file),
             Inner::Borrowed(file) => file.try_clone(),
+        }
+    }
+}
+
+impl<'borrow> AsRef<fs::File> for MaybeOwnedFile<'borrow> {
+    fn as_ref(&self) -> &fs::File {
+        match &self.inner {
+            Inner::Owned(f) => f,
+            Inner::Borrowed(f) => f,
         }
     }
 }

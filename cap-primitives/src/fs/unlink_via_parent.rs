@@ -9,5 +9,5 @@ pub(crate) fn unlink_via_parent(start: &fs::File, path: &Path) -> io::Result<()>
 
     let basename = open_parent(&mut start, path, &mut symlink_count)?;
 
-    unlink_unchecked(start.as_file(), basename.as_ref())
+    unlink_unchecked(start.as_ref(), basename.as_ref())
 }
