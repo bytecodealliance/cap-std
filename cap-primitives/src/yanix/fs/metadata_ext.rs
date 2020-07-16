@@ -91,6 +91,7 @@ impl MetadataExt {
     }
 }
 
+#[allow(clippy::similar_names)]
 fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
     SystemTime::UNIX_EPOCH.checked_add(Duration::new(
         u64::try_from(sec).unwrap(),
