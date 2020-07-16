@@ -16,7 +16,7 @@ impl PermissionsExt {
         }
     }
 
-    /// Constructs a new instance of `FileType` from the given `libc::mode_t`.
+    /// Constructs a new instance of `Permissions` from the given `libc::mode_t`.
     #[inline]
     pub(crate) const fn from_libc(mode: libc::mode_t) -> Permissions {
         Permissions {

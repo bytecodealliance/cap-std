@@ -9,7 +9,7 @@ use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::{
         canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink, unlink, FollowSymlinks,
+        symlink, unlink, DirOptions, FollowSymlinks,
     },
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
@@ -18,7 +18,7 @@ use {
 use {
     cap_primitives::fs::{
         canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink_dir, symlink_file, unlink, FollowSymlinks,
+        symlink_dir, symlink_file, unlink, DirOptions, FollowSymlinks,
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
@@ -129,7 +129,7 @@ impl Dir {
     /// [`std::fs::create_dir`]: https://doc.rust-lang.org/std/fs/fn.create_dir.html
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        mkdir(&self.std_file, path.as_ref())
+        self._create_dir_one(path.as_ref(), &DirOptions::new())
     }
 
     /// Recursively create a directory and all of its parent components if they are missing.
@@ -140,22 +140,45 @@ impl Dir {
     /// [`std::fs::create_dir_all`]: https://doc.rust-lang.org/std/fs/fn.create_dir_all.html
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        self._create_dir_all(path.as_ref())
+        self._create_dir_all(path.as_ref(), &DirOptions::new())
     }
 
-    fn _create_dir_all(&self, path: &Path) -> io::Result<()> {
+    /// Creates the specified directory with the options configured in this builder.
+    ///
+    /// This corresponds to [`std::fs::DirBuilder::create`].
+    ///
+    /// [`std::fs::DirBuilder::create`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.create
+    #[inline]
+    pub fn create_dir_with<P: AsRef<Path>>(
+        &self,
+        path: P,
+        dir_builder: &DirBuilder,
+    ) -> io::Result<()> {
+        let options = dir_builder.options();
+        if dir_builder.is_recursive() {
+            self._create_dir_all(path.as_ref(), options)
+        } else {
+            self._create_dir_one(path.as_ref(), options)
+        }
+    }
+
+    fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
+        mkdir(&self.std_file, path, dir_options)
+    }
+
+    fn _create_dir_all(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
         if path == Path::new("") {
             return Ok(());
         }
 
-        match self.create_dir(path) {
+        match self._create_dir_one(path, dir_options) {
             Ok(()) => return Ok(()),
             Err(ref e) if e.kind() == io::ErrorKind::NotFound => {}
             Err(_) if self.is_dir(path) => return Ok(()),
             Err(e) => return Err(e),
         }
         match path.parent() {
-            Some(p) => self._create_dir_all(p)?,
+            Some(p) => self._create_dir_all(p, dir_options)?,
             None => {
                 return Err(io::Error::new(
                     io::ErrorKind::Other,
@@ -163,7 +186,7 @@ impl Dir {
                 ));
             }
         }
-        match self.create_dir(path) {
+        match self._create_dir_one(path, dir_options) {
             Ok(()) => Ok(()),
             Err(_) if self.is_dir(path) => Ok(()),
             Err(e) => Err(e),
@@ -381,24 +404,6 @@ impl Dir {
         use io::Write;
         let mut file = self.create(path)?;
         file.write_all(contents.as_ref())
-    }
-
-    /// Creates the specified directory with the options configured in this builder.
-    ///
-    /// This corresponds to [`std::fs::DirBuilder::create`].
-    ///
-    /// [`std::fs::DirBuilder::create`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.create
-    #[inline]
-    pub fn create_with_dir_builder<P: AsRef<Path>>(
-        &self,
-        _dir_builder: &DirBuilder,
-        path: P,
-    ) -> io::Result<()> {
-        todo!(
-            "Dir::create_with_dir_builder({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
     }
 
     /// Creates a new symbolic link on a filesystem.
