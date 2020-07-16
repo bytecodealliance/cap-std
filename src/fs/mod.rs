@@ -19,17 +19,17 @@
 //! [`Dir`]: struct.Dir.html
 
 mod dir;
-mod dir_builder;
 mod file;
 
 pub use dir::*;
-pub use dir_builder::*;
 pub use file::*;
 
 // Re-export things from `cap_primitives` that we can use as-is.
 #[cfg(not(target_os = "wasi"))]
-pub use cap_primitives::fs::{DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir};
+pub use cap_primitives::fs::{
+    DirBuilder, DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir,
+};
 
 // Re-export things from `std` that we can use as-is.
 #[cfg(target_os = "wasi")]
-pub use std::fs::{DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir};
+pub use std::fs::{DirBuilder, DirEntry, FileType, Metadata, OpenOptions, Permissions, ReadDir};
