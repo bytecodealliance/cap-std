@@ -109,7 +109,7 @@ impl Dir {
                 .read(true)
                 .custom_flags(OFlag::DIRECTORY.bits()),
         )
-        .map(|file| crate::fs::Dir::from_std_file(file.std))
+        .map(|file| Self::from_std_file(file.std))
     }
 
     #[cfg(windows)]
@@ -122,7 +122,7 @@ impl Dir {
                 .read(true)
                 .attributes(FILE_FLAG_BACKUP_SEMANTICS),
         )
-        .map(|file| crate::fs::Dir::from_std_file(file.std))
+        .map(|file| Self::from_std_file(file.std))
     }
 
     /// Creates a new, empty directory at the provided path.
