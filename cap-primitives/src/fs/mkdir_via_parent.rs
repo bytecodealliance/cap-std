@@ -13,5 +13,5 @@ pub(crate) fn mkdir_via_parent(start: &fs::File, path: &Path) -> io::Result<()> 
 
     let basename = open_parent(&mut start, path, &mut symlink_count)?;
 
-    mkdir_unchecked(start.as_file(), basename.as_ref())
+    mkdir_unchecked(&start, basename.as_ref())
 }

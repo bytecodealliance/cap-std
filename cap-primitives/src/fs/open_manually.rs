@@ -174,7 +174,7 @@ pub(crate) fn open_manually_maybe<'start>(
                     if dir_precluded {
                         return Err(errors::is_directory());
                     }
-                    if !base.as_file().metadata()?.is_dir() {
+                    if !base.metadata()?.is_dir() {
                         return Err(errors::is_not_directory());
                     }
                     canonical_path.push(Component::CurDir.as_os_str().to_os_string());
@@ -185,7 +185,7 @@ pub(crate) fn open_manually_maybe<'start>(
             }
             OwnedComponent::ParentDir => {
                 // TODO: This is a racy check, though it is useful for testing and fuzzing.
-                debug_assert!(dirs.is_empty() || !is_same_file(start, base.as_file())?);
+                debug_assert!(dirs.is_empty() || !is_same_file(start, &base)?);
 
                 if components.is_empty() && dir_precluded {
                     return Err(errors::is_directory());
@@ -209,7 +209,7 @@ pub(crate) fn open_manually_maybe<'start>(
                     &dir_options
                 };
                 match open_unchecked(
-                    base.as_file(),
+                    &base,
                     one.as_ref(),
                     use_options.clone().follow(FollowSymlinks::No),
                 ) {
@@ -228,7 +228,7 @@ pub(crate) fn open_manually_maybe<'start>(
                         return Err(err);
                     }
                     Err(OpenUncheckedError::Symlink(_)) => {
-                        let destination = readlink_one(base.as_file(), &one, symlink_count)?;
+                        let destination = readlink_one(&base, &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                         dir_required |= path_requires_dir(&destination);
                     }
@@ -276,13 +276,13 @@ fn check_open(
     ) {
         Ok(unchecked_file) => {
             assert!(
-                is_same_file(base.as_file(), &unchecked_file).unwrap(),
+                is_same_file(&base, &unchecked_file).unwrap(),
                 "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; \
                  got='{:?}' expected='{:?}'",
                 start,
                 path.display(),
                 canonical_path.debug.display(),
-                base.as_file(),
+                base,
                 &unchecked_file,
             );
         }
@@ -291,7 +291,7 @@ fn check_open(
             panic!(
                 "unexpected success opening result={:?} start='{:?}', path='{}'; canonical_path='{}'; \
                  expected {:?}",
-                base.as_file(),
+                base,
                 start,
                 path.display(),
                 canonical_path.debug.display(),

@@ -17,9 +17,9 @@ pub(crate) fn link_via_parent(
     let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     link_unchecked(
-        old_start.as_file(),
+        &old_start,
         old_basename.as_ref(),
-        new_start.as_file(),
+        &new_start,
         new_basename.as_ref(),
         FollowSymlinks::No,
     )

@@ -20,7 +20,7 @@ pub(crate) fn symlink_via_parent(
 
     let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
-    symlink_unchecked(old_path, new_start.as_file(), new_basename.as_ref())
+    symlink_unchecked(old_path, &new_start, new_basename.as_ref())
 }
 
 /// Implement `symlink_file` by `open`ing up the parent component of the path and then
