@@ -84,6 +84,9 @@ pub(crate) fn open_impl(
                         errno => return other_error(errno),
                     },
                     ret => {
+                        // Note that we don't bother with `ensure_cloexec` here
+                        // because Linux has supported `O_CLOEXEC` since 2.6.18,
+                        // and `openat2` was introduced in 5.6.
                         let file = fs::File::from_raw_fd(ret as RawFd);
 
                         #[cfg(debug_assertions)]
