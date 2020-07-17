@@ -1,6 +1,6 @@
 use crate::fs::FollowSymlinks;
 use std::{fs, io, os::unix::io::AsRawFd, path::Path};
-use yanix::file::{linkat, AtFlag};
+use yanix::file::{linkat, AtFlags};
 
 /// *Unsandboxed* function similar to `link`, but which does not perform sandboxing.
 pub(crate) fn link_unchecked(
@@ -11,8 +11,8 @@ pub(crate) fn link_unchecked(
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     let flags = match follow {
-        FollowSymlinks::Yes => AtFlag::SYMLINK_FOLLOW,
-        FollowSymlinks::No => AtFlag::empty(),
+        FollowSymlinks::Yes => AtFlags::SYMLINK_FOLLOW,
+        FollowSymlinks::No => AtFlags::empty(),
     };
 
     unsafe {

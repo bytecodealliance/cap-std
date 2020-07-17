@@ -6,7 +6,7 @@ use std::{
 };
 #[cfg(debug_assertions)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
-use yanix::file::OFlag;
+use yanix::file::OFlags;
 
 // Rust's `Path` implicity strips redundant slashes and `.` components, however
 // they aren't redundant in one case: at the end of a path they indicate that a
@@ -45,13 +45,13 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
 pub(crate) fn dir_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
-        .custom_flags(OFlag::DIRECTORY.bits())
+        .custom_flags(OFlags::DIRECTORY.bits())
         .clone()
 }
 
 // Test whether an `OpenOptions` is set to only open directories.
 pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
-    (options.ext.custom_flags & OFlag::DIRECTORY.bits()) == OFlag::DIRECTORY.bits()
+    (options.ext.custom_flags & OFlags::DIRECTORY.bits()) == OFlags::DIRECTORY.bits()
 }
 
 #[test]
