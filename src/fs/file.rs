@@ -362,10 +362,10 @@ fn fmt_debug_file(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
         if mode.is_err() {
             return None;
         }
-        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
-            yanix::file::OFlag::RDONLY => Some((true, false)),
-            yanix::file::OFlag::RDWR => Some((true, true)),
-            yanix::file::OFlag::WRONLY => Some((false, true)),
+        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
+            yanix::file::OFlags::RDONLY => Some((true, false)),
+            yanix::file::OFlags::RDWR => Some((true, true)),
+            yanix::file::OFlags::WRONLY => Some((false, true)),
             _ => None,
         }
     }

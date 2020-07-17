@@ -1,35 +1,35 @@
 use crate::fs::{FollowSymlinks, OpenOptions};
 use std::io;
-use yanix::file::OFlag;
+use yanix::file::OFlags;
 
-pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlag> {
+pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
     // TODO: Add `CLOEXEC` when yanix is updated.
-    let mut oflags = OFlag::empty();
+    let mut oflags = OFlags::empty();
     oflags |= get_access_mode(options)?;
     oflags |= get_creation_mode(options)?;
     if options.follow == FollowSymlinks::No {
-        oflags |= OFlag::NOFOLLOW;
+        oflags |= OFlags::NOFOLLOW;
     }
-    oflags |= OFlag::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")
-        & !OFlag::ACCMODE;
+    oflags |= OFlags::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")
+        & !OFlags::ACCMODE;
     Ok(oflags)
 }
 
 // `OpenOptions` translation code derived from Rust's src/libstd/sys/unix/fs.rs
 // at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
 
-fn get_access_mode(options: &OpenOptions) -> io::Result<OFlag> {
+fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
     match (options.read, options.write, options.append) {
-        (true, false, false) => Ok(OFlag::RDONLY),
-        (false, true, false) => Ok(OFlag::WRONLY),
-        (true, true, false) => Ok(OFlag::RDWR),
-        (false, _, true) => Ok(OFlag::WRONLY | OFlag::APPEND),
-        (true, _, true) => Ok(OFlag::RDWR | OFlag::APPEND),
+        (true, false, false) => Ok(OFlags::RDONLY),
+        (false, true, false) => Ok(OFlags::WRONLY),
+        (true, true, false) => Ok(OFlags::RDWR),
+        (false, _, true) => Ok(OFlags::WRONLY | OFlags::APPEND),
+        (true, _, true) => Ok(OFlags::RDWR | OFlags::APPEND),
         (false, false, false) => Err(io::Error::from_raw_os_error(libc::EINVAL)),
     }
 }
 
-fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlag> {
+fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlags> {
     match (options.write, options.append) {
         (true, false) => {}
         (false, false) => {
@@ -46,11 +46,11 @@ fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlag> {
 
     Ok(
         match (options.create, options.truncate, options.create_new) {
-            (false, false, false) => OFlag::empty(),
-            (true, false, false) => OFlag::CREAT,
-            (false, true, false) => OFlag::TRUNC,
-            (true, true, false) => OFlag::CREAT | OFlag::TRUNC,
-            (_, _, true) => OFlag::CREAT | OFlag::EXCL,
+            (false, false, false) => OFlags::empty(),
+            (true, false, false) => OFlags::CREAT,
+            (false, true, false) => OFlags::TRUNC,
+            (true, true, false) => OFlags::CREAT | OFlags::TRUNC,
+            (_, _, true) => OFlags::CREAT | OFlags::EXCL,
         },
     )
 }

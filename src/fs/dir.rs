@@ -97,12 +97,12 @@ impl Dir {
     #[cfg(any(unix, target_os = "fuchsia"))]
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::unix::fs::OpenOptionsExt;
-        use yanix::file::OFlag;
+        use yanix::file::OFlags;
         self.open_with(
             path,
             OpenOptions::new()
                 .read(true)
-                .custom_flags(OFlag::DIRECTORY.bits()),
+                .custom_flags(OFlags::DIRECTORY.bits()),
         )
         .map(|file| Self::from_std_file(file.std))
     }
@@ -657,10 +657,10 @@ fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
         if mode.is_err() {
             return None;
         }
-        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
-            yanix::file::OFlag::RDONLY => Some((true, false)),
-            yanix::file::OFlag::RDWR => Some((true, true)),
-            yanix::file::OFlag::WRONLY => Some((false, true)),
+        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
+            yanix::file::OFlags::RDONLY => Some((true, false)),
+            yanix::file::OFlags::RDWR => Some((true, true)),
+            yanix::file::OFlags::WRONLY => Some((false, true)),
             _ => None,
         }
     }
@@ -679,10 +679,10 @@ fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
         if mode.is_err() {
             return None;
         }
-        match mode.unwrap() & yanix::file::OFlag::ACCMODE {
-            yanix::file::OFlag::RDONLY => Some((true, false)),
-            yanix::file::OFlag::RDWR => Some((true, true)),
-            yanix::file::OFlag::WRONLY => Some((false, true)),
+        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
+            yanix::file::OFlags::RDONLY => Some((true, false)),
+            yanix::file::OFlags::RDWR => Some((true, true)),
+            yanix::file::OFlags::WRONLY => Some((false, true)),
             _ => None,
         }
     }
