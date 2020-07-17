@@ -9,22 +9,21 @@ pub fn rename_via_parent(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    let mut symlink_count = 0;
-    let mut old_start = MaybeOwnedFile::borrowed(old_start);
-    let mut new_start = MaybeOwnedFile::borrowed(new_start);
+    let old_start = MaybeOwnedFile::borrowed(old_start);
+    let new_start = MaybeOwnedFile::borrowed(new_start);
 
     // As a special case, `rename` ignores a trailing slash rather than treating
     // it as equivalent to a trailing slash-dot, so strip any trailing slashes.
     let old_path = strip_dir_suffix(old_path);
     let new_path = strip_dir_suffix(new_path);
 
-    let old_basename = open_parent(&mut old_start, old_path, &mut symlink_count)?;
-    let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
+    let (old_dir, old_basename) = open_parent(old_start, old_path)?;
+    let (new_dir, new_basename) = open_parent(new_start, new_path)?;
 
     rename_unchecked(
-        &old_start,
+        &old_dir,
         old_basename.as_ref(),
-        &new_start,
+        &new_dir,
         new_basename.as_ref(),
     )
 }

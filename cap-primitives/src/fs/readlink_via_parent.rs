@@ -7,10 +7,9 @@ use std::{
 /// Implement `readlink` by `open`ing up the parent component of the path and then
 /// calling `readlink_unchecked` on the last component.
 pub fn readlink_via_parent(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
-    let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::borrowed(start);
+    let start = MaybeOwnedFile::borrowed(start);
 
-    let basename = open_parent(&mut start, path, &mut symlink_count)?;
+    let (dir, basename) = open_parent(start, path)?;
 
-    readlink_unchecked(&start, basename.as_ref())
+    readlink_unchecked(&dir, basename.as_ref())
 }
