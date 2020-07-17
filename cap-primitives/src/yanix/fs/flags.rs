@@ -3,8 +3,7 @@ use std::io;
 use yanix::file::OFlags;
 
 pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
-    // TODO: Add `CLOEXEC` when yanix is updated.
-    let mut oflags = OFlags::empty();
+    let mut oflags = OFlags::CLOEXEC;
     oflags |= get_access_mode(options)?;
     oflags |= get_creation_mode(options)?;
     if options.follow == FollowSymlinks::No {
