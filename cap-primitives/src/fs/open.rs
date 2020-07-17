@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 #[cfg(debug_assertions)]
 use {
     super::get_path,
-    crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata, OpenUncheckedError},
+    crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata},
 };
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
@@ -81,11 +81,7 @@ fn check_open(
             Err(result_error) => match result_error.kind() {
                 io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
                 _ => {
-                    let _unchecked_error = match unchecked_error {
-                        OpenUncheckedError::Other(err)
-                        | OpenUncheckedError::Symlink(err)
-                        | OpenUncheckedError::NotFound(err) => err,
-                    };
+                    let _unchecked_error = unchecked_error.into_io_error();
                     /* TODO: Check error messages.
                     assert_eq!(result_error.to_string(), unchecked_error.to_string());
                     assert_eq!(result_error.kind(), unchecked_error.kind());

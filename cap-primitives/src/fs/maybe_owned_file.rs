@@ -1,4 +1,5 @@
-use std::{fmt, fs, io, mem, ops::Deref};
+use crate::fs::{dir_options, open_unchecked, OpenUncheckedError};
+use std::{fmt, fs, io, mem, ops::Deref, path::Component};
 #[cfg(debug_assertions)]
 use {crate::fs::get_path, std::path::PathBuf};
 
@@ -27,7 +28,7 @@ pub(crate) struct MaybeOwnedFile<'borrow> {
 }
 
 impl<'borrow> MaybeOwnedFile<'borrow> {
-    /// Constructs a new `ManuallyOwnedFile` which is not owned.
+    /// Constructs a new `MaybeOwnedFile` which is not owned.
     pub(crate) fn borrowed(file: &'borrow fs::File) -> Self {
         #[cfg(debug_assertions)]
         let path = get_path(file);
@@ -40,10 +41,23 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         }
     }
 
+    /// Constructs a new `MaybeOwnedFile` which is owned.
+    pub(crate) fn owned(file: fs::File) -> Self {
+        #[cfg(debug_assertions)]
+        let path = get_path(&file);
+
+        Self {
+            inner: Inner::Owned(file),
+
+            #[cfg(debug_assertions)]
+            path,
+        }
+    }
+
     /// Set this `MaybeOwnedFile` to a new owned file which is from a subtree
     /// of the current file. Return a `MaybeOwnedFile` representing the previous
     /// state.
-    pub(crate) fn descend_to(&mut self, to: fs::File) -> Self {
+    pub(crate) fn descend_to(&mut self, to: MaybeOwnedFile<'borrow>) -> Self {
         #[cfg(debug_assertions)]
         let path = self.path.clone();
 
@@ -62,7 +76,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         }
 
         Self {
-            inner: mem::replace(&mut self.inner, Inner::Owned(to)),
+            inner: mem::replace(&mut self.inner, to.inner),
 
             #[cfg(debug_assertions)]
             path,
@@ -74,7 +88,13 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     pub(crate) fn into_file(self) -> io::Result<fs::File> {
         match self.inner {
             Inner::Owned(file) => Ok(file),
-            Inner::Borrowed(file) => file.try_clone(),
+            Inner::Borrowed(file) => {
+                // The only situation in which we'd be asked to produce an owned
+                // `File` is when there's a need to open "." within a directory
+                // to obtain a new handle.
+                open_unchecked(file, Component::CurDir.as_ref(), &dir_options())
+                    .map_err(OpenUncheckedError::into_io_error)
+            }
         }
     }
 }

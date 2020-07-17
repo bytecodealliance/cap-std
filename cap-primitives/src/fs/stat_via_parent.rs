@@ -1,7 +1,7 @@
 //! `stat` by resolving the parent directory and calling `fstatat`.
 
 use crate::fs::{
-    open_parent, readlink_one, stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata,
+    open_parent_manually, readlink_one, stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata,
 };
 use std::{borrow::Cow, fs, io, path::Path};
 
@@ -14,15 +14,16 @@ pub(crate) fn stat_via_parent(
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
     let mut symlink_count = 0;
-    let mut start = MaybeOwnedFile::borrowed(start);
+    let mut dir = MaybeOwnedFile::borrowed(start);
     let mut path = Cow::Borrowed(path);
 
     loop {
         // Split `path` into parent and basename and open the parent.
-        let basename = open_parent(&mut start, &path, &mut symlink_count)?;
+        let (opened_dir, basename) = open_parent_manually(dir, &path, &mut symlink_count)?;
+        dir = opened_dir;
 
         // Do the stat.
-        let metadata = stat_unchecked(&start, basename.as_ref(), FollowSymlinks::No)?;
+        let metadata = stat_unchecked(&dir, basename.as_ref(), FollowSymlinks::No)?;
 
         // If the user didn't want us to follow a symlink in the last component, or we didn't
         // find a symlink, we're done.
@@ -31,6 +32,6 @@ pub(crate) fn stat_via_parent(
         }
 
         // Dereference the symlink and iterate.
-        path = Cow::Owned(readlink_one(&start, basename, &mut symlink_count)?);
+        path = Cow::Owned(readlink_one(&dir, basename, &mut symlink_count)?);
     }
 }

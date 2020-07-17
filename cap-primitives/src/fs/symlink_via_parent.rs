@@ -15,12 +15,11 @@ pub(crate) fn symlink_via_parent(
     new_path: &Path,
 ) -> io::Result<()> {
     use crate::fs::symlink_unchecked;
-    let mut symlink_count = 0;
-    let mut new_start = MaybeOwnedFile::borrowed(new_start);
+    let new_start = MaybeOwnedFile::borrowed(new_start);
 
-    let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
+    let (new_dir, new_basename) = open_parent(new_start, new_path)?;
 
-    symlink_unchecked(old_path, &new_start, new_basename.as_ref())
+    symlink_unchecked(old_path, &new_dir, new_basename.as_ref())
 }
 
 /// Implement `symlink_file` by `open`ing up the parent component of the path and then

@@ -1,9 +1,11 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
+#[cfg(debug_assertions)]
+use crate::fs::is_same_file;
 use crate::fs::{
-    dir_options, errors, is_same_file, open_unchecked, path_requires_dir, readlink_one,
-    FollowSymlinks, MaybeOwnedFile, OpenOptions,
+    dir_options, errors, open_unchecked, path_requires_dir, readlink_one, FollowSymlinks,
+    MaybeOwnedFile, OpenOptions,
 };
 use std::{
     ffi::OsString,
@@ -108,6 +110,7 @@ pub(crate) fn open_manually_wrapper(
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
     let mut symlink_count = 0;
+    let start = MaybeOwnedFile::borrowed(start);
     open_manually(start, path, options, &mut symlink_count, None)
         .and_then(MaybeOwnedFile::into_file)
 }
@@ -123,12 +126,15 @@ pub(crate) fn open_manually_wrapper(
 /// `&mut PathBuf`. If an error occurs before the complete canonical path is
 /// processed, the provided `&mut PathBuf` is cleared to empty.
 pub(crate) fn open_manually<'start>(
-    start: &'start fs::File,
+    start: MaybeOwnedFile<'start>,
     path: &Path,
     options: &OpenOptions,
     symlink_count: &mut u8,
     canonical_path: Option<&mut PathBuf>,
 ) -> io::Result<MaybeOwnedFile<'start>> {
+    #[cfg(debug_assertions)]
+    let start_clone = MaybeOwnedFile::owned(start.try_clone().unwrap());
+
     // POSIX returns `ENOENT` on an empty path. TODO: On Windows, we should
     // be compatible with what Windows does instead.
     if path.as_os_str().is_empty() {
@@ -140,7 +146,7 @@ pub(crate) fn open_manually<'start>(
         .map(to_owned_component)
         .rev()
         .collect::<Vec<_>>();
-    let mut base = MaybeOwnedFile::borrowed(start);
+    let mut base = start;
     let mut dirs = Vec::new();
     let mut canonical_path = CanonicalPath::new(canonical_path);
     let dir_options = dir_options();
@@ -171,7 +177,8 @@ pub(crate) fn open_manually<'start>(
             }
             OwnedComponent::ParentDir => {
                 // TODO: This is a racy check, though it is useful for testing and fuzzing.
-                debug_assert!(dirs.is_empty() || !is_same_file(start, &base)?);
+                #[cfg(debug_assertions)]
+                assert!(dirs.is_empty() || !is_same_file(&start_clone, &base)?);
 
                 if components.is_empty() && dir_precluded {
                     return Err(errors::is_directory());
@@ -200,7 +207,7 @@ pub(crate) fn open_manually<'start>(
                     use_options.clone().follow(FollowSymlinks::No),
                 ) {
                     Ok(file) => {
-                        let prev_base = base.descend_to(file);
+                        let prev_base = base.descend_to(MaybeOwnedFile::owned(file));
                         dirs.push(prev_base);
                         if one != Component::CurDir.as_os_str() {
                             canonical_path.push(one);
@@ -237,7 +244,7 @@ pub(crate) fn open_manually<'start>(
 
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    check_open(start, path, options, &canonical_path, &base);
+    check_open(&start_clone, path, options, &canonical_path, &base);
 
     canonical_path.complete();
     Ok(base)
@@ -292,4 +299,12 @@ pub(crate) enum OpenUncheckedError {
     Other(io::Error),
     Symlink(io::Error),
     NotFound(io::Error),
+}
+
+impl OpenUncheckedError {
+    pub(crate) fn into_io_error(self) -> io::Error {
+        match self {
+            Self::Other(err) | Self::Symlink(err) | Self::NotFound(err) => err,
+        }
+    }
 }
