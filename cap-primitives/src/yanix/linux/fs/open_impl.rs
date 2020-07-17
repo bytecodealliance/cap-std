@@ -32,9 +32,28 @@ struct OpenHow {
 }
 const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
-/// Call the `openat2` system call. If the syscall is unavailable, mark it so for future
-/// calls, and fallback to `open_manually_wrapper`
+/// Call the `openat2` system call, or use a fallback if that's unavailable.
 pub(crate) fn open_impl(
+    start: &fs::File,
+    path: &Path,
+    options: &OpenOptions,
+) -> io::Result<fs::File> {
+    let result = open_with_openat2(start, path, options);
+
+    // If that returned `ENOSYS`, use a fallback strategy.
+    if let Err(e) = &result {
+        if let Some(libc::ENOSYS) = e.raw_os_error() {
+            return open_manually_wrapper(start, path, options);
+        }
+    }
+
+    result
+}
+
+/// Call the `openat2` system call. If the syscall is unavailable, mark it so
+/// for future calls. If `openat2` is unavailable either permenantly or
+/// temporarily, return `ENOSYS`.
+pub(crate) fn open_with_openat2(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
@@ -60,6 +79,7 @@ pub(crate) fn open_impl(
             mode: u64::from(mode),
             resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
         };
+
         // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
         // while it's running, so use a loop to retry it a few times. But not too many
         // times, because there's no limit on how often this can happen.
@@ -76,8 +96,8 @@ pub(crate) fn open_impl(
                         libc::EAGAIN => continue,
                         libc::EXDEV => return Err(errors::escape_attempt()),
                         libc::ENOSYS => {
-                            // ENOSYS means SYS_OPENAT2 is not available; mark it so,
-                            // exit the loop, and fallback to `open_manually_wrapper`.
+                            // `openat2` is permenantly unavailable; mark it so and
+                            // exit the loop.
                             INVALID.store(true, Relaxed);
                             break;
                         }
@@ -114,8 +134,8 @@ pub(crate) fn open_impl(
         }
     }
 
-    // Fall back to the manual-resolution path.
-    open_manually_wrapper(start, path, options)
+    // `openat2` is unavailable, either temporarily or permenantly.
+    other_error(libc::ENOSYS)
 }
 
 fn other_error(errno: i32) -> io::Result<fs::File> {

@@ -269,7 +269,7 @@ fn check_open(
     ) {
         Ok(unchecked_file) => {
             assert!(
-                is_same_file(&base, &unchecked_file).unwrap(),
+                is_same_file(base, &unchecked_file).unwrap(),
                 "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; \
                  got='{:?}' expected='{:?}'",
                 start,

@@ -25,14 +25,20 @@ cfg_if::cfg_if! {
         pub(crate) use crate::yanix::linux::fs::*;
     } else {
         pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+        pub(crate) use crate::fs::stat_via_parent as stat_impl;
     }
 }
 
+#[rustfmt::skip]
 pub(crate) use crate::fs::{
-    canonicalize_manually_and_follow as canonicalize_impl, link_via_parent as link_impl,
-    mkdir_via_parent as mkdir_impl, readlink_via_parent as readlink_impl,
-    rename_via_parent as rename_impl, rmdir_via_parent as rmdir_impl, stat_via_parent as stat_impl,
-    symlink_via_parent as symlink_impl, unlink_via_parent as unlink_impl,
+    canonicalize_manually_and_follow as canonicalize_impl,
+    link_via_parent as link_impl,
+    mkdir_via_parent as mkdir_impl,
+    readlink_via_parent as readlink_impl,
+    rename_via_parent as rename_impl,
+    rmdir_via_parent as rmdir_impl,
+    symlink_via_parent as symlink_impl,
+    unlink_via_parent as unlink_impl,
 };
 
 pub(crate) mod errors;
