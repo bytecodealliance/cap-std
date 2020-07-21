@@ -1,7 +1,7 @@
 use std::{io, os::unix::io::RawFd};
 use yanix::{
     fcntl::{get_fd_flags, set_fd_flags},
-    file::FdFlag,
+    file::FdFlags,
 };
 
 // Implementation derived from `ensure_cloexec` in Rust's
@@ -53,12 +53,12 @@ pub(crate) unsafe fn ensure_cloexec(fd: RawFd) -> io::Result<()> {
 // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
 
 unsafe fn get_cloexec(fd: RawFd) -> io::Result<bool> {
-    Ok(get_fd_flags(fd)?.contains(FdFlag::CLOEXEC))
+    Ok(get_fd_flags(fd)?.contains(FdFlags::CLOEXEC))
 }
 
 unsafe fn set_cloexec(fd: RawFd) -> io::Result<()> {
     let previous = get_fd_flags(fd)?;
-    let new = previous | FdFlag::CLOEXEC;
+    let new = previous | FdFlags::CLOEXEC;
     if new != previous {
         set_fd_flags(fd, new)?;
     }
