@@ -1,4 +1,6 @@
 use super::compute_oflags;
+#[cfg(target_os = "linux")]
+use crate::fs::ensure_cloexec;
 use crate::fs::{is_dir_options, stat_unchecked, OpenOptions, OpenUncheckedError};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
@@ -18,7 +20,12 @@ pub(crate) fn open_unchecked(
 
     let err = unsafe {
         match openat(start.as_raw_fd(), path, oflags, mode) {
-            Ok(fd) => return Ok(fs::File::from_raw_fd(fd)),
+            Ok(fd) => {
+                #[cfg(target_os = "linux")]
+                ensure_cloexec(fd).map_err(OpenUncheckedError::Other)?;
+
+                return Ok(fs::File::from_raw_fd(fd));
+            }
             Err(err) => err,
         }
     };
