@@ -207,6 +207,23 @@ pub(crate) fn open_manually<'start>(
                     use_options.clone().follow(FollowSymlinks::No),
                 ) {
                     Ok(file) => {
+                        // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file` is a
+                        // symlink, follow it.
+                        #[cfg(target_os = "linux")]
+                        if (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
+                            && use_options.follow == FollowSymlinks::Yes
+                        {
+                            if let Ok(destination) =
+                                readlink_one(&file, Default::default(), symlink_count)
+                            {
+                                components
+                                    .extend(destination.components().map(to_owned_component).rev());
+                                dir_required |= path_requires_dir(&destination);
+                                continue;
+                            }
+                        }
+
+                        // Normal case
                         let prev_base = base.descend_to(MaybeOwnedFile::owned(file));
                         dirs.push(prev_base);
                         if one != Component::CurDir.as_os_str() {
