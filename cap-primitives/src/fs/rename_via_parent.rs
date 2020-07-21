@@ -2,7 +2,7 @@ use crate::fs::{open_parent, rename_unchecked, strip_dir_suffix, MaybeOwnedFile}
 use std::{fs, io, path::Path};
 
 /// Implement `rename` by `open`ing up the parent component of the path and then
-/// calling `renameat` on the last component.
+/// calling `rename_unchecked` on the last component.
 pub fn rename_via_parent(
     old_start: &fs::File,
     old_path: &Path,
@@ -22,9 +22,9 @@ pub fn rename_via_parent(
     let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     rename_unchecked(
-        old_start.as_file(),
+        &old_start,
         old_basename.as_ref(),
-        new_start.as_file(),
+        &new_start,
         new_basename.as_ref(),
     )
 }

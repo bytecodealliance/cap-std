@@ -1,34 +1,29 @@
 use crate::fs_utf8::DirEntry;
-use std::io;
+use std::{fmt, io};
 
 /// Iterator over the entries in a directory.
 ///
 /// This corresponds to [`std::fs::ReadDir`].
-///
-/// Unlike `std::fs::ReadDir`, this API has a lifetime parameter.
-///
-/// TODO: The lifetime parameter is here because `ReadDir` needs to return
-/// `DirEntry`s which have paths
 ///
 /// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
-pub struct ReadDir<'dir> {
-    cap_std: crate::fs::ReadDir<'dir>,
+pub struct ReadDir {
+    cap_std: crate::fs::ReadDir,
 }
 
-impl<'dir> ReadDir<'dir> {
+impl ReadDir {
     /// Constructs a new instance of `Self` from the given `cap_std::fs::File`.
     #[inline]
-    pub fn from_cap_std(cap_std: crate::fs::ReadDir<'dir>) -> Self {
+    pub fn from_cap_std(cap_std: crate::fs::ReadDir) -> Self {
         Self { cap_std }
     }
 }
 
-impl<'dir> Iterator for ReadDir<'dir> {
-    type Item = io::Result<DirEntry<'dir>>;
+impl Iterator for ReadDir {
+    type Item = io::Result<DirEntry>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -38,4 +33,8 @@ impl<'dir> Iterator for ReadDir<'dir> {
     }
 }
 
-// TODO: impl Debug for ReadDir? But don't expose ReadDir's path...
+impl fmt::Debug for ReadDir {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cap_std.fmt(f)
+    }
+}

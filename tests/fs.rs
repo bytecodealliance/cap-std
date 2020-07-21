@@ -449,7 +449,6 @@ fn file_test_stat_is_correct_on_is_file() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_stat_is_correct_on_is_dir() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_dir";
@@ -460,7 +459,6 @@ fn file_test_stat_is_correct_on_is_dir() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_fileinfo_false_when_checking_is_file_on_a_directory() {
     let tmpdir = tmpdir();
     let dir = "fileinfo_false_on_dir";
@@ -480,7 +478,6 @@ fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
 }
 
 #[test]
-#[ignore] // `remove_dir` not yet implemented
 fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
     let tmpdir = tmpdir();
     let dir = "before_and_after_dir";
@@ -493,7 +490,6 @@ fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";
@@ -608,7 +604,6 @@ fn recursive_mkdir_empty() {
 }
 
 #[test]
-#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
     let d1 = PathBuf::from("d1");
@@ -628,7 +623,6 @@ fn recursive_rmdir() {
 }
 
 #[test]
-#[ignore] // remove_dir_all is not yet implemented in cap-std
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
     let tmpdir = tmpdir();
@@ -1347,7 +1341,6 @@ fn realpath_works_tricky() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_methods() {
     let tmpdir = tmpdir();
 
@@ -1371,7 +1364,6 @@ fn dir_entry_methods() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn dir_entry_debug() {
     let tmpdir = tmpdir();
     tmpdir.create("b").unwrap();
@@ -1383,10 +1375,9 @@ fn dir_entry_debug() {
 }
 
 #[test]
-#[ignore] // `read_dir` not yet implemented in cap-std
 fn read_dir_not_found() {
     let tmpdir = tmpdir();
-    let res = tmpdir.read_dir("/path/that/does/not/exist");
+    let res = tmpdir.read_dir("path/that/does/not/exist");
     assert_eq!(res.err().unwrap().kind(), ErrorKind::NotFound);
 }
 

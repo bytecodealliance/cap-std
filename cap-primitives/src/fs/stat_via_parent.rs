@@ -6,7 +6,7 @@ use crate::fs::{
 use std::{borrow::Cow, fs, io, path::Path};
 
 /// Implement `stat` by `open`ing up the parent component of the path and then
-/// calling `fstatat` on the last component. If it's a symlink, repeat this
+/// calling `stat_unchecked` on the last component. If it's a symlink, repeat this
 /// process.
 pub(crate) fn stat_via_parent(
     start: &fs::File,
@@ -22,7 +22,7 @@ pub(crate) fn stat_via_parent(
         let basename = open_parent(&mut start, &path, &mut symlink_count)?;
 
         // Do the stat.
-        let metadata = stat_unchecked(start.as_file(), basename.as_ref(), FollowSymlinks::No)?;
+        let metadata = stat_unchecked(&start, basename.as_ref(), FollowSymlinks::No)?;
 
         // If the user didn't want us to follow a symlink in the last component, or we didn't
         // find a symlink, we're done.
@@ -31,6 +31,6 @@ pub(crate) fn stat_via_parent(
         }
 
         // Dereference the symlink and iterate.
-        path = Cow::Owned(readlink_one(start.as_file(), basename, &mut symlink_count)?);
+        path = Cow::Owned(readlink_one(&start, basename, &mut symlink_count)?);
     }
 }

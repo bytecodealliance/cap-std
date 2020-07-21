@@ -2,6 +2,7 @@
 
 mod canonicalize;
 mod canonicalize_manually;
+mod dir_entry;
 mod file_type;
 mod follow_symlinks;
 #[cfg(debug_assertions)]
@@ -17,10 +18,14 @@ mod open_manually;
 mod open_options;
 mod open_parent;
 mod permissions;
+mod read_dir;
 mod readlink;
 mod readlink_via_parent;
+mod remove_dir_all;
 mod rename;
 mod rename_via_parent;
+mod rmdir;
+mod rmdir_via_parent;
 mod stat;
 mod stat_via_parent;
 mod symlink;
@@ -38,6 +43,7 @@ pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
 pub(crate) use readlink_via_parent::*;
 pub(crate) use rename_via_parent::*;
+pub(crate) use rmdir_via_parent::*;
 pub(crate) use stat_via_parent::*;
 pub(crate) use symlink_via_parent::*;
 pub(crate) use unlink_via_parent::*;
@@ -53,6 +59,7 @@ cfg_if::cfg_if! {
 }
 
 pub use canonicalize::*;
+pub use dir_entry::*;
 pub use file_type::*;
 pub use follow_symlinks::*;
 pub use link::*;
@@ -61,8 +68,11 @@ pub use mkdir::*;
 pub use open::*;
 pub use open_options::*;
 pub use permissions::*;
+pub use read_dir::*;
 pub use readlink::*;
+pub use remove_dir_all::*;
 pub use rename::*;
+pub use rmdir::*;
 pub use stat::*;
 pub use symlink::*;
 pub use unlink::*;
