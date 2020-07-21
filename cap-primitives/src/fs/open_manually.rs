@@ -109,6 +109,7 @@ pub(crate) fn open_manually_wrapper(
 ) -> io::Result<fs::File> {
     let mut symlink_count = 0;
     open_manually(start, path, options, &mut symlink_count, None)
+        .and_then(MaybeOwnedFile::into_file)
 }
 
 /// Implement `open` by breaking up the path into components and resolving
@@ -121,22 +122,7 @@ pub(crate) fn open_manually_wrapper(
 /// `open_manually` returns an `Err`, it will be stored in the provided
 /// `&mut PathBuf`. If an error occurs before the complete canonical path is
 /// processed, the provided `&mut PathBuf` is cleared to empty.
-pub(crate) fn open_manually(
-    start: &fs::File,
-    path: &Path,
-    options: &OpenOptions,
-    symlink_count: &mut u8,
-    canonical_path: Option<&mut PathBuf>,
-) -> io::Result<fs::File> {
-    open_manually_maybe(start, path, options, symlink_count, canonical_path)
-        .and_then(MaybeOwnedFile::into_file)
-}
-
-/// The main body of `open_manually`, which returns a `MaybeOwnedFile` instead
-/// of a `std::fs::File` so that users within this crate can avoid calling
-/// `ManuallyOwnedFile::into_file`, which allocates a new file descriptor in
-/// some cases.
-pub(crate) fn open_manually_maybe<'start>(
+pub(crate) fn open_manually<'start>(
     start: &'start fs::File,
     path: &Path,
     options: &OpenOptions,
