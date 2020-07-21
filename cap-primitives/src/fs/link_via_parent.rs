@@ -2,7 +2,7 @@ use crate::fs::{link_unchecked, open_parent, FollowSymlinks, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `link` by `open`ing up the parent component of the path and then
-/// calling `linkat` on the last component.
+/// calling `link_unchecked` on the last component.
 pub(crate) fn link_via_parent(
     old_start: &fs::File,
     old_path: &Path,
@@ -17,9 +17,9 @@ pub(crate) fn link_via_parent(
     let new_basename = open_parent(&mut new_start, new_path, &mut symlink_count)?;
 
     link_unchecked(
-        old_start.as_file(),
+        &old_start,
         old_basename.as_ref(),
-        new_start.as_file(),
+        &new_start,
         new_basename.as_ref(),
         FollowSymlinks::No,
     )

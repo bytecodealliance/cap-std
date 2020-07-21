@@ -241,9 +241,9 @@ impl Dir {
     ///
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
-    pub fn remove_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+    pub async fn remove_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
-        self.cap_std.remove_dir_all(path)
+        self.cap_std.remove_dir_all(path).await
     }
 
     /// Removes a file from a filesystem.

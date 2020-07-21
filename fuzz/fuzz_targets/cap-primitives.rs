@@ -33,6 +33,9 @@ enum Operation {
     Rename(usize, usize, usize, usize),
     Symlink(usize, usize, usize),
     Unlink(usize, usize),
+    Rmdir(usize, usize),
+    ReadDir(usize, usize),
+    RemoveDirAll(usize, usize),
 }
 
 #[derive(Arbitrary, Debug)]
@@ -120,6 +123,37 @@ impl Plan {
                 }
                 Operation::Unlink(dirno, path) => {
                     cap_primitives::fs::unlink(
+                        &files[*dirno % files.len()],
+                        &paths[*path % paths.len()],
+                    )
+                    .ok();
+                }
+                Operation::Rmdir(dirno, path) => {
+                    cap_primitives::fs::rmdir(
+                        &files[*dirno % files.len()],
+                        &paths[*path % paths.len()],
+                    )
+                    .ok();
+                }
+                Operation::ReadDir(dirno, path) => {
+                    let path = &paths[*path % paths.len()];
+                    if let Ok(read_dir) =
+                        cap_primitives::fs::read_dir(&files[*dirno % files.len()], path)
+                    {
+                        for child in read_dir {
+                            if let Ok(child) = child {
+                                cap_primitives::fs::stat(
+                                    &files[*dirno % files.len()],
+                                    &path.join(child.file_name()),
+                                    FollowSymlinks::Yes,
+                                )
+                                .ok();
+                            }
+                        }
+                    }
+                }
+                Operation::RemoveDirAll(dirno, path) => {
+                    cap_primitives::fs::remove_dir_all(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                     )

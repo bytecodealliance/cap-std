@@ -18,8 +18,7 @@ pub(crate) fn open_parent<'path>(
 
     if !parent.as_os_str().is_empty() {
         let parent_file =
-            open_manually(start.as_file(), parent, &dir_options(), symlink_count, None)?
-                .into_file()?;
+            open_manually_maybe(start, parent, &dir_options(), symlink_count, None)?.into_file()?;
 
         start.descend_to(parent_file);
     }

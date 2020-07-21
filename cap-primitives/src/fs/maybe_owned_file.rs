@@ -1,4 +1,4 @@
-use std::{fs, io, mem};
+use std::{fmt, fs, io, mem, ops::Deref};
 #[cfg(debug_assertions)]
 use {crate::fs::get_path, std::path::PathBuf};
 
@@ -7,6 +7,18 @@ enum Inner<'borrow> {
     Borrowed(&'borrow fs::File),
 }
 
+/// Several places in the code need to be able to handle either owned or
+/// borrowed `std::fs::File`s. Cloning a `File` to let them always have an
+/// owned `File` is expensive and fallble, so use use this `struct` to hold
+/// either one, and implement `Deref` to allow them to be handled in a
+/// uniform way.
+///
+/// This is similar to `Cow`, except without the copy-on-write part ;-).
+/// `Cow` requires a `Clone` implementation, which `File` doesn't have, and
+/// most users of this type don't need copy-on-write behavior.
+///
+/// And, this type has the special `descend_to`, which just does an
+/// assignment, but also some useful assertion checks.
 pub(crate) struct MaybeOwnedFile<'borrow> {
     inner: Inner<'borrow>,
 
@@ -57,17 +69,29 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         }
     }
 
-    pub(crate) fn as_file(&'borrow self) -> &'borrow fs::File {
-        match &self.inner {
-            Inner::Owned(f) => f,
-            Inner::Borrowed(f) => f,
-        }
-    }
-
+    /// Produce an owned `File`. This uses `try_clone` (dup) to convert a
+    /// borrowed `File` to an owned one.
     pub(crate) fn into_file(self) -> io::Result<fs::File> {
         match self.inner {
             Inner::Owned(file) => Ok(file),
             Inner::Borrowed(file) => file.try_clone(),
         }
+    }
+}
+
+impl<'borrow> Deref for MaybeOwnedFile<'borrow> {
+    type Target = fs::File;
+
+    fn deref(&self) -> &Self::Target {
+        match &self.inner {
+            Inner::Owned(f) => f,
+            Inner::Borrowed(f) => f,
+        }
+    }
+}
+
+impl<'borrow> fmt::Debug for MaybeOwnedFile<'borrow> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.deref().fmt(f)
     }
 }

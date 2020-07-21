@@ -10,7 +10,8 @@ use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, rename, stat, symlink, unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, remove_dir_all, rename, rmdir, stat, symlink,
+        unlink, FollowSymlinks,
     },
 };
 
@@ -18,8 +19,8 @@ use {
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, rename, stat, symlink_dir, symlink_file, unlink,
-        FollowSymlinks,
+        canonicalize, link, mkdir, open, readlink, remove_dir_all, rename, rmdir, stat,
+        symlink_dir, symlink_file, unlink, FollowSymlinks,
     },
 };
 
@@ -323,11 +324,8 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        todo!(
-            "Dir::remove_dir({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        let file = unsafe { as_sync(&self.std_file) };
+        rmdir(&file, path.as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -337,12 +335,9 @@ impl Dir {
     ///
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
     #[inline]
-    pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        todo!(
-            "Dir::remove_dir_all({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+    pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        let file = unsafe { as_sync(&self.std_file) };
+        remove_dir_all(&file, path.as_ref())
     }
 
     /// Removes a file from a filesystem.
