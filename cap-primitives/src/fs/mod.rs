@@ -2,7 +2,9 @@
 
 mod canonicalize;
 mod canonicalize_manually;
+mod dir_builder;
 mod dir_entry;
+mod dir_options;
 mod file_type;
 mod follow_symlinks;
 #[cfg(debug_assertions)]
@@ -62,7 +64,9 @@ cfg_if::cfg_if! {
 }
 
 pub use canonicalize::*;
+pub use dir_builder::*;
 pub use dir_entry::*;
+pub use dir_options::*;
 pub use file_type::*;
 pub use follow_symlinks::*;
 pub use link::*;

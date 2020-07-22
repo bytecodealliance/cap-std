@@ -1,31 +1,27 @@
-use async_std::fs;
+use crate::fs::DirOptions;
+use std::fmt;
 
 /// A builder used to create directories in various manners.
 ///
 /// This corresponds to [`std::fs::DirBuilder`].
 ///
-/// Unlike `async_std::fs::DirBuilder`, this API has no `DirBuilder::create`, because
-/// creating directories requires a capability. Use
-/// [`Dir::create_with_dir_builder`] instead.
+/// Unlike `std::fs::DirBuilder`, this API has no `DirBuilder::create`, because
+/// creating directories requires a capability. Use [`Dir::create_dir_with`]
+/// instead.
 ///
 /// [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
-/// [`Dir::create_with_dir_builder`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_with_dir_builder
+/// [`Dir::create_dir_with`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_dir_with
 ///
 /// <details>
 /// We need to define our own version because the libstd `DirBuilder` doesn't have
 /// public accessors that we can use.
 /// </details>
 pub struct DirBuilder {
-    std: fs::DirBuilder,
+    pub(crate) recursive: bool,
+    pub(crate) options: DirOptions,
 }
 
 impl DirBuilder {
-    /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
-    #[inline]
-    pub const fn from_std(std: fs::DirBuilder) -> Self {
-        Self { std }
-    }
-
     /// Creates a new set of options with default mode/security settings for all platforms and also non-recursive.
     ///
     /// This corresponds to [`std::fs::DirBuilder::new`].
@@ -33,9 +29,10 @@ impl DirBuilder {
     /// [`std::fs::DirBuilder::new`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.new
     #[allow(clippy::new_without_default)]
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
-            std: fs::DirBuilder::new(),
+            recursive: false,
+            options: DirOptions::new(),
         }
     }
 
@@ -46,18 +43,37 @@ impl DirBuilder {
     /// [`std::fs::DirBuilder::recursive`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.recursive
     #[inline]
     pub fn recursive(&mut self, recursive: bool) -> &mut Self {
-        self.std.recursive(recursive);
+        self.recursive = recursive;
         self
+    }
+
+    /// Return the `DirOptions` contained in this `DirBuilder`.
+    #[inline]
+    pub const fn options(&self) -> &DirOptions {
+        &self.options
+    }
+
+    /// Return the value of the `recursive` flag.
+    #[inline]
+    pub const fn is_recursive(&self) -> bool {
+        self.recursive
     }
 }
 
 #[cfg(unix)]
-impl async_std::os::unix::fs::DirBuilderExt for DirBuilder {
+impl std::os::unix::fs::DirBuilderExt for DirBuilder {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
-        self.std.mode(mode);
+        self.options.mode(mode);
         self
     }
 }
 
-// TODO: impl Debug for DirBuilder? But don't expose DirBuilder's path...
+impl fmt::Debug for DirBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut b = f.debug_struct("DirBuilder");
+        b.field("recursive", &self.recursive);
+        b.field("options", &self.options);
+        b.finish()
+    }
+}
