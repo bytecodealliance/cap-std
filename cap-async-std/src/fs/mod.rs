@@ -11,7 +11,7 @@
 //!
 //! Since all functions which expose raw file descriptors are `unsafe`,
 //! I/O handles in this API are unforgeable (unsafe code notwithstanding).
-//! This combined a lack of absolute paths provides a natural
+//! This combined with a lack of absolute paths provides a natural
 //! capability-oriented interface.
 //!
 //! [`async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/
