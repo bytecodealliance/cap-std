@@ -1,4 +1,4 @@
-//! OS-specific functionality.
+//! OS-specific extensions.
 //!
 //! This corresponds to [`async_std::os`].
 //!
