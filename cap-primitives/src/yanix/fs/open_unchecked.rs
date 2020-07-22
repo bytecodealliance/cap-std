@@ -30,7 +30,19 @@ pub(crate) fn open_unchecked(
         }
     };
     match err.raw_os_error() {
-        Some(libc::ELOOP) | Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink(err)),
+        // `ELOOP` is the POSIX standard and most widely used error code to
+        // indiate that a symlink was found when `O_NOFOLLOW` was set.
+        #[cfg(not(any(target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd")))]
+        Some(libc::ELOOP) => Err(OpenUncheckedError::Symlink(err)),
+
+        // FreeBSD and similar (but not Darwin) use `EMLINK`.
+        #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
+        Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink(err)),
+
+        // NetBSD uses `EFTYPE`.
+        #[cfg(any(target_os = "netbsd"))]
+        Some(libc::EFTYPE) => Err(OpenUncheckedError::Symlink(err)),
+
         Some(libc::ENOENT) => Err(OpenUncheckedError::NotFound(err)),
         Some(libc::ENOTDIR) => {
             if is_dir_options(options)
