@@ -597,8 +597,6 @@ impl Dir {
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
         self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
     }
-
-    // async_std doesn't have `try_clone`.
 }
 
 #[cfg(unix)]
