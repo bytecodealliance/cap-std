@@ -57,8 +57,9 @@ Attempts to access paths not contained within the directory:
 
 return `PermissionDenied` errors.
 
-This allows applications to configure their own access, without setting up a
-separate host process or requiring external configuration.
+This allows application logic to configure its own access, without changing
+the behavior of the whole host process, setting up a separate host process, or
+requiring external configuration.
 
 ## How do I obtain a `Dir`?
 
