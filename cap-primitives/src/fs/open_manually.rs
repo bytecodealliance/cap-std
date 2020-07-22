@@ -158,7 +158,7 @@ pub(crate) fn open_manually<'start>(
         .rev()
         .collect::<Vec<_>>();
     let mut base = start;
-    let mut dirs = Vec::new();
+    let mut dirs = Vec::with_capacity(components.len());
     let mut canonical_path = CanonicalPath::new(canonical_path);
     let dir_options = dir_options();
 
