@@ -112,6 +112,12 @@ and `green`.
 
 [`openat2`]: https://lwn.net/Articles/796868/
 
+## Async support
+
+Async APIs are available in the [`cap-async-std`] crate.
+
+[`cap-async-std`]: https://crates.io/crates/cap-async-std
+
 ## What about networking?
 
 This library contains a few sketches of how to apply similar ideas to

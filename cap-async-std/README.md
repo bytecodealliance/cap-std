@@ -19,8 +19,8 @@ talk about `std` rather than `async-std`.
 
 See the [`cap-std` README.md] for more information about capability-based security.
 
-[`async-std`]: https://docs.rs/async_std/
-[`cap-std`]: https://docs.rs/cap_std/
+[`async-std`]: https://crates.io/crates/async-std
+[`cap-std`]: https://crates.io/crates/cap-std
 [`cap-std` README.md]: https://github.com/sunfishcode/cap-std/blob/main/README.md
 
 At the moment, `cap-async-std` is a very rudimentary translation of `cap-std` to
@@ -33,4 +33,4 @@ Windows and WASI platforms are in development, though not yet usable.
 
 The networking module, `net`, is not yet usable.
 
-[`cap-primitives`]: https://docs.rs/cap_primitives/
+[`cap-primitives`]: https://crates.io/crates/cap-primitives
