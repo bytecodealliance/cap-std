@@ -1,27 +1,27 @@
 //! This defines `mkdir`, the primary entrypoint to sandboxed directory creation.
 
-use crate::fs::mkdir_impl;
 #[cfg(debug_assertions)]
 use crate::fs::{canonicalize, mkdir_unchecked, stat_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{mkdir_impl, DirOptions};
 use std::{fs, io, path::Path};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
 #[inline]
-pub fn mkdir(start: &fs::File, path: &Path) -> io::Result<()> {
+pub fn mkdir(start: &fs::File, path: &Path, options: &DirOptions) -> io::Result<()> {
     #[cfg(debug_assertions)]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
-    let result = mkdir_impl(start, path);
+    let result = mkdir_impl(start, path, options);
 
     #[cfg(debug_assertions)]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
     // TODO: This is a racy check, though it is useful for testing and fuzzing.
     #[cfg(debug_assertions)]
-    check_mkdir(start, path, &stat_before, &result, &stat_after);
+    check_mkdir(start, path, options, &stat_before, &result, &stat_after);
 
     result
 }
@@ -31,6 +31,7 @@ pub fn mkdir(start: &fs::File, path: &Path) -> io::Result<()> {
 fn check_mkdir(
     start: &fs::File,
     path: &Path,
+    options: &DirOptions,
     stat_before: &io::Result<Metadata>,
     result: &io::Result<()>,
     stat_after: &io::Result<Metadata>,
@@ -59,7 +60,7 @@ fn check_mkdir(
         }
 
         (_, Err((kind, message)), _) => match map_result(&canonicalize(start, path)) {
-            Ok(canon) => match map_result(&mkdir_unchecked(start, &canon)) {
+            Ok(canon) => match map_result(&mkdir_unchecked(start, &canon, options)) {
                 Err((unchecked_kind, unchecked_message)) => {
                     assert_eq!(
                         kind,

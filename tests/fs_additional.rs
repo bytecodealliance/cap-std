@@ -4,7 +4,7 @@
 
 mod sys_common;
 
-use cap_std::fs::OpenOptions;
+use cap_std::fs::{DirBuilder, OpenOptions};
 use sys_common::io::tmpdir;
 
 #[test]
@@ -78,4 +78,23 @@ fn rename_slashdots() {
     // TODO: Platform-specific error code.
     error_contains!(tmpdir.rename("dir", &tmpdir, "dir/."), "");
     error_contains!(tmpdir.rename("dir/.", &tmpdir, "dir"), "");
+}
+
+#[test]
+fn optionally_recursive_mkdir() {
+    let tmpdir = tmpdir();
+    let dir = "d1/d2";
+    check!(tmpdir.create_dir_with(dir, DirBuilder::new().recursive(true)));
+    assert!(tmpdir.is_dir(dir));
+}
+
+#[test]
+fn optionally_nonrecursive_mkdir() {
+    let tmpdir = tmpdir();
+    let dir = "d1/d2";
+    error_contains!(
+        tmpdir.create_dir_with(dir, &DirBuilder::new()),
+        "No such file"
+    );
+    assert!(!tmpdir.exists(dir));
 }

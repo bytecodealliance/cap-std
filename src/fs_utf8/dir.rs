@@ -104,6 +104,21 @@ impl Dir {
         self.cap_std.create_dir_all(path)
     }
 
+    /// Creates the specified directory with the options configured in this builder.
+    ///
+    /// This corresponds to [`std::fs::DirBuilder::create`].
+    ///
+    /// [`std::fs::DirBuilder::create`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.create
+    #[inline]
+    pub fn create_dir_with<P: AsRef<str>>(
+        &self,
+        path: P,
+        dir_builder: &DirBuilder,
+    ) -> io::Result<()> {
+        let path = from_utf8(path)?;
+        self.cap_std.create_dir_with(path, dir_builder)
+    }
+
     /// Opens a file in write-only mode.
     ///
     /// This corresponds to [`std::fs::File::create`], but only accesses paths
@@ -297,22 +312,6 @@ impl Dir {
     pub fn write<P: AsRef<str>, C: AsRef<[u8]>>(&self, path: P, contents: C) -> io::Result<()> {
         let path = from_utf8(path)?;
         self.cap_std.write(path, contents)
-    }
-
-    /// Creates the specified directory with the options configured in this builder.
-    ///
-    /// This corresponds to [`std::fs::DirBuilder::create`].
-    ///
-    /// [`std::fs::DirBuilder::create`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.create
-    #[inline]
-    pub fn create_with_dir_builder<P: AsRef<str>>(
-        &self,
-        dir_builder: &DirBuilder,
-        path: P,
-    ) -> io::Result<()> {
-        let path = from_utf8(path)?;
-        self.cap_std
-            .create_with_dir_builder(&dir_builder.cap_std, path)
     }
 
     /// Creates a new symbolic link on a filesystem.

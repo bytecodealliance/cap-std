@@ -1,5 +1,6 @@
 mod dir_entry_inner;
-mod dir_options;
+mod dir_options_ext;
+mod dir_utils;
 mod file_type_ext;
 mod get_path;
 mod is_same_file;
@@ -35,7 +36,8 @@ pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use dir_entry_inner::*;
-pub(crate) use dir_options::*;
+pub(crate) use dir_options_ext::*;
+pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use get_path::get_path as get_path_impl;
 pub(crate) use is_same_file::*;
