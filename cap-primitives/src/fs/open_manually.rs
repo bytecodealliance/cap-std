@@ -8,7 +8,7 @@ use crate::fs::{
     MaybeOwnedFile, OpenOptions,
 };
 use std::{
-    ffi::OsString,
+    ffi::{OsString, OsStr},
     fs, io,
     path::{Component, Path, PathBuf},
 };
@@ -55,9 +55,9 @@ impl<'path_buf> CanonicalPath<'path_buf> {
         }
     }
 
-    fn push(&mut self, one: OsString) {
+    fn push(&mut self, one: &OsStr) {
         #[cfg(debug_assertions)]
-        self.debug.push(one.clone());
+        self.debug.push(one);
 
         if let Some(path) = &mut self.path {
             path.push(one)
@@ -169,7 +169,7 @@ pub(crate) fn open_manually<'start>(
                     if !base.metadata()?.is_dir() {
                         return Err(errors::is_not_directory());
                     }
-                    canonical_path.push(Component::CurDir.as_os_str().to_os_string());
+                    canonical_path.push(Component::CurDir.as_os_str());
                 }
 
                 // Otherwise just skip `.`.
@@ -210,13 +210,13 @@ pub(crate) fn open_manually<'start>(
                         let prev_base = base.descend_to(MaybeOwnedFile::owned(file));
                         dirs.push(prev_base);
                         if one != Component::CurDir.as_os_str() {
-                            canonical_path.push(one);
+                            canonical_path.push(&one);
                         }
                     }
                     Err(OpenUncheckedError::Symlink(err))
                         if use_options.follow == FollowSymlinks::No && components.is_empty() =>
                     {
-                        canonical_path.push(one);
+                        canonical_path.push(&one);
                         canonical_path.complete();
                         return Err(err);
                     }
@@ -232,7 +232,7 @@ pub(crate) fn open_manually<'start>(
                         // An error occurred. If this was the last component, record it as the
                         // last component of the canonical path, even if we couldn't open it.
                         if components.is_empty() {
-                            canonical_path.push(one);
+                            canonical_path.push(&one);
                             canonical_path.complete();
                         }
                         return Err(err);
