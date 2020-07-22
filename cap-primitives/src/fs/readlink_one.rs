@@ -1,3 +1,4 @@
+use super::errors::too_many_symlinks;
 use crate::fs::readlink_unchecked;
 use std::{
     ffi::OsStr,
@@ -28,7 +29,7 @@ pub(crate) fn readlink_one(
     );
 
     if *symlink_count == MAX_SYMLINK_EXPANSIONS {
-        return too_many_symlinks();
+        return Err(too_many_symlinks());
     }
 
     let destination = readlink_unchecked(base, name)?;
@@ -36,9 +37,4 @@ pub(crate) fn readlink_one(
     *symlink_count += 1;
 
     Ok(destination)
-}
-
-#[cold]
-fn too_many_symlinks() -> io::Result<PathBuf> {
-    Err(io::Error::from_raw_os_error(libc::ELOOP))
 }

@@ -111,12 +111,12 @@ impl Dir {
     #[cfg(windows)]
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+        use winx::file::Flags;
         self.open_with(
             path,
             OpenOptions::new()
                 .read(true)
-                .attributes(FILE_FLAG_BACKUP_SEMANTICS),
+                .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits()),
         )
         .map(|file| Self::from_std_file(file.std))
     }
