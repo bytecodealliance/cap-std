@@ -10,7 +10,7 @@ enum Inner<'borrow> {
 
 /// Several places in the code need to be able to handle either owned or
 /// borrowed `std::fs::File`s. Cloning a `File` to let them always have an
-/// owned `File` is expensive and fallble, so use use this `struct` to hold
+/// owned `File` is expensive and fallible, so use use this `struct` to hold
 /// either one, and implement `Deref` to allow them to be handled in a
 /// uniform way.
 ///
