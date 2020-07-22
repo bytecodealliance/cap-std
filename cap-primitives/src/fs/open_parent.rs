@@ -54,10 +54,10 @@ pub(crate) fn open_parent_manually<'path, 'borrow>(
 /// is empty.
 ///
 /// This differs from `path.parent()` and `path.file_name()` in several respects:
-///  - Treat paths ending in `/` and `/.` as implying a directory.
+///  - Treat paths ending in `/` or `/.` as implying a directory.
 ///  - Treat the path `.` as a normal component rather than a parent.
-///  - Append a `.` to a path with a trailing `..` to avoid requiring
-///    our callers to special-case `..`.
+///  - Append a `.` to a path with a trailing `..` to avoid requiring our
+///    callers to special-case `..`.
 ///  - Bare absolute paths are ok.
 fn split_parent(path: &Path) -> Option<(&Path, Component)> {
     if path.as_os_str().is_empty() {
