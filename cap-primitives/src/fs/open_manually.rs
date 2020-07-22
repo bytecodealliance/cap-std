@@ -8,29 +8,40 @@ use crate::fs::{
     MaybeOwnedFile, OpenOptions,
 };
 use std::{
-    ffi::{OsString, OsStr},
+    borrow::Cow,
+    ffi::OsStr,
     fs, io,
     path::{Component, Path, PathBuf},
 };
 
 /// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
-/// we don't support absolute paths, and `Normal` has an owned `OsString` instead
-/// of an `OsStr` reference, so it doesn't need a lifetime parameter.
+/// we don't support absolute paths, and `Normal` has a `Cow` instead of a plain
+/// `OsStr` reference, so it can optionally own its own string.
 #[derive(Debug)]
-enum OwnedComponent {
+enum CowComponent<'borrow> {
     PrefixOrRootDir,
     CurDir,
     ParentDir,
-    Normal(OsString),
+    Normal(Cow<'borrow, OsStr>),
 }
 
-/// Convert a `Component` into an `OwnedComponent`.
-fn to_owned_component(component: Component) -> OwnedComponent {
+/// Convert a `Component` into an `CowComponent` which borrows strings.
+fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent<'borrow> {
     match component {
-        Component::Prefix(_) | Component::RootDir => OwnedComponent::PrefixOrRootDir,
-        Component::CurDir => OwnedComponent::CurDir,
-        Component::ParentDir => OwnedComponent::ParentDir,
-        Component::Normal(os_str) => OwnedComponent::Normal(os_str.to_os_string()),
+        Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
+        Component::CurDir => CowComponent::CurDir,
+        Component::ParentDir => CowComponent::ParentDir,
+        Component::Normal(os_str) => CowComponent::Normal(os_str.into()),
+    }
+}
+
+/// Convert a `Component` into an `CowComponent` which owns strings.
+fn to_owned_component<'borrow>(component: Component) -> CowComponent<'borrow> {
+    match component {
+        Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
+        Component::CurDir => CowComponent::CurDir,
+        Component::ParentDir => CowComponent::ParentDir,
+        Component::Normal(os_str) => CowComponent::Normal(os_str.to_os_string().into()),
     }
 }
 
@@ -143,7 +154,7 @@ pub(crate) fn open_manually<'start>(
 
     let mut components = path
         .components()
-        .map(to_owned_component)
+        .map(to_borrowed_component)
         .rev()
         .collect::<Vec<_>>();
     let mut base = start;
@@ -159,8 +170,8 @@ pub(crate) fn open_manually<'start>(
 
     while let Some(c) = components.pop() {
         match c {
-            OwnedComponent::PrefixOrRootDir => return Err(errors::escape_attempt()),
-            OwnedComponent::CurDir => {
+            CowComponent::PrefixOrRootDir => return Err(errors::escape_attempt()),
+            CowComponent::CurDir => {
                 // If the path ends in `.` and we want write access, fail.
                 if components.is_empty() {
                     if dir_precluded {
@@ -175,7 +186,7 @@ pub(crate) fn open_manually<'start>(
                 // Otherwise just skip `.`.
                 continue;
             }
-            OwnedComponent::ParentDir => {
+            CowComponent::ParentDir => {
                 // TODO: This is a racy check, though it is useful for testing and fuzzing.
                 #[cfg(debug_assertions)]
                 assert!(dirs.is_empty() || !is_same_file(&start_clone, &base)?);
@@ -190,7 +201,7 @@ pub(crate) fn open_manually<'start>(
                 }
                 assert!(canonical_path.pop());
             }
-            OwnedComponent::Normal(one) => {
+            CowComponent::Normal(one) => {
                 // If the path requires a directory and we'd open it for writing, fail.
                 if components.is_empty() && dir_required && dir_precluded {
                     return Err(errors::is_directory());
