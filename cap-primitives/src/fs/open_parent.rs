@@ -5,10 +5,11 @@ use std::{
     path::{Component, Path},
 };
 
-/// The primary purpose of this function is to open the "parent" of `path`. `start`
-/// is updated to hold the newly opened file descriptor, and the basename of `path`
-/// is returned as `Ok(basename)`. Note that the basename may still refer to a
-/// symbolic link.
+/// Open the "parent" of `path`, relative to `start`. The return value on
+/// success is a tuple of the newly opened directory and an `OsStr` referencing
+/// the single remaining path component. This last component will not be `..`,
+/// though it may be `.` or a symbolic link to anywhere (possibly
+/// including `..` or an absolute path).
 pub(crate) fn open_parent<'path, 'borrow>(
     start: MaybeOwnedFile<'borrow>,
     path: &'path Path,
