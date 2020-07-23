@@ -1,7 +1,7 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, dir_options, link, mkdir, open, read_dir, readlink, remove_dir_all, rename,
-    rmdir, stat, unlink, FollowSymlinks,
+    canonicalize, link, mkdir, open, open_dir, read_dir, readlink, remove_dir_all, rename, rmdir,
+    stat, unlink, FollowSymlinks,
 };
 use std::{
     fmt, fs, io,
@@ -90,8 +90,7 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self.open_with(path, &dir_options())
-            .map(|file| Self::from_std_file(file.std))
+        open_dir(&self.std_file, path.as_ref()).map(Self::from_std_file)
     }
 
     /// Creates a new, empty directory at the provided path.

@@ -1,8 +1,8 @@
 use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use cap_primitives::fs::{
-    canonicalize, dir_options, link, mkdir, open, read_dir, readlink, remove_dir_all, rename,
-    rmdir, stat, unlink, FollowSymlinks,
+    canonicalize, link, mkdir, open, open_dir, read_dir, readlink, remove_dir_all, rename, rmdir,
+    stat, unlink, FollowSymlinks,
 };
 use std::{
     fmt,
@@ -94,8 +94,9 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self.open_with(path, &dir_options())
-            .map(|file| Self::from_std_file(file.std))
+        let file = unsafe { as_sync(&self.std_file) };
+        open_dir(&file, path.as_ref())
+            .map(|file| Self::from_std_file(File::from_std(file.into()).std))
     }
 
     /// Creates a new, empty directory at the provided path.

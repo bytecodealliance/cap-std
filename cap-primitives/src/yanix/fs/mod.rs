@@ -1,3 +1,4 @@
+mod dir_options;
 mod dir_entry_inner;
 mod file_type_ext;
 mod flags;
@@ -39,7 +40,6 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) mod dir_options;
 pub(crate) mod errors;
 
 pub(crate) use dir_entry_inner::*;

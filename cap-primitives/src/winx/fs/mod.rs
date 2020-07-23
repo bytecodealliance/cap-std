@@ -1,4 +1,5 @@
 mod dir_entry_inner;
+mod dir_options;
 mod file_type_ext;
 mod get_path;
 mod is_same_file;
@@ -30,7 +31,6 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) mod dir_options;
 pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;

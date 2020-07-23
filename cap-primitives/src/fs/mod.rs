@@ -14,6 +14,7 @@ mod metadata;
 mod mkdir;
 mod mkdir_via_parent;
 mod open;
+mod open_dir;
 mod open_manually;
 mod open_options;
 mod open_parent;
@@ -53,10 +54,8 @@ pub(crate) use unlink_via_parent::*;
 cfg_if::cfg_if! {
     if #[cfg(any(unix, target_os = "fuchsia"))] {
         pub(crate) use super::yanix::fs::*;
-        pub use super::yanix::fs::dir_options::dir_options;
     } else if #[cfg(windows)] {
         pub(crate) use super::winx::fs::*;
-        pub use super::winx::fs::dir_options::dir_options;
     } else if #[cfg(not(target_os = "wasi"))] {
         compile_error!("cap-std doesn't compile for this platform yet");
     }
@@ -70,6 +69,7 @@ pub use link::*;
 pub use metadata::*;
 pub use mkdir::*;
 pub use open::*;
+pub use open_dir::*;
 pub use open_options::*;
 pub use permissions::*;
 pub use read_dir::*;
