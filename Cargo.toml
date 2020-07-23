@@ -26,9 +26,14 @@ yanix = "0.19.0"
 yanix = "0.19.0"
 
 [dev-dependencies]
-libc = "0.2.72"
 rand = "0.7.3"
 uuid = { version = "0.8", features = ["v4"] }
+
+[target.'cfg(not(windows))'.dev-dependencies]
+libc = "0.2.72"
+
+[target.'cfg(windows)'.dev-dependencies]
+winx = "0.19.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
