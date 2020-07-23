@@ -225,13 +225,18 @@ pub(crate) fn open_manually<'start>(
                         // symlink, follow it.
                         #[cfg(target_os = "linux")]
                         if should_emulate_o_path(use_options) {
-                            if let Ok(destination) =
-                                readlink_one(&file, Default::default(), symlink_count)
-                            {
-                                components
-                                    .extend(destination.components().map(to_owned_component).rev());
-                                dir_required |= path_requires_dir(&destination);
-                                continue;
+                            match readlink_one(&file, Default::default(), symlink_count) {
+                                Ok(destination) => {
+                                    components.extend(
+                                        destination.components().map(to_owned_component).rev(),
+                                    );
+                                    dir_required |= path_requires_dir(&destination);
+                                    continue;
+                                }
+                                // If it isn't a symlink, handle it as normal.
+                                Err(err) if err.kind() == io::ErrorKind::InvalidInput => (),
+                                // If `readlinkat` fails any other way, pass it on.
+                                Err(err) => return Err(err),
                             }
                         }
 
