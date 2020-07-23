@@ -1,30 +1,29 @@
 //! This defines `stat`, the primary entrypoint to sandboxed metadata querying.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{canonicalize, stat_unchecked};
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform an `fstatat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Metadata> {
     // Call the underlying implementation.
     let result = stat_impl(start, path, follow);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat = stat_unchecked(start, path, follow);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_stat(start, path, follow, &result, &stat);
 
     result
 }
 
+#[cfg(not(feature = "no_racy_asserts"))]
 #[allow(clippy::enum_glob_use)]
-#[cfg(debug_assertions)]
 fn check_stat(
     start: &fs::File,
     path: &Path,

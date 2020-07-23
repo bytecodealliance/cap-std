@@ -7,7 +7,7 @@ mod dir_entry;
 mod dir_options;
 mod file_type;
 mod follow_symlinks;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 mod get_path;
 mod link;
 mod link_via_parent;
@@ -38,7 +38,7 @@ mod unlink;
 mod unlink_via_parent;
 
 pub(crate) use canonicalize_manually::*;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
 pub(crate) use maybe_owned_file::*;
@@ -85,7 +85,7 @@ pub use stat::*;
 pub use symlink::*;
 pub use unlink::*;
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::ErrorKind, String)> {
     match result {
         Ok(t) => Ok(t.clone()),

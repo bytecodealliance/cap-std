@@ -2,7 +2,7 @@
 
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use {
     super::get_path,
     crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata},
@@ -10,26 +10,25 @@ use {
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_before = stat_unchecked(start, path, options.follow);
 
     // Call the underlying implementation.
     let result = open_impl(start, path, options);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_after = stat_unchecked(start, path, options.follow);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_open(start, path, options, &stat_before, &result, &stat_after);
 
     result
 }
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 fn check_open(
     start: &fs::File,
     path: &Path,
@@ -93,7 +92,7 @@ fn check_open(
 
     // On operating systems which can tell us the path of a file descriptor,
     // assert that the start path is a parent of the result path.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     if let Ok(result_file) = &result {
         if let Some(result_path) = get_path(result_file) {
             if let Some(start_path) = get_path(start) {

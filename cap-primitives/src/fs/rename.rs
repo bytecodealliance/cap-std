@@ -2,7 +2,7 @@
 
 use crate::fs::rename_impl;
 use std::{fs, io, path::Path};
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use {
     crate::fs::{
         append_dir_suffix, canonicalize_manually, path_requires_dir, rename_unchecked,
@@ -14,7 +14,7 @@ use {
 /// Perform a `renameat`-like operation, ensuring that the resolution of both
 /// the old and new paths never escape the directory tree rooted at their
 /// respective starts.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn rename(
     old_start: &fs::File,
@@ -22,7 +22,7 @@ pub fn rename(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let (old_metadata_before, new_metadata_before) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
@@ -31,14 +31,13 @@ pub fn rename(
     // Call the underlying implementation.
     let result = rename_impl(old_start, old_path, new_start, new_path);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let (old_metadata_after, new_metadata_after) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
     );
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_rename(
         old_start,
         old_path,
@@ -54,9 +53,9 @@ pub fn rename(
     result
 }
 
+#[cfg(not(feature = "no_racy_asserts"))]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::enum_glob_use)]
-#[cfg(debug_assertions)]
 fn check_rename(
     old_start: &fs::File,
     old_path: &Path,
@@ -140,7 +139,7 @@ fn check_rename(
     }
 }
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 fn canonicalize_for_rename(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let mut canon = canonicalize_manually(start, path, FollowSymlinks::No)?;
 

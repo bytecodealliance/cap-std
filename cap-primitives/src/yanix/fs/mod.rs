@@ -3,7 +3,7 @@ mod dir_options_ext;
 mod dir_utils;
 mod file_type_ext;
 mod flags;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 mod is_same_file;
 mod link_unchecked;
 mod metadata_ext;
@@ -48,7 +48,7 @@ pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
 pub(crate) use metadata_ext::*;

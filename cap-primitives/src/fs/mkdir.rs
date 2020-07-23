@@ -1,33 +1,32 @@
 //! This defines `mkdir`, the primary entrypoint to sandboxed directory creation.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{canonicalize, mkdir_unchecked, stat_unchecked, FollowSymlinks, Metadata};
 use crate::fs::{mkdir_impl, DirOptions};
 use std::{fs, io, path::Path};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn mkdir(start: &fs::File, path: &Path, options: &DirOptions) -> io::Result<()> {
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
     let result = mkdir_impl(start, path, options);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_mkdir(start, path, options, &stat_before, &result, &stat_after);
 
     result
 }
 
+#[cfg(not(feature = "no_racy_asserts"))]
 #[allow(clippy::enum_glob_use)]
-#[cfg(debug_assertions)]
 fn check_mkdir(
     start: &fs::File,
     path: &Path,

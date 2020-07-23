@@ -15,7 +15,7 @@ async-std = { version = "1.6.2", features = ["attributes"] }
 ipnet = "2.3.0"
 cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
-cap-primitives = { path = "../cap-primitives", version = "0.0.0" }
+cap-primitives = { path = "../cap-primitives", version = "0.0.0", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.19.0"
@@ -30,5 +30,6 @@ yanix = "0.19.0"
 maintenance = { status = "actively-developed" }
 
 [features]
-default = []
+default = ["no_racy_asserts"]
 fs_utf8 = ["arf-strings"]
+no_racy_asserts = ["cap-primitives/no_racy_asserts"]
