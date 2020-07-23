@@ -26,7 +26,7 @@ enum CowComponent<'borrow> {
 }
 
 /// Convert a `Component` into a `CowComponent` which borrows strings.
-fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent<'borrow> {
+fn to_borrowed_component(component: Component) -> CowComponent {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
         Component::CurDir => CowComponent::CurDir,
