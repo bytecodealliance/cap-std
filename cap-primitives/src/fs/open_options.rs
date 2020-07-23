@@ -201,7 +201,7 @@ impl arbitrary::Arbitrary for OpenOptions {
             _ => panic!(),
         };
         // TODO: `OpenOptionsExt` options.
-        Ok(OpenOptions::new()
+        Ok(Self::new()
             .read(read)
             .write(write)
             .create(<bool as Arbitrary>::arbitrary(u)?)

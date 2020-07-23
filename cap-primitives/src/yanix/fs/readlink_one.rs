@@ -17,12 +17,12 @@ pub(crate) fn readlink_one(
 ) -> io::Result<PathBuf> {
     let name: &Path = name.as_ref();
     assert!(
-        name.file_name().is_some(),
+        name.as_os_str().is_empty() || name.file_name().is_some(),
         "readlink_one expects a single normal path component, got '{}'",
         name.display()
     );
     assert!(
-        name.parent().unwrap().as_os_str().is_empty(),
+        name.as_os_str().is_empty() || name.parent().unwrap().as_os_str().is_empty(),
         "readlink_one expects a single normal path component, got '{}'",
         name.display()
     );
