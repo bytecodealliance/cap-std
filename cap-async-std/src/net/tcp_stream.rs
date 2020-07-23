@@ -11,13 +11,13 @@ use std::pin::Pin;
 
 /// A TCP stream between a local and a remote socket.
 ///
-/// This corresponds to [`std::net::TcpStream`].
+/// This corresponds to [`async_std::net::TcpStream`].
 ///
 /// Note that this `TcpStream` has no `connect` method. To create a `TcpStream`,
 /// you must first obtain a [`Catalog`] permitting the address, and then call
 /// [`Catalog::connect_tcp_stream`].
 ///
-/// [`std::net::TcpStream`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html
+/// [`async_std::net::TcpStream`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::connect_tcp_stream`]: struct.Catalog.html#method.connect_tcp_stream
 pub struct TcpStream {
@@ -33,9 +33,9 @@ impl TcpStream {
 
     /// Returns the local socket address of this listener.
     ///
-    /// This corresponds to [`std::net::TcpStream::local_addr`].
+    /// This corresponds to [`async_std::net::TcpStream::local_addr`].
     ///
-    /// [`std::net::TcpStream::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.local_addr
+    /// [`async_std::net::TcpStream::local_addr`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -43,9 +43,9 @@ impl TcpStream {
 
     /// Shuts down the read, write, or both halves of this connection.
     ///
-    /// This corresponds to [`std::net::TcpStream::shutdown`].
+    /// This corresponds to [`async_std::net::TcpStream::shutdown`].
     ///
-    /// [`std::net::TcpStream::shutdown`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.shutdown
+    /// [`async_std::net::TcpStream::shutdown`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
         self.std.shutdown(how)
@@ -64,9 +64,9 @@ impl TcpStream {
     /// Receives data on the socket from the remote address to which it is connected, without
     /// removing that data from the queue.
     ///
-    /// This corresponds to [`std::net::TcpStream::peek`].
+    /// This corresponds to [`async_std::net::TcpStream::peek`].
     ///
-    /// [`std::net::TcpStream::peek`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.peek
+    /// [`async_std::net::TcpStream::peek`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.peek
     #[inline]
     pub async fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.peek(buf).await
@@ -74,9 +74,9 @@ impl TcpStream {
 
     /// Sets the value of the `TCP_NODELAY` option on this socket.
     ///
-    /// This corresponds to [`std::net::TcpStream::set_nodelay`].
+    /// This corresponds to [`async_std::net::TcpStream::set_nodelay`].
     ///
-    /// [`std::net::TcpStream::set_nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_nodelay
+    /// [`async_std::net::TcpStream::set_nodelay`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.set_nodelay
     #[inline]
     pub fn set_nodelay(&self, nodelay: bool) -> io::Result<()> {
         self.std.set_nodelay(nodelay)
@@ -84,9 +84,9 @@ impl TcpStream {
 
     /// Gets the value of the `TCP_NODELAY` option on this socket.
     ///
-    /// This corresponds to [`std::net::TcpStream::nodelay`].
+    /// This corresponds to [`async_std::net::TcpStream::nodelay`].
     ///
-    /// [`std::net::TcpStream::nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.nodelay
+    /// [`async_std::net::TcpStream::nodelay`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.nodelay
     #[inline]
     pub fn nodelay(&self) -> io::Result<bool> {
         self.std.nodelay()
@@ -94,9 +94,9 @@ impl TcpStream {
 
     /// Sets the value for the `IP_TTL` option on this socket.
     ///
-    /// This corresponds to [`std::net::TcpStream::set_ttl`].
+    /// This corresponds to [`async_std::net::TcpStream::set_ttl`].
     ///
-    /// [`std::net::TcpStream::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_ttl
+    /// [`async_std::net::TcpStream::set_ttl`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.std.set_ttl(ttl)
@@ -104,9 +104,9 @@ impl TcpStream {
 
     /// Gets the value of the `IP_TTL` option for this socket.
     ///
-    /// This corresponds to [`std::net::TcpStream::ttl`].
+    /// This corresponds to [`async_std::net::TcpStream::ttl`].
     ///
-    /// [`std::net::TcpStream::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.ttl
+    /// [`async_std::net::TcpStream::ttl`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
         self.std.ttl()

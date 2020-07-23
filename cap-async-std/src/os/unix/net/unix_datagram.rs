@@ -9,7 +9,7 @@ use async_std::{
 
 /// A Unix datagram socket.
 ///
-/// This corresponds to [`std::os::unix::net::UnixDatagram`].
+/// This corresponds to [`async_std::os::unix::net::UnixDatagram`].
 ///
 /// Note that this `UnixDatagram` has no `bind`, `connect`, or `send_to`
 /// methods. To create a `UnixDatagram`,
@@ -17,7 +17,7 @@ use async_std::{
 /// [`Dir::bind_unix_datagram`], [`Dir::connect_unix_datagram`], or
 /// [`Dir::send_to_unix_datagram_addr`].
 ///
-/// [`std::os::unix::net::UnixDatagram`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html
+/// [`async_std::os::unix::net::UnixDatagram`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::connect_unix_datagram`]: struct.Dir.html#method.connect_unix_datagram
 /// [`Dir::bind_unix_datagram`]: struct.Dir.html#method.bind_unix_datagram
@@ -35,11 +35,11 @@ impl UnixDatagram {
 
     /// Creates a Unix Datagram socket which is not bound to any address.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::unbound`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::unbound`].
     ///
     /// TODO: should this require a capability?
     ///
-    /// [`std::os::unix::net::UnixDatagram::unbound`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.unbound
+    /// [`async_std::os::unix::net::UnixDatagram::unbound`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.unbound
     #[inline]
     pub fn unbound() -> io::Result<Self> {
         unix::net::UnixDatagram::unbound().map(Self::from_std)
@@ -47,11 +47,11 @@ impl UnixDatagram {
 
     /// Creates an unnamed pair of connected sockets.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::pair`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::pair`].
     ///
     /// TODO: should this require a capability?
     ///
-    /// [`std::os::unix::net::UnixDatagram::pair`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.pair
+    /// [`async_std::os::unix::net::UnixDatagram::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
         unix::net::UnixDatagram::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
@@ -61,9 +61,9 @@ impl UnixDatagram {
 
     /// Returns the address of this socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::local_addr`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::local_addr`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::local_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.local_addr
+    /// [`async_std::os::unix::net::UnixDatagram::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -71,9 +71,9 @@ impl UnixDatagram {
 
     /// Returns the address of this socket's peer.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::peer_addr`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::peer_addr`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::peer_addr`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.peer_addr
+    /// [`async_std::os::unix::net::UnixDatagram::peer_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.peer_addr
     #[inline]
     pub fn peer_addr(&self) -> io::Result<SocketAddr> {
         self.std.peer_addr()
@@ -81,9 +81,9 @@ impl UnixDatagram {
 
     /// Receives data from the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::recv_from`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::recv_from`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::recv_from`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.recv_from
+    /// [`async_std::os::unix::net::UnixDatagram::recv_from`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.recv_from
     #[inline]
     pub async fn recv_from(&self, buf: &mut [u8]) -> io::Result<(usize, SocketAddr)> {
         self.std.recv_from(buf).await
@@ -91,9 +91,9 @@ impl UnixDatagram {
 
     /// Receives data from the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::recv`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::recv`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::recv`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.recv
+    /// [`async_std::os::unix::net::UnixDatagram::recv`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.recv
     #[inline]
     pub async fn recv(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.recv(buf).await
@@ -101,9 +101,9 @@ impl UnixDatagram {
 
     /// Sends data on the socket to the socket's peer.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::send`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::send`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::send`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send
+    /// [`async_std::os::unix::net::UnixDatagram::send`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.send
     #[inline]
     pub async fn send(&self, buf: &[u8]) -> io::Result<usize> {
         self.std.send(buf).await
@@ -123,9 +123,9 @@ impl UnixDatagram {
 
     /// Shut down the read, write, or both halves of this connection.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::shutdown`].
+    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::shutdown`].
     ///
-    /// [`std::os::unix::net::UnixDatagram::shutdown`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.shutdown
+    /// [`async_std::os::unix::net::UnixDatagram::shutdown`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
         self.std.shutdown(how)
