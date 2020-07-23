@@ -233,8 +233,9 @@ pub(crate) fn open_manually<'start>(
                                     dir_required |= path_requires_dir(&destination);
                                     continue;
                                 }
-                                // If it isn't a symlink, handle it as normal.
-                                Err(err) if err.kind() == io::ErrorKind::InvalidInput => (),
+                                // If it isn't a symlink, handle it as normal. `readlinkat` returns
+                                // `ENOENT` if the file isn't a symlink in this situation.
+                                Err(err) if err.kind() == io::ErrorKind::NotFound => (),
                                 // If `readlinkat` fails any other way, pass it on.
                                 Err(err) => return Err(err),
                             }
