@@ -184,6 +184,10 @@ pub(crate) fn open_manually<'start>(
                     return Err(errors::is_directory());
                 }
 
+                // We hold onto all the parent directory descriptors so that we
+                // don't have to re-open anything when we encounter a `..`. This
+                // way, even if the directory is concurrently moved, we don't have
+                // to worry about `..` leaving the sandbox.
                 match dirs.pop() {
                     Some(dir) => base = dir,
                     None => return Err(errors::escape_attempt()),

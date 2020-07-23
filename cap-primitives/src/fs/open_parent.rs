@@ -1,3 +1,7 @@
+/// `open_parent` is the key building block in all `*_via_parent` functions.
+/// It opens the parent directory of the given path, and returns the basename,
+/// so that all the `*_via_parent` routines need to do is make sure they
+/// don't follow symlinks in the basename.
 use crate::fs::{dir_options, errors, open, open_manually, path_requires_dir, MaybeOwnedFile};
 use std::{
     ffi::OsStr,
@@ -5,10 +9,11 @@ use std::{
     path::{Component, Path},
 };
 
-/// The primary purpose of this function is to open the "parent" of `path`. `start`
-/// is updated to hold the newly opened file descriptor, and the basename of `path`
-/// is returned as `Ok(basename)`. Note that the basename may still refer to a
-/// symbolic link.
+/// Open the "parent" of `path`, relative to `start`. The return value on
+/// success is a tuple of the newly opened directory and an `OsStr` referencing
+/// the single remaining path component. This last component will not be `..`,
+/// though it may be `.` or a symbolic link to anywhere (possibly
+/// including `..` or an absolute path).
 pub(crate) fn open_parent<'path, 'borrow>(
     start: MaybeOwnedFile<'borrow>,
     path: &'path Path,
@@ -49,10 +54,10 @@ pub(crate) fn open_parent_manually<'path, 'borrow>(
 /// is empty.
 ///
 /// This differs from `path.parent()` and `path.file_name()` in several respects:
-///  - Treat paths ending in `/` and `/.` as implying a directory.
+///  - Treat paths ending in `/` or `/.` as implying a directory.
 ///  - Treat the path `.` as a normal component rather than a parent.
-///  - Append a `.` to a path with a trailing `..` to avoid requiring
-///    our callers to special-case `..`.
+///  - Append a `.` to a path with a trailing `..` to avoid requiring our
+///    callers to special-case `..`.
 ///  - Bare absolute paths are ok.
 fn split_parent(path: &Path) -> Option<(&Path, Component)> {
     if path.as_os_str().is_empty() {

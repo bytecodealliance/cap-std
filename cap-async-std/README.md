@@ -19,8 +19,18 @@ talk about `std` rather than `async-std`.
 
 See the [`cap-std` README.md] for more information about capability-based security.
 
-[`async-std`]: https://docs.rs/async_std/
-[`cap-std`]: https://docs.rs/cap_std/
+[`async-std`]: https://crates.io/crates/async-std
+[`cap-std`]: https://crates.io/crates/cap-std
 [`cap-std` README.md]: https://github.com/sunfishcode/cap-std/blob/main/README.md
 
-**It is a work in progress and many things aren't implemented yet.**
+At the moment, `cap-async-std` is a very rudimentary translation of `cap-std` to
+`async-std`. Like `cap-std`, it uses [`cap-primitives`] to perform the underlying
+operations. It hasn't yet been optimized to make effective use of `async`.
+
+The filesystem module, `fs`, is known to compile on Linux, macOS, and FreeBSD, and
+probably can be easily ported to other modern Unix-family platforms. Ports to
+Windows and WASI platforms are in development, though not yet usable.
+
+The networking module, `net`, is not yet usable.
+
+[`cap-primitives`]: https://crates.io/crates/cap-primitives

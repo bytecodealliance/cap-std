@@ -1,4 +1,4 @@
-//! Platform-specific extensions to std for Unix platforms.
+//! Platform-specific extensions for Unix platforms.
 //!
 //! This corresponds to [`async_std::os::unix`].
 //!

@@ -467,6 +467,8 @@ impl Dir {
     /// This corresponds to [`std::os::unix::net::UnixListener::bind`], but only
     /// accesses paths relative to `self`.
     ///
+    /// XXX: This function is not yet implemented.
+    ///
     /// [`std::os::unix::net::UnixListener::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.bind
     #[cfg(unix)]
     #[inline]
@@ -482,6 +484,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixStream::connect`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixStream::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.connect
     #[cfg(unix)]
@@ -499,6 +503,8 @@ impl Dir {
     /// This corresponds to [`std::os::unix::net::UnixDatagram::bind`], but only
     /// accesses paths relative to `self`.
     ///
+    /// XXX: This function is not yet implemented.
+    ///
     /// [`std::os::unix::net::UnixDatagram::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.bind
     #[cfg(unix)]
     #[inline]
@@ -514,6 +520,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixDatagram::connect`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixDatagram::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.connect
     #[cfg(unix)]
@@ -534,6 +542,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixDatagram::send_to`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixDatagram::send_to`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send_to
     #[cfg(unix)]
@@ -587,8 +597,6 @@ impl Dir {
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
         self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
     }
-
-    // async_std doesn't have `try_clone`.
 }
 
 #[cfg(unix)]
