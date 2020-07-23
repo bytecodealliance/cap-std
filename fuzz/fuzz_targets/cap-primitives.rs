@@ -192,5 +192,5 @@ fuzz_target!(|plan: Plan| {
 
     let mut files = (0..8).map(|_| dir.try_clone().unwrap()).collect::<Vec<_>>();
 
-    plan.execute(&mut files, &mut paths);
+    plan.execute(&mut files, &paths);
 });
