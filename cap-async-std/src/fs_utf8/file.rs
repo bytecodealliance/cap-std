@@ -11,13 +11,13 @@ use std::{fmt, pin::Pin};
 
 /// A reference to an open file on a filesystem.
 ///
-/// This corresponds to [`std::fs::File`].
+/// This corresponds to [`async_std::fs::File`].
 ///
 /// Note that this `File` has no `open` or `create` methods. To open or create
 /// a file, you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open`] or [`Dir::create`].
 ///
-/// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
+/// [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
 /// [`Dir`]: struct.Dir.html
 /// [`Dir::open`]: struct.Dir.html#method.open
 /// [`Dir::create`]: struct.Dir.html#method.create
@@ -40,9 +40,9 @@ impl File {
 
     /// Attempts to sync all OS-internal metadata to disk.
     ///
-    /// This corresponds to [`std::fs::File::sync_all`].
+    /// This corresponds to [`async_std::fs::File::sync_all`].
     ///
-    /// [`std::fs::File::sync_all`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_all
+    /// [`async_std::fs::File::sync_all`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.sync_all
     #[inline]
     pub async fn sync_all(&self) -> io::Result<()> {
         self.cap_std.sync_all().await
@@ -51,9 +51,9 @@ impl File {
     /// This function is similar to `sync_all`, except that it may not synchronize
     /// file metadata to a filesystem.
     ///
-    /// This corresponds to [`std::fs::File::sync_data`].
+    /// This corresponds to [`async_std::fs::File::sync_data`].
     ///
-    /// [`std::fs::File::sync_data`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_data
+    /// [`async_std::fs::File::sync_data`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.sync_data
     #[inline]
     pub async fn sync_data(&self) -> io::Result<()> {
         self.cap_std.sync_data().await
@@ -62,9 +62,9 @@ impl File {
     /// Truncates or extends the underlying file, updating the size of this file
     /// to become size.
     ///
-    /// This corresponds to [`std::fs::File::set_len`].
+    /// This corresponds to [`async_std::fs::File::set_len`].
     ///
-    /// [`std::fs::File::set_len`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_len
+    /// [`async_std::fs::File::set_len`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.set_len
     #[inline]
     pub async fn set_len(&self, size: u64) -> io::Result<()> {
         self.cap_std.set_len(size).await
@@ -72,9 +72,9 @@ impl File {
 
     /// Queries metadata about the underlying file.
     ///
-    /// This corresponds to [`std::fs::File::metadata`].
+    /// This corresponds to [`async_std::fs::File::metadata`].
     ///
-    /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
+    /// [`async_std::fs::File::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.metadata
     #[inline]
     pub async fn metadata(&self) -> io::Result<Metadata> {
         self.cap_std.metadata().await
@@ -84,9 +84,9 @@ impl File {
 
     /// Changes the permissions on the underlying file.
     ///
-    /// This corresponds to [`std::fs::File::set_permissions`].
+    /// This corresponds to [`async_std::fs::File::set_permissions`].
     ///
-    /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
+    /// [`async_std::fs::File::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
         self.cap_std.set_permissions(perm).await

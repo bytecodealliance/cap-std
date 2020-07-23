@@ -32,9 +32,9 @@ pub use read_dir::*;
 #[cfg(not(target_os = "wasi"))]
 pub use cap_primitives::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
-// Re-export things from `std` that we can use as-is.
+// Re-export things from `async_std` that we can use as-is.
 #[cfg(target_os = "wasi")]
-pub use std::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
+pub use async_std::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
 /// Utility for returning an `async_std::fs::File` as a `std::fs::File`
 /// for synchronous operations.

@@ -1,8 +1,8 @@
 //! Unix-specific networking functionality
 //!
-//! This corresponds to [`std::os::unix::net`].
+//! This corresponds to [`async_std::os::unix::net`].
 //!
-//! [`std::os::unix::net`]: https://doc.rust-lang.org/std/os/unix/net/
+//! [`async_std::os::unix::net`]: https://docs.rs/async-std/latest/async_std/os/unix/net/
 
 mod incoming;
 mod unix_datagram;
