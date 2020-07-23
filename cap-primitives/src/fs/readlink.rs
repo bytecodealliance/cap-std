@@ -2,7 +2,7 @@
 //! dereferencing.
 
 use crate::fs::readlink_impl;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{readlink_unchecked, stat, FollowSymlinks};
 use std::{
     fs, io,
@@ -11,24 +11,23 @@ use std::{
 
 /// Perform a `readlinkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
     let result = readlink_impl(start, path);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let unchecked = readlink_unchecked(start, path);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_readlink(start, path, &result, &unchecked);
 
     result
 }
 
+#[cfg(not(feature = "no_racy_asserts"))]
 #[allow(clippy::enum_glob_use)]
-#[cfg(debug_assertions)]
 fn check_readlink(
     start: &fs::File,
     path: &Path,

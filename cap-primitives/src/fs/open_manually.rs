@@ -1,7 +1,7 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_requires_dir, readlink_one, FollowSymlinks,
@@ -52,14 +52,14 @@ struct CanonicalPath<'path_buf> {
     path: Option<&'path_buf mut PathBuf>,
 
     /// Our own private copy of the canonical path, for assertion checking.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     debug: PathBuf,
 }
 
 impl<'path_buf> CanonicalPath<'path_buf> {
     fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
         Self {
-            #[cfg(debug_assertions)]
+            #[cfg(not(feature = "no_racy_asserts"))]
             debug: PathBuf::new(),
 
             path,
@@ -67,7 +67,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     fn push(&mut self, one: &OsStr) {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         self.debug.push(one);
 
         if let Some(path) = &mut self.path {
@@ -76,7 +76,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     fn pop(&mut self) -> bool {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         self.debug.pop();
 
         if let Some(path) = &mut self.path {
@@ -142,7 +142,7 @@ pub(crate) fn open_manually<'start>(
     symlink_count: &mut u8,
     canonical_path: Option<&mut PathBuf>,
 ) -> io::Result<MaybeOwnedFile<'start>> {
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let start_clone = MaybeOwnedFile::owned(start.try_clone().unwrap());
 
     // POSIX returns `ENOENT` on an empty path. TODO: On Windows, we should
@@ -186,8 +186,7 @@ pub(crate) fn open_manually<'start>(
                 continue;
             }
             CowComponent::ParentDir => {
-                // TODO: This is a racy check, though it is useful for testing and fuzzing.
-                #[cfg(debug_assertions)]
+                #[cfg(not(feature = "no_racy_asserts"))]
                 assert!(dirs.is_empty() || !is_same_file(&start_clone, &base)?);
 
                 if components.is_empty() && dir_precluded {
@@ -276,8 +275,7 @@ pub(crate) fn open_manually<'start>(
         }
     }
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_open(&start_clone, path, options, &canonical_path, &base);
 
     canonical_path.complete();
@@ -292,7 +290,7 @@ fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
         && use_options.follow == FollowSymlinks::Yes
 }
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 fn check_open(
     start: &fs::File,
     path: &Path,

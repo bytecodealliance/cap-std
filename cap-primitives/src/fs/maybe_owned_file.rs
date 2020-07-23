@@ -1,6 +1,6 @@
 use crate::fs::{dir_options, open_unchecked, OpenUncheckedError};
 use std::{fmt, fs, io, mem, ops::Deref, path::Component};
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use {crate::fs::get_path, std::path::PathBuf};
 
 enum Inner<'borrow> {
@@ -23,33 +23,33 @@ enum Inner<'borrow> {
 pub(crate) struct MaybeOwnedFile<'borrow> {
     inner: Inner<'borrow>,
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     path: Option<PathBuf>,
 }
 
 impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Constructs a new `MaybeOwnedFile` which is not owned.
     pub(crate) fn borrowed(file: &'borrow fs::File) -> Self {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         let path = get_path(file);
 
         Self {
             inner: Inner::Borrowed(file),
 
-            #[cfg(debug_assertions)]
+            #[cfg(not(feature = "no_racy_asserts"))]
             path,
         }
     }
 
     /// Constructs a new `MaybeOwnedFile` which is owned.
     pub(crate) fn owned(file: fs::File) -> Self {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         let path = get_path(&file);
 
         Self {
             inner: Inner::Owned(file),
 
-            #[cfg(debug_assertions)]
+            #[cfg(not(feature = "no_racy_asserts"))]
             path,
         }
     }
@@ -58,11 +58,10 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     /// of the current file. Return a `MaybeOwnedFile` representing the previous
     /// state.
     pub(crate) fn descend_to(&mut self, to: MaybeOwnedFile<'borrow>) -> Self {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         let path = self.path.clone();
 
-        // TODO: This is a racy check, though it is useful for testing and fuzzing.
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         if let Some(to_path) = get_path(&to) {
             if let Some(current_path) = &self.path {
                 assert!(
@@ -78,7 +77,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         Self {
             inner: mem::replace(&mut self.inner, to.inner),
 
-            #[cfg(debug_assertions)]
+            #[cfg(not(feature = "no_racy_asserts"))]
             path,
         }
     }

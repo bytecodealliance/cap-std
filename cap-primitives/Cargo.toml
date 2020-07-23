@@ -43,5 +43,9 @@ winapi = { version = "0.3.9", features = [
     "aclapi"
 ] }
 
+[features]
+default = ["no_racy_asserts"]
+no_racy_asserts = []
+
 [badges]
 maintenance = { status = "actively-developed" }
