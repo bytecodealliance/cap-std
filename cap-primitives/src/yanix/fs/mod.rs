@@ -1,5 +1,5 @@
-mod dir_options;
 mod dir_entry_inner;
+mod dir_options;
 mod file_type_ext;
 mod flags;
 #[cfg(debug_assertions)]
@@ -63,4 +63,6 @@ pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
 
+// On Linux, there is a limit of 40 symlink expansions.
+// Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;
