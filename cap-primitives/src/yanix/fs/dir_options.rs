@@ -41,8 +41,8 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
     OsStr::from_bytes(bytes).as_ref()
 }
 
-// Return an `OpenOptions` for opening directories.
-pub(crate) fn dir_options() -> OpenOptions {
+/// Return an `OpenOptions` for opening directories.
+pub fn dir_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
         .custom_flags(OFlags::DIRECTORY.bits())

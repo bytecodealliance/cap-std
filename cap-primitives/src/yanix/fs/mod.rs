@@ -1,5 +1,4 @@
 mod dir_entry_inner;
-mod dir_options;
 mod file_type_ext;
 mod flags;
 #[cfg(debug_assertions)]
@@ -40,6 +39,7 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
+pub(crate) mod dir_options;
 pub(crate) mod errors;
 
 pub(crate) use dir_entry_inner::*;
@@ -62,3 +62,5 @@ pub(crate) use rmdir_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
+
+pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;

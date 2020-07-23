@@ -38,8 +38,8 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
     unimplemented!("strip_dir_suffix")
 }
 
-// Return an `OpenOptions` for opening directories.
-pub(crate) fn dir_options() -> OpenOptions {
+/// Return an `OpenOptions` for opening directories.
+pub fn dir_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
         .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())

@@ -1,4 +1,8 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
+use cap_primitives::fs::{
+    canonicalize, dir_options, link, mkdir, open, read_dir, readlink, remove_dir_all, rename,
+    rmdir, stat, unlink, FollowSymlinks,
+};
 use std::{
     fmt, fs, io,
     path::{Path, PathBuf},
@@ -7,19 +11,13 @@ use std::{
 #[cfg(any(unix, target_os = "fuchsia"))]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
-    cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink, unlink, FollowSymlinks,
-    },
+    cap_primitives::fs::symlink,
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 
 #[cfg(windows)]
 use {
-    cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink_dir, symlink_file, unlink, FollowSymlinks,
-    },
+    cap_primitives::fs::{symlink_dir, symlink_file},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
 
@@ -92,33 +90,8 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self._open_dir(path.as_ref())
-    }
-
-    #[cfg(any(unix, target_os = "fuchsia"))]
-    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
-        use std::os::unix::fs::OpenOptionsExt;
-        use yanix::file::OFlags;
-        self.open_with(
-            path,
-            OpenOptions::new()
-                .read(true)
-                .custom_flags(OFlags::DIRECTORY.bits()),
-        )
-        .map(|file| Self::from_std_file(file.std))
-    }
-
-    #[cfg(windows)]
-    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
-        use std::os::windows::fs::OpenOptionsExt;
-        use winx::file::Flags;
-        self.open_with(
-            path,
-            OpenOptions::new()
-                .read(true)
-                .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits()),
-        )
-        .map(|file| Self::from_std_file(file.std))
+        self.open_with(path, &dir_options())
+            .map(|file| Self::from_std_file(file.std))
     }
 
     /// Creates a new, empty directory at the provided path.

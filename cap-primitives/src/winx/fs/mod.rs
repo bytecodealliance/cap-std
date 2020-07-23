@@ -1,5 +1,4 @@
 mod dir_entry_inner;
-mod dir_options;
 mod file_type_ext;
 mod get_path;
 mod is_same_file;
@@ -31,6 +30,7 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
+pub(crate) mod dir_options;
 pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
@@ -52,3 +52,7 @@ pub(crate) use rmdir_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
+
+// On Windows, there is a limit of 63 reparse points on any given path.
+// https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points
+pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;

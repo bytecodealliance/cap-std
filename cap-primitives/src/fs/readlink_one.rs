@@ -1,12 +1,10 @@
-use super::errors::too_many_symlinks;
+use super::{errors::too_many_symlinks, MAX_SYMLINK_EXPANSIONS};
 use crate::fs::readlink_unchecked;
 use std::{
     ffi::OsStr,
     fs, io,
     path::{Path, PathBuf},
 };
-
-const MAX_SYMLINK_EXPANSIONS: u8 = 40;
 
 /// This is a wrapper around `readlink_unchecked` which performs a single
 /// symlink expansion on a single path component, and which enforces the
