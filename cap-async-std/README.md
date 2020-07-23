@@ -14,8 +14,7 @@ This crate provides a capability-based version of [`async-std`]. It provides all
 interfaces you are used to, but in a capability-based version.
 
 This is a very simplistic port of [`cap-std`] to `async-std`. Key `fs` functions
-including opening files still use synchronous API calls. Quite a few comments still
-talk about `std` rather than `async-std`.
+including opening files still use synchronous API calls.
 
 See the [`cap-std` README.md] for more information about capability-based security.
 

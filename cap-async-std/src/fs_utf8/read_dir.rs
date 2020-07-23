@@ -3,13 +3,13 @@ use std::{fmt, io};
 
 /// Iterator over the entries in a directory.
 ///
-/// This corresponds to [`std::fs::ReadDir`].
+/// This corresponds to [`async_std::fs::ReadDir`].
 ///
 /// Note that there is no `from_std` method, as `async_std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
 ///
-/// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
+/// [`async_std::fs::ReadDir`]: https://docs.rs/async-std/latest/async_std/fs/struct.ReadDir.html
 pub struct ReadDir {
     cap_std: crate::fs::ReadDir,
 }

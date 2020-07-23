@@ -20,19 +20,17 @@
 //! [ARF strings]: https://crates.io/crates/arf-strings
 
 mod dir;
-mod dir_builder;
 mod dir_entry;
 mod file;
 mod read_dir;
 
 pub use dir::*;
-pub use dir_builder::*;
 pub use dir_entry::*;
 pub use file::*;
 pub use read_dir::*;
 
 // Re-export things from `cap_std::fs` that we can use as-is.
-pub use crate::fs::{FileType, Metadata, OpenOptions, Permissions};
+pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
 fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     // For now, for WASI use the same logic as other OS's, but

@@ -32,7 +32,7 @@ impl MetadataExt {
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         // From [MSDN]:
         // The identifier (low and high parts) and the volume serial number

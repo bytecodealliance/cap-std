@@ -8,9 +8,9 @@ use std::pin::Pin;
 
 /// An iterator that infinitely `accept`s connections on a [`TcpListener`].
 ///
-/// This corresponds to [`std::net::Incoming`].
+/// This corresponds to [`async_std::net::Incoming`].
 ///
-/// [`std::net::Incoming`]: https://doc.rust-lang.org/std/net/struct.Incoming.html
+/// [`async_std::net::Incoming`]: https://docs.rs/async-std/latest/async_std/net/struct.Incoming.html
 /// [`TcpListener`]: struct.TcpListener.html
 pub struct Incoming<'a> {
     std: net::Incoming<'a>,

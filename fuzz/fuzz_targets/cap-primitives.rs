@@ -4,7 +4,7 @@
 extern crate libfuzzer_sys;
 
 use arbitrary::Arbitrary;
-use cap_primitives::fs::{FollowSymlinks, OpenOptions};
+use cap_primitives::fs::{DirOptions, FollowSymlinks, OpenOptions};
 use std::{fs, path::PathBuf};
 use tempfile::tempdir;
 
@@ -26,7 +26,7 @@ enum Operation {
     Create(usize, usize, usize),
     Open(usize, usize, OpenOptions, usize),
     Stat(usize, usize, FollowSymlinks),
-    Mkdir(usize, usize),
+    Mkdir(usize, usize, DirOptions),
     Canonicalize(usize, usize),
     Link(usize, usize, usize, usize),
     Readlink(usize, usize),
@@ -74,10 +74,11 @@ impl Plan {
                     )
                     .ok();
                 }
-                Operation::Mkdir(dirno, path) => {
+                Operation::Mkdir(dirno, path, options) => {
                     cap_primitives::fs::mkdir(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
+                        options,
                     )
                     .ok();
                 }
@@ -191,5 +192,5 @@ fuzz_target!(|plan: Plan| {
 
     let mut files = (0..8).map(|_| dir.try_clone().unwrap()).collect::<Vec<_>>();
 
-    plan.execute(&mut files, &mut paths);
+    plan.execute(&mut files, &paths);
 });

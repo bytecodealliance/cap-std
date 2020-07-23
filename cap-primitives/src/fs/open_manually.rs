@@ -1,7 +1,7 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_requires_dir, readlink_one, FollowSymlinks,
@@ -25,8 +25,8 @@ enum CowComponent<'borrow> {
     Normal(Cow<'borrow, OsStr>),
 }
 
-/// Convert a `Component` into an `CowComponent` which borrows strings.
-fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent<'borrow> {
+/// Convert a `Component` into a `CowComponent` which borrows strings.
+fn to_borrowed_component(component: Component) -> CowComponent {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
         Component::CurDir => CowComponent::CurDir,
@@ -35,7 +35,7 @@ fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent
     }
 }
 
-/// Convert a `Component` into an `CowComponent` which owns strings.
+/// Convert a `Component` into a `CowComponent` which owns strings.
 fn to_owned_component<'borrow>(component: Component) -> CowComponent<'borrow> {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
@@ -52,14 +52,14 @@ struct CanonicalPath<'path_buf> {
     path: Option<&'path_buf mut PathBuf>,
 
     /// Our own private copy of the canonical path, for assertion checking.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     debug: PathBuf,
 }
 
 impl<'path_buf> CanonicalPath<'path_buf> {
     fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
         Self {
-            #[cfg(debug_assertions)]
+            #[cfg(not(feature = "no_racy_asserts"))]
             debug: PathBuf::new(),
 
             path,
@@ -67,7 +67,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     fn push(&mut self, one: &OsStr) {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         self.debug.push(one);
 
         if let Some(path) = &mut self.path {
@@ -76,7 +76,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     fn pop(&mut self) -> bool {
-        #[cfg(debug_assertions)]
+        #[cfg(not(feature = "no_racy_asserts"))]
         self.debug.pop();
 
         if let Some(path) = &mut self.path {
@@ -113,8 +113,8 @@ impl<'path_buf> Drop for CanonicalPath<'path_buf> {
 }
 
 /// A wrapper around `open_manually` which starts with a `symlink_count` of 0
-/// and does not return the canonical path, so it has the signature needed
-/// to be used as `open_impl`.
+/// and does not return the canonical path, so it has the signature needed to be
+/// used as `open_impl`.
 pub(crate) fn open_manually_wrapper(
     start: &fs::File,
     path: &Path,
@@ -126,13 +126,12 @@ pub(crate) fn open_manually_wrapper(
         .and_then(MaybeOwnedFile::into_file)
 }
 
-/// Implement `open` by breaking up the path into components and resolving
-/// each component individually, and resolving symbolic links manually. This
-/// implementation can also optionally produce the canonical path computed along
-/// the way.
+/// Implement `open` by breaking up the path into components, resolving each
+/// component individually, and resolving symbolic links manually. If requested,
+/// also produce the canonical path along the way.
 ///
 /// Callers can request the canonical path by passing `Some` to
-/// `canonical_path`.  If the complete canonical path is processed, even if
+/// `canonical_path`. If the complete canonical path is processed, even if
 /// `open_manually` returns an `Err`, it will be stored in the provided
 /// `&mut PathBuf`. If an error occurs before the complete canonical path is
 /// processed, the provided `&mut PathBuf` is cleared to empty.
@@ -143,7 +142,7 @@ pub(crate) fn open_manually<'start>(
     symlink_count: &mut u8,
     canonical_path: Option<&mut PathBuf>,
 ) -> io::Result<MaybeOwnedFile<'start>> {
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let start_clone = MaybeOwnedFile::owned(start.try_clone().unwrap());
 
     // POSIX returns `ENOENT` on an empty path. TODO: On Windows, we should
@@ -187,8 +186,7 @@ pub(crate) fn open_manually<'start>(
                 continue;
             }
             CowComponent::ParentDir => {
-                // TODO: This is a racy check, though it is useful for testing and fuzzing.
-                #[cfg(debug_assertions)]
+                #[cfg(not(feature = "no_racy_asserts"))]
                 assert!(dirs.is_empty() || !is_same_file(&start_clone, &base)?);
 
                 if components.is_empty() && dir_precluded {
@@ -225,16 +223,20 @@ pub(crate) fn open_manually<'start>(
                         // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file` is a
                         // symlink, follow it.
                         #[cfg(target_os = "linux")]
-                        if (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
-                            && use_options.follow == FollowSymlinks::Yes
-                        {
-                            if let Ok(destination) =
-                                readlink_one(&file, Default::default(), symlink_count)
-                            {
-                                components
-                                    .extend(destination.components().map(to_owned_component).rev());
-                                dir_required |= path_requires_dir(&destination);
-                                continue;
+                        if should_emulate_o_path(use_options) {
+                            match readlink_one(&file, Default::default(), symlink_count) {
+                                Ok(destination) => {
+                                    components.extend(
+                                        destination.components().map(to_owned_component).rev(),
+                                    );
+                                    dir_required |= path_requires_dir(&destination);
+                                    continue;
+                                }
+                                // If it isn't a symlink, handle it as normal. `readlinkat` returns
+                                // `ENOENT` if the file isn't a symlink in this situation.
+                                Err(err) if err.kind() == io::ErrorKind::NotFound => (),
+                                // If `readlinkat` fails any other way, pass it on.
+                                Err(err) => return Err(err),
                             }
                         }
 
@@ -245,14 +247,12 @@ pub(crate) fn open_manually<'start>(
                             canonical_path.push(&one);
                         }
                     }
-                    Err(OpenUncheckedError::Symlink(err))
-                        if use_options.follow == FollowSymlinks::No && components.is_empty() =>
-                    {
-                        canonical_path.push(&one);
-                        canonical_path.complete();
-                        return Err(err);
-                    }
-                    Err(OpenUncheckedError::Symlink(_)) => {
+                    Err(OpenUncheckedError::Symlink(err)) => {
+                        if use_options.follow == FollowSymlinks::No && components.is_empty() {
+                            canonical_path.push(&one);
+                            canonical_path.complete();
+                            return Err(err);
+                        }
                         let destination = readlink_one(&base, &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                         dir_required |= path_requires_dir(&destination);
@@ -261,9 +261,10 @@ pub(crate) fn open_manually<'start>(
                         return Err(err);
                     }
                     Err(OpenUncheckedError::Other(err)) => {
-                        // An error occurred. If this was the last component, record it as the
-                        // last component of the canonical path, even if we couldn't open it.
-                        if components.is_empty() {
+                        // An error occurred. If this was the last component, and the error wasn't
+                        // due to invalid inputs (eg. the path has an embedded NUL), record it as
+                        // the last component of the canonical path, even if we couldn't open it.
+                        if components.is_empty() && err.kind() != io::ErrorKind::InvalidInput {
                             canonical_path.push(&one);
                             canonical_path.complete();
                         }
@@ -274,15 +275,22 @@ pub(crate) fn open_manually<'start>(
         }
     }
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_open(&start_clone, path, options, &canonical_path, &base);
 
     canonical_path.complete();
     Ok(base)
 }
 
-#[cfg(debug_assertions)]
+// Test whether the given options imply that we should treat an open file as
+// potentially being a symlink we need to follow, due to use of `O_PATH`.
+#[cfg(target_os = "linux")]
+fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
+    (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
+        && use_options.follow == FollowSymlinks::Yes
+}
+
+#[cfg(not(feature = "no_racy_asserts"))]
 fn check_open(
     start: &fs::File,
     path: &Path,

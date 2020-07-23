@@ -21,9 +21,9 @@ pub struct DirEntry {
 impl DirEntry {
     /// Returns the metadata for the file that this entry points at.
     ///
-    /// This corresponds to [`std::fs::DirEntry::metadata`].
+    /// This corresponds to [`async_std::fs::DirEntry::metadata`].
     ///
-    /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
+    /// [`async_std::fs::DirEntry::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.DirEntry.html#method.metadata
     #[inline]
     pub async fn metadata(&self) -> io::Result<Metadata> {
         // TODO: Make this actually async.
@@ -32,9 +32,9 @@ impl DirEntry {
 
     /// Returns the file type for the file that this entry points at.
     ///
-    /// This corresponds to [`std::fs::DirEntry::file_type`].
+    /// This corresponds to [`async_std::fs::DirEntry::file_type`].
     ///
-    /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
+    /// [`async_std::fs::DirEntry::file_type`]: https://docs.rs/async-std/latest/async_std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub async fn file_type(&self) -> io::Result<FileType> {
         // TODO: Make this actually async.
@@ -43,9 +43,9 @@ impl DirEntry {
 
     /// Returns the bare file name of this directory entry without any other leading path component.
     ///
-    /// This corresponds to [`std::fs::DirEntry::file_name`].
+    /// This corresponds to [`async_std::fs::DirEntry::file_name`].
     ///
-    /// [`std::fs::DirEntry::file_name`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_name
+    /// [`async_std::fs::DirEntry::file_name`]: https://docs.rs/async-std/latest/async_std/fs/struct.DirEntry.html#method.file_name
     #[inline]
     pub fn file_name(&self) -> ffi::OsString {
         self.inner.file_name()

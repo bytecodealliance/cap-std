@@ -4,7 +4,7 @@ use std::{
     os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
     path::Path,
 };
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
 use yanix::file::OFlags;
 
@@ -22,7 +22,7 @@ pub(crate) fn path_requires_dir(path: &Path) -> bool {
 
 // Append a trailing `/`. This can be used to require that the given `path`
 // names a directory.
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
     let mut bytes = path.into_os_string().into_vec();
     bytes.push(b'/');

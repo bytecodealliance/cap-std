@@ -1,6 +1,6 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 #[cfg(any(
     unix,
     target_os = "fuchsia",
@@ -8,13 +8,13 @@
     target_os = "vxworks"
 ))]
 use crate::fs::symlink_unchecked;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{canonicalize, canonicalize_manually, stat_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[cfg(any(
     unix,
     target_os = "fuchsia",
@@ -25,17 +25,16 @@ use std::{fs, io, path::Path};
 pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_impl;
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);
 
     // Call the underlying implementation.
     let result = symlink_impl(old_path, new_start, new_path);
 
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     let stat_after = stat_unchecked(new_start, new_path, FollowSymlinks::No);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_symlink(
         old_path,
         new_start,
@@ -48,14 +47,14 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
     result
 }
 
-#[allow(clippy::enum_glob_use)]
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 #[cfg(any(
     unix,
     target_os = "fuchsia",
     target_os = "redox",
     target_os = "vxworks"
 ))]
+#[allow(clippy::enum_glob_use)]
 fn check_symlink(
     old_path: &Path,
     new_start: &fs::File,
@@ -127,7 +126,7 @@ fn check_symlink(
 
 /// Perform a `symlink_file`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[cfg(windows)]
 #[inline]
 pub fn symlink_file(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
@@ -137,7 +136,7 @@ pub fn symlink_file(old_path: &Path, new_start: &fs::File, new_path: &Path) -> i
 
 /// Perform a `symlink_dir`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[cfg(windows)]
 #[inline]
 pub fn symlink_dir(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {

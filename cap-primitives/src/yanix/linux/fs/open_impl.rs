@@ -5,7 +5,7 @@
 //!
 //! On older Linux, fall back to `open_manually`.
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{compute_oflags, errors, open_manually_wrapper, OpenOptions};
 use std::{
@@ -109,23 +109,8 @@ pub(crate) fn open_with_openat2(
                         // and `openat2` was introduced in 5.6.
                         let file = fs::File::from_raw_fd(ret as RawFd);
 
-                        #[cfg(debug_assertions)]
-                        {
-                            let check = open_manually_wrapper(
-                                start,
-                                path,
-                                options
-                                    .clone()
-                                    .create(false)
-                                    .create_new(false)
-                                    .truncate(false),
-                            )
-                            .expect("open_manually failed when open_openat2 succeeded");
-                            debug_assert!(
-                                is_same_file(&file, &check)?,
-                                "open_manually should open the same inode as open_openat2"
-                            );
-                        }
+                        #[cfg(not(feature = "no_racy_asserts"))]
+                        check_open(start, path, options, &file);
 
                         return Ok(file);
                     }
@@ -140,4 +125,22 @@ pub(crate) fn open_with_openat2(
 
 fn other_error(errno: i32) -> io::Result<fs::File> {
     Err(io::Error::from_raw_os_error(errno))
+}
+
+#[cfg(not(feature = "no_racy_asserts"))]
+fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::File) {
+    let check = open_manually_wrapper(
+        start,
+        path,
+        options
+            .clone()
+            .create(false)
+            .create_new(false)
+            .truncate(false),
+    )
+    .expect("open_manually failed when open_openat2 succeeded");
+    assert!(
+        is_same_file(&file, &check).expect("open_manually should be able to stat the result"),
+        "open_manually should open the same inode as open_openat2"
+    );
 }

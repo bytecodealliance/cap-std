@@ -2,7 +2,7 @@
 //! resolution, in order to enforce sandboxing.
 
 use crate::fs::canonicalize_impl;
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{get_path, is_same_file, open, OpenOptions};
 use std::{
     fs, io,
@@ -11,20 +11,19 @@ use std::{
 
 /// Canonicalize the given path, ensuring that the resolution of the path never
 /// escapes the directory tree rooted at `start`.
-#[cfg_attr(not(debug_assertions), allow(clippy::let_and_return))]
+#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
 #[inline]
 pub fn canonicalize(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
     let result = canonicalize_impl(start, path);
 
-    // TODO: This is a racy check, though it is useful for testing and fuzzing.
-    #[cfg(debug_assertions)]
+    #[cfg(not(feature = "no_racy_asserts"))]
     check_canonicalize(start, path, &result);
 
     result
 }
 
-#[cfg(debug_assertions)]
+#[cfg(not(feature = "no_racy_asserts"))]
 fn check_canonicalize(start: &fs::File, path: &Path, result: &io::Result<PathBuf>) {
     if let Ok(canonical_path) = result {
         let path_result = open(start, path, OpenOptions::new().read(true));
