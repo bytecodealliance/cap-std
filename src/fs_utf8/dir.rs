@@ -22,6 +22,8 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 /// a `set_permissions` method because popular host platforms don't have a way to
 /// perform that operation in a manner compatible with cap-std's sandbox; instead,
 /// open the file and call [`File::set_permissions`].
+///
+/// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     cap_std: crate::fs::Dir,
 }

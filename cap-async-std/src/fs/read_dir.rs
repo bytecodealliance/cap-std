@@ -12,7 +12,7 @@ use std::fmt;
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
-    inner: cap_primitives::fs::ReadDir,
+    pub(crate) inner: cap_primitives::fs::ReadDir,
 }
 
 impl Iterator for ReadDir {

@@ -10,8 +10,8 @@ use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, remove_dir_all, rename, rmdir, stat, symlink,
-        unlink, FollowSymlinks,
+        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
+        symlink, unlink, FollowSymlinks,
     },
 };
 
@@ -19,7 +19,7 @@ use {
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{
-        canonicalize, link, mkdir, open, readlink, remove_dir_all, rename, rmdir, stat,
+        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
         symlink_dir, symlink_file, unlink, FollowSymlinks,
     },
 };
@@ -99,7 +99,7 @@ impl Dir {
         self._open_dir(path.as_ref())
     }
 
-    #[cfg(unix)]
+    #[cfg(any(unix, target_os = "fuchsia"))]
     fn _open_dir(&self, path: &Path) -> io::Result<Self> {
         use std::os::unix::fs::OpenOptionsExt;
         use yanix::file::OFlags;
@@ -214,6 +214,9 @@ impl Dir {
         // Implementation derived from `copy` in Rust's
         // src/libstd/sys_common/fs.rs at revision
         // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+        //
+        // TODO: Move this to cap_primitives and implement the platform-specific
+        // optimizations.
         if !self.is_file(from.as_ref()) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
@@ -268,11 +271,8 @@ impl Dir {
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        todo!(
-            "Dir::read_dir({:?}, {})",
-            self.std_file,
-            path.as_ref().display()
-        )
+        let file = unsafe { as_sync(&self.std_file) };
+        read_dir(&file, path.as_ref()).map(|inner| ReadDir { inner })
     }
 
     /// Read the entire contents of a file into a bytes vector.

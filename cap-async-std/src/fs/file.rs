@@ -73,7 +73,7 @@ impl File {
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub async fn metadata(&self) -> io::Result<Metadata> {
-        self.std.metadata().await.map(Metadata::from_std)
+        self.std.metadata().await.map(metadata_from_std)
     }
 
     // async_std doesn't have `try_clone`.
@@ -86,8 +86,40 @@ impl File {
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
         let sync = unsafe { as_sync(&self.std) };
-        self.std.set_permissions(perm.into_std(&sync)?).await
+        self.std
+            .set_permissions(permissions_into_std(&sync, perm)?)
+            .await
     }
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
+    Metadata::from_std(metadata)
+}
+
+#[cfg(target_os = "wasi")]
+#[inline]
+fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
+    metadata
+}
+
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+fn permissions_into_std(
+    file: &std::fs::File,
+    permissions: Permissions,
+) -> io::Result<fs::Permissions> {
+    permissions.into_std(file)
+}
+
+#[cfg(target_os = "wasi")]
+#[inline]
+fn permissions_into_std(
+    _file: &std::fs::File,
+    permissions: Permissions,
+) -> io::Result<fs::Permissions> {
+    permissions
 }
 
 #[cfg(any(unix, target_os = "wasi"))]

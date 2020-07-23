@@ -6,7 +6,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/sunfishcode/cap-async-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-async-std/workflows/CI/badge.svg" alt="build status" /></a>
+    <a href="https://github.com/sunfishcode/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-std/workflows/CI/badge.svg" alt="build status" /></a>
   </p>
 </div>
 
