@@ -1,5 +1,9 @@
 use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
+use cap_primitives::fs::{
+    canonicalize, link, mkdir, open, open_dir, read_dir, readlink, remove_dir_all, rename, rmdir,
+    stat, unlink, FollowSymlinks,
+};
 use std::{
     fmt,
     path::{Path, PathBuf},
@@ -9,19 +13,13 @@ use std::{
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink, unlink, FollowSymlinks,
-    },
+    cap_primitives::fs::symlink,
 };
 
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    cap_primitives::fs::{
-        canonicalize, link, mkdir, open, read_dir, readlink, remove_dir_all, rename, rmdir, stat,
-        symlink_dir, symlink_file, unlink, FollowSymlinks,
-    },
+    cap_primitives::fs::{symlink_dir, symlink_file},
 };
 
 #[cfg(target_os = "wasi")]
@@ -96,33 +94,9 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        self._open_dir(path.as_ref())
-    }
-
-    #[cfg(any(unix, target_os = "fuchsia"))]
-    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
-        use std::os::unix::fs::OpenOptionsExt;
-        use yanix::file::OFlags;
-        self.open_with(
-            path,
-            OpenOptions::new()
-                .read(true)
-                .custom_flags(OFlags::DIRECTORY.bits()),
-        )
-        .map(|file| Self::from_std_file(file.std))
-    }
-
-    #[cfg(windows)]
-    fn _open_dir(&self, path: &Path) -> io::Result<Self> {
-        use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
-        self.open_with(
-            path,
-            OpenOptions::new()
-                .read(true)
-                .attributes(FILE_FLAG_BACKUP_SEMANTICS),
-        )
-        .map(|file| Self::from_std_file(file.std))
+        let file = unsafe { as_sync(&self.std_file) };
+        open_dir(&file, path.as_ref())
+            .map(|file| Self::from_std_file(File::from_std(file.into()).std))
     }
 
     /// Creates a new, empty directory at the provided path.

@@ -11,7 +11,6 @@ mod open_options_ext;
 mod open_unchecked;
 mod permissions_ext;
 mod read_dir_inner;
-mod readlink_one;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod rename_unchecked;
@@ -56,7 +55,6 @@ pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use permissions_ext::*;
 pub(crate) use read_dir_inner::*;
-pub(crate) use readlink_one::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use rename_unchecked::*;
@@ -64,3 +62,7 @@ pub(crate) use rmdir_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
+
+// On Linux, there is a limit of 40 symlink expansions.
+// Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html
+pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;

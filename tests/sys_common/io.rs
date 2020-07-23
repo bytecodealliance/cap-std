@@ -25,13 +25,13 @@ impl TempDir {
     #[cfg(windows)]
     fn from_std(path: &Path) -> io::Result<Self> {
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+        use winx::file::Flags;
         Ok(Self(
             cap_std::fs::Dir::from_std_file(
                 fs::OpenOptions::new()
                     .read(true)
                     .write(true)
-                    .attributes(FILE_FLAG_BACKUP_SEMANTICS)
+                    .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
                     .open(&path)?,
             ),
             path.to_owned(),
