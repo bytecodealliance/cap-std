@@ -610,7 +610,7 @@ impl IntoRawHandle for Dir {
 /// Derived from the function of the same name in libstd.
 fn initial_buffer_size(file: &File) -> usize {
     // Allocate one extra byte so the buffer doesn't need to grow before the
-    // final `read` call at the end of the file.  Don't worry about `usize`
+    // final `read` call at the end of the file. Don't worry about `usize`
     // overflow because reading will fail regardless in that case.
     file.metadata().map(|m| m.len() as usize + 1).unwrap_or(0)
 }

@@ -25,7 +25,7 @@ enum CowComponent<'borrow> {
     Normal(Cow<'borrow, OsStr>),
 }
 
-/// Convert a `Component` into an `CowComponent` which borrows strings.
+/// Convert a `Component` into a `CowComponent` which borrows strings.
 fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent<'borrow> {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
@@ -35,7 +35,7 @@ fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent
     }
 }
 
-/// Convert a `Component` into an `CowComponent` which owns strings.
+/// Convert a `Component` into a `CowComponent` which owns strings.
 fn to_owned_component<'borrow>(component: Component) -> CowComponent<'borrow> {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
@@ -113,8 +113,8 @@ impl<'path_buf> Drop for CanonicalPath<'path_buf> {
 }
 
 /// A wrapper around `open_manually` which starts with a `symlink_count` of 0
-/// and does not return the canonical path, so it has the signature needed
-/// to be used as `open_impl`.
+/// and does not return the canonical path, so it has the signature needed to be
+/// used as `open_impl`.
 pub(crate) fn open_manually_wrapper(
     start: &fs::File,
     path: &Path,
@@ -126,13 +126,12 @@ pub(crate) fn open_manually_wrapper(
         .and_then(MaybeOwnedFile::into_file)
 }
 
-/// Implement `open` by breaking up the path into components and resolving
-/// each component individually, and resolving symbolic links manually. This
-/// implementation can also optionally produce the canonical path computed along
-/// the way.
+/// Implement `open` by breaking up the path into components, resolving each
+/// component individually, and resolving symbolic links manually. If requested,
+/// also produce the canonical path along the way.
 ///
 /// Callers can request the canonical path by passing `Some` to
-/// `canonical_path`.  If the complete canonical path is processed, even if
+/// `canonical_path`. If the complete canonical path is processed, even if
 /// `open_manually` returns an `Err`, it will be stored in the provided
 /// `&mut PathBuf`. If an error occurs before the complete canonical path is
 /// processed, the provided `&mut PathBuf` is cleared to empty.
