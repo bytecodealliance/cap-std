@@ -26,7 +26,7 @@ enum CowComponent<'borrow> {
 }
 
 /// Convert a `Component` into a `CowComponent` which borrows strings.
-fn to_borrowed_component<'borrow>(component: Component<'borrow>) -> CowComponent<'borrow> {
+fn to_borrowed_component(component: Component) -> CowComponent {
     match component {
         Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
         Component::CurDir => CowComponent::CurDir,
@@ -224,9 +224,7 @@ pub(crate) fn open_manually<'start>(
                         // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file` is a
                         // symlink, follow it.
                         #[cfg(target_os = "linux")]
-                        if (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
-                            && use_options.follow == FollowSymlinks::Yes
-                        {
+                        if should_emulate_o_path(use_options) {
                             if let Ok(destination) =
                                 readlink_one(&file, Default::default(), symlink_count)
                             {
@@ -244,14 +242,12 @@ pub(crate) fn open_manually<'start>(
                             canonical_path.push(&one);
                         }
                     }
-                    Err(OpenUncheckedError::Symlink(err))
-                        if use_options.follow == FollowSymlinks::No && components.is_empty() =>
-                    {
-                        canonical_path.push(&one);
-                        canonical_path.complete();
-                        return Err(err);
-                    }
-                    Err(OpenUncheckedError::Symlink(_)) => {
+                    Err(OpenUncheckedError::Symlink(err)) => {
+                        if use_options.follow == FollowSymlinks::No && components.is_empty() {
+                            canonical_path.push(&one);
+                            canonical_path.complete();
+                            return Err(err);
+                        }
                         let destination = readlink_one(&base, &one, symlink_count)?;
                         components.extend(destination.components().map(to_owned_component).rev());
                         dir_required |= path_requires_dir(&destination);
@@ -279,6 +275,14 @@ pub(crate) fn open_manually<'start>(
 
     canonical_path.complete();
     Ok(base)
+}
+
+// Test whether the given options imply that we should treat an open file as
+// potentially being a symlink we need to follow, due to use of `O_PATH`.
+#[cfg(target_os = "linux")]
+fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
+    (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
+        && use_options.follow == FollowSymlinks::Yes
 }
 
 #[cfg(debug_assertions)]

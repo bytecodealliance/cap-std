@@ -7,6 +7,7 @@ use std::{fs, io, path::Path};
 /// Open a directory by performing an `openat`-like operation,
 /// ensuring that the resolution of the path never escapes
 /// the directory tree rooted at `start`.
+#[inline]
 pub fn open_dir(start: &fs::File, path: &Path) -> io::Result<fs::File> {
     open(start, path, &dir_options())
 }

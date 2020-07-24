@@ -3,8 +3,11 @@ use std::{
     ffi::OsStr,
     fmt, fs, io,
     mem::ManuallyDrop,
-    os::unix::io::{AsRawFd, FromRawFd},
-    path::Path,
+    os::unix::{
+        ffi::OsStrExt,
+        io::{AsRawFd, FromRawFd},
+    },
+    path::{Component, Path},
     sync::Arc,
 };
 use yanix::dir::{Dir, DirIter};
@@ -44,7 +47,9 @@ impl Iterator for ReadDirInner {
                 Ok(entry) => entry,
             };
             let file_name = entry.file_name().to_bytes();
-            if file_name != b"." && file_name != b".." {
+            if file_name != Component::CurDir.as_os_str().as_bytes()
+                && file_name != Component::ParentDir.as_os_str().as_bytes()
+            {
                 return Some(Ok(DirEntryInner {
                     yanix: entry,
                     read_dir: Self { yanix: clone },
