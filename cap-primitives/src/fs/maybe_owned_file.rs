@@ -82,7 +82,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         }
     }
 
-    /// Produce an owned `File`. This uses `try_clone` (dup) to convert a
+    /// Produce an owned `File`. This uses `open` on "." if needed to convert a
     /// borrowed `File` to an owned one.
     pub(crate) fn into_file(self) -> io::Result<fs::File> {
         match self.inner {
@@ -94,6 +94,14 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
                 open_unchecked(file, Component::CurDir.as_ref(), &dir_options())
                     .map_err(OpenUncheckedError::into_io_error)
             }
+        }
+    }
+
+    /// Assuming `self` holds an owned `File`, return it.
+    pub(crate) fn unwrap_owned(self) -> fs::File {
+        match self.inner {
+            Inner::Owned(file) => file,
+            Inner::Borrowed(_) => panic!("expected owned file"),
         }
     }
 }

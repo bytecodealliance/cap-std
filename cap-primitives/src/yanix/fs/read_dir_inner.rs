@@ -1,6 +1,6 @@
 use crate::fs::{
     dir_options, open, rmdir_unchecked, stat_unchecked, unlink_unchecked, DirEntryInner,
-    FollowSymlinks, Metadata, OpenOptions,
+    FollowSymlinks, Metadata, OpenOptions, open_entry_impl
 };
 use std::{
     ffi::OsStr,
@@ -27,7 +27,7 @@ impl ReadDirInner {
     }
 
     pub(crate) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
-        open(&self.to_std_file(), file_name.as_ref(), options)
+        open_entry_impl(&self.to_std_file(), file_name, options)
     }
 
     pub(crate) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
