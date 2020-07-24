@@ -1,3 +1,4 @@
+#[macro_use]
 mod sys_common;
 
 use std::path::Path;

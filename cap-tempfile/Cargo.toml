@@ -1,0 +1,18 @@
+[package]
+name = "cap-tempfile"
+version = "0.0.0"
+description = "Capability-based temporary directories"
+authors = ["Dan Gohman <sunfish@mozilla.com>", "Jakub Konka <kubkon@jakubkonka.com>"]
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+keywords = ["filesystem", "tmpfile", "tempfile"]
+categories = ["filesystem"]
+repository = "https://github.com/sunfishcode/cap-std"
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+cap-std = { path = "..", version = "0.0.0" }
+tempfile = "3.1.0"
+
+[badges]
+maintenance = { status = "actively-developed" }

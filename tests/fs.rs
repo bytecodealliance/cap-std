@@ -3,6 +3,7 @@
 //
 // This is the contents of the `tests` module, ported to use `cap_std`.
 
+#[macro_use]
 mod sys_common;
 
 use std::io::prelude::*;

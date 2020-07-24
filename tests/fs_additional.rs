@@ -2,6 +2,7 @@
 // The reason for additional module to contain those is so that `fs.rs` mirrors
 // Rust's libstd tests.
 
+#[macro_use]
 mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};

@@ -27,7 +27,8 @@ yanix = "0.19.0"
 
 [dev-dependencies]
 rand = "0.7.3"
-uuid = { version = "0.8", features = ["v4"] }
+cap-tempfile = { path = "cap-tempfile", version = "0.0.0" }
+cap-directories = { path = "cap-directories", version = "0.0.0" }
 
 [target.'cfg(not(windows))'.dev-dependencies]
 libc = "0.2.72"
@@ -47,6 +48,8 @@ no_racy_asserts = ["cap-primitives/no_racy_asserts"]
 members = [
   "cap-primitives",
   "cap-async-std",
+  "cap-tempfile",
+  "cap-directories",
   # Work around https://github.com/rust-lang/cargo/issues/8338.
   #"fuzz",
 ]
