@@ -1,4 +1,4 @@
-use crate::fs::{FileType, Metadata};
+use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
 use async_std::io;
 use std::{ffi, fmt};
 
@@ -8,6 +8,11 @@ use std::{ffi, fmt};
 ///
 /// Unlike `async_std::fs::DirEntry`, this API has no `DirEntry::path`, because
 /// absolute paths don't interoperate well with the capability model.
+///
+/// There is a `file_name` function, however there are also `open`,
+/// `open_with`, `open_dir`, `remove_file`, and `remove_dir` functions for
+/// opening or removing the entry directly, which can be more efficient and
+/// convenient.
 ///
 /// Note that there is no `from_std` method, as `async_std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
@@ -19,6 +24,38 @@ pub struct DirEntry {
 }
 
 impl DirEntry {
+    /// Open the file for reading.
+    #[inline]
+    pub fn open(&self) -> io::Result<File> {
+        self.inner.open().map(|f| File::from_std(f.into()))
+    }
+
+    /// Open the file with the given options.
+    #[inline]
+    pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
+        self.inner
+            .open_with(options)
+            .map(|f| File::from_std(f.into()))
+    }
+
+    /// Open the entry as a directory.
+    #[inline]
+    pub fn open_dir(&self) -> io::Result<Dir> {
+        self.inner.open_dir().map(|f| Dir::from_std_file(f.into()))
+    }
+
+    /// Removes the file from its filesystem.
+    #[inline]
+    pub fn remove_file(&self) -> io::Result<()> {
+        self.inner.remove_file()
+    }
+
+    /// Removes the directory from its filesystem.
+    #[inline]
+    pub fn remove_dir(&self) -> io::Result<()> {
+        self.inner.remove_dir()
+    }
+
     /// Returns the metadata for the file that this entry points at.
     ///
     /// This corresponds to [`async_std::fs::DirEntry::metadata`].

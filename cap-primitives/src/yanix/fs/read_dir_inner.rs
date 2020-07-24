@@ -1,4 +1,7 @@
-use crate::fs::{dir_options, open, stat_unchecked, DirEntryInner, FollowSymlinks, Metadata};
+use crate::fs::{
+    dir_options, open, rmdir_unchecked, stat_unchecked, unlink_unchecked, DirEntryInner,
+    FollowSymlinks, Metadata, OpenOptions,
+};
 use std::{
     ffi::OsStr,
     fmt, fs, io,
@@ -23,14 +26,24 @@ impl ReadDirInner {
         })
     }
 
+    pub(crate) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
+        open(&self.to_std_file(), file_name.as_ref(), options)
+    }
+
     pub(crate) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
-        stat_unchecked(
-            &ManuallyDrop::<fs::File>::new(unsafe {
-                fs::File::from_raw_fd(self.yanix.as_raw_fd())
-            }),
-            file_name.as_ref(),
-            FollowSymlinks::No,
-        )
+        stat_unchecked(&self.to_std_file(), file_name.as_ref(), FollowSymlinks::No)
+    }
+
+    pub(crate) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
+        unlink_unchecked(&self.to_std_file(), file_name.as_ref())
+    }
+
+    pub(crate) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
+        rmdir_unchecked(&self.to_std_file(), file_name.as_ref())
+    }
+
+    fn to_std_file(&self) -> ManuallyDrop<fs::File> {
+        ManuallyDrop::<fs::File>::new(unsafe { fs::File::from_raw_fd(self.yanix.as_raw_fd()) })
     }
 }
 

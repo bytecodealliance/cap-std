@@ -1,5 +1,5 @@
-use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions};
-use std::{ffi::OsString, fmt, fs, io};
+use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
+use std::{ffi::OsString, fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -19,26 +19,26 @@ use std::{ffi::OsString, fmt, fs, io};
 ///
 /// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry {
-    pub(crate) inner: DirEntryInner,
+    pub(crate) inner: cap_primitives::fs::DirEntry,
 }
 
 impl DirEntry {
     /// Open the file for reading.
     #[inline]
-    pub fn open(&self) -> io::Result<fs::File> {
-        self.open_with(OpenOptions::new().read(true))
+    pub fn open(&self) -> io::Result<File> {
+        self.inner.open().map(File::from_std)
     }
 
     /// Open the file with the given options.
     #[inline]
-    pub fn open_with(&self, options: &OpenOptions) -> io::Result<fs::File> {
-        self.inner.open(options)
+    pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
+        self.inner.open_with(options).map(File::from_std)
     }
 
     /// Open the entry as a directory.
     #[inline]
-    pub fn open_dir(&self) -> io::Result<fs::File> {
-        self.open_with(&dir_options())
+    pub fn open_dir(&self) -> io::Result<Dir> {
+        self.inner.open_dir().map(Dir::from_std_file)
     }
 
     /// Removes the file from its filesystem.
@@ -70,7 +70,7 @@ impl DirEntry {
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
-        Ok(self.inner.file_type())
+        self.inner.file_type()
     }
 
     /// Returns the bare file name of this directory entry without any other leading path component.
@@ -93,7 +93,6 @@ impl std::os::unix::fs::DirEntryExt for DirEntry {
 }
 
 impl fmt::Debug for DirEntry {
-    // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
