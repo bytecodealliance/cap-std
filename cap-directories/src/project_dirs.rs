@@ -40,7 +40,7 @@ impl ProjectDirs {
     pub fn cache_dir(&self) -> io::Result<Dir> {
         let path = self.inner.cache_dir();
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 
     /// Returns the project's config directory.
@@ -51,7 +51,7 @@ impl ProjectDirs {
     pub fn config_dir(&self) -> io::Result<Dir> {
         let path = self.inner.config_dir();
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 
     /// Returns the project's data directory.
@@ -62,7 +62,7 @@ impl ProjectDirs {
     pub fn data_dir(&self) -> io::Result<Dir> {
         let path = self.inner.data_dir();
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 
     /// Returns the project's local data directory.
@@ -73,7 +73,7 @@ impl ProjectDirs {
     pub fn data_local_dir(&self) -> io::Result<Dir> {
         let path = self.inner.data_local_dir();
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 
     /// Returns the project's preference directory.
@@ -84,7 +84,7 @@ impl ProjectDirs {
     pub fn preference_dir(&self) -> io::Result<Dir> {
         let path = self.inner.preference_dir();
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 
     /// Returns the project's runtime directory.
@@ -95,6 +95,6 @@ impl ProjectDirs {
     pub fn runtime_dir(&self) -> io::Result<Dir> {
         let path = self.inner.runtime_dir().ok_or_else(not_found)?;
         fs::create_dir_all(path)?;
-        fs::File::open(path).map(Dir::from_std_file)
+        unsafe { Dir::open_ambient_dir(path) }
     }
 }

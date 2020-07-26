@@ -1,8 +1,8 @@
 use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use cap_primitives::fs::{
-    canonicalize, link, mkdir, open, open_dir, read_dir, readlink, remove_dir_all, rename, rmdir,
-    stat, unlink, DirOptions, FollowSymlinks,
+    canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    remove_dir_all, rename, rmdir, stat, unlink, DirOptions, FollowSymlinks,
 };
 use std::{
     fmt,
@@ -574,6 +574,18 @@ impl Dir {
     #[inline]
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
         self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
+    }
+
+    /// Constructs a new instance of `Self` by opening the given path as a
+    /// directory using the host process' ambient authority.
+    ///
+    /// # Safety
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+        open_ambient_dir(path.as_ref()).map(|f| Self::from_std_file(f.into()))
     }
 }
 

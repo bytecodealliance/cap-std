@@ -32,17 +32,13 @@ impl Dir {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
     pub fn from_std_file(std_file: fs::File) -> Self {
-        Self {
-            cap_std: crate::fs::Dir::from_std_file(std_file),
-        }
+        Self::from_cap_std(crate::fs::Dir::from_std_file(std_file))
     }
 
     /// Constructs a new instance of `Self` from the given `cap_std::fs::Dir`.
     #[inline]
-    pub fn from_cap_std(cap_std_dir: crate::fs::Dir) -> Self {
-        Self {
-            cap_std: cap_std_dir,
-        }
+    pub fn from_cap_std(cap_std: crate::fs::Dir) -> Self {
+        Self { cap_std }
     }
 
     /// Attempts to open a file in read-only mode.
@@ -487,6 +483,19 @@ impl Dir {
             Ok(path) => self.cap_std.is_dir(path),
             Err(_) => false,
         }
+    }
+
+    /// Constructs a new instance of `Self` by opening the given path as a
+    /// directory using the host process' ambient authority.
+    ///
+    /// # Safety
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub unsafe fn open_ambient_dir<P: AsRef<str>>(path: P) -> io::Result<Self> {
+        let path = from_utf8(path)?;
+        crate::fs::Dir::open_ambient_dir(path).map(Self::from_cap_std)
     }
 }
 

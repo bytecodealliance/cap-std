@@ -1,7 +1,7 @@
 //! Capability-oriented temporary directories.
 
 use cap_std::fs::Dir;
-use std::{fs, io, ops::Deref};
+use std::{io, ops::Deref};
 
 /// A directory in a filesystem that is automatically deleted when it goes out of scope.
 ///
@@ -25,7 +25,7 @@ impl TempDir {
     /// [`tempfile::TempDir::new`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.new
     pub fn new() -> io::Result<Self> {
         let inner = tempfile::TempDir::new()?;
-        let dir = Dir::from_std_file(fs::File::open(inner.path())?);
+        let dir = unsafe { Dir::open_ambient_dir(inner.path())? };
         Ok(Self { inner, dir })
     }
 

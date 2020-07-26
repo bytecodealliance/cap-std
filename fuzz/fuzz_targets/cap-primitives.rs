@@ -4,7 +4,7 @@
 extern crate libfuzzer_sys;
 
 use arbitrary::Arbitrary;
-use cap_primitives::fs::{DirOptions, FollowSymlinks, OpenOptions};
+use cap_primitives::fs::{open_ambient_dir, DirOptions, FollowSymlinks, OpenOptions};
 use std::{fs, path::PathBuf};
 use tempfile::tempdir;
 
@@ -188,7 +188,7 @@ fuzz_target!(|plan: Plan| {
     let tmp = tempdir().unwrap();
     fs::create_dir(tmp.path().join("dir")).unwrap();
 
-    let dir = fs::File::open(tmp.path().join("dir")).unwrap();
+    let dir = unsafe { open_ambient_dir(&tmp.path().join("dir")).unwrap() };
 
     let mut files = (0..8).map(|_| dir.try_clone().unwrap()).collect::<Vec<_>>();
 

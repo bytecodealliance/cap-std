@@ -3,6 +3,7 @@ use crate::fs::OpenOptions;
 use std::path::PathBuf;
 use std::{
     ffi::{OsStr, OsString},
+    fs, io,
     os::windows::{
         ffi::{OsStrExt, OsStringExt},
         fs::OpenOptionsExt,
@@ -50,4 +51,18 @@ pub(crate) fn dir_options() -> OpenOptions {
 pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
     (options.ext.attributes & Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
         == Flags::FILE_FLAG_BACKUP_SEMANTICS.bits()
+}
+
+/// Open a directory named by a bare path, using the host process' ambient
+/// authority.
+///
+/// # Safety
+///
+/// This function is not sandboxed and may trivially access any path that the
+/// host process has access to.
+pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+    fs::OpenOptions::new()
+        .read(true)
+        .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .open(&path)
 }
