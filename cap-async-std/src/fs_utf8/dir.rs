@@ -149,7 +149,12 @@ impl Dir {
     ///
     /// [`async_std::fs::copy`]: https://docs.rs/async-std/latest/async_std/fs/fn.copy.html
     #[inline]
-    pub async fn copy<P: AsRef<str>, Q: AsRef<str>>(&self, from: P, to_dir: &Self, to: Q) -> io::Result<u64> {
+    pub async fn copy<P: AsRef<str>, Q: AsRef<str>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<u64> {
         let from = from_utf8(from)?;
         let to = from_utf8(to)?;
         self.cap_std.copy(from, &to_dir.cap_std, to).await

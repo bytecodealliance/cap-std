@@ -246,7 +246,7 @@ fn symlink_chasing_open(b: &mut test::Bencher) {
 
     let name = "32";
     b.iter(|| {
-         let _file = dir.open(name).unwrap();
+        let _file = dir.open(name).unwrap();
     });
 }
 
@@ -259,12 +259,16 @@ fn symlink_chasing_open_baseline(b: &mut test::Bencher) {
 
     fs::File::create(dir.path().join("0")).unwrap();
     for i in 0..32 {
-        symlink(dir.path().join(i.to_string()), dir.path().join((i + 1).to_string())).unwrap();
+        symlink(
+            dir.path().join(i.to_string()),
+            dir.path().join((i + 1).to_string()),
+        )
+        .unwrap();
     }
 
     let name = dir.path().join("32");
     b.iter(|| {
-         let _file = fs::File::open(&name).unwrap();
+        let _file = fs::File::open(&name).unwrap();
     });
 }
 
@@ -280,7 +284,7 @@ fn symlink_chasing_metadata(b: &mut test::Bencher) {
 
     let name = "32";
     b.iter(|| {
-         let _metadata = dir.metadata(name).unwrap();
+        let _metadata = dir.metadata(name).unwrap();
     });
 }
 
@@ -293,12 +297,16 @@ fn symlink_chasing_metadata_baseline(b: &mut test::Bencher) {
 
     fs::File::create(dir.path().join("0")).unwrap();
     for i in 0..32 {
-        symlink(dir.path().join(i.to_string()), dir.path().join((i + 1).to_string())).unwrap();
+        symlink(
+            dir.path().join(i.to_string()),
+            dir.path().join((i + 1).to_string()),
+        )
+        .unwrap();
     }
 
     let name = dir.path().join("32");
     b.iter(|| {
-         let _metadata = fs::metadata(&name).unwrap();
+        let _metadata = fs::metadata(&name).unwrap();
     });
 }
 

@@ -206,7 +206,12 @@ impl Dir {
     ///
     /// [`async_std::fs::copy`]: https://docs.rs/async-std/latest/async_std/fs/fn.copy.html
     #[inline]
-    pub async fn copy<P: AsRef<Path>, Q: AsRef<Path>>(&self, from: P, to_dir: &Self, to: Q) -> io::Result<u64> {
+    pub async fn copy<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<u64> {
         // Implementation derived from `copy` in Rust's
         // src/libstd/sys_common/fs.rs at revision
         // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
