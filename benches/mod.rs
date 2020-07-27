@@ -202,6 +202,7 @@ fn directory_iteration(b: &mut test::Bencher) {
     });
 }
 
+/* TODO: This depends on https://github.com/sunfishcode/cap-std/pull/72
 #[bench]
 fn directory_iteration_fast(b: &mut test::Bencher) {
     let dir = cap_tempfile::tempdir().unwrap();
@@ -216,6 +217,7 @@ fn directory_iteration_fast(b: &mut test::Bencher) {
         }
     });
 }
+*/
 
 #[bench]
 fn directory_iteration_baseline(b: &mut test::Bencher) {
