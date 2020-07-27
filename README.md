@@ -70,12 +70,13 @@ There are three main ways:
  - Use the [`cap-directories`] crate to create `Dir`s for config, cache and
    other data directories.
  - Use the [`cap-tempfile`] crate to create `Dir`s for temporary directories.
- - Use [`Dir::from_std_file`] to create `Dir`s from `std::fs::File`s opened
-   from directories directly.
+ - Use the `unsafe` [`Dir::open_ambient_dir`] to open a plain path. This
+   function is not sandboxed, and may open any file the host process has
+   access to.
 
 [`cap-directories`]: https://crates.io/crates/cap-directories
 [`cap-tempfile`]: https://crates.io/crates/cap-tempfile
-[`Dir::from_std_file`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.from_std_file
+[`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
 
 ## How do I use a `Dir`?
 
