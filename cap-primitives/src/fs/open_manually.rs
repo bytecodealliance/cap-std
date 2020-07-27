@@ -123,7 +123,7 @@ pub(crate) fn open_manually_wrapper(
     let mut symlink_count = 0;
     let start = MaybeOwnedFile::borrowed(start);
     open_manually(start, path, options, &mut symlink_count, None)
-        .and_then(MaybeOwnedFile::into_file)
+        .and_then(|maybe_owned| maybe_owned.into_file(options))
 }
 
 /// Implement `open` by breaking up the path into components, resolving each
