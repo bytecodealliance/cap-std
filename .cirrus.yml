@@ -13,6 +13,4 @@ task:
     - rustup default stable
   test_script:
     - . $HOME/.cargo/env
-    - cargo fmt --all -- --check
     - cargo test --no-default-features --features=fs_utf8 --all
-    - cargo fuzz build --dev --no-default-features
