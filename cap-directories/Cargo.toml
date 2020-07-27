@@ -1,0 +1,26 @@
+[package]
+name = "cap-directories"
+version = "0.0.0"
+description = "Capability-based standard directories for config, cache and other data"
+authors = ["Dan Gohman <sunfish@mozilla.com>", "Jakub Konka <kubkon@jakubkonka.com>"]
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+keywords = ["app_dirs", "path", "folder", "xdg", "basedir"]
+categories = [ "filesystem" ]
+repository = "https://github.com/sunfishcode/cap-std"
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+cap-std = { path = "..", version = "0.0.0" }
+directories = "3.0.1"
+
+[target.'cfg(not(windows))'.dependencies]
+libc = "0.2.72"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = [
+    "winerror",
+] }
+
+[badges]
+maintenance = { status = "actively-developed" }

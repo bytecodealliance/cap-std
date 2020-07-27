@@ -1,6 +1,7 @@
 use crate::fs::OpenOptions;
 use std::{
     ffi::OsStr,
+    fs, io,
     os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
     path::Path,
 };
@@ -52,6 +53,20 @@ pub(crate) fn dir_options() -> OpenOptions {
 // Test whether an `OpenOptions` is set to only open directories.
 pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
     (options.ext.custom_flags & OFlags::DIRECTORY.bits()) == OFlags::DIRECTORY.bits()
+}
+
+/// Open a directory named by a bare path, using the host process' ambient
+/// authority.
+///
+/// # Safety
+///
+/// This function is not sandboxed and may trivially access any path that the
+/// host process has access to.
+pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+    fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(OFlags::DIRECTORY.bits())
+        .open(&path)
 }
 
 #[test]

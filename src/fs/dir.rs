@@ -1,11 +1,11 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, link, mkdir, open, open_dir, read_dir, readlink, remove_dir_all, rename, rmdir,
-    stat, unlink, DirOptions, FollowSymlinks,
+    canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    remove_dir_all, rename, rmdir, stat, unlink, DirOptions, FollowSymlinks,
 };
 use std::{
     fmt, fs, io,
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
 
 #[cfg(any(unix, target_os = "fuchsia"))]
@@ -252,6 +252,12 @@ impl Dir {
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         stat(&self.std_file, path.as_ref(), FollowSymlinks::Yes)
+    }
+
+    /// Returns an iterator over the entries within `self`.
+    #[inline]
+    pub fn entries(&self) -> io::Result<ReadDir> {
+        self.read_dir(Component::CurDir)
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -559,6 +565,18 @@ impl Dir {
     #[inline]
     pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
         self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
+    }
+
+    /// Constructs a new instance of `Self` by opening the given path as a
+    /// directory using the host process' ambient authority.
+    ///
+    /// # Safety
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+        open_ambient_dir(path.as_ref()).map(Self::from_std_file)
     }
 }
 
