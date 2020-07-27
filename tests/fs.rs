@@ -725,7 +725,7 @@ fn copy_file_does_not_exist() {
     let from = Path::new("test/nonexistent-bogus-path");
     let to = Path::new("test/other-bogus-path");
 
-    match tmpdir.copy(&from, &to) {
+    match tmpdir.copy(&from, &tmpdir, &to) {
         Ok(..) => panic!(),
         Err(..) => {
             assert!(!tmpdir.exists(from));
@@ -740,7 +740,7 @@ fn copy_src_does_not_exist() {
     let from = Path::new("test/nonexistent-bogus-path");
     let to = "out.txt";
     check!(check!(tmpdir.create(&to)).write(b"hello"));
-    assert!(tmpdir.copy(&from, &to).is_err());
+    assert!(tmpdir.copy(&from, &tmpdir, &to).is_err());
     assert!(!tmpdir.exists(from));
     let mut v = Vec::new();
     check!(check!(tmpdir.open(&to)).read_to_end(&mut v));
@@ -756,7 +756,7 @@ fn copy_file_ok() {
     let out = "out.txt";
 
     check!(check!(tmpdir.create(&input)).write(b"hello"));
-    check!(tmpdir.copy(&input, &out));
+    check!(tmpdir.copy(&input, &tmpdir, &out));
     let mut v = Vec::new();
     check!(check!(tmpdir.open(&out)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
@@ -775,7 +775,7 @@ fn copy_file_dst_dir() {
     let out = "out";
 
     check!(tmpdir.create(&out));
-    match tmpdir.copy(&*out, ".") {
+    match tmpdir.copy(&*out, &tmpdir, ".") {
         Ok(..) => panic!(),
         Err(..) => {}
     }
@@ -791,7 +791,7 @@ fn copy_file_dst_exists() {
 
     check!(check!(tmpdir.create(&input)).write("foo".as_bytes()));
     check!(check!(tmpdir.create(&output)).write("bar".as_bytes()));
-    check!(tmpdir.copy(&input, &output));
+    check!(tmpdir.copy(&input, &tmpdir, &output));
 
     let mut v = Vec::new();
     check!(check!(tmpdir.open(&output)).read_to_end(&mut v));
@@ -805,7 +805,7 @@ fn copy_file_src_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    match tmpdir.copy(".", &out) {
+    match tmpdir.copy(".", &tmpdir, &out) {
         Ok(..) => panic!(),
         Err(..) => {}
     }
@@ -824,7 +824,7 @@ fn copy_file_preserves_perm_bits() {
     let mut p = attr.permissions();
     p.set_readonly(true);
     check!(tmpdir.open(&input).and_then(|file| file.set_permissions(p)));
-    check!(tmpdir.copy(&input, &out));
+    check!(tmpdir.copy(&input, &tmpdir, &out));
     assert!(check!(tmpdir.metadata(out)).permissions().readonly());
     check!(tmpdir
         .open(&input)
@@ -840,7 +840,7 @@ fn copy_file_preserves_perm_bits() {
 fn copy_file_preserves_streams() {
     let tmp = tmpdir();
     check!(check!(tmp.create("in.txt:bunny")).write("carrot".as_bytes()));
-    assert_eq!(check!(tmp.copy("in.txt", "out.txt")), 0);
+    assert_eq!(check!(tmp.copy("in.txt", &tmp, "out.txt")), 0);
     assert_eq!(check!(tmp.metadata("out.txt")).len(), 0);
     let mut v = Vec::new();
     check!(check!(tmp.open("out.txt:bunny")).read_to_end(&mut v));
@@ -857,7 +857,7 @@ fn copy_file_returns_metadata_len() {
     check!(check!(tmp.create(&in_path)).write(b"lettuce"));
     #[cfg(windows)]
     check!(check!(tmp.create("in.txt:bunny")).write(b"carrot"));
-    let copied_len = check!(tmp.copy(&in_path, &out_path));
+    let copied_len = check!(tmp.copy(&in_path, &tmp, &out_path));
     assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
 
@@ -878,7 +878,7 @@ fn copy_file_follows_dst_symlink() {
     check!(tmp.write(&out_path, "bar"));
     check!(symlink_file(&out_path, &tmp, &out_path_symlink));
 
-    check!(tmp.copy(&in_path, &out_path_symlink));
+    check!(tmp.copy(&in_path, &tmp, &out_path_symlink));
 
     assert!(check!(tmp.symlink_metadata(out_path_symlink))
         .file_type()
