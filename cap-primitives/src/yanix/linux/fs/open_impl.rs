@@ -1,7 +1,9 @@
 //! Linux 5.6 and later have a syscall `openat2`, with flags that allow it to
-//! enforce the sandboxing property we want. See [the LWN article] for details.
+//! enforce the sandboxing property we want. See the [LWN article] for an
+//! overview and the [openat2 documentation] for details.
 //!
-//! [the LWN article]: https://lwn.net/Articles/796868/
+//! [LWN article]: https://lwn.net/Articles/796868/
+//! [openat2 documentation]: https://man7.org/linux/man-pages/man2/openat2.2.html
 //!
 //! On older Linux, fall back to `open_manually`.
 
