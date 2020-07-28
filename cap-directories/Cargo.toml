@@ -5,7 +5,7 @@ description = "Capability-based standard directories for config, cache and other
 authors = ["Dan Gohman <sunfish@mozilla.com>", "Jakub Konka <kubkon@jakubkonka.com>"]
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["app_dirs", "path", "folder", "xdg", "basedir"]
-categories = [ "filesystem" ]
+categories = ["filesystem"]
 repository = "https://github.com/sunfishcode/cap-std"
 edition = "2018"
 readme = "README.md"
@@ -18,9 +18,7 @@ directories = "3.0.1"
 libc = "0.2.72"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", features = [
-    "winerror",
-] }
+winapi = { version = "0.3.9", features = ["winerror"] }
 
 [badges]
 maintenance = { status = "actively-developed" }
