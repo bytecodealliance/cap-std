@@ -22,6 +22,13 @@ mod unlink_unchecked;
 
 pub(crate) mod errors;
 
+// On Linux, use optimized implementations of `open` and `stat` using `openat2`
+// and `O_PATH` when available.
+//
+// FreeBSD has a similar mechanism in `O_BENEATH`, however it appears to have
+// different behavior on absolute and `..` paths in ways that make it unsuitable
+// for `cap-std`'s style of sandboxing. For more information, see the bug filed
+// upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
 cfg_if::cfg_if! {
     if #[cfg(target_os = "linux")] {
         pub(crate) use crate::yanix::linux::fs::*;
