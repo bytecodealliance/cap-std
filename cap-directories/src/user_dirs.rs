@@ -2,8 +2,8 @@ use crate::not_found;
 use cap_std::fs::Dir;
 use std::io;
 
-/// `UserDirs` provides user-facing standard directories, following the conventions of the
-/// operating system the library is running on.
+/// `UserDirs` provides paths of user-facing standard directories, following the
+/// conventions of the operating system the library is running on.
 ///
 /// This corresponds to [`directories::UserDirs`], except that the functions open the
 /// directories and returns `Dir`s instead of returning `Path`s.
@@ -18,7 +18,8 @@ pub struct UserDirs {
 }
 
 impl UserDirs {
-    /// Creates a `UserDirs` struct from values describing the project.
+    /// Creates a UserDirs struct which holds the paths to user-facing directories for audio, font,
+    /// video, etc. data on the system.
     ///
     /// This corresponds to [`directories::UserDirs::new`].
     ///
