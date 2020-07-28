@@ -96,7 +96,7 @@ fn check_rmdir(
         ),
     }
 
-    match stat_unchecked(start, path, FollowSymlinks::No) {
+    match stat_after {
         Ok(_unchecked_metadata) => match &result {
             Ok(()) => panic!(
                 "file still exists after rmdir start='{:?}', path='{}'",
