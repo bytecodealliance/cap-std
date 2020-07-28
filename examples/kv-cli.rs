@@ -19,11 +19,13 @@ fn main() -> anyhow::Result<()> {
     }
 
     // Obtain the `data_dir` for this program.
-    let project_dirs = ProjectDirs::from(
-        "com.example",
-        "Example Organization",
-        "Cap-std Key-Value CLI Example",
-    )
+    let project_dirs = unsafe {
+        ProjectDirs::from(
+            "com.example",
+            "Example Organization",
+            "Cap-std Key-Value CLI Example",
+        )
+    }
     .ok_or_else(no_project_dirs)?;
     let mut data_dir = project_dirs.data_dir()?;
 

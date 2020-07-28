@@ -34,8 +34,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::home_dir`].
     ///
     /// [`directories::UserDirs::home_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.home_dir
-    pub fn home_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.home_dir()) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn home_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.home_dir())
     }
 
     /// Returns the user's audio directory.
@@ -43,8 +49,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::audio_dir`].
     ///
     /// [`directories::UserDirs::audio_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.audio_dir
-    pub fn audio_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.audio_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn audio_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.audio_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's desktop directory.
@@ -52,8 +64,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::desktop_dir`].
     ///
     /// [`directories::UserDirs::desktop_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.desktop_dir
-    pub fn desktop_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.desktop_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn desktop_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.desktop_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's document directory.
@@ -61,8 +79,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::document_dir`].
     ///
     /// [`directories::UserDirs::document_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.document_dir
-    pub fn document_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.document_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn document_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.document_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's download directory.
@@ -70,8 +94,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::download_dir`].
     ///
     /// [`directories::UserDirs::download_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.download_dir
-    pub fn download_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.download_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn download_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.download_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's font directory.
@@ -79,8 +109,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::font_dir`].
     ///
     /// [`directories::UserDirs::font_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.font_dir
-    pub fn font_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.font_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn font_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.font_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's picture directory.
@@ -88,8 +124,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::picture_dir`].
     ///
     /// [`directories::UserDirs::picture_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.picture_dir
-    pub fn picture_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.picture_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn picture_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.picture_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's public directory.
@@ -97,8 +139,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::public_dir`].
     ///
     /// [`directories::UserDirs::public_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.public_dir
-    pub fn public_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.public_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn public_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.public_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's template directory.
@@ -106,8 +154,14 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::template_dir`].
     ///
     /// [`directories::UserDirs::template_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.template_dir
-    pub fn template_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.template_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn template_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.template_dir().ok_or_else(not_found)?)
     }
 
     /// Returns the user's video directory.
@@ -115,7 +169,13 @@ impl UserDirs {
     /// This corresponds to [`directories::UserDirs::video_dir`].
     ///
     /// [`directories::UserDirs::video_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.video_dir
-    pub fn video_dir(&self) -> io::Result<Dir> {
-        unsafe { Dir::open_ambient_dir(self.inner.video_dir().ok_or_else(not_found)?) }
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the user directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn video_dir(&self) -> io::Result<Dir> {
+        Dir::open_ambient_dir(self.inner.video_dir().ok_or_else(not_found)?)
     }
 }
