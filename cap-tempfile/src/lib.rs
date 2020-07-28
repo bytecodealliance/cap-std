@@ -1,5 +1,8 @@
 //! Capability-oriented temporary directories.
 
+#![deny(missing_docs)]
+#![doc(html_logo_url = "https://github.com/sunfishcode/cap-std/tree/main/media/cap-std.svg")]
+
 use cap_std::fs::Dir;
 use std::{io, ops::Deref};
 

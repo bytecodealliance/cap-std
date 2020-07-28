@@ -26,9 +26,7 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
-#![doc(
-    html_logo_url = "https://repository-images.githubusercontent.com/275013363/5b1c4000-c848-11ea-8edb-877395f68065"
-)]
+#![doc(html_logo_url = "https://github.com/sunfishcode/cap-std/tree/main/media/cap-std.svg")]
 
 pub mod fs;
 #[cfg(feature = "fs_utf8")]
