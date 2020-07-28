@@ -37,7 +37,7 @@ fn check_open(
     result: &io::Result<fs::File>,
     _stat_after: &io::Result<Metadata>,
 ) {
-    match open_unchecked(
+    let unchecked_result = open_unchecked(
         start,
         path,
         options
@@ -45,54 +45,50 @@ fn check_open(
             .create(false)
             .create_new(false)
             .truncate(false),
-    ) {
-        Ok(unchecked_file) => match &result {
-            Ok(result_file) => {
-                assert!(
-                    is_same_file(result_file, &unchecked_file).unwrap(),
-                    "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' \
-                     expected='{:?}'",
-                    start,
-                    path.display(),
-                    result_file,
-                    &unchecked_file
-                );
-            }
-            Err(e) => match e.kind() {
-                io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
-                io::ErrorKind::AlreadyExists if options.create_new => (),
-                _ => panic!(
-                    "unexpected error opening start='{:?}', path='{}': {:?}",
-                    start,
-                    path.display(),
-                    e
-                ),
-            },
-        },
-        Err(unchecked_error) => match &result {
-            Ok(result_file) => panic!(
-                "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
+    );
+
+    match (&result, &unchecked_result) {
+        (Ok(result_file), Ok(unchecked_file)) => {
+            assert!(
+                is_same_file(result_file, &unchecked_file).unwrap(),
+                "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
                 start,
                 path.display(),
-                unchecked_error,
-                result_file
+                result_file,
+                &unchecked_file
+            );
+        }
+        (Ok(result_file), Err(unchecked_error)) => panic!(
+            "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
+            start,
+            path.display(),
+            unchecked_error,
+            result_file
+        ),
+        (Err(result_error), Ok(_unchecked_file)) => match result_error.kind() {
+            io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
+            io::ErrorKind::AlreadyExists if options.create_new => (),
+            _ => panic!(
+                "unexpected error opening start='{:?}', path='{}': {:?}",
+                start,
+                path.display(),
+                result_error
             ),
-            Err(result_error) => match result_error.kind() {
-                io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
-                _ => {
-                    let _unchecked_error = unchecked_error.into_io_error();
-                    /* TODO: Check error messages.
-                    assert_eq!(result_error.to_string(), unchecked_error.to_string());
-                    assert_eq!(result_error.kind(), unchecked_error.kind());
-                    */
-                }
-            },
+        },
+        (Err(result_error), Err(unchecked_error)) => match result_error.kind() {
+            io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
+            _ => {
+                /* TODO: Check error messages.
+                let unchecked_error = unchecked_error.into_io_error();
+                assert_eq!(result_error.to_string(), unchecked_error.to_string());
+                assert_eq!(result_error.kind(), unchecked_error.kind());
+                */
+            }
         },
     }
 
     // On operating systems which can tell us the path of a file descriptor,
     // assert that the start path is a parent of the result path.
-    #[cfg(not(feature = "no_racy_asserts"))]
     if let Ok(result_file) = &result {
         if let Some(result_path) = get_path(result_file) {
             if let Some(start_path) = get_path(start) {

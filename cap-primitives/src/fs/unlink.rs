@@ -91,35 +91,31 @@ fn check_unlink(
         ),
     }
 
-    match stat_unchecked(start, path, FollowSymlinks::No) {
-        Ok(unchecked_metadata) => match &result {
-            Ok(()) => panic!(
-                "file still exists after unlink start='{:?}', path='{}'",
+    match (result, stat_after) {
+        (Ok(()), Ok(_unchecked_metadata)) => panic!(
+            "file still exists after unlink start='{:?}', path='{}'",
+            start,
+            path.display()
+        ),
+        (Err(e), Ok(unchecked_metadata)) => match e.kind() {
+            io::ErrorKind::PermissionDenied => (),
+            io::ErrorKind::Other if unchecked_metadata.is_dir() => (),
+            _ => panic!(
+                "unexpected error unlinking start='{:?}', path='{}': {:?}",
                 start,
-                path.display()
+                path.display(),
+                e
             ),
-            Err(e) => match e.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                io::ErrorKind::Other if unchecked_metadata.is_dir() => (),
-                _ => panic!(
-                    "unexpected error unlinking start='{:?}', path='{}': {:?}",
-                    start,
-                    path.display(),
-                    e
-                ),
-            },
         },
-        Err(_unchecked_error) => match &result {
-            Ok(()) => (),
-            Err(result_error) => match result_error.kind() {
-                io::ErrorKind::PermissionDenied => (),
-                _ => {
-                    /* TODO: Check error messages.
-                    assert_eq!(result_error.to_string(), unchecked_error.to_string());
-                    assert_eq!(result_error.kind(), unchecked_error.kind());
-                    */
-                }
-            },
+        (Ok(()), Err(_unchecked_error)) => (),
+        (Err(result_error), Err(_unchecked_error)) => match result_error.kind() {
+            io::ErrorKind::PermissionDenied => (),
+            _ => {
+                /* TODO: Check error messages.
+                assert_eq!(result_error.to_string(), unchecked_error.to_string());
+                assert_eq!(result_error.kind(), unchecked_error.kind());
+                */
+            }
         },
     }
 }
