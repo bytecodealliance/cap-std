@@ -11,8 +11,6 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-ipnet = "2.3.0"
-cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
 cap-primitives = { path = "cap-primitives", version = "0.0.0", default-features = false }
 
@@ -26,11 +24,12 @@ yanix = "0.19.0"
 yanix = "0.19.0"
 
 [dev-dependencies]
-rand = "0.7.3"
-cap-tempfile = { path = "cap-tempfile", version = "0.0.0" }
-cap-directories = { path = "cap-directories", version = "0.0.0" }
-tempfile = "3.1.0"
 anyhow = "1.0.32"
+cap-directories = { path = "cap-directories", version = "0.0.0" }
+cap-tempfile = { path = "cap-tempfile", version = "0.0.0" }
+cfg-if = "0.1.9"
+tempfile = "3.1.0"
+rand = "0.7.3"
 
 [target.'cfg(not(windows))'.dev-dependencies]
 libc = "0.2.72"
@@ -62,10 +61,10 @@ no_racy_asserts = ["cap-primitives/no_racy_asserts"]
 
 [workspace]
 members = [
-  "cap-primitives",
   "cap-async-std",
-  "cap-tempfile",
   "cap-directories",
+  "cap-primitives",
+  "cap-tempfile",
   # Work around https://github.com/rust-lang/cargo/issues/8338.
   #"fuzz",
 ]
