@@ -51,11 +51,8 @@ impl Iterator for ReadDirInner {
     type Item = io::Result<DirEntryInner>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // TODO: Could we avoid this `clone` by adjusting yanix's API?
-        let mut iter = DirIter::new(Arc::clone(&self.yanix));
-        let clone = Arc::clone(&self.yanix);
         loop {
-            let entry = match iter.next()? {
+            let entry = match DirIter::new(&*self.yanix).next()? {
                 Err(e) => return Some(Err(e)),
                 Ok(entry) => entry,
             };
@@ -63,6 +60,7 @@ impl Iterator for ReadDirInner {
             if file_name != Component::CurDir.as_os_str().as_bytes()
                 && file_name != Component::ParentDir.as_os_str().as_bytes()
             {
+                let clone = Arc::clone(&self.yanix);
                 return Some(Ok(DirEntryInner {
                     yanix: entry,
                     read_dir: Self { yanix: clone },
