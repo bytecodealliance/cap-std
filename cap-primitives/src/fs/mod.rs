@@ -5,6 +5,7 @@ mod canonicalize_manually;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
+pub(crate) mod errors;
 mod file_type;
 mod follow_symlinks;
 #[cfg(not(feature = "no_racy_asserts"))]

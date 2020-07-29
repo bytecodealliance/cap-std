@@ -1,5 +1,6 @@
 use crate::fs::OpenOptions;
 use std::{
+    borrow::Cow,
     ffi::OsStr,
     fs, io,
     os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
@@ -34,12 +35,12 @@ pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
 // used by `mkdir` and others to prevent paths like `foo/` from canonicalizing
 // to `foo/.` since these syscalls treat these differently.
 #[allow(clippy::indexing_slicing)]
-pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
+pub(crate) fn strip_dir_suffix(path: &Path) -> Cow<Path> {
     let mut bytes = path.as_os_str().as_bytes();
     while bytes.len() > 1 && *bytes.last().unwrap() == b'/' {
         bytes = &bytes[..bytes.len() - 1];
     }
-    OsStr::from_bytes(bytes).as_ref()
+    Cow::Borrowed(OsStr::from_bytes(bytes).as_ref())
 }
 
 // Return an `OpenOptions` for opening directories.

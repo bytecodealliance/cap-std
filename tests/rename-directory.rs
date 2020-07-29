@@ -21,6 +21,7 @@ use std::{
 use sys_common::io::tmpdir;
 
 #[test]
+#[cfg_attr(windows, ignore)]
 fn rename_directory() {
     let tmpdir = tmpdir();
     let old_path = Path::new("foo/bar/baz");

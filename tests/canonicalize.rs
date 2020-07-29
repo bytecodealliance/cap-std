@@ -10,8 +10,17 @@ fn canonicalize_edge_cases() {
     assert_eq!(check!(tmpdir.canonicalize(".")), Path::new("."));
     assert_eq!(check!(tmpdir.canonicalize("./")), Path::new("."));
     assert_eq!(check!(tmpdir.canonicalize("./.")), Path::new("."));
-    error_contains!(tmpdir.canonicalize(""), "No such file");
-    error_contains!(tmpdir.canonicalize("foo"), "No such file");
+
+    #[cfg(not(windows))]
+    error!(tmpdir.canonicalize(""), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.canonicalize(""), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.canonicalize("foo"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.canonicalize("foo"), 2);
+
     error_contains!(
         tmpdir.canonicalize("/"),
         "a path led outside of the filesystem"
@@ -87,26 +96,54 @@ fn canonicalize_edge_cases() {
     assert_eq!(check!(tmpdir.canonicalize("foo/..")), Path::new("."));
     assert_eq!(check!(tmpdir.canonicalize("foo/../")), Path::new("."));
     assert_eq!(check!(tmpdir.canonicalize("foo/../.")), Path::new("."));
-    assert_eq!(check!(tmpdir.canonicalize("foo/bar")), Path::new("foo/bar"));
+
+    assert_eq!(
+        check!(tmpdir.canonicalize("foo/bar")),
+        if cfg!(windows) {
+            Path::new("foo\\bar")
+        } else {
+            Path::new("foo/bar")
+        }
+    );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar/")),
-        Path::new("foo/bar")
+        if cfg!(windows) {
+            Path::new("foo\\bar")
+        } else {
+            Path::new("foo/bar")
+        }
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar/")).to_str(),
-        Some("foo/bar")
+        if cfg!(windows) {
+            Some("foo\\bar")
+        } else {
+            Some("foo/bar")
+        }
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar")),
-        Path::new("foo/bar")
+        if cfg!(windows) {
+            Path::new("foo\\bar")
+        } else {
+            Path::new("foo/bar")
+        }
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar/")),
-        Path::new("foo/bar")
+        if cfg!(windows) {
+            Path::new("foo\\bar")
+        } else {
+            Path::new("foo/bar")
+        }
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar/")).to_str(),
-        Some("foo/bar")
+        if cfg!(windows) {
+            Some("foo\\bar")
+        } else {
+            Some("foo/bar")
+        }
     );
     error_contains!(
         tmpdir.canonicalize("foo/../.."),
@@ -116,5 +153,9 @@ fn canonicalize_edge_cases() {
         tmpdir.canonicalize("foo/../../"),
         "a path led outside of the filesystem"
     );
-    error_contains!(tmpdir.canonicalize("foo/bar/qux"), "No such file");
+
+    #[cfg(not(windows))]
+    error!(tmpdir.canonicalize("foo/bar/qux"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.canonicalize("foo/bar/qux"), 2);
 }

@@ -64,6 +64,7 @@ cfg_if::cfg_if! {
 */
 
 #[test]
+#[cfg_attr(windows, ignore)]
 fn rename_basics() {
     let tmpdir = tmpdir();
 

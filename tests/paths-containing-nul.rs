@@ -30,6 +30,7 @@ fn assert_invalid_input<T>(on: &str, result: io::Result<T>) {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
 fn paths_containing_nul() {
     let tmpdir = tmpdir();
 

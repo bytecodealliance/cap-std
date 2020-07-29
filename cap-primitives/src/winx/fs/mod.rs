@@ -1,6 +1,7 @@
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
+pub(crate) mod errors;
 mod file_type_ext;
 mod flags;
 mod get_path;
@@ -33,12 +34,11 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) mod errors;
-
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
+pub(crate) use errors as errors_impl;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
 pub(crate) use get_path::get_path as get_path_impl;

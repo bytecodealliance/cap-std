@@ -17,8 +17,8 @@ pub fn rename_via_parent(
     let old_path = strip_dir_suffix(old_path);
     let new_path = strip_dir_suffix(new_path);
 
-    let (old_dir, old_basename) = open_parent(old_start, old_path)?;
-    let (new_dir, new_basename) = open_parent(new_start, new_path)?;
+    let (old_dir, old_basename) = open_parent(old_start, &old_path)?;
+    let (new_dir, new_basename) = open_parent(new_start, &new_path)?;
 
     rename_unchecked(
         &old_dir,
