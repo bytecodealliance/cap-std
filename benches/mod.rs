@@ -70,6 +70,36 @@ fn nested_directories_metadata_baseline(b: &mut test::Bencher) {
     });
 }
 
+#[bench]
+fn nested_directories_canonicalize(b: &mut test::Bencher) {
+    let dir = cap_tempfile::tempdir().unwrap();
+
+    let mut path = PathBuf::new();
+    for _ in 0..256 {
+        path.push("abc");
+    }
+    dir.create_dir_all(&path).unwrap();
+
+    b.iter(|| {
+        let _canonical = dir.canonicalize(&path).unwrap();
+    });
+}
+
+#[bench]
+fn nested_directories_canonicalize_baseline(b: &mut test::Bencher) {
+    let dir = tempfile::tempdir().unwrap();
+
+    let mut path = PathBuf::new();
+    for _ in 0..256 {
+        path.push("abc");
+    }
+    fs::create_dir_all(dir.path().join(&path)).unwrap();
+
+    b.iter(|| {
+        let _canonical = fs::canonicalize(dir.path().join(&path)).unwrap();
+    });
+}
+
 #[cfg(unix)]
 #[bench]
 fn nested_directories_readlink(b: &mut test::Bencher) {
@@ -307,6 +337,44 @@ fn symlink_chasing_metadata_baseline(b: &mut test::Bencher) {
     let name = dir.path().join("32");
     b.iter(|| {
         let _metadata = fs::metadata(&name).unwrap();
+    });
+}
+
+#[cfg(unix)]
+#[bench]
+fn symlink_chasing_canonicalize(b: &mut test::Bencher) {
+    let dir = cap_tempfile::tempdir().unwrap();
+
+    dir.create("0").unwrap();
+    for i in 0..32 {
+        dir.symlink(i.to_string(), (i + 1).to_string()).unwrap();
+    }
+
+    let name = "32";
+    b.iter(|| {
+        let _canonical = dir.canonicalize(name).unwrap();
+    });
+}
+
+#[cfg(unix)]
+#[bench]
+fn symlink_chasing_canonicalize_baseline(b: &mut test::Bencher) {
+    use std::os::unix::fs::symlink;
+
+    let dir = tempfile::tempdir().unwrap();
+
+    fs::File::create(dir.path().join("0")).unwrap();
+    for i in 0..32 {
+        symlink(
+            dir.path().join(i.to_string()),
+            dir.path().join((i + 1).to_string()),
+        )
+        .unwrap();
+    }
+
+    let name = dir.path().join("32");
+    b.iter(|| {
+        let _canonical = fs::canonicalize(&name).unwrap();
     });
 }
 
