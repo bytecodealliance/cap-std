@@ -11,8 +11,8 @@
   </p>
 </div>
 
-`cap-std` crate provides a capability-based version of [`std`]. It provides all the
-interfaces you are used to, but in a capability-based version.
+`cap-std` crate provides a capability-based version of [`std`]. It provides all
+the interfaces you are used to, but in a capability-based version.
 
 [`std`]: https://doc.rust-lang.org/std/
 
@@ -57,8 +57,8 @@ Attempts to access paths not contained within the directory:
 
 return `PermissionDenied` errors.
 
-This allows application logic to configure its own access, without changing
-the behavior of the whole host process, setting up a separate host process, or
+This allows application logic to configure its own access, without changing the
+behavior of the whole host process, setting up a separate host process, or
 requiring external configuration.
 
 ## How do I obtain a `Dir`?
