@@ -11,7 +11,7 @@
   </p>
 </div>
 
-`cap-directories` crate provides utilities for accessing standard directories
+The `cap-directories` crate provides utilities for accessing standard directories
 via the [`directories`] crate, but which provide [`Dir`]s instead of `Path`s.
 
 [`directories`]: https://crates.io/crates/directories

@@ -11,7 +11,7 @@
   </p>
 </div>
 
-`cap-tempfile` crate provides utilities for creating temporary directories
+The `cap-tempfile` crate provides utilities for creating temporary directories
 via the [`tempfile`] crate, but which provide [`Dir`]s instead of `Path`s.
 
 [`tempfile`]: https://crates.io/crates/tempfile

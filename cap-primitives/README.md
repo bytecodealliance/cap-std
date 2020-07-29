@@ -11,7 +11,7 @@
   </p>
 </div>
 
-`cap-primitives` crate provides primitive sandboxing operations that [`cap-std`]
+The `cap-primitives` crate provides primitive sandboxing operations that [`cap-std`]
 and [`cap-async-std`] are built on.
 
 [`cap-std`]: https://crates.io/crates/cap-std
