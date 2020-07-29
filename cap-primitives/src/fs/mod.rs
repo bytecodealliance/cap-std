@@ -5,7 +5,6 @@ mod canonicalize_manually;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
-pub(crate) mod errors;
 mod file_type;
 mod follow_symlinks;
 #[cfg(not(feature = "no_racy_asserts"))]
@@ -37,6 +36,8 @@ mod symlink;
 mod symlink_via_parent;
 mod unlink;
 mod unlink_via_parent;
+
+pub(crate) mod errors;
 
 pub(crate) use canonicalize_manually::*;
 #[cfg(not(feature = "no_racy_asserts"))]

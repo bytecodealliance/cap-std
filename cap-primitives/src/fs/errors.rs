@@ -1,6 +1,12 @@
 use std::io;
 
-pub(crate) use super::errors_impl::*;
+cfg_if::cfg_if! {
+    if #[cfg(any(unix, target_os = "fuchsia"))] {
+        pub(crate) use crate::yanix::fs::errors::*;
+    } else if #[cfg(windows)] {
+        pub(crate) use crate::winx::fs::errors::*;
+    }
+}
 
 #[cold]
 pub(crate) fn escape_attempt() -> io::Error {

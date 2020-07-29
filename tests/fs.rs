@@ -433,6 +433,7 @@ fn file_test_io_seek_read_write() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_stat_is_correct_on_is_file() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_file.txt";
@@ -452,6 +453,7 @@ fn file_test_stat_is_correct_on_is_file() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_stat_is_correct_on_is_dir() {
     let tmpdir = tmpdir();
     let filename = "file_stat_correct_on_is_dir";
@@ -463,6 +465,7 @@ fn file_test_stat_is_correct_on_is_dir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_fileinfo_false_when_checking_is_file_on_a_directory() {
     let tmpdir = tmpdir();
     let dir = "fileinfo_false_on_dir";
@@ -473,6 +476,7 @@ fn file_test_fileinfo_false_when_checking_is_file_on_a_directory() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
     let tmpdir = tmpdir();
     let file = "fileinfo_check_exists_b_and_a.txt";
@@ -484,6 +488,7 @@ fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
     let tmpdir = tmpdir();
     let dir = "before_and_after_dir";
@@ -497,6 +502,7 @@ fn file_test_directoryinfo_check_exists_before_and_after_mkdir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";
@@ -546,6 +552,7 @@ fn mkdir_path_already_exists_error() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
@@ -555,6 +562,7 @@ fn recursive_mkdir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn recursive_mkdir_failure() {
     let tmpdir = tmpdir();
     let dir = "d1";
@@ -602,6 +610,7 @@ fn recursive_mkdir_slash() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn recursive_mkdir_dot() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all(Path::new(".")));
@@ -615,6 +624,7 @@ fn recursive_mkdir_empty() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
     let d1 = PathBuf::from("d1");
@@ -635,6 +645,7 @@ fn recursive_rmdir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
     let tmpdir = tmpdir();
@@ -654,6 +665,7 @@ fn recursive_rmdir_of_symlink() {
 // only Windows makes a distinction between file and directory symlinks.
 #[cfg(windows)]
 #[ignore]
+// TODO enable once more Win syscalls are added
 fn recursive_rmdir_of_file_symlink() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -672,6 +684,7 @@ fn recursive_rmdir_of_file_symlink() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn unicode_path_is_dir() {
     let tmpdir = tmpdir();
 
@@ -692,6 +705,7 @@ fn unicode_path_is_dir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn unicode_path_exists() {
     let tmpdir = tmpdir();
 
@@ -735,6 +749,7 @@ fn copy_src_does_not_exist() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_ok() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -754,6 +769,7 @@ fn copy_file_ok() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_dst_dir() {
     let tmpdir = tmpdir();
     let out = "out";
@@ -767,6 +783,7 @@ fn copy_file_dst_dir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_dst_exists() {
     let tmpdir = tmpdir();
     let input = "in";
@@ -783,6 +800,7 @@ fn copy_file_dst_exists() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_src_dir() {
     let tmpdir = tmpdir();
     let out = "out";
@@ -796,6 +814,7 @@ fn copy_file_src_dir() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_preserves_perm_bits() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -830,6 +849,7 @@ fn copy_file_preserves_streams() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_returns_metadata_len() {
     let tmp = tmpdir();
     let in_path = "in.txt";
@@ -843,6 +863,7 @@ fn copy_file_returns_metadata_len() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
     if !got_symlink_permission(&tmp) {
@@ -868,6 +889,7 @@ fn copy_file_follows_dst_symlink() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn symlinks_work() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -893,6 +915,7 @@ fn symlinks_work() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn symlink_noexist() {
     // Symlinks can point to things that don't exist
     let tmpdir = tmpdir();
@@ -908,6 +931,7 @@ fn symlink_noexist() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn read_link() {
     let tmpdir = tmpdir();
     if cfg!(windows) {
@@ -952,6 +976,7 @@ fn readlink_not_symlink() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn links_work() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -985,6 +1010,7 @@ fn links_work() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
@@ -1014,6 +1040,7 @@ fn chmod_works() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn fchmod_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
@@ -1080,6 +1107,7 @@ fn truncate_works() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn open_flavors() {
     use cap_std::fs::OpenOptions as OO;
     fn c<T: Clone>(t: &T) -> T {
@@ -1312,6 +1340,7 @@ fn canonicalize_works_simple() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn realpath_works() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -1343,6 +1372,7 @@ fn realpath_works() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn realpath_works_tricky() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -1374,6 +1404,7 @@ fn realpath_works_tricky() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn dir_entry_methods() {
     let tmpdir = tmpdir();
 
@@ -1398,6 +1429,7 @@ fn dir_entry_methods() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn dir_entry_debug() {
     let tmpdir = tmpdir();
     tmpdir.create("b").unwrap();
@@ -1410,6 +1442,7 @@ fn dir_entry_debug() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn read_dir_not_found() {
     let tmpdir = tmpdir();
     let res = tmpdir.read_dir("path/that/does/not/exist");
@@ -1418,6 +1451,7 @@ fn read_dir_not_found() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();
     let target = "target";
@@ -1448,6 +1482,7 @@ fn create_dir_all_with_junctions() {
 
 #[test]
 #[cfg_attr(windows, ignore)]
+// TODO enable once more Win syscalls are added
 fn metadata_access_times() {
     let tmpdir = tmpdir();
 

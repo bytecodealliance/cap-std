@@ -1,7 +1,6 @@
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
-pub(crate) mod errors;
 mod file_type_ext;
 mod flags;
 #[cfg(not(feature = "no_racy_asserts"))]
@@ -20,6 +19,8 @@ mod rmdir_unchecked;
 mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
+
+pub(crate) mod errors;
 
 cfg_if::cfg_if! {
     if #[cfg(target_os = "linux")] {
@@ -45,7 +46,6 @@ pub(crate) use crate::fs::{
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
-pub(crate) use errors as errors_impl;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags::*;
 #[cfg(not(feature = "no_racy_asserts"))]

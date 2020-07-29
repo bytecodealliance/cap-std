@@ -99,51 +99,27 @@ fn canonicalize_edge_cases() {
 
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar")),
-        if cfg!(windows) {
-            Path::new("foo\\bar")
-        } else {
-            Path::new("foo/bar")
-        }
+        Path::new("foo").join("bar"),
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar/")),
-        if cfg!(windows) {
-            Path::new("foo\\bar")
-        } else {
-            Path::new("foo/bar")
-        }
+        Path::new("foo").join("bar")
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/bar/")).to_str(),
-        if cfg!(windows) {
-            Some("foo\\bar")
-        } else {
-            Some("foo/bar")
-        }
+        Path::new("foo").join("bar").to_str(),
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar")),
-        if cfg!(windows) {
-            Path::new("foo\\bar")
-        } else {
-            Path::new("foo/bar")
-        }
+        Path::new("foo").join("bar")
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar/")),
-        if cfg!(windows) {
-            Path::new("foo\\bar")
-        } else {
-            Path::new("foo/bar")
-        }
+        Path::new("foo").join("bar")
     );
     assert_eq!(
         check!(tmpdir.canonicalize("foo/../foo/bar/")).to_str(),
-        if cfg!(windows) {
-            Some("foo\\bar")
-        } else {
-            Some("foo/bar")
-        }
+        Path::new("foo").join("bar").to_str()
     );
     error_contains!(
         tmpdir.canonicalize("foo/../.."),
