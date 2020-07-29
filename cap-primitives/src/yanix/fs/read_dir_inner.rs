@@ -1,6 +1,6 @@
 use crate::fs::{
-    dir_options, open, rmdir_unchecked, stat_unchecked, unlink_unchecked, DirEntryInner,
-    FollowSymlinks, Metadata, OpenOptions, open_entry_impl
+    dir_options, open, open_entry_impl, rmdir_unchecked, stat_unchecked, unlink_unchecked,
+    DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
 };
 use std::{
     ffi::OsStr,
