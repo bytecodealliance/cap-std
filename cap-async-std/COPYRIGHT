@@ -6,14 +6,15 @@ Apache 2.0, and MIT terms.
 
 Longer version:
 
-Copyrights in the `cap-async-std` project are retained by their contributors. No
-copyright assignment is required to contribute to the `cap-async-std` project.
+Copyrights in the `cap-async-std` project are retained by their contributors.
+No copyright assignment is required to contribute to the `cap-async-std`
+project.
 
 Some files include code derived from Rust's `libstd`; see the comments in
 the code for details.
 
-Except as otherwise noted (below and/or in individual files), `cap-async-std` is
-licensed under:
+Except as otherwise noted (below and/or in individual files), `cap-async-std`
+is licensed under:
 
  - the Apache License, Version 2.0, with the LLVM Exception
    <LICENSE-Apache-2.0_WITH_LLVM-exception> or

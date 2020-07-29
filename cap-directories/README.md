@@ -11,8 +11,9 @@
   </p>
 </div>
 
-The `cap-directories` crate provides utilities for accessing standard directories
-via the [`directories`] crate, but which provide [`Dir`]s instead of `Path`s.
+The `cap-directories` crate provides utilities for accessing standard
+directories via the [`directories`] crate, but which provide [`Dir`]s instead of
+`Path`s.
 
 [`directories`]: https://crates.io/crates/directories
 [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
