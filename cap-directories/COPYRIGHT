@@ -1,19 +1,19 @@
 Short version for non-lawyers:
 
-`cap-tempfile` is triple-licensed under Apache 2.0 with the LLVM Exception,
+`cap-directories` is triple-licensed under Apache 2.0 with the LLVM Exception,
 Apache 2.0, and MIT terms.
 
 
 Longer version:
 
-Copyrights in the `cap-tempfile` project are retained by their contributors.
-No copyright assignment is required to contribute to the `cap-tempfile`
+Copyrights in the `cap-directories` project are retained by their contributors.
+No copyright assignment is required to contribute to the `cap-directories`
 project.
 
 Some files include code derived from Rust's `libstd`; see the comments in
 the code for details.
 
-Except as otherwise noted (below and/or in individual files), `cap-tempfile`
+Except as otherwise noted (below and/or in individual files), `cap-directories`
 is licensed under:
 
  - the Apache License, Version 2.0, with the LLVM Exception
