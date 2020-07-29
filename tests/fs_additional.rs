@@ -132,6 +132,8 @@ fn optionally_nonrecursive_mkdir() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `readdir` is implemented
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";
