@@ -11,10 +11,8 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-async-std = { version = "1.6.2", features = ["attributes"] }
-ipnet = "2.3.0"
-cfg-if = "0.1.9"
 arf-strings = { version = "0.1.2", optional = true }
+async-std = { version = "1.6.2", features = ["attributes"] }
 cap-primitives = { path = "../cap-primitives", version = "0.0.0", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
