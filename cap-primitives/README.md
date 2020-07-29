@@ -6,7 +6,8 @@
   </p>
 
   <p>
-    <a href="https://github.com/sunfishcode/cap-primitives/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-primitives/workflows/CI/badge.svg" alt="build status" /></a>
+    <a href="https://github.com/sunfishcode/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-std/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
+    <a href="https://cirrus-ci.com/github/sunfishcode/cap-std"><img src="https://api.cirrus-ci.com/github/sunfishcode/cap-std.svg" alt="Cirrus CI Status" /></a>
   </p>
 </div>
 
