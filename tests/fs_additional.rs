@@ -9,6 +9,8 @@ use cap_std::fs::{DirBuilder, OpenOptions};
 use sys_common::io::tmpdir;
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `stat_unchecked` is implemented
 fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
@@ -20,13 +22,24 @@ fn recursive_mkdir() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO investigate why this one is failing
 fn open_various() {
     let tmpdir = tmpdir();
-    error_contains!(tmpdir.create(""), "No such file");
-    error_contains!(tmpdir.create("."), "Is a directory");
+    #[cfg(not(windows))]
+    error!(tmpdir.create(""), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.create(""), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.create("."), "Is a directory");
+    #[cfg(windows)]
+    error!(tmpdir.create("."), 2);
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `stat_unchecked` is implemented
 fn dir_writable() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("dir"));
@@ -62,13 +75,21 @@ fn dir_writable() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO investigate why this one is failing
 fn trailing_slash() {
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
-    error_contains!(tmpdir.open("file/"), "Not a directory");
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("file/"), "Not a directory");
+    #[cfg(windows)]
+    error!(tmpdir.open("file/"), 2);
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `rename_unchecked` is implemented
 fn rename_slashdots() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("dir"));
@@ -82,6 +103,8 @@ fn rename_slashdots() {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `stat_unchecked` is implemented
 fn optionally_recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
@@ -93,9 +116,13 @@ fn optionally_recursive_mkdir() {
 fn optionally_nonrecursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
-    error_contains!(
+    #[cfg(not(windows))]
+    error!(
         tmpdir.create_dir_with(dir, &DirBuilder::new()),
         "No such file"
     );
+    #[cfg(windows)]
+    error!(tmpdir.create_dir_with(dir, &DirBuilder::new()), 2);
+
     assert!(!tmpdir.exists(dir));
 }

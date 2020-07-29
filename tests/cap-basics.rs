@@ -14,27 +14,67 @@ fn cap_smoke_test() {
     let inner = check!(tmpdir.open_dir("dir/inner"));
 
     check!(tmpdir.open("red.txt"));
-    error_contains!(tmpdir.open("blue.txt"), "No such file");
-    error_contains!(tmpdir.open("green.txt"), "No such file");
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("blue.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("blue.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("green.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("green.txt"), 2);
 
     check!(tmpdir.open("./red.txt"));
-    error_contains!(tmpdir.open("./blue.txt"), "No such file");
-    error_contains!(tmpdir.open("./green.txt"), "No such file");
 
-    error_contains!(tmpdir.open("dir/red.txt"), "No such file");
+    #[cfg(not(windows))]
+    error!(tmpdir.open("./blue.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("./blue.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("./green.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("./green.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("dir/red.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("dir/red.txt"), 2);
+
     check!(tmpdir.open("dir/green.txt"));
-    error_contains!(tmpdir.open("dir/blue.txt"), "No such file");
 
-    error_contains!(tmpdir.open("dir/inner/red.txt"), "No such file");
-    error_contains!(tmpdir.open("dir/inner/green.txt"), "No such file");
+    #[cfg(not(windows))]
+    error!(tmpdir.open("dir/blue.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("dir/blue.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("dir/inner/red.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("dir/inner/red.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(tmpdir.open("dir/inner/green.txt"), "No such file");
+    #[cfg(windows)]
+    error!(tmpdir.open("dir/inner/green.txt"), 2);
+
     check!(tmpdir.open("dir/inner/blue.txt"));
 
     check!(tmpdir.open("dir/../red.txt"));
     check!(tmpdir.open("dir/inner/../../red.txt"));
     check!(tmpdir.open("dir/inner/../inner/../../red.txt"));
 
-    error_contains!(inner.open("red.txt"), "No such file");
-    error_contains!(inner.open("green.txt"), "No such file");
+    #[cfg(not(windows))]
+    error!(inner.open("red.txt"), "No such file");
+    #[cfg(windows)]
+    error!(inner.open("red.txt"), 2);
+
+    #[cfg(not(windows))]
+    error!(inner.open("green.txt"), "No such file");
+    #[cfg(windows)]
+    error!(inner.open("green.txt"), 2);
+
     error_contains!(
         inner.open("../inner/blue.txt"),
         "a path led outside of the filesystem"
@@ -44,7 +84,11 @@ fn cap_smoke_test() {
         "a path led outside of the filesystem"
     );
 
-    error_contains!(inner.open_dir(""), "No such file");
+    #[cfg(not(windows))]
+    error!(inner.open_dir(""), "No such file");
+    #[cfg(windows)]
+    error!(inner.open_dir(""), 2);
+
     error_contains!(inner.open_dir("/"), "a path led outside of the filesystem");
     error_contains!(
         inner.open_dir("/etc/services"),

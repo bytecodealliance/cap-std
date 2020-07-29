@@ -30,6 +30,8 @@ fn assert_invalid_input<T>(on: &str, result: io::Result<T>) {
 }
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once more Windows syscalls are implemented
 fn paths_containing_nul() {
     let tmpdir = tmpdir();
 

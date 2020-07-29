@@ -20,6 +20,8 @@ mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
 
+pub(crate) mod errors;
+
 cfg_if::cfg_if! {
     if #[cfg(target_os = "linux")] {
         pub(crate) use crate::yanix::linux::fs::*;
@@ -40,8 +42,6 @@ pub(crate) use crate::fs::{
     symlink_via_parent as symlink_impl,
     unlink_via_parent as unlink_impl,
 };
-
-pub(crate) mod errors;
 
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;

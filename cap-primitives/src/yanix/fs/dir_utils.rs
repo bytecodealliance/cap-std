@@ -2,6 +2,7 @@ use crate::fs::OpenOptions;
 use std::{
     ffi::OsStr,
     fs, io,
+    ops::Deref,
     os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
     path::Path,
 };
@@ -34,7 +35,7 @@ pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
 // used by `mkdir` and others to prevent paths like `foo/` from canonicalizing
 // to `foo/.` since these syscalls treat these differently.
 #[allow(clippy::indexing_slicing)]
-pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
+pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
     let mut bytes = path.as_os_str().as_bytes();
     while bytes.len() > 1 && *bytes.last().unwrap() == b'/' {
         bytes = &bytes[..bytes.len() - 1];
@@ -71,10 +72,10 @@ pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> 
 
 #[test]
 fn strip_dir_suffix_tests() {
-    assert_eq!(strip_dir_suffix(Path::new("/foo//")), Path::new("/foo"));
-    assert_eq!(strip_dir_suffix(Path::new("/foo/")), Path::new("/foo"));
-    assert_eq!(strip_dir_suffix(Path::new("foo/")), Path::new("foo"));
-    assert_eq!(strip_dir_suffix(Path::new("foo")), Path::new("foo"));
-    assert_eq!(strip_dir_suffix(Path::new("/")), Path::new("/"));
-    assert_eq!(strip_dir_suffix(Path::new("//")), Path::new("/"));
+    assert_eq!(&*strip_dir_suffix(Path::new("/foo//")), Path::new("/foo"));
+    assert_eq!(&*strip_dir_suffix(Path::new("/foo/")), Path::new("/foo"));
+    assert_eq!(&*strip_dir_suffix(Path::new("foo/")), Path::new("foo"));
+    assert_eq!(&*strip_dir_suffix(Path::new("foo")), Path::new("foo"));
+    assert_eq!(&*strip_dir_suffix(Path::new("/")), Path::new("/"));
+    assert_eq!(&*strip_dir_suffix(Path::new("//")), Path::new("/"));
 }

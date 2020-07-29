@@ -64,6 +64,8 @@ cfg_if::cfg_if! {
 */
 
 #[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once more Windows syscalls are implemented
 fn rename_basics() {
     let tmpdir = tmpdir();
 

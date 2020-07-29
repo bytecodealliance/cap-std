@@ -15,10 +15,14 @@ pub(super) fn open_options_to_std(opts: &OpenOptions) -> fs::OpenOptions {
         .truncate(opts.truncate)
         .create(opts.create)
         .create_new(opts.create_new)
-        .access_mode(opts.ext.access_mode)
         .share_mode(opts.ext.share_mode)
         .custom_flags(custom_flags)
         .attributes(opts.ext.attributes)
         .security_qos_flags(opts.ext.security_qos_flags);
+
+    if let Some(access_mode) = opts.ext.access_mode {
+        std_opts.access_mode(access_mode);
+    }
+
     std_opts
 }

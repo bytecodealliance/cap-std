@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
-    pub(crate) access_mode: u32,
+    pub(crate) access_mode: Option<u32>,
     pub(crate) share_mode: u32,
     pub(crate) custom_flags: u32,
     pub(crate) attributes: u32,
@@ -10,9 +10,8 @@ pub(crate) struct OpenOptionsExt {
 impl OpenOptionsExt {
     pub(crate) fn new() -> Self {
         use winapi::um::winnt;
-        // TODO figure out the defaults
         Self {
-            access_mode: 0,
+            access_mode: None,
             share_mode: winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE | winnt::FILE_SHARE_DELETE,
             custom_flags: 0,
             attributes: 0,
@@ -23,7 +22,7 @@ impl OpenOptionsExt {
 
 impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
     fn access_mode(&mut self, mode: u32) -> &mut Self {
-        self.access_mode = mode;
+        self.access_mode = Some(mode);
         self
     }
 

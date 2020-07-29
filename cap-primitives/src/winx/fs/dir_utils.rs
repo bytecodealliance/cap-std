@@ -1,14 +1,13 @@
 use crate::fs::OpenOptions;
-#[cfg(not(feature = "no_racy_asserts"))]
-use std::path::PathBuf;
 use std::{
     ffi::{OsStr, OsString},
     fs, io,
+    ops::Deref,
     os::windows::{
         ffi::{OsStrExt, OsStringExt},
         fs::OpenOptionsExt,
     },
-    path::Path,
+    path::{Path, PathBuf},
 };
 use winx::file::Flags;
 
@@ -35,8 +34,14 @@ pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
 // Strip trailing `/`s, unless this reduces `path` to `/` itself. This is
 // used by `mkdir` and others to prevent paths like `foo/` from canonicalizing
 // to `foo/.` since these syscalls treat these differently.
-pub(crate) fn strip_dir_suffix(path: &Path) -> &Path {
-    unimplemented!("strip_dir_suffix")
+pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
+    let mut wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+    while wide.len() > 1
+        && (*wide.last().unwrap() == '/' as u16 || *wide.last().unwrap() == '\\' as u16)
+    {
+        wide.pop();
+    }
+    PathBuf::from(OsString::from_wide(&wide))
 }
 
 // Return an `OpenOptions` for opening directories.

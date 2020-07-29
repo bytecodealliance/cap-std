@@ -14,7 +14,7 @@ pub(crate) fn mkdir_via_parent(
     // it as equivalent to a trailing slash-dot, so strip any trailing slashes.
     let path = strip_dir_suffix(path);
 
-    let (dir, basename) = open_parent(start, path)?;
+    let (dir, basename) = open_parent(start, &path)?;
 
     mkdir_unchecked(&dir, basename.as_ref(), options)
 }

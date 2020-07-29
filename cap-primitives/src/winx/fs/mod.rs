@@ -19,6 +19,8 @@ mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
 
+pub(crate) mod errors;
+
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     canonicalize_manually_and_follow as canonicalize_impl,
@@ -32,8 +34,6 @@ pub(crate) use crate::fs::{
     symlink_file_via_parent as symlink_file_impl,
     unlink_via_parent as unlink_impl,
 };
-
-pub(crate) mod errors;
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
 pub(crate) use dir_entry_inner::*;

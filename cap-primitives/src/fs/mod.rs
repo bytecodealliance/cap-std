@@ -37,6 +37,8 @@ mod symlink_via_parent;
 mod unlink;
 mod unlink_via_parent;
 
+pub(crate) mod errors;
+
 pub(crate) use canonicalize_manually::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
