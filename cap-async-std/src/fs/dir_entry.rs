@@ -1,6 +1,6 @@
 use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
 use async_std::io;
-use std::{ffi, fmt};
+use std::{ffi::OsString, fmt};
 
 /// Entries returned by the `ReadDir` iterator.
 ///
@@ -84,12 +84,12 @@ impl DirEntry {
     ///
     /// [`async_std::fs::DirEntry::file_name`]: https://docs.rs/async-std/latest/async_std/fs/struct.DirEntry.html#method.file_name
     #[inline]
-    pub fn file_name(&self) -> ffi::OsString {
+    pub fn file_name(&self) -> OsString {
         self.inner.file_name()
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "fuchsia", target_os = "vxworks"))]
 impl async_std::os::unix::fs::DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {
