@@ -16,8 +16,6 @@ use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawH
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Windows support.
-///
 /// This does not directly correspond to anything in `async_std`, however its methods
 /// correspond to the [functions in `async_std::fs`] and the constructor methods for
 /// [`async_std::fs::File`].
