@@ -17,17 +17,17 @@ pub(crate) struct DirEntryInner {
 
 impl DirEntryInner {
     #[inline]
-    pub fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
+    pub(crate) fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
         self.read_dir.open(self.file_name_bytes(), options)
     }
 
     #[inline]
-    pub fn metadata(&self) -> io::Result<Metadata> {
+    pub(crate) fn metadata(&self) -> io::Result<Metadata> {
         self.read_dir.metadata(self.file_name_bytes())
     }
 
     #[inline]
-    pub fn remove_file(&self) -> io::Result<()> {
+    pub(crate) fn remove_file(&self) -> io::Result<()> {
         self.read_dir.remove_file(self.file_name_bytes())
     }
 
@@ -37,12 +37,12 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub fn remove_dir(&self) -> io::Result<()> {
+    pub(crate) fn remove_dir(&self) -> io::Result<()> {
         self.read_dir.remove_dir(self.file_name_bytes())
     }
 
     #[inline]
-    pub fn file_type(&self) -> io::Result<FileType> {
+    pub(crate) fn file_type(&self) -> io::Result<FileType> {
         Ok(match self.yanix.file_type() {
             yanix::file::FileType::Directory => FileType::dir(),
             yanix::file::FileType::RegularFile => FileType::file(),
@@ -56,12 +56,12 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub fn file_name(&self) -> OsString {
+    pub(crate) fn file_name(&self) -> OsString {
         self.file_name_bytes().to_os_string()
     }
 
     #[inline]
-    pub fn ino(&self) -> u64 {
+    pub(crate) fn ino(&self) -> u64 {
         self.yanix.ino()
     }
 
