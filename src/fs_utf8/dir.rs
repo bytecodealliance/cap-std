@@ -62,7 +62,7 @@ impl Dir {
     /// This corresponds to [`std::fs::OpenOptions::open`].
     ///
     /// Instead of being a method on `OpenOptions`, this is a method on `Dir`,
-    /// and it only accesses functions relative to `self`.
+    /// and it only accesses paths relative to `self`.
     ///
     /// [`std::fs::OpenOptions::open`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.open
     #[inline]
