@@ -85,7 +85,7 @@ impl TempDir {
         Err(Self::already_exists())
     }
 
-    /// Closes and removes the temporary directory, returing a `Result`.
+    /// Closes and removes the temporary directory, returning a `Result`.
     ///
     /// This corresponds to [`tempfile::TempDir::close`].
     ///

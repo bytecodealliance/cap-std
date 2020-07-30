@@ -10,7 +10,7 @@ use std::{
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
 use yanix::file::OFlags;
 
-// Rust's `Path` implicity strips redundant slashes and `.` components, however
+// Rust's `Path` implicitly strips redundant slashes and `.` components, however
 // they aren't redundant in one case: at the end of a path they indicate that a
 // path is expected to name a directory.
 pub(crate) fn path_requires_dir(path: &Path) -> bool {
