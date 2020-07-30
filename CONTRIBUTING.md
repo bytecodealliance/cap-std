@@ -34,3 +34,15 @@ To run the `cap-primitives` fuzzer, run:
 cargo +nightly fuzz run cap-primitives
 ```
 
+## Benchmarking
+
+There are several micro-benchmarks for the `cap-std` crate which stress-test
+specific API features. As micro-benchmarks, they aren't representative of
+real-world use, but they are useful for development of `cap-std`.
+
+To run the `cap-std` benchmarks, run:
+
+```
+cargo +nightly bench
+```
+
