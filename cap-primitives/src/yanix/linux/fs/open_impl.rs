@@ -140,7 +140,7 @@ fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::F
     )
     .expect("open_manually failed when open_openat2 succeeded");
     assert!(
-        is_same_file(&file, &check).expect("open_manually should be able to stat the result"),
+        is_same_file(file, &check).expect("open_manually should be able to stat the result"),
         "open_manually should open the same inode as open_openat2"
     );
 }

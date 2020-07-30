@@ -50,7 +50,7 @@ fn check_open(
     match (&result, &unchecked_result) {
         (Ok(result_file), Ok(unchecked_file)) => {
             assert!(
-                is_same_file(result_file, &unchecked_file).unwrap(),
+                is_same_file(result_file, unchecked_file).unwrap(),
                 "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
                 start,
                 path.display(),
