@@ -11,16 +11,16 @@
   </p>
 </div>
 
-`cap-std` crate provides a capability-based version of [`std`]. It provides all
-the interfaces you are used to, but in a capability-based version.
+`cap-std` crate provides a capability-based version of [`std`]. It provides
+capability-based versions of interfaces you are used to.
+
+The filesystem module, [`cap_std::fs`], is known to work on Linux, macOS, and
+FreeBSD, and probably can be easily ported to other modern Unix-family
+platforms. Ports to Windows and WASI platforms are in development, though not
+yet usable.
 
 [`std`]: https://doc.rust-lang.org/std/
-
-The filesystem module, `fs`, is known to work on Linux, macOS, and FreeBSD, and
-probably can be easily ported to other modern Unix-family platforms. Ports to
-Windows and WASI platforms are in development, though not yet usable.
-
-The networking module, `net`, is not yet usable.
+[`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 
 ## Capability-based security
 
@@ -39,8 +39,8 @@ mechanisms governing which resources can actually be accessed, but those are
 typically coarse-grained and configured outside of the application.
 
 Capability-based security seeks to avoid ambient authority, to make sandboxing
-finer-grained and composable. To open a file, one needs a handle to a directory
-it's in:
+finer-grained and composable. To open a file, one needs a [`Dir`], representing
+an open directory it's in:
 
 ```
     let file = dir.open("the/thing.txt")?;
@@ -61,7 +61,9 @@ This allows application logic to configure its own access, without changing the
 behavior of the whole host process, setting up a separate host process, or
 requiring external configuration.
 
-## How do I obtain a `Dir`?
+[`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
+
+## How do I obtain a [`Dir`]?
 
 If every resource requires some other resource to obtain, how does one obtain
 the first resource?
@@ -82,26 +84,17 @@ and `cap-std` APIs.
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
 [`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/examples/kv-cli.rs
 
-## How do I use a `Dir`?
-
-Once you have a `Dir`, it's very similar to the Rust standard library:
-
- - Instead of using `File::open(...)`, call `dir.open(...)`.
- - Instead of using `File::create(...)`, call `dir.create(...)`.
- - Instead of using `fs::metadata(...)`, call `dir.metadata(...)`.
-
-and so on.
-
 ## What can I use `cap-std` for?
 
 `cap-std` is not a sandbox for untrusted Rust code. Among other things,
 untrusted Rust code could use `unsafe` or the unsandboxed APIs in `std::fs`.
 
-`cap-std` allows code to declare its intent, and opt in to protection from
-malicious path names. Code which takes a `Dir` from which to open files, rather
-than taking bare filenames, declares its intent to only open files underneath
-that `Dir`. And, `Dir` automatically protects against paths which might include
-`..`, symlinks, or absolute paths that might lead outside of that `Dir`.
+`cap-std` allows code to declare its intent and to opt in to protection from
+malicious path names. Code which takes a [`Dir`] from which to open files,
+rather than taking bare filenames, declares its intent to only open files
+underneath that `Dir`. And, `Dir` automatically protects against paths which
+might include `..`, symlinks, or absolute paths that might lead outside of that
+`Dir`.
 
 `cap-std` also has another role, within WASI, because `cap-std`'s filesystem
 APIs closely follow WASI's sandboxing APIs. In WASI, `cap-std` becomes a very
