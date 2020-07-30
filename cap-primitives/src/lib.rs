@@ -9,7 +9,8 @@
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(target_os = "windows", feature(windows_by_handle))]
 #![cfg_attr(target_os = "windows", feature(windows_file_type_ext))]
-#![doc(html_logo_url = "https://github.com/sunfishcode/cap-std/tree/main/media/cap-std.svg")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.ico")]
 
 cfg_if::cfg_if! {
     if #[cfg(any(unix, target_os = "fuchsia"))] {
