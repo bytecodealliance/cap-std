@@ -63,7 +63,7 @@ impl Dir {
     /// This corresponds to [`async_std::fs::OpenOptions::open`].
     ///
     /// Instead of being a method on `OpenOptions`, this is a method on `Dir`,
-    /// and it only accesses functions relative to `self`.
+    /// and it only accesses paths relative to `self`.
     ///
     /// [`async_std::fs::OpenOptions::open`]: https://docs.rs/async-std/latest/async_std/fs/struct.OpenOptions.html#method.open
     #[inline]
