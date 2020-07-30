@@ -7,7 +7,7 @@ use cap_primitives::fs::{
 };
 use std::{
     fmt,
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
 
 #[cfg(any(unix, target_os = "fuchsia"))]
@@ -263,6 +263,12 @@ impl Dir {
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         let file = unsafe { as_sync(&self.std_file) };
         stat(&file, path.as_ref(), FollowSymlinks::Yes)
+    }
+
+    /// Returns an iterator over the entries within `self`.
+    #[inline]
+    pub fn entries(&self) -> io::Result<ReadDir> {
+        self.read_dir(Component::CurDir)
     }
 
     /// Returns an iterator over the entries within a directory.

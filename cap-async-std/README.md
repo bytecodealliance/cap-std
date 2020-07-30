@@ -12,7 +12,7 @@
 </div>
 
 This crate provides a capability-oriented version of [`async-std`]. It provides
-all the interfaces you are used to, but in a capability-oriented version.
+capability-oriented versions of interfaces you are used to.
 
 See the [`cap-std` README.md] for more information about capability-oriented
 security.
