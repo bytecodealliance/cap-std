@@ -17,7 +17,7 @@ pub(crate) fn open_entry_manually(
         Ok(file) => Ok(file),
         Err(OpenUncheckedError::Symlink(_)) => {
             let mut symlink_count = 0;
-            let destination = readlink_one(start, path.as_ref(), &mut symlink_count)?;
+            let destination = readlink_one(start, path, &mut symlink_count)?;
             let maybe = MaybeOwnedFile::borrowed(start);
             open_manually(maybe, &destination, options, &mut symlink_count, None)
                 .map(MaybeOwnedFile::unwrap_owned)

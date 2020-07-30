@@ -18,8 +18,8 @@ pub struct UserDirs {
 }
 
 impl UserDirs {
-    /// Creates a UserDirs struct which holds the paths to user-facing directories for audio, font,
-    /// video, etc. data on the system.
+    /// Creates a `UserDirs` struct which holds the paths to user-facing directories for audio,
+    /// font, video, etc. data on the system.
     ///
     /// This corresponds to [`directories::UserDirs::new`].
     ///

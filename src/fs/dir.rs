@@ -156,7 +156,7 @@ impl Dir {
                 return Err(io::Error::new(
                     io::ErrorKind::Other,
                     "failed to create whole tree",
-                ));
+                ))
             }
         }
         match self._create_dir_one(path, dir_options) {

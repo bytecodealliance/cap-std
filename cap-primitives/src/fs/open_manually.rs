@@ -255,9 +255,7 @@ pub(crate) fn open_manually<'start>(
                         components.extend(destination.components().map(to_owned_component).rev());
                         dir_required |= path_requires_dir(&destination);
                     }
-                    Err(OpenUncheckedError::NotFound(err)) => {
-                        return Err(err);
-                    }
+                    Err(OpenUncheckedError::NotFound(err)) => return Err(err),
                     Err(OpenUncheckedError::Other(err)) => {
                         // An error occurred. If this was the last component, and the error wasn't
                         // due to invalid inputs (eg. the path has an embedded NUL), record it as
