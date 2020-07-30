@@ -15,8 +15,6 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 
 /// A reference to an open directory on a filesystem.
 ///
-/// TODO: Windows support.
-///
 /// This does not directly correspond to anything in `std`, however its methods
 /// correspond to the [functions in `std::fs`] and the constructor methods for
 /// [`std::fs::File`].

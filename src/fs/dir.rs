@@ -34,8 +34,6 @@ use std::os::wasi::{
 /// correspond to the [functions in `std::fs`] and the constructor methods for
 /// [`std::fs::File`].
 ///
-/// TODO: Windows support.
-///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model. And it lacks
 /// a `set_permissions` method because popular host platforms don't have a way to
