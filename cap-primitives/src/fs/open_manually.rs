@@ -243,9 +243,7 @@ pub(crate) fn open_manually<'start>(
                         // Normal case
                         let prev_base = base.descend_to(MaybeOwnedFile::owned(file));
                         dirs.push(prev_base);
-                        if one != Component::CurDir.as_os_str() {
-                            canonical_path.push(&one);
-                        }
+                        canonical_path.push(&one);
                     }
                     Err(OpenUncheckedError::Symlink(err)) => {
                         if use_options.follow == FollowSymlinks::No && components.is_empty() {
