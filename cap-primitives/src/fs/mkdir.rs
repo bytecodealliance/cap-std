@@ -1,7 +1,9 @@
 //! This defines `mkdir`, the primary entrypoint to sandboxed directory creation.
 
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{canonicalize, mkdir_unchecked, stat_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{
+    canonicalize, map_result, mkdir_unchecked, stat_unchecked, FollowSymlinks, Metadata,
+};
 use crate::fs::{mkdir_impl, DirOptions};
 use std::{fs, io, path::Path};
 
@@ -35,7 +37,6 @@ fn check_mkdir(
     result: &io::Result<()>,
     stat_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

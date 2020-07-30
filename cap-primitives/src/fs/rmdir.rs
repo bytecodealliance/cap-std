@@ -2,7 +2,9 @@
 
 use crate::fs::rmdir_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{canonicalize_manually, rmdir_unchecked, stat_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{
+    canonicalize_manually, map_result, rmdir_unchecked, stat_unchecked, FollowSymlinks, Metadata,
+};
 use std::{fs, io, path::Path};
 
 /// Perform a `rmdirat`-like operation, ensuring that the resolution of the path
@@ -34,7 +36,6 @@ fn check_rmdir(
     result: &io::Result<()>,
     stat_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

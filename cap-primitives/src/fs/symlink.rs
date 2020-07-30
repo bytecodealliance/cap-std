@@ -9,7 +9,9 @@
 ))]
 use crate::fs::symlink_unchecked;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{canonicalize, canonicalize_manually, stat_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{
+    canonicalize, canonicalize_manually, map_result, stat_unchecked, FollowSymlinks, Metadata,
+};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
@@ -117,7 +119,6 @@ fn check_symlink(
     result: &io::Result<()>,
     stat_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

@@ -1,5 +1,4 @@
-use super::{errors::too_many_symlinks, MAX_SYMLINK_EXPANSIONS};
-use crate::fs::readlink_unchecked;
+use crate::fs::{errors, readlink_unchecked, MAX_SYMLINK_EXPANSIONS};
 use std::{
     ffi::OsStr,
     fs, io,
@@ -27,7 +26,7 @@ pub(crate) fn readlink_one(
     );
 
     if *symlink_count == MAX_SYMLINK_EXPANSIONS {
-        return Err(too_many_symlinks());
+        return Err(errors::too_many_symlinks());
     }
 
     let destination = readlink_unchecked(base, name)?;
