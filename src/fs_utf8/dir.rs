@@ -4,7 +4,7 @@ use crate::{
 };
 use std::{fmt, fs, io};
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "fuchsia"))]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
@@ -187,6 +187,12 @@ impl Dir {
     pub fn metadata<P: AsRef<str>>(&self, path: P) -> io::Result<Metadata> {
         let path = from_utf8(path)?;
         self.cap_std.metadata(path)
+    }
+
+    /// Returns an iterator over the entries within `self`.
+    #[inline]
+    pub fn entries(&self) -> io::Result<ReadDir> {
+        self.cap_std.entries().map(ReadDir::from_cap_std)
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -389,6 +395,8 @@ impl Dir {
     /// This corresponds to [`std::os::unix::net::UnixListener::bind`], but only
     /// accesses paths relative to `self`.
     ///
+    /// XXX: This function is not yet implemented.
+    ///
     /// [`std::os::unix::net::UnixListener::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.bind
     #[cfg(unix)]
     #[inline]
@@ -401,6 +409,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixStream::connect`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixStream::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.connect
     #[cfg(unix)]
@@ -415,6 +425,8 @@ impl Dir {
     /// This corresponds to [`std::os::unix::net::UnixDatagram::bind`], but only
     /// accesses paths relative to `self`.
     ///
+    /// XXX: This function is not yet implemented.
+    ///
     /// [`std::os::unix::net::UnixDatagram::bind`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.bind
     #[cfg(unix)]
     #[inline]
@@ -427,6 +439,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixDatagram::connect`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixDatagram::connect`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.connect
     #[cfg(unix)]
@@ -444,6 +458,8 @@ impl Dir {
     ///
     /// This corresponds to [`std::os::unix::net::UnixDatagram::send_to`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// XXX: This function is not yet implemented.
     ///
     /// [`std::os::unix::net::UnixDatagram::send_to`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.send_to
     #[cfg(unix)]
