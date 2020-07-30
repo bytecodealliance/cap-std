@@ -1,5 +1,8 @@
 //! Capability-oriented standard directories.
 
+#![deny(missing_docs)]
+#![doc(html_logo_url = "https://github.com/sunfishcode/cap-std/tree/main/media/cap-std.svg")]
+
 use std::io;
 
 mod project_dirs;
