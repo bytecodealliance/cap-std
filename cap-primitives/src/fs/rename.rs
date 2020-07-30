@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 #[cfg(not(feature = "no_racy_asserts"))]
 use {
     crate::fs::{
-        append_dir_suffix, canonicalize_manually, path_requires_dir, rename_unchecked,
+        append_dir_suffix, canonicalize_manually, map_result, path_requires_dir, rename_unchecked,
         stat_unchecked, FollowSymlinks, Metadata,
     },
     std::path::PathBuf,
@@ -67,7 +67,6 @@ fn check_rename(
     old_metadata_after: &io::Result<Metadata>,
     new_metadata_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

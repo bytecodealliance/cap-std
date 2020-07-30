@@ -1,12 +1,9 @@
 //! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
 
+#[cfg(not(feature = "no_racy_asserts"))]
+use crate::fs::{get_path, is_same_file, open_unchecked, stat_unchecked, Metadata};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
-#[cfg(not(feature = "no_racy_asserts"))]
-use {
-    super::get_path,
-    crate::fs::{is_same_file, open_unchecked, stat_unchecked, Metadata},
-};
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.

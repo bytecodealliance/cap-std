@@ -2,7 +2,9 @@
 
 use crate::fs::link_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{canonicalize, link_unchecked, stat_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{
+    canonicalize, link_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
+};
 use std::{fs, io, path::Path};
 
 /// Perform a `linkat`-like operation, ensuring that the resolution of the path
@@ -60,7 +62,6 @@ fn check_link(
     old_metadata_after: &io::Result<Metadata>,
     new_metadata_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

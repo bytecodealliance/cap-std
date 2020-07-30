@@ -3,7 +3,7 @@
 use crate::fs::unlink_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{
-    canonicalize_manually, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata,
+    canonicalize_manually, map_result, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata,
 };
 use std::{fs, io, path::Path};
 
@@ -36,7 +36,6 @@ fn check_unlink(
     result: &io::Result<()>,
     stat_after: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (

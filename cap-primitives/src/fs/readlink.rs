@@ -3,7 +3,7 @@
 
 use crate::fs::readlink_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{readlink_unchecked, stat, FollowSymlinks};
+use crate::fs::{map_result, readlink_unchecked, stat, FollowSymlinks};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -34,7 +34,6 @@ fn check_readlink(
     result: &io::Result<PathBuf>,
     unchecked: &io::Result<PathBuf>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (map_result(result), map_result(unchecked)) {

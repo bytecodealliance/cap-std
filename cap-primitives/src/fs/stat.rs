@@ -1,7 +1,7 @@
 //! This defines `stat`, the primary entrypoint to sandboxed metadata querying.
 
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{canonicalize, stat_unchecked};
+use crate::fs::{canonicalize, map_result, stat_unchecked};
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
@@ -31,7 +31,6 @@ fn check_stat(
     result: &io::Result<Metadata>,
     stat: &io::Result<Metadata>,
 ) {
-    use super::map_result;
     use io::ErrorKind::*;
 
     match (map_result(result), map_result(stat)) {
