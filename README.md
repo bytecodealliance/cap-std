@@ -2,7 +2,7 @@
   <h1><code>cap-std</code></h1>
 
   <p>
-    <strong>Capability-based version of Rust standard library</strong>
+    <strong>Capability-oriented version of Rust standard library</strong>
   </p>
 
   <p>
@@ -11,8 +11,8 @@
   </p>
 </div>
 
-`cap-std` crate provides a capability-based version of [`std`]. It provides
-capability-based versions of interfaces you are used to.
+`cap-std` crate provides a capability-oriented version of [`std`]. It provides
+capability-oriented versions of interfaces you are used to.
 
 The filesystem module, [`cap_std::fs`], is known to work on Linux, macOS, and
 FreeBSD, and probably can be easily ported to other modern Unix-family
@@ -22,7 +22,7 @@ yet usable.
 [`std`]: https://doc.rust-lang.org/std/
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 
-## Capability-based security
+## Capability-oriented security
 
 Operating systems have a concept of resource handles, or file descriptors, which
 are values that can be passed around within and sometimes between programs, and
@@ -38,7 +38,7 @@ There may be access-control lists, namespaces, firewalls, or virtualization
 mechanisms governing which resources can actually be accessed, but those are
 typically coarse-grained and configured outside of the application.
 
-Capability-based security seeks to avoid ambient authority, to make sandboxing
+Capability-oriented security seeks to avoid ambient authority, to make sandboxing
 finer-grained and composable. To open a file, one needs a [`Dir`], representing
 an open directory it's in:
 

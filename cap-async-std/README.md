@@ -2,7 +2,7 @@
   <h1><code>cap-async-std</code></h1>
 
   <p>
-    <strong>Capability-based version of `async-std`</strong>
+    <strong>Capability-oriented version of `async-std`</strong>
   </p>
 
   <p>
@@ -11,10 +11,10 @@
   </p>
 </div>
 
-This crate provides a capability-based version of [`async-std`]. It provides all
-the interfaces you are used to, but in a capability-based version.
+This crate provides a capability-oriented version of [`async-std`]. It provides
+all the interfaces you are used to, but in a capability-oriented version.
 
-See the [`cap-std` README.md] for more information about capability-based
+See the [`cap-std` README.md] for more information about capability-oriented
 security.
 
 [`async-std`]: https://crates.io/crates/async-std

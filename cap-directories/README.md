@@ -2,7 +2,7 @@
   <h1><code>cap-directories</code></h1>
 
   <p>
-    <strong>Capability-based standard directories for config, cache and other data</strong>
+    <strong>Capability-oriented standard directories for config, cache and other data</strong>
   </p>
 
   <p>
