@@ -3,7 +3,7 @@ use std::{fs, io, path::Path};
 
 /// Implement `rename` by `open`ing up the parent component of the path and then
 /// calling `rename_unchecked` on the last component.
-pub fn rename_via_parent(
+pub(crate) fn rename_via_parent(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,

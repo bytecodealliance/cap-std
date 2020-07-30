@@ -10,7 +10,7 @@ pub(crate) struct DirEntryInner {
 
 impl DirEntryInner {
     #[inline]
-    pub fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
+    pub(crate) fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
         match options.follow {
             FollowSymlinks::No => open_options_to_std(options).open(self.std.path()),
             FollowSymlinks::Yes => unsafe {
@@ -25,34 +25,34 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub fn metadata(&self) -> io::Result<Metadata> {
+    pub(crate) fn metadata(&self) -> io::Result<Metadata> {
         self.std.metadata().map(Metadata::from_std)
     }
 
     #[inline]
-    pub fn remove_file(&self) -> io::Result<()> {
+    pub(crate) fn remove_file(&self) -> io::Result<()> {
         fs::remove_file(self.std.path())
     }
 
     #[inline]
-    pub fn remove_dir(&self) -> io::Result<()> {
+    pub(crate) fn remove_dir(&self) -> io::Result<()> {
         fs::remove_dir(self.std.path())
     }
 
     #[inline]
-    pub fn read_dir(&self) -> io::Result<ReadDir> {
+    pub(crate) fn read_dir(&self) -> io::Result<ReadDir> {
         let std = fs::read_dir(self.std.path())?;
         let inner = ReadDirInner::from_std(std);
         Ok(ReadDir { inner })
     }
 
     #[inline]
-    pub fn file_type(&self) -> io::Result<FileType> {
+    pub(crate) fn file_type(&self) -> io::Result<FileType> {
         self.std.file_type().map(FileType::from_std)
     }
 
     #[inline]
-    pub fn file_name(&self) -> OsString {
+    pub(crate) fn file_name(&self) -> OsString {
         self.std.file_name()
     }
 
