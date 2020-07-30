@@ -268,7 +268,7 @@ impl Dir {
     /// [`std::fs::read_dir`]: https://doc.rust-lang.org/std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        read_dir(&self.std_file, path.as_ref())
+        read_dir(&self.std_file, path.as_ref()).map(|inner| ReadDir { inner })
     }
 
     /// Read the entire contents of a file into a bytes vector.

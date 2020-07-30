@@ -1,6 +1,6 @@
 use crate::{
-    fs::{FileType, Metadata},
-    fs_utf8::to_utf8,
+    fs::{FileType, Metadata, OpenOptions},
+    fs_utf8::{to_utf8, Dir, File},
 };
 use std::{fmt, io};
 
@@ -10,6 +10,11 @@ use std::{fmt, io};
 ///
 /// Unlike `std::fs::DirEntry`, this API has no `DirEntry::path`, because
 /// absolute paths don't interoperate well with the capability model.
+///
+/// There is a `file_name` function, however there are also `open`,
+/// `open_with`, `open_dir`, `remove_file`, and `remove_dir` functions for
+/// opening or removing the entry directly, which can be more efficient and
+/// convenient.
 ///
 /// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
@@ -25,6 +30,36 @@ impl DirEntry {
     #[inline]
     pub fn from_cap_std(cap_std: crate::fs::DirEntry) -> Self {
         Self { cap_std }
+    }
+
+    /// Open the file for reading.
+    #[inline]
+    pub fn open(&self) -> io::Result<File> {
+        self.cap_std.open().map(File::from_cap_std)
+    }
+
+    /// Open the file with the given options.
+    #[inline]
+    pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
+        self.cap_std.open_with(options).map(File::from_cap_std)
+    }
+
+    /// Open the entry as a directory.
+    #[inline]
+    pub fn open_dir(&self) -> io::Result<Dir> {
+        self.cap_std.open_dir().map(Dir::from_cap_std)
+    }
+
+    /// Removes the file from its filesystem.
+    #[inline]
+    pub fn remove_file(&self) -> io::Result<()> {
+        self.cap_std.remove_file()
+    }
+
+    /// Removes the directory from its filesystem.
+    #[inline]
+    pub fn remove_dir(&self) -> io::Result<()> {
+        self.cap_std.remove_dir()
     }
 
     /// Returns the metadata for the file that this entry points at.

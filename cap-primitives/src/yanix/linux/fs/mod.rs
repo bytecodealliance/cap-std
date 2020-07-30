@@ -1,8 +1,10 @@
 mod ensure_cloexec;
+mod open_entry_impl;
 mod open_impl;
 mod stat_impl;
 
 pub(crate) use ensure_cloexec::*;
+pub(crate) use open_entry_impl::*;
 pub(crate) use open_impl::*;
 pub(crate) use stat_impl::*;
 

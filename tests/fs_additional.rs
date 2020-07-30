@@ -6,6 +6,10 @@
 mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};
+use std::{
+    io::{Read, Write},
+    str,
+};
 use sys_common::io::tmpdir;
 
 #[test]
@@ -125,4 +129,34 @@ fn optionally_nonrecursive_mkdir() {
     error!(tmpdir.create_dir_with(dir, &DirBuilder::new()), 2);
 
     assert!(!tmpdir.exists(dir));
+}
+
+#[test]
+#[cfg_attr(windows, ignore)]
+// TODO enable once `readdir` is implemented
+fn file_test_directoryinfo_readdir() {
+    let tmpdir = tmpdir();
+    let dir = "di_readdir";
+    check!(tmpdir.create_dir(dir));
+    let prefix = "foo";
+    for n in 0..3 {
+        let f = format!("{}.txt", n);
+        let mut w = check!(tmpdir.create(&f));
+        let msg_str = format!("{}{}", prefix, n.to_string());
+        let msg = msg_str.as_bytes();
+        check!(w.write(msg));
+    }
+    let files = check!(tmpdir.read_dir(dir));
+    let mut mem = [0; 4];
+    for f in files {
+        let f = f.unwrap();
+        {
+            check!(check!(f.open()).read(&mut mem));
+            let read_str = str::from_utf8(&mem).unwrap();
+            let expected = format!("{}{}", prefix, f.file_name().to_str().unwrap());
+            assert_eq!(expected, read_str);
+        }
+        check!(f.remove_file());
+    }
+    check!(tmpdir.remove_dir(dir));
 }

@@ -1,5 +1,5 @@
-use crate::fs::{FileType, Metadata, ReadDirInner};
-use std::{ffi::OsString, fmt, io};
+use crate::fs::{FileType, Metadata, OpenOptions, ReadDirInner};
+use std::{ffi::OsString, fmt, fs, io};
 
 pub(crate) struct DirEntryInner {
     pub(crate) read_dir: ReadDirInner,
@@ -7,8 +7,23 @@ pub(crate) struct DirEntryInner {
 
 impl DirEntryInner {
     #[inline]
+    pub fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
+        todo!("DirEntryInner::open")
+    }
+
+    #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         todo!("DirEntryInner::metadata")
+    }
+
+    #[inline]
+    pub fn remove_file(&self) -> io::Result<()> {
+        todo!("DirEntryInner::remove_file")
+    }
+
+    #[inline]
+    pub fn remove_dir(&self) -> io::Result<()> {
+        todo!("DirEntryInner::remove_dir")
     }
 
     #[inline]

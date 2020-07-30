@@ -21,7 +21,7 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         if child.file_type()?.is_dir() {
             remove_dir_all_recursive(start, &path.join(child.file_name()))?;
         } else {
-            unlink(start, &path.join(child.file_name()))?;
+            child.remove_file()?;
         }
     }
     rmdir(start, path)

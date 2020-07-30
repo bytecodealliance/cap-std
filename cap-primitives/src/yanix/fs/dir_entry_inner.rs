@@ -1,8 +1,8 @@
-use crate::fs::{FileType, FileTypeExt, Metadata, ReadDirInner};
+use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDirInner};
 use std::{
     ffi::{OsStr, OsString},
-    fmt, io,
-    os::unix::ffi::{OsStrExt, OsStringExt},
+    fmt, fs, io,
+    os::unix::ffi::OsStrExt,
 };
 use yanix::dir::{Entry, EntryExt};
 
@@ -13,9 +13,23 @@ pub(crate) struct DirEntryInner {
 
 impl DirEntryInner {
     #[inline]
+    pub fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
+        self.read_dir.open(self.file_name_bytes(), options)
+    }
+
+    #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        self.read_dir
-            .metadata(OsStr::from_bytes(self.yanix.file_name().to_bytes()))
+        self.read_dir.metadata(self.file_name_bytes())
+    }
+
+    #[inline]
+    pub fn remove_file(&self) -> io::Result<()> {
+        self.read_dir.remove_file(self.file_name_bytes())
+    }
+
+    #[inline]
+    pub fn remove_dir(&self) -> io::Result<()> {
+        self.read_dir.remove_dir(self.file_name_bytes())
     }
 
     #[inline]
@@ -34,12 +48,16 @@ impl DirEntryInner {
 
     #[inline]
     pub fn file_name(&self) -> OsString {
-        OsString::from_vec(self.yanix.file_name().to_bytes().to_vec())
+        self.file_name_bytes().to_os_string()
     }
 
     #[inline]
     pub fn ino(&self) -> u64 {
         self.yanix.ino()
+    }
+
+    fn file_name_bytes(&self) -> &OsStr {
+        OsStr::from_bytes(self.yanix.file_name().to_bytes())
     }
 }
 
