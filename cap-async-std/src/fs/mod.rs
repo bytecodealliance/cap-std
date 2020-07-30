@@ -1,4 +1,4 @@
-//! A capability-based filesystem API modeled after `async_std::fs`.
+//! A capability-oriented filesystem API modeled after `async_std::fs`.
 //!
 //! This corresponds to [`async_std::fs`].
 //!

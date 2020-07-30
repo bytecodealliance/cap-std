@@ -1,8 +1,8 @@
-//! A capability-based API modeled after `async_std`.
+//! A capability-oriented API modeled after `async_std`.
 //!
 //! This corresponds to [`async_std`].
 //!
-//! Capability-based APIs represent access to external resources as
+//! Capability-oriented APIs represent access to external resources as
 //! objects which can be passed around between different parts of a
 //! program.
 //!

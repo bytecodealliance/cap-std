@@ -1,4 +1,4 @@
-//! A capability-based network API modeled after `async_std::net`.
+//! A capability-oriented network API modeled after `async_std::net`.
 //!
 //! XXX: The interfaces in this module are not yet implemented.
 //!
