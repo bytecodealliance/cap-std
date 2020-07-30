@@ -2,9 +2,9 @@
 //!
 //! This corresponds to [`async_std::fs`].
 //!
-//! Instead of [`async_std::fs`'s free functions] which operate on paths, this
-//! crate has methods on [`Dir`] which operate on paths which must be
-//! relative to the directory.
+//! Instead of [`async_std::fs`'s free functions] and [`async_std::fs::File`]'s
+//! constructors which operate on bare paths, this crate has methods on [`Dir`]
+//! which operate on paths which must be relative to the directory.
 //!
 //! Where `async_std` says "the filesystem", this API says "a filesystem", as
 //! it doesn't assume that there's a single global filesystem namespace.
@@ -16,6 +16,7 @@
 //!
 //! [`async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/
 //! [`async_std::fs`'s free functions]: https://docs.rs/async-std/latest/async_std/fs/#functions
+//! [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
 //! [`Dir`]: struct.Dir.html
 
 mod dir;

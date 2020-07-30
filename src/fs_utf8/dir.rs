@@ -17,12 +17,18 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 ///
 /// TODO: Windows support.
 ///
+/// This does not directly correspond to anything in `std`, however its methods
+/// correspond to the [functions in `std::fs`] and the constructor methods for
+/// [`std::fs::File`].
+///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model. And it lacks
 /// a `set_permissions` method because popular host platforms don't have a way to
 /// perform that operation in a manner compatible with cap-std's sandbox; instead,
 /// open the file and call [`File::set_permissions`].
 ///
+/// [functions in `std::fs`]: https://doc.rust-lang.org/std/fs/index.html#functions
+/// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 /// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     cap_std: crate::fs::Dir,

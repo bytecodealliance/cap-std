@@ -31,6 +31,10 @@ use async_std::os::wasi::{
 
 /// A reference to an open directory on a filesystem.
 ///
+/// This does not directly correspond to anything in `async_std`, however its methods
+/// correspond to the [functions in `async_std::fs`] and the constructor methods for
+/// [`async_std::fs::File`].
+///
 /// TODO: Windows support.
 ///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
@@ -39,6 +43,8 @@ use async_std::os::wasi::{
 /// perform that operation in a manner compatible with cap-std's sandbox; instead,
 /// open the file and call [`File::set_permissions`].
 ///
+/// [functions in `async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/index.html#functions
+/// [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
 /// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     std_file: fs::File,
