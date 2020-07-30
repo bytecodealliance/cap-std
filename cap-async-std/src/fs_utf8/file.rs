@@ -93,7 +93,7 @@ impl File {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -109,7 +109,7 @@ impl FromRawHandle for File {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl AsRawFd for File {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -125,7 +125,7 @@ impl AsRawHandle for File {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 impl IntoRawFd for File {
     #[inline]
     fn into_raw_fd(self) -> RawFd {

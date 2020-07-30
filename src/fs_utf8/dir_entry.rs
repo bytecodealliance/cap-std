@@ -94,7 +94,7 @@ impl DirEntry {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "fuchsia", target_os = "vxworks"))]
 impl std::os::unix::fs::DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {
