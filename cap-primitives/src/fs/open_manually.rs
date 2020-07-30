@@ -278,8 +278,8 @@ pub(crate) fn open_manually<'start>(
     Ok(base)
 }
 
-// Test whether the given options imply that we should treat an open file as
-// potentially being a symlink we need to follow, due to use of `O_PATH`.
+/// Test whether the given options imply that we should treat an open file as
+/// potentially being a symlink we need to follow, due to use of `O_PATH`.
 #[cfg(target_os = "linux")]
 fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
     (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
