@@ -27,7 +27,13 @@ impl ProjectDirs {
     /// This corresponds to [`directories::ProjectDirs::from`].
     ///
     /// [`directories::ProjectDirs::from`]: https://docs.rs/directories/latest/directories/struct.ProjectDirs.html#method.from
-    pub fn from(qualifier: &str, organization: &str, application: &str) -> Option<Self> {
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access the project directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn from(qualifier: &str, organization: &str, application: &str) -> Option<Self> {
         let inner = directories::ProjectDirs::from(qualifier, organization, application)?;
         Some(Self { inner })
     }

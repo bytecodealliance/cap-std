@@ -31,9 +31,15 @@ impl TempDir {
     /// This corresponds to [`tempfile::TempDir::new`].
     ///
     /// [`tempfile::TempDir::new`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.new
-    pub fn new() -> io::Result<Self> {
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it makes use of ambient authority to
+    /// access temporary directories, which doesn't uphold the invariant of
+    /// the rest of the API. It is otherwise safe to use.
+    pub unsafe fn new() -> io::Result<Self> {
         let inner = tempfile::TempDir::new()?;
-        let dir = unsafe { Dir::open_ambient_dir(inner.path())? };
+        let dir = Dir::open_ambient_dir(inner.path())?;
         Ok(Self { inner, dir })
     }
 
@@ -62,6 +68,12 @@ impl Deref for TempDir {
 /// This corresponds to [`tempfile::tempdir`].
 ///
 /// [`tempfile::tempdir`]: https://docs.rs/tempfile/3.1.0/tempfile/fn.tempdir.html
-pub fn tempdir() -> io::Result<TempDir> {
+///
+/// # Safety
+///
+/// This function is unsafe because it makes use of ambient authority to
+/// access temporary directories, which doesn't uphold the invariant of
+/// the rest of the API. It is otherwise safe to use.
+pub unsafe fn tempdir() -> io::Result<TempDir> {
     TempDir::new()
 }

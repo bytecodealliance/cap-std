@@ -74,9 +74,13 @@ There are three main ways:
    function is not sandboxed, and may open any file the host process has
    access to.
 
+See the [`kv-cli` example] for a simple example of a program using `cap-directories`
+and `cap-std` APIs.
+
 [`cap-directories`]: https://crates.io/crates/cap-directories
 [`cap-tempfile`]: https://crates.io/crates/cap-tempfile
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
+[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/examples/kv-cli.rs
 
 ## How do I use a `Dir`?
 
