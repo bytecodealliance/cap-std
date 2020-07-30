@@ -1,7 +1,7 @@
 //! A simple key-value store that stores data in a project data directory.
 //!
 //! Keys are filesystem paths, which isn't a great idea in general, because
-//! it bubbles up filesystem idiosyncracies such as the case sensitivity
+//! it bubbles up filesystem idiosyncrasies such as the case sensitivity
 //! scheme the filesystem uses, but it makes a simple illustration of the
 //! `cap-std` API.
 

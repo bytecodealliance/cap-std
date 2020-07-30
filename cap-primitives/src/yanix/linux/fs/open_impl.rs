@@ -53,7 +53,7 @@ pub(crate) fn open_impl(
 }
 
 /// Call the `openat2` system call. If the syscall is unavailable, mark it so
-/// for future calls. If `openat2` is unavailable either permenantly or
+/// for future calls. If `openat2` is unavailable either permanently or
 /// temporarily, return `ENOSYS`.
 pub(crate) fn open_with_openat2(
     start: &fs::File,
@@ -98,7 +98,7 @@ pub(crate) fn open_with_openat2(
                         libc::EAGAIN => continue,
                         libc::EXDEV => return Err(errors::escape_attempt()),
                         libc::ENOSYS => {
-                            // `openat2` is permenantly unavailable; mark it so and
+                            // `openat2` is permanently unavailable; mark it so and
                             // exit the loop.
                             INVALID.store(true, Relaxed);
                             break;
@@ -121,7 +121,7 @@ pub(crate) fn open_with_openat2(
         }
     }
 
-    // `openat2` is unavailable, either temporarily or permenantly.
+    // `openat2` is unavailable, either temporarily or permanently.
     other_error(libc::ENOSYS)
 }
 
