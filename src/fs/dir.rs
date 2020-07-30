@@ -30,6 +30,10 @@ use std::os::wasi::{
 
 /// A reference to an open directory on a filesystem.
 ///
+/// This does not directly correspond to anything in `std`, however its methods
+/// correspond to the [functions in `std::fs`] and the constructor methods for
+/// [`std::fs::File`].
+///
 /// TODO: Windows support.
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
@@ -38,6 +42,8 @@ use std::os::wasi::{
 /// perform that operation in a manner compatible with cap-std's sandbox; instead,
 /// open the file and call [`File::set_permissions`].
 ///
+/// [functions in `std::fs`]: https://doc.rust-lang.org/std/fs/index.html#functions
+/// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
 /// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     std_file: fs::File,

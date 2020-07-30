@@ -18,12 +18,18 @@ use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawH
 ///
 /// TODO: Windows support.
 ///
+/// This does not directly correspond to anything in `async_std`, however its methods
+/// correspond to the [functions in `async_std::fs`] and the constructor methods for
+/// [`async_std::fs::File`].
+///
 /// Unlike `async_std::fs`, this API's `canonicalize` returns a relative path since
 /// absolute paths don't interoperate well with the capability model. And it lacks
 /// a `set_permissions` method because popular host platforms don't have a way to
 /// perform that operation in a manner compatible with cap-std's sandbox; instead,
 /// open the file and call [`File::set_permissions`].
 ///
+/// [functions in `async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/index.html#functions
+/// [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
 /// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     cap_std: crate::fs::Dir,
