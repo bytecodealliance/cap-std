@@ -1,4 +1,4 @@
-use crate::fs::{open_unchecked, OpenOptions, OpenUncheckedError};
+use crate::fs::{open_unchecked, OpenOptions};
 use std::{fmt, fs, io, mem, ops::Deref, path::Component};
 #[cfg(not(feature = "no_racy_asserts"))]
 use {crate::fs::get_path, std::path::PathBuf};
@@ -91,8 +91,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
                 // The only situation in which we'd be asked to produce an owned
                 // `File` is when there's a need to open "." within a directory
                 // to obtain a new handle.
-                open_unchecked(file, Component::CurDir.as_ref(), options)
-                    .map_err(OpenUncheckedError::into_io_error)
+                open_unchecked(file, Component::CurDir.as_ref(), options).map_err(Into::into)
             }
         }
     }

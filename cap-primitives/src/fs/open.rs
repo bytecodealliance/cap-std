@@ -75,11 +75,11 @@ fn check_open(
                 result_error
             ),
         },
-        (Err(result_error), Err(unchecked_error)) => match result_error.kind() {
+        (Err(result_error), Err(_unchecked_error)) => match result_error.kind() {
             io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
             _ => {
                 /* TODO: Check error messages.
-                let unchecked_error = unchecked_error.into_io_error();
+                let unchecked_error = unchecked_error.into();
                 assert_eq!(result_error.to_string(), unchecked_error.to_string());
                 assert_eq!(result_error.kind(), unchecked_error.kind());
                 */
