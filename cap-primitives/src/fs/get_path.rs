@@ -14,9 +14,11 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
         return None;
     }
 
+    // Ignore paths that don't start with '/', which are things like
+    // `socket:[3556564]` or similar.
     let mut p = PathBuf::from("/proc/self/fd");
     p.push(&file.as_raw_fd().to_string());
-    fs::read_link(p).ok()
+    fs::read_link(p).ok().filter(|path| path.starts_with('/'))
 }
 
 #[cfg(target_os = "macos")]
