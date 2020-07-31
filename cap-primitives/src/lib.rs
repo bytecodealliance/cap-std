@@ -1,9 +1,4 @@
 //! Capability-oriented primitives.
-//!
-//! TODO: Is it worth defining our own `Path` and `PathBuf` types? Rust's `Path`
-//! has several ambient-authority methods: `metadata`, `read_link`, `read_dir`,
-//! `symlink_metadata`, `canonicalize`. If we had our own `Path`, we could also
-//! handle absolute paths specially too.
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
