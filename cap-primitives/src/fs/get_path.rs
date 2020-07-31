@@ -12,7 +12,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     // `socket:[3556564]` or similar.
     let mut p = PathBuf::from("/proc/self/fd");
     p.push(&file.as_raw_fd().to_string());
-    let path = fs::read_link(p).ok().filter(|path| path.starts_with('/'))?;
+    let path = fs::read_link(p).ok().filter(|path| path.starts_with("/"))?;
 
     // Linux appends the string " (deleted)" when a file is deleted; avoid
     // treating that as the actual name.
