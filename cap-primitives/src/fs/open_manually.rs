@@ -339,10 +339,12 @@ pub(crate) enum OpenUncheckedError {
     NotFound(io::Error),
 }
 
-impl OpenUncheckedError {
-    pub(crate) fn into_io_error(self) -> io::Error {
-        match self {
-            Self::Other(err) | Self::Symlink(err) | Self::NotFound(err) => err,
+impl From<OpenUncheckedError> for io::Error {
+    fn from(error: OpenUncheckedError) -> io::Error {
+        match error {
+            OpenUncheckedError::Other(err)
+            | OpenUncheckedError::Symlink(err)
+            | OpenUncheckedError::NotFound(err) => err,
         }
     }
 }
