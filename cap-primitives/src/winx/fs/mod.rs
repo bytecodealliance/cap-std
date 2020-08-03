@@ -35,7 +35,9 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+pub(crate) use crate::fs::{
+    open_manually_wrapper as open_impl, remove_open_dir_by_searching as remove_open_dir_impl,
+};
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;

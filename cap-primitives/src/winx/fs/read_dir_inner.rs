@@ -8,8 +8,16 @@ impl ReadDirInner {
         todo!("ReadDirInner::read_dir")
     }
 
+    pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
+        todo!("ReadDirInner::read_dir_unchecked")
+    }
+
     pub(crate) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
         todo!("ReadDirInner::metadata")
+    }
+
+    pub(crate) fn self_metadata(&self) -> io::Result<Metadata> {
+        todo!("ReadDirInner::self_metadata")
     }
 }
 

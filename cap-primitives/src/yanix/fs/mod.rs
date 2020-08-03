@@ -49,6 +49,7 @@ pub(crate) use crate::fs::{
     rmdir_via_parent as rmdir_impl,
     symlink_via_parent as symlink_impl,
     unlink_via_parent as unlink_impl,
+    remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
 pub(crate) use dir_entry_inner::*;

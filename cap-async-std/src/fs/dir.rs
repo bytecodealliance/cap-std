@@ -1,8 +1,9 @@
-use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
+use crate::fs::{as_sync, into_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use cap_primitives::fs::{
     canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
-    remove_dir_all, rename, rmdir, stat, unlink, DirOptions, FollowSymlinks,
+    remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, stat, unlink, DirOptions,
+    FollowSymlinks,
 };
 use std::{
     fmt,
@@ -339,6 +340,29 @@ impl Dir {
     pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
         remove_dir_all(&file, path.as_ref())
+    }
+
+    /// Remove the directory referenced by `self` and consume `self`.
+    ///
+    /// Note that even though this implementation works in terms of handles
+    /// as much as possible, removal is not guaranteed to be atomic with respect
+    /// to a concurrent rename of the directory.
+    #[inline]
+    pub fn remove_open_dir(self) -> io::Result<()> {
+        let file = into_sync(self.std_file);
+        remove_open_dir(file)
+    }
+
+    /// Removes the directory referenced by `self`, after removing all its contents, and
+    /// consume `self`. Use carefully!
+    ///
+    /// Note that even though this implementation works in terms of handles
+    /// as much as possible, removal is not guaranteed to be atomic with respect
+    /// to a concurrent rename of the directory.
+    #[inline]
+    pub fn remove_open_dir_all(self) -> io::Result<()> {
+        let file = into_sync(self.std_file);
+        remove_open_dir_all(file)
     }
 
     /// Removes a file from a filesystem.

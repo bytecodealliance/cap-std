@@ -1,6 +1,6 @@
 use crate::fs::{
-    dir_options, open, open_entry_impl, rmdir_unchecked, stat_unchecked, unlink_unchecked,
-    DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
+    dir_options, open, open_entry_impl, open_unchecked, rmdir_unchecked, stat_unchecked,
+    unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions, OpenUncheckedError,
 };
 use std::{
     ffi::OsStr,
@@ -26,6 +26,14 @@ impl ReadDirInner {
         })
     }
 
+    pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
+        let dir = open_unchecked(start, path, &dir_options())
+            .map_err(OpenUncheckedError::into_io_error)?;
+        Ok(Self {
+            yanix: Arc::new(Dir::from(dir)?),
+        })
+    }
+
     pub(crate) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
         open_entry_impl(&self.to_std_file(), file_name, options)
     }
@@ -40,6 +48,10 @@ impl ReadDirInner {
 
     pub(crate) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
         rmdir_unchecked(&self.to_std_file(), file_name.as_ref())
+    }
+
+    pub(crate) fn self_metadata(&self) -> io::Result<Metadata> {
+        self.to_std_file().metadata().map(Metadata::from_std)
     }
 
     fn to_std_file(&self) -> ManuallyDrop<fs::File> {
