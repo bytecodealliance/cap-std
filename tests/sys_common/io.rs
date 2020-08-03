@@ -2,6 +2,7 @@ use cap_tempfile::tempdir;
 
 pub use cap_tempfile::TempDir;
 
+#[allow(unused)]
 pub fn tmpdir() -> TempDir {
     // It's ok to wrap this in an unsafe block, rather than an unsafe function,
     // because this function is only used by tests.

@@ -1,4 +1,4 @@
-use crate::fs::{DirEntry, ReadDirInner};
+use crate::fs::{DirEntry, Metadata, ReadDirInner};
 use std::{fmt, fs, io, path::Path};
 
 /// Construct a `ReadDir` to iterate over the contents of a directory,
@@ -8,6 +8,14 @@ use std::{fmt, fs, io, path::Path};
 pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     Ok(ReadDir {
         inner: ReadDirInner::read_dir(start, path)?,
+    })
+}
+
+/// Like `read_dir`, but doesn't perform sandboxing.
+#[inline]
+pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
+    Ok(ReadDir {
+        inner: ReadDirInner::read_dir_unchecked(start, path)?,
     })
 }
 
@@ -22,6 +30,13 @@ pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
     inner: ReadDirInner,
+}
+
+impl ReadDir {
+    /// Return the `Metadata` for the directory this `ReadDir` is iterating over.
+    pub(crate) fn metadata(&self) -> io::Result<Metadata> {
+        self.inner.self_metadata()
+    }
 }
 
 impl Iterator for ReadDir {

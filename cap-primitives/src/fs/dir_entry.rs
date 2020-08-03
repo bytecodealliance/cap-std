@@ -82,6 +82,11 @@ impl DirEntry {
     pub fn file_name(&self) -> OsString {
         self.inner.file_name()
     }
+
+    #[inline]
+    pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
+        self.inner.is_same_file(metadata)
+    }
 }
 
 #[cfg(any(unix, target_os = "fuchsia", target_os = "vxworks"))]

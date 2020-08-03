@@ -1,5 +1,8 @@
-use crate::fs::{read_dir, rmdir, stat, unlink, FollowSymlinks};
-use std::{fs, io, path::Path};
+use crate::fs::{read_dir, remove_open_dir, rmdir, stat, unlink, FollowSymlinks};
+use std::{
+    fs, io,
+    path::{Component, Path},
+};
 
 pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<()> {
     // Code adapted from `remove_dir_all` in Rust's src/libstd/sys/windows/fs.rs
@@ -10,8 +13,14 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
         // rmdir only deletes dir symlinks and junctions, not file symlinks.
         rmdir(start, path)
     } else {
-        remove_dir_all_recursive(start, path)
+        remove_dir_all_recursive(start, path)?;
+        rmdir(start, path)
     }
+}
+
+pub(crate) fn remove_open_dir_all_impl(dir: fs::File) -> io::Result<()> {
+    remove_dir_all_recursive(&dir, Component::CurDir.as_os_str().as_ref())?;
+    remove_open_dir(dir)
 }
 
 fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
@@ -23,14 +32,15 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         let child = child?;
         let child_type = child.file_type()?;
         if child_type.is_dir() {
-            remove_dir_all_recursive(start, &path.join(child.file_name()))?;
+            let path = path.join(child.file_name());
+            remove_dir_all_recursive(start, &path)?;
+            rmdir(start, &path)?;
         } else if child_type.is_symlink_dir() {
             rmdir(start, &path.join(child.file_name()))?;
         } else {
             unlink(start, &path.join(child.file_name()))?;
         }
     }
-    rmdir(start, path)
     */
     todo!("remove_dir_all_recursive")
 }

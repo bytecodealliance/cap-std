@@ -1,4 +1,8 @@
 use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDirInner};
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
+#[cfg(target_os = "wasi")]
+use std::os::wasi::fs::MetadataExt;
 use std::{
     ffi::{OsStr, OsString},
     fmt, fs, io,
@@ -54,6 +58,11 @@ impl DirEntryInner {
     #[inline]
     pub fn ino(&self) -> u64 {
         self.yanix.ino()
+    }
+
+    #[inline]
+    pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
+        Ok(self.ino() == metadata.ino() && self.metadata()?.dev() == metadata.dev())
     }
 
     fn file_name_bytes(&self) -> &OsStr {

@@ -37,8 +37,8 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub fn ino(&self) -> u64 {
-        todo!("DirEntryInner::ino")
+    pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
+        todo!("DirEntryInner::is_same_file")
     }
 }
 

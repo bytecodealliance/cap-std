@@ -262,6 +262,27 @@ impl Dir {
         self.cap_std.remove_dir_all(path).await
     }
 
+    /// Remove the directory referenced by `self` and consume `self`.
+    ///
+    /// Note that even though this implementation works in terms of handles
+    /// as much as possible, removal is not guaranteed to be atomic with respect
+    /// to a concurrent rename of the directory.
+    #[inline]
+    pub fn remove_open_dir(self) -> io::Result<()> {
+        self.cap_std.remove_open_dir()
+    }
+
+    /// Removes the directory referenced by `self`, after removing all its contents, and
+    /// consume `self`. Use carefully!
+    ///
+    /// Note that even though this implementation works in terms of handles
+    /// as much as possible, removal is not guaranteed to be atomic with respect
+    /// to a concurrent rename of the directory.
+    #[inline]
+    pub fn remove_open_dir_all(self) -> io::Result<()> {
+        self.cap_std.remove_open_dir_all()
+    }
+
     /// Removes a file from a filesystem.
     ///
     /// This corresponds to [`async_std::fs::remove_file`], but only accesses paths
