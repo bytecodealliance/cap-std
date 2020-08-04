@@ -39,7 +39,7 @@ pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     Some(PathBuf::from(std::ffi::OsString::from_vec(buf)))
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 pub(crate) fn get_path(file: &fs::File) -> Option<PathBuf> {
     crate::winx::fs::get_path_impl(file).ok()
 }
