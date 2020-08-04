@@ -11,7 +11,7 @@ use std::{fs, path::PathBuf};
 
 #[bench]
 fn nested_directories_open(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -41,7 +41,7 @@ fn nested_directories_open_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn nested_directories_metadata(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -72,7 +72,7 @@ fn nested_directories_metadata_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn nested_directories_canonicalize(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -103,7 +103,7 @@ fn nested_directories_canonicalize_baseline(b: &mut test::Bencher) {
 #[cfg(unix)]
 #[bench]
 fn nested_directories_readlink(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -143,7 +143,7 @@ fn nested_directories_readlink_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn curdir(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -176,7 +176,7 @@ fn curdir_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn parentdir(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -219,7 +219,7 @@ fn parentdir_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn directory_iteration(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     for i in 0..256 {
         dir.create(i.to_string()).unwrap();
@@ -235,7 +235,7 @@ fn directory_iteration(b: &mut test::Bencher) {
 /* TODO: This depends on https://github.com/sunfishcode/cap-std/pull/72
 #[bench]
 fn directory_iteration_fast(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     for i in 0..256 {
         dir.create(i.to_string()).unwrap();
@@ -267,7 +267,7 @@ fn directory_iteration_baseline(b: &mut test::Bencher) {
 #[cfg(unix)]
 #[bench]
 fn symlink_chasing_open(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.create("0").unwrap();
     for i in 0..32 {
@@ -305,7 +305,7 @@ fn symlink_chasing_open_baseline(b: &mut test::Bencher) {
 #[cfg(unix)]
 #[bench]
 fn symlink_chasing_metadata(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.create("0").unwrap();
     for i in 0..32 {
@@ -343,7 +343,7 @@ fn symlink_chasing_metadata_baseline(b: &mut test::Bencher) {
 #[cfg(unix)]
 #[bench]
 fn symlink_chasing_canonicalize(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.create("0").unwrap();
     for i in 0..32 {
@@ -380,7 +380,7 @@ fn symlink_chasing_canonicalize_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn recursive_create_delete(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
     for _ in 0..256 {
@@ -411,7 +411,7 @@ fn recursive_create_delete_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn copy_4b(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.write("file", &vec![1u8; 0x4]).unwrap();
 
@@ -435,7 +435,7 @@ fn copy_4b_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn copy_4k(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.write("file", &vec![1u8; 0x1000]).unwrap();
 
@@ -459,7 +459,7 @@ fn copy_4k_baseline(b: &mut test::Bencher) {
 
 #[bench]
 fn copy_4m(b: &mut test::Bencher) {
-    let dir = cap_tempfile::tempdir().unwrap();
+    let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     dir.write("file", &vec![1u8; 0x400000]).unwrap();
 
