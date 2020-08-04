@@ -1,6 +1,7 @@
 use crate::fs::{read_dir, remove_open_dir, rmdir, stat, unlink, FollowSymlinks};
 use std::{
     fs, io,
+    os::windows::fs::FileTypeExt,
     path::{Component, Path},
 };
 
@@ -40,4 +41,5 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
             unlink(start, &path.join(child.file_name()))?;
         }
     }
+    Ok(())
 }
