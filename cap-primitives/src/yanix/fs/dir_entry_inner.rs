@@ -41,7 +41,7 @@ impl DirEntryInner {
         match self.yanix.file_type() {
             yanix::file::FileType::Directory => FileType::dir(),
             yanix::file::FileType::RegularFile => FileType::file(),
-            yanix::file::FileType::Symlink => FileType::symlink(),
+            yanix::file::FileType::Symlink => FileType::ext(FileTypeExt::symlink()),
             yanix::file::FileType::Fifo => FileType::ext(FileTypeExt::fifo()),
             yanix::file::FileType::Socket => FileType::ext(FileTypeExt::socket()),
             yanix::file::FileType::CharacterDevice => FileType::ext(FileTypeExt::char_device()),
