@@ -3,6 +3,7 @@ use std::fs;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum Inner {
+    Symlink,
     BlockDevice,
     CharDevice,
     Fifo,
@@ -17,7 +18,9 @@ impl FileTypeExt {
     #[inline]
     pub(crate) fn from_std(std: fs::FileType) -> Option<Self> {
         use std::os::unix::fs::FileTypeExt;
-        Some(Self(if std.is_block_device() {
+        Some(Self(if std.is_symlink() {
+            Inner::Symlink
+        } else if std.is_block_device() {
             Inner::BlockDevice
         } else if std.is_char_device() {
             Inner::CharDevice
@@ -36,13 +39,19 @@ impl FileTypeExt {
         match mode & libc::S_IFMT {
             libc::S_IFREG => FileType::file(),
             libc::S_IFDIR => FileType::dir(),
-            libc::S_IFLNK => FileType::symlink(),
+            libc::S_IFLNK => FileType::ext(Self::symlink()),
             libc::S_IFIFO => FileType::ext(Self::fifo()),
             libc::S_IFCHR => FileType::ext(Self::char_device()),
             libc::S_IFBLK => FileType::ext(Self::block_device()),
             libc::S_IFSOCK => FileType::ext(Self::socket()),
             _ => FileType::unknown(),
         }
+    }
+
+    /// Creates a `FileType` for which `is_symlink()` returns `true`.
+    #[inline]
+    pub(crate) const fn symlink() -> Self {
+        Self(Inner::Symlink)
     }
 
     /// Creates a `FileType` for which `is_block_device()` returns `true`.
@@ -67,5 +76,10 @@ impl FileTypeExt {
     #[inline]
     pub(crate) const fn socket() -> Self {
         Self(Inner::Socket)
+    }
+
+    #[inline]
+    pub(crate) fn is_symlink(&self) -> bool {
+        self.0 == Inner::Symlink
     }
 }

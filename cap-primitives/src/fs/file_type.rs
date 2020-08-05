@@ -12,9 +12,6 @@ enum Inner {
     /// A file.
     File,
 
-    /// A symbolic link.
-    Symlink,
-
     /// An unknown entity.
     Unknown,
 
@@ -44,8 +41,6 @@ impl FileType {
             Inner::Dir
         } else if std.is_file() {
             Inner::File
-        } else if std.is_symlink() {
-            Inner::Symlink
         } else if let Some(ext) = FileTypeExt::from_std(std) {
             Inner::Ext(ext)
         } else {
@@ -63,12 +58,6 @@ impl FileType {
     #[inline]
     pub const fn file() -> Self {
         Self(Inner::File)
-    }
-
-    /// Creates a `FileType` for which `is_symlink()` returns `true`.
-    #[inline]
-    pub const fn symlink() -> Self {
-        Self(Inner::Symlink)
     }
 
     /// Creates a `FileType` for which `is_unknown()` returns `true`.
@@ -110,7 +99,11 @@ impl FileType {
     /// [`std::fs::FileType::is_symlink`]: https://doc.rust-lang.org/std/fs/struct.FileType.html#method.is_symlink
     #[inline]
     pub fn is_symlink(&self) -> bool {
-        self.0 == Inner::Symlink
+        if let Inner::Ext(ext) = self.0 {
+            ext.is_symlink()
+        } else {
+            false
+        }
     }
 }
 
@@ -164,11 +157,11 @@ impl std::os::vxworks::fs::FileTypeExt for FileType {
 impl std::os::windows::fs::FileTypeExt for FileType {
     #[inline]
     fn is_symlink_dir(&self) -> bool {
-        self.0 == Inner::Ext(FileTypeExt::SymlinkFile)
+        self.0 == Inner::Ext(FileTypeExt::symlink_file())
     }
 
     #[inline]
     fn is_symlink_file(&self) -> bool {
-        self.0 == Inner::Ext(FileTypeExt::SymlinkDir)
+        self.0 == Inner::Ext(FileTypeExt::symlink_dir())
     }
 }

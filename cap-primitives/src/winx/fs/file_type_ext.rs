@@ -34,4 +34,10 @@ impl FileTypeExt {
     pub(crate) const fn symlink_dir() -> Self {
         Self(Inner::SymlinkDir)
     }
+
+    #[inline]
+    pub(crate) fn is_symlink(&self) -> bool {
+        /// All current `FileTypeExt` types are symlinks.
+        true
+    }
 }
