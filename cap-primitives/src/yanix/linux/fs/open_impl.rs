@@ -7,9 +7,10 @@
 //!
 //! On older Linux, fall back to `open_manually`.
 
+use super::super::super::fs::compute_oflags;
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
-use crate::fs::{compute_oflags, errors, open_manually_wrapper, OpenOptions};
+use crate::fs::{errors, open_manually_wrapper, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,

@@ -57,7 +57,6 @@ pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
-pub(crate) use flags::*;
 pub(crate) use is_root_dir::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use is_same_file::*;
@@ -79,3 +78,5 @@ pub(crate) use unlink_unchecked::*;
 // On Linux, there is a limit of 40 symlink expansions.
 // Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;
+
+pub(super) use flags::*;

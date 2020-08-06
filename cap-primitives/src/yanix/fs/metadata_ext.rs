@@ -54,7 +54,7 @@ impl MetadataExt {
 
     /// Constructs a new instance of `Metadata` from the given `libc::stat`.
     #[inline]
-    pub(crate) fn from_libc(mode: libc::stat) -> Metadata {
+    pub(super) fn from_libc(mode: libc::stat) -> Metadata {
         Metadata {
             file_type: FileTypeExt::from_libc(mode.st_mode),
             len: u64::try_from(mode.st_size).unwrap(),
