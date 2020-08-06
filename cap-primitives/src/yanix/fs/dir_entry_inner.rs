@@ -1,4 +1,4 @@
-use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDirInner};
+use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDir, ReadDirInner};
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 #[cfg(target_os = "wasi")]
@@ -29,6 +29,11 @@ impl DirEntryInner {
     #[inline]
     pub fn remove_file(&self) -> io::Result<()> {
         self.read_dir.remove_file(self.file_name_bytes())
+    }
+
+    #[inline]
+    pub(crate) fn read_dir(&self) -> io::Result<ReadDir> {
+        self.read_dir.read_dir(self.file_name_bytes())
     }
 
     #[inline]

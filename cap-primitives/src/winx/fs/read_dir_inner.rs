@@ -10,16 +10,20 @@ pub(crate) struct ReadDirInner {
 }
 
 impl ReadDirInner {
-    pub(crate) fn read_dir(start: &fs::File, path: &Path) -> io::Result<Self> {
+    pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
         let dir = open_dir(start, path)?;
-        Self::read_dir_unchecked(&dir, Component::CurDir.as_os_str().as_ref())
+        Self::new_unchecked(&dir, Component::CurDir.as_os_str().as_ref())
     }
 
-    pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
+    pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
         let full_path = concatenate_or_return_absolute(start, path)?;
         Ok(Self {
             std: fs::read_dir(full_path)?,
         })
+    }
+
+    pub(super) fn from_std(std: fs::ReadDir) -> Self {
+        Self { std }
     }
 }
 

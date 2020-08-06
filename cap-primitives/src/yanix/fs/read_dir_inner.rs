@@ -1,6 +1,7 @@
 use crate::fs::{
-    dir_options, open, open_entry_impl, open_unchecked, rmdir_unchecked, stat_unchecked,
-    unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions, OpenUncheckedError,
+    dir_options, open, open_entry_impl, open_unchecked, read_dir_unchecked, rmdir_unchecked,
+    stat_unchecked, unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
+    OpenUncheckedError, ReadDir,
 };
 use std::{
     ffi::OsStr,
@@ -20,13 +21,13 @@ pub(crate) struct ReadDirInner {
 }
 
 impl ReadDirInner {
-    pub(crate) fn read_dir(start: &fs::File, path: &Path) -> io::Result<Self> {
+    pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
         Ok(Self {
             yanix: Arc::new(Dir::from(open(start, path, &dir_options())?)?),
         })
     }
 
-    pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
+    pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
         let dir = open_unchecked(start, path, &dir_options())
             .map_err(OpenUncheckedError::into_io_error)?;
         Ok(Self {
@@ -52,6 +53,10 @@ impl ReadDirInner {
 
     pub(super) fn self_metadata(&self) -> io::Result<Metadata> {
         self.to_std_file().metadata().map(Metadata::from_std)
+    }
+
+    pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {
+        read_dir_unchecked(&self.to_std_file(), file_name.as_ref())
     }
 
     fn to_std_file(&self) -> ManuallyDrop<fs::File> {

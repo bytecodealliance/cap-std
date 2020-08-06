@@ -7,7 +7,7 @@ use std::{fmt, fs, io, path::Path};
 #[inline]
 pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     Ok(ReadDir {
-        inner: ReadDirInner::read_dir(start, path)?,
+        inner: ReadDirInner::new(start, path)?,
     })
 }
 
@@ -15,7 +15,7 @@ pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
 #[inline]
 pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     Ok(ReadDir {
-        inner: ReadDirInner::read_dir_unchecked(start, path)?,
+        inner: ReadDirInner::new_unchecked(start, path)?,
     })
 }
 

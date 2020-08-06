@@ -1,5 +1,7 @@
 use super::open_options_to_std;
-use crate::fs::{open, open_ambient_dir, FileType, FollowSymlinks, Metadata, OpenOptions};
+use crate::fs::{
+    open, open_ambient_dir, FileType, FollowSymlinks, Metadata, OpenOptions, ReadDir, ReadDirInner,
+};
 use std::{ffi::OsString, fmt, fs, io};
 
 pub(crate) struct DirEntryInner {
@@ -25,6 +27,13 @@ impl DirEntryInner {
     #[inline]
     pub fn remove_dir(&self) -> io::Result<()> {
         fs::remove_dir(self.std.path())
+    }
+
+    #[inline]
+    pub fn read_dir(&self) -> io::Result<ReadDir> {
+        let std = fs::read_dir(self.std.path())?;
+        let inner = ReadDirInner::from_std(std);
+        Ok(ReadDir { inner })
     }
 
     #[inline]
