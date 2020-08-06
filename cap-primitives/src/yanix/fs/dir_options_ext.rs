@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub(crate) struct DirOptionsExt {
-    pub(crate) mode: u32,
+    pub(super) mode: u32,
 }
 
 impl DirOptionsExt {

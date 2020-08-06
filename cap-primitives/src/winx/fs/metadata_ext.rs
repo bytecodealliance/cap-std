@@ -4,14 +4,14 @@ use std::fs;
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
-    pub(crate) file_attributes: u32,
-    pub(crate) creation_time: u64,
-    pub(crate) last_access_time: u64,
-    pub(crate) last_write_time: u64,
-    pub(crate) file_size: u64,
-    pub(crate) volume_serial_number: Option<u32>,
-    pub(crate) number_of_links: Option<u32>,
-    pub(crate) file_index: Option<u64>,
+    file_attributes: u32,
+    creation_time: u64,
+    last_access_time: u64,
+    last_write_time: u64,
+    file_size: u64,
+    volume_serial_number: Option<u32>,
+    number_of_links: Option<u32>,
+    file_index: Option<u64>,
 }
 
 impl MetadataExt {

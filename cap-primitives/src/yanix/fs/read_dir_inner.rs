@@ -34,23 +34,23 @@ impl ReadDirInner {
         })
     }
 
-    pub(crate) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
+    pub(super) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
         open_entry_impl(&self.to_std_file(), file_name, options)
     }
 
-    pub(crate) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
+    pub(super) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
         stat_unchecked(&self.to_std_file(), file_name.as_ref(), FollowSymlinks::No)
     }
 
-    pub(crate) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
+    pub(super) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
         unlink_unchecked(&self.to_std_file(), file_name.as_ref())
     }
 
-    pub(crate) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
+    pub(super) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
         rmdir_unchecked(&self.to_std_file(), file_name.as_ref())
     }
 
-    pub(crate) fn self_metadata(&self) -> io::Result<Metadata> {
+    pub(super) fn self_metadata(&self) -> io::Result<Metadata> {
         self.to_std_file().metadata().map(Metadata::from_std)
     }
 

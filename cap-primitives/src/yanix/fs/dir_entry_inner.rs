@@ -11,8 +11,8 @@ use std::{
 use yanix::dir::{Entry, EntryExt};
 
 pub(crate) struct DirEntryInner {
-    pub(crate) yanix: Entry,
-    pub(crate) read_dir: ReadDirInner,
+    pub(super) yanix: Entry,
+    pub(super) read_dir: ReadDirInner,
 }
 
 impl DirEntryInner {

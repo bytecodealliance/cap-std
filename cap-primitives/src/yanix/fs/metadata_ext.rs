@@ -9,22 +9,22 @@ use std::{
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
-    pub(crate) dev: u64,
-    pub(crate) ino: u64,
-    pub(crate) mode: u32,
-    pub(crate) nlink: u64,
-    pub(crate) uid: u32,
-    pub(crate) gid: u32,
-    pub(crate) rdev: u64,
-    pub(crate) size: u64,
-    pub(crate) atime: i64,
-    pub(crate) atime_nsec: i64,
-    pub(crate) mtime: i64,
-    pub(crate) mtime_nsec: i64,
-    pub(crate) ctime: i64,
-    pub(crate) ctime_nsec: i64,
-    pub(crate) blksize: u64,
-    pub(crate) blocks: u64,
+    dev: u64,
+    ino: u64,
+    mode: u32,
+    nlink: u64,
+    uid: u32,
+    gid: u32,
+    rdev: u64,
+    size: u64,
+    atime: i64,
+    atime_nsec: i64,
+    mtime: i64,
+    mtime_nsec: i64,
+    ctime: i64,
+    ctime_nsec: i64,
+    blksize: u64,
+    blocks: u64,
 }
 
 impl MetadataExt {
