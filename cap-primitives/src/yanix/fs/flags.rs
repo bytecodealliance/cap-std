@@ -2,7 +2,7 @@ use crate::fs::{FollowSymlinks, OpenOptions};
 use std::io;
 use yanix::file::OFlags;
 
-pub(crate) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
+pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
     let mut oflags = OFlags::CLOEXEC;
     oflags |= get_access_mode(options)?;
     oflags |= get_creation_mode(options)?;
