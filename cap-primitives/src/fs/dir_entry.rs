@@ -1,4 +1,4 @@
-use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions};
+use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions, ReadDir};
 use std::{ffi::OsString, fmt, fs, io};
 
 /// Entries returned by the `ReadDir` iterator.
@@ -51,6 +51,12 @@ impl DirEntry {
     #[inline]
     pub fn remove_dir(&self) -> io::Result<()> {
         self.inner.remove_dir()
+    }
+
+    /// Returns an iterator over the entries within the subdirectory.
+    #[inline]
+    pub fn read_dir(&self) -> io::Result<ReadDir> {
+        self.inner.read_dir()
     }
 
     /// Returns the metadata for the file that this entry points at.
