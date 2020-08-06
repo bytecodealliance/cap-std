@@ -1,4 +1,4 @@
-use crate::fs::{link_unchecked, open_parent, FollowSymlinks, MaybeOwnedFile};
+use crate::fs::{link_unchecked, open_parent, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `link` by `open`ing up the parent component of the path and then
@@ -20,6 +20,5 @@ pub(crate) fn link_via_parent(
         old_basename.as_ref(),
         &new_dir,
         new_basename.as_ref(),
-        FollowSymlinks::No,
     )
 }

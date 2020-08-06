@@ -90,11 +90,7 @@ fn check_link(
             map_result(&canonicalize(new_start, new_path)),
         ) {
             (Ok(old_canon), Ok(new_canon)) => match map_result(&link_unchecked(
-                old_start,
-                &old_canon,
-                new_start,
-                &new_canon,
-                FollowSymlinks::No,
+                old_start, &old_canon, new_start, &new_canon,
             )) {
                 Err((_unchecked_kind, _unchecked_message)) => {
                     /* TODO: Check error messages.
