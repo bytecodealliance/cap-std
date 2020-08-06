@@ -1,10 +1,10 @@
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
-    pub(crate) access_mode: Option<u32>,
-    pub(crate) share_mode: u32,
-    pub(crate) custom_flags: u32,
-    pub(crate) attributes: u32,
-    pub(crate) security_qos_flags: u32,
+    pub(super) access_mode: Option<u32>,
+    pub(super) share_mode: u32,
+    pub(super) custom_flags: u32,
+    pub(super) attributes: u32,
+    pub(super) security_qos_flags: u32,
 }
 
 impl OpenOptionsExt {
