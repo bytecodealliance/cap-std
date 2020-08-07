@@ -70,7 +70,7 @@ impl DirEntry {
     /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
-        Ok(self.inner.file_type())
+        self.inner.file_type()
     }
 
     /// Returns the bare file name of this directory entry without any other leading path component.

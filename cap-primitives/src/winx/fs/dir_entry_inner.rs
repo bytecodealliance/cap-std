@@ -1,8 +1,9 @@
-use crate::fs::{FileType, Metadata, OpenOptions, ReadDirInner};
+use super::open_options_to_std;
+use crate::fs::{open, open_ambient_dir, FileType, FollowSymlinks, Metadata, OpenOptions};
 use std::{ffi::OsString, fmt, fs, io};
 
 pub(crate) struct DirEntryInner {
-    pub(crate) read_dir: ReadDirInner,
+    pub(crate) std: fs::DirEntry,
 }
 
 impl DirEntryInner {
@@ -13,32 +14,32 @@ impl DirEntryInner {
 
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        todo!("DirEntryInner::metadata")
+        self.std.metadata().map(Metadata::from_std)
     }
 
     #[inline]
     pub fn remove_file(&self) -> io::Result<()> {
-        todo!("DirEntryInner::remove_file")
+        fs::remove_file(self.std.path())
     }
 
     #[inline]
     pub fn remove_dir(&self) -> io::Result<()> {
-        todo!("DirEntryInner::remove_dir")
+        fs::remove_dir(self.std.path())
     }
 
     #[inline]
-    pub fn file_type(&self) -> FileType {
-        todo!("DirEntryInner::file_type")
+    pub fn file_type(&self) -> io::Result<FileType> {
+        self.std.file_type().map(FileType::from_std)
     }
 
     #[inline]
     pub fn file_name(&self) -> OsString {
-        todo!("DirEntryInner::file_name")
+        self.std.file_name()
     }
 
     #[inline]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
-        todo!("DirEntryInner::is_same_file")
+        Ok(self.metadata()?.is_same_file(metadata))
     }
 }
 
