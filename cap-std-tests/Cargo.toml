@@ -9,6 +9,7 @@ cap-std = { path = ".." }
 cap-tempfile = { path = "../cap-tempfile" }
 cfg-if = "0.1.9"
 rand = "0.7.3"
+tempfile = "3.1.0"
 
 [target.'cfg(not(windows))'.dev-dependencies]
 libc = "0.2.72"
