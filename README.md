@@ -2,7 +2,7 @@
   <h1><code>cap-std</code></h1>
 
   <p>
-    <strong>Capability-oriented version of Rust standard library</strong>
+    <strong>Capability-oriented version of the Rust standard library</strong>
   </p>
 
   <p>
@@ -11,16 +11,24 @@
   </p>
 </div>
 
-`cap-std` crate provides a capability-oriented version of [`std`]. It provides
-capability-oriented versions of interfaces you are used to.
+The `cap-std` project is organized around the eponymous [`cap-std`] crate,
+develops libraries to make it easy to write capability-oriented code, including:
 
-The filesystem module, [`cap_std::fs`], is known to work on Linux, macOS, and
-FreeBSD, and probably can be easily ported to other modern Unix-family
-platforms. Ports to Windows and WASI platforms are in development, though not
-yet usable.
+ - [`cap-std`], which provides capability-oriented versions of `std` APIs
+ - [`cap-async-std`], which is to [`async-std`] what `cap-std` is to `std`
+ - [`cap-directories`] which provides capability-oriented access to
+   [standard application directories]
+ - [`cap-tempfile`], which provides capability-oriented access to
+   [temporary directories]
 
 [`std`]: https://doc.rust-lang.org/std/
+[`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
+[`cap-async-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-async-std/README.md
+[`cap-directories`]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/README.md
+[`cap-tempfile`]: https://github.com/sunfishcode/cap-std/blob/main/cap-tempfile/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
+[standard application directories]: https://docs.rs/directories/
+[temporary directories]: https://docs.rs/tempfile/
 
 ## Capability-oriented security
 
@@ -79,10 +87,8 @@ There are three main ways:
 See the [`kv-cli` example] for a simple example of a program using `cap-directories`
 and `cap-std` APIs.
 
-[`cap-directories`]: https://crates.io/crates/cap-directories
-[`cap-tempfile`]: https://crates.io/crates/cap-tempfile
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
-[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/examples/kv-cli.rs
+[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/examples/kv-cli.rs
 
 ## What can I use `cap-std` for?
 
@@ -114,12 +120,6 @@ calls—it opens `red`, `green`, and then `blue`, and closes the handles for `re
 and `green`.
 
 [`openat2`]: https://lwn.net/Articles/796868/
-
-## Async support
-
-Async APIs are available in the [`cap-async-std`] crate.
-
-[`cap-async-std`]: https://crates.io/crates/cap-async-std
 
 ## What about networking?
 

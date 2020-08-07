@@ -1,6 +1,6 @@
 [package]
-name = "cap-std"
-version = "0.1.0"
+name = "cap-std-workspace"
+version = "0.0.0"
 description = "Capability-oriented version of the Rust standard library"
 authors = ["Dan Gohman <sunfish@mozilla.com>", "Jakub Konka <kubkon@jakubkonka.com>"]
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
@@ -9,25 +9,48 @@ categories = ["filesystem", "network-programming"]
 repository = "https://github.com/sunfishcode/cap-std"
 edition = "2018"
 readme = "README.md"
+publish = false
 
-[dependencies]
-arf-strings = { version = "0.1.2", optional = true }
-cap-primitives = { path = "cap-primitives", version = "^0.1.0", default-features = false }
+[dev-dependencies]
+async-std = { version = "1.6.2", features = ["attributes"] }
+anyhow = "1.0.32"
+cap-async-std = { path = "cap-async-std", version = "^0.1.0" }
+cap-directories = { path = "cap-directories", version = "^0.1.0" }
+cap-primitives = { path = "cap-primitives", version = "^0.1.0" }
+cap-std = { path = "cap-std", version = "^0.1.0" }
+cap-tempfile = { path = "cap-tempfile", version = "^0.1.0" }
+rand = "0.7.3"
+tempfile = "3.1.0"
+
+[target.'cfg(not(windows))'.dev-dependencies]
+libc = "0.2.72"
+
+[target.'cfg(windows)'.dev-dependencies]
+winapi = { version = "0.3.9", features = [
+    "std",
+    "errhandlingapi",
+    "handleapi",
+    "processthreadsapi",
+    "profileapi",
+    "securitybaseapi",
+    "winbase",
+    "winerror",
+    "ws2def",
+    "fileapi",
+    "aclapi",
+    "winioctl"
+] }
+winx = "0.19.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
-
-[features]
-default = ["no_racy_asserts"]
-fs_utf8 = ["arf-strings"]
-no_racy_asserts = ["cap-primitives/no_racy_asserts"]
 
 [workspace]
 members = [
   "cap-async-std",
   "cap-directories",
   "cap-primitives",
-  "cap-std-tests",
+  "cap-std",
   "cap-tempfile",
   # Work around https://github.com/rust-lang/cargo/issues/8338.
   #"fuzz",

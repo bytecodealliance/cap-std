@@ -8,28 +8,16 @@
   <p>
     <a href="https://github.com/sunfishcode/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-std/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
     <a href="https://cirrus-ci.com/github/sunfishcode/cap-std"><img src="https://api.cirrus-ci.com/github/sunfishcode/cap-std.svg" alt="Cirrus CI Status" /></a>
+    <a href="https://docs.rs/cap-async-std"><img src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square" alt="docs.rs docs" /></a>
   </p>
 </div>
 
-This crate provides a capability-oriented version of [`async-std`]. It provides
-capability-oriented versions of interfaces you are used to.
+This crate provides a capability-oriented version of [`async-std`]. See the
+[toplevel README.md] for more information about capability-oriented security.
 
-See the [`cap-std` README.md] for more information about capability-oriented
-security.
+At the moment, `cap-async-std` is a very rudimentary translation of [`cap-std`] to
+`async-std`. It hasn't yet been optimized to make effective use of `async`.
 
 [`async-std`]: https://crates.io/crates/async-std
-[`cap-std`]: https://crates.io/crates/cap-std
-[`cap-std` README.md]: https://github.com/sunfishcode/cap-std/blob/main/README.md
-
-At the moment, `cap-async-std` is a very rudimentary translation of `cap-std` to
-`async-std`. Like `cap-std`, it uses [`cap-primitives`] to perform the
-underlying operations. It hasn't yet been optimized to make effective use of
-`async`.
-
-The filesystem module, `fs`, is known to compile on Linux, macOS, and FreeBSD,
-and probably can be easily ported to other modern Unix-family platforms. Ports
-to Windows and WASI platforms are in development, though not yet usable.
-
-The networking module, `net`, is not yet usable.
-
-[`cap-primitives`]: https://crates.io/crates/cap-primitives
+[`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
+[toplevel README.md]: https://github.com/sunfishcode/cap-std/blob/main/README.md

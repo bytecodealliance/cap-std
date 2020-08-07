@@ -8,13 +8,7 @@ including [`rustfmt`].
 
 ## Tests
 
-Of course `cargo test` works, though there are additional options
-that are useful to add:
-
- - `--workspace` - This additionally runs tests in the `cap-std-tests`,
-   `cap-primitives` and `cap-async-std` packages.
-
- - `--all-features` - This additionally runs tests in the `fs_utf8` modules.
+`cargo test`.
 
 ## Fuzzing
 
@@ -45,4 +39,3 @@ To run the `cap-std` benchmarks, run:
 ```
 cargo +nightly bench
 ```
-
