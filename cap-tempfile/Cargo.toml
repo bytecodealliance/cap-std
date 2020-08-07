@@ -11,7 +11,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-std = { path = "..", version = "0.0.0" }
+cap-std = { path = "..", version = "^0.1.0"}
 uuid = { version = "0.8.1", features = ["v4"] }
 
 [badges]
