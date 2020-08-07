@@ -12,7 +12,7 @@ readme = "README.md"
 
 [dependencies]
 arf-strings = { version = "0.1.2", optional = true }
-cap-primitives = { path = "cap-primitives", version = "0.0.0", default-features = false }
+cap-primitives = { path = "cap-primitives", version = "^0.1.0", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 yanix = "0.19.0"
