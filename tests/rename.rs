@@ -64,6 +64,7 @@ cfg_if::cfg_if! {
 */
 
 #[test]
+#[cfg_attr(windows, ignore)] // TODO: Blocked on `no_such_file_or_directory` for Windows
 fn rename_basics() {
     let tmpdir = tmpdir();
 
