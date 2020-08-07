@@ -1,4 +1,4 @@
-use crate::fs::{read_dir, remove_open_dir, rmdir, stat, unlink, FollowSymlinks};
+use crate::fs::{read_dir_unchecked, remove_open_dir, rmdir, stat, unlink, FollowSymlinks};
 use std::{
     fs, io,
     os::windows::fs::FileTypeExt,
@@ -28,7 +28,7 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
     // Code adapted from `remove_dir_all_recursive` in Rust's
     // src/libstd/sys/windows/fs.rs at revision
     // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
-    for child in read_dir(start, path)? {
+    for child in read_dir_unchecked(start, path)? {
         let child = child?;
         let child_type = child.file_type()?;
         if child_type.is_dir() {

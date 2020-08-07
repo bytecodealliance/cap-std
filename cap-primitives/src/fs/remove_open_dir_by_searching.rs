@@ -1,4 +1,4 @@
-use crate::fs::{errors, read_dir_unchecked, Metadata};
+use crate::fs::{errors, is_root_dir, read_dir_unchecked, Metadata};
 use std::{fs, io, path::Component};
 
 /// Delete the directory referenced by the given handle by searching for it in
@@ -14,10 +14,11 @@ pub(crate) fn remove_open_dir_by_searching(dir: fs::File) -> io::Result<()> {
             return child.remove_dir();
         }
     }
+
     // We didn't find the directory among its parent's children. Check for the
     // root directory and handle it specially -- removal will probably fail, so
-    // we'll get the apprpriate error code.
-    if Metadata::from_std(dir.metadata()?).is_same_file(&iter.metadata()?) {
+    // we'll get the appropriate error code.
+    if is_root_dir(&dir, &iter)? {
         fs::remove_dir(Component::RootDir.as_os_str())
     } else {
         Err(errors::no_such_file_or_directory())

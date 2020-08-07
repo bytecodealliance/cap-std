@@ -37,7 +37,7 @@ impl FileTypeExt {
 
     #[inline]
     pub(crate) fn is_symlink(&self) -> bool {
-        /// All current `FileTypeExt` types are symlinks.
+        // All current `FileTypeExt` types are symlinks.
         true
     }
 }

@@ -1,23 +1,25 @@
-use crate::fs::{DirEntryInner, Metadata};
-use std::{ffi::OsStr, fmt, fs, io, path::Path};
+use super::get_path::concatenate_or_return_absolute;
+use crate::fs::{open_dir, DirEntryInner, Metadata};
+use std::{
+    fmt, fs, io,
+    path::{Component, Path},
+};
 
-pub(crate) struct ReadDirInner {}
+pub(crate) struct ReadDirInner {
+    std: fs::ReadDir,
+}
 
 impl ReadDirInner {
     pub(crate) fn read_dir(start: &fs::File, path: &Path) -> io::Result<Self> {
-        todo!("ReadDirInner::read_dir")
+        let dir = open_dir(start, path)?;
+        Self::read_dir_unchecked(&dir, Component::CurDir.as_os_str().as_ref())
     }
 
     pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        todo!("ReadDirInner::read_dir_unchecked")
-    }
-
-    pub(crate) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
-        todo!("ReadDirInner::metadata")
-    }
-
-    pub(crate) fn self_metadata(&self) -> io::Result<Metadata> {
-        todo!("ReadDirInner::self_metadata")
+        let full_path = concatenate_or_return_absolute(start, path)?;
+        Ok(Self {
+            std: fs::read_dir(full_path)?,
+        })
     }
 }
 
@@ -25,7 +27,9 @@ impl Iterator for ReadDirInner {
     type Item = io::Result<DirEntryInner>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        todo!("ReadDirInner::next")
+        self.std
+            .next()
+            .map(|result| result.map(|std| DirEntryInner { std }))
     }
 }
 

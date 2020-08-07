@@ -37,8 +37,8 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub fn file_type(&self) -> FileType {
-        match self.yanix.file_type() {
+    pub fn file_type(&self) -> io::Result<FileType> {
+        Ok(match self.yanix.file_type() {
             yanix::file::FileType::Directory => FileType::dir(),
             yanix::file::FileType::RegularFile => FileType::file(),
             yanix::file::FileType::Symlink => FileType::ext(FileTypeExt::symlink()),
@@ -47,7 +47,7 @@ impl DirEntryInner {
             yanix::file::FileType::CharacterDevice => FileType::ext(FileTypeExt::char_device()),
             yanix::file::FileType::BlockDevice => FileType::ext(FileTypeExt::block_device()),
             yanix::file::FileType::Unknown => FileType::unknown(),
-        }
+        })
     }
 
     #[inline]

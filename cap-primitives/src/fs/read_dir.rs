@@ -1,4 +1,4 @@
-use crate::fs::{DirEntry, Metadata, ReadDirInner};
+use crate::fs::{DirEntry, ReadDirInner};
 use std::{fmt, fs, io, path::Path};
 
 /// Construct a `ReadDir` to iterate over the contents of a directory,
@@ -29,14 +29,7 @@ pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<Re
 ///
 /// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
-    inner: ReadDirInner,
-}
-
-impl ReadDir {
-    /// Return the `Metadata` for the directory this `ReadDir` is iterating over.
-    pub(crate) fn metadata(&self) -> io::Result<Metadata> {
-        self.inner.self_metadata()
-    }
+    pub(crate) inner: ReadDirInner,
 }
 
 impl Iterator for ReadDir {
