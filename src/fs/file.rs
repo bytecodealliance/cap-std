@@ -1,4 +1,5 @@
 use crate::fs::{Metadata, Permissions};
+use cap_primitives::fs::flags;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -356,28 +357,19 @@ impl fmt::Debug for File {
 }
 
 #[cfg(any(unix, target_os = "wasi", target_os = "fuchsia"))]
-fn fmt_debug_file(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
-    unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
-        let mode = yanix::fcntl::get_status_flags(fd);
-        if mode.is_err() {
-            return None;
-        }
-        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
-            yanix::file::OFlags::RDONLY => Some((true, false)),
-            yanix::file::OFlags::RDWR => Some((true, true)),
-            yanix::file::OFlags::WRONLY => Some((false, true)),
-            _ => None,
-        }
-    }
-
-    let fd = fd.as_raw_fd();
+fn fmt_debug_file(file: &fs::File, b: &mut fmt::DebugStruct) {
+    let fd = file.as_raw_fd();
     b.field("fd", &fd);
-    if let Some((read, write)) = unsafe { get_mode(fd) } {
+    if let Ok((read, write)) = flags(file) {
         b.field("read", &read).field("write", &write);
     }
 }
 
 #[cfg(windows)]
-fn fmt_debug_file(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    b.field("TODO fill in the blanks", &fd.as_raw_handle());
+fn fmt_debug_file(file: &fs::File, b: &mut fmt::DebugStruct) {
+    let handle = file.as_raw_handle();
+    b.field("handle", &handle);
+    if let Ok((read, write)) = flags(file) {
+        b.field("read", &read).field("write", &write);
+    }
 }

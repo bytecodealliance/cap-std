@@ -6,6 +6,7 @@ mod dir_builder;
 mod dir_entry;
 mod dir_options;
 mod file_type;
+mod flags;
 mod follow_symlinks;
 #[cfg(not(feature = "no_racy_asserts"))]
 mod get_path;
@@ -75,6 +76,7 @@ pub use dir_builder::*;
 pub use dir_entry::*;
 pub use dir_options::*;
 pub use file_type::*;
+pub use flags::*;
 pub use follow_symlinks::*;
 pub use link::*;
 pub use metadata::*;

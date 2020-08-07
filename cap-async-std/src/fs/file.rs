@@ -9,6 +9,7 @@ use async_std::{
     fs, io,
     task::{Context, Poll},
 };
+use cap_primitives::fs::flags;
 use std::{fmt, pin::Pin};
 
 /// A reference to an open file on a filesystem.
@@ -243,34 +244,26 @@ impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
-        fmt_debug_file(&self.std, &mut b);
+        let file = unsafe { as_sync(&self.std) };
+        fmt_debug_file(&file, &mut b);
         b.finish()
     }
 }
 
 #[cfg(any(unix, target_os = "wasi", target_os = "fuchsia"))]
-fn fmt_debug_file(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
-    unsafe fn get_mode(fd: RawFd) -> Option<(bool, bool)> {
-        let mode = yanix::fcntl::get_status_flags(fd);
-        if mode.is_err() {
-            return None;
-        }
-        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
-            yanix::file::OFlags::RDONLY => Some((true, false)),
-            yanix::file::OFlags::RDWR => Some((true, true)),
-            yanix::file::OFlags::WRONLY => Some((false, true)),
-            _ => None,
-        }
-    }
-
-    let fd = fd.as_raw_fd();
+fn fmt_debug_file(file: &std::fs::File, b: &mut fmt::DebugStruct) {
+    let fd = file.as_raw_fd();
     b.field("fd", &fd);
-    if let Some((read, write)) = unsafe { get_mode(fd) } {
+    if let Ok((read, write)) = flags(file) {
         b.field("read", &read).field("write", &write);
     }
 }
 
 #[cfg(windows)]
-fn fmt_debug_file(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    b.field("TODO fill in the blanks", &fd.as_raw_handle());
+fn fmt_debug_file(file: &std::fs::File, b: &mut fmt::DebugStruct) {
+    let handle = file.as_raw_handle();
+    b.field("handle", &handle);
+    if let Ok((read, write)) = flags(file) {
+        b.field("read", &read).field("write", &write);
+    }
 }

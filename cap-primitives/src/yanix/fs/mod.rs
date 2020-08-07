@@ -2,13 +2,14 @@ mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
 mod file_type_ext;
-mod flags;
+mod flags_impl;
 mod is_root_dir;
 #[cfg(not(feature = "no_racy_asserts"))]
 mod is_same_file;
 mod link_unchecked;
 mod metadata_ext;
 mod mkdir_unchecked;
+mod oflags;
 mod open_options_ext;
 mod open_unchecked;
 mod permissions_ext;
@@ -57,6 +58,7 @@ pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
+pub(crate) use flags_impl::*;
 pub(crate) use is_root_dir::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use is_same_file::*;
@@ -79,4 +81,4 @@ pub(crate) use unlink_unchecked::*;
 // Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;
 
-pub(super) use flags::*;
+pub(super) use oflags::*;

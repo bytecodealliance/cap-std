@@ -700,48 +700,10 @@ impl fmt::Debug for Dir {
     }
 }
 
-#[cfg(any(unix, target_os = "fuchsia"))]
+#[cfg(any(unix, target_os = "fuchsia", target_os = "wasi"))]
 fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
-    unsafe fn get_mode(fd: std::os::unix::io::RawFd) -> Option<(bool, bool)> {
-        let mode = yanix::fcntl::get_status_flags(fd);
-        if mode.is_err() {
-            return None;
-        }
-        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
-            yanix::file::OFlags::RDONLY => Some((true, false)),
-            yanix::file::OFlags::RDWR => Some((true, true)),
-            yanix::file::OFlags::WRONLY => Some((false, true)),
-            _ => None,
-        }
-    }
-
     let fd = fd.as_raw_fd();
     b.field("fd", &fd);
-    if let Some((read, write)) = unsafe { get_mode(fd) } {
-        b.field("read", &read).field("write", &write);
-    }
-}
-
-#[cfg(target_os = "wasi")]
-fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
-    unsafe fn get_mode(fd: std::os::wasi::io::RawFd) -> Option<(bool, bool)> {
-        let mode = yanix::fcntl::get_status_flags(fd);
-        if mode.is_err() {
-            return None;
-        }
-        match mode.unwrap() & yanix::file::OFlags::ACCMODE {
-            yanix::file::OFlags::RDONLY => Some((true, false)),
-            yanix::file::OFlags::RDWR => Some((true, true)),
-            yanix::file::OFlags::WRONLY => Some((false, true)),
-            _ => None,
-        }
-    }
-
-    let fd = fd.as_raw_fd();
-    b.field("fd", &fd);
-    if let Some((read, write)) = unsafe { get_mode(fd) } {
-        b.field("read", &read).field("write", &write);
-    }
 }
 
 #[cfg(windows)]
