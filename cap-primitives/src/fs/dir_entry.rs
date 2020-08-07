@@ -89,6 +89,7 @@ impl DirEntry {
         self.inner.file_name()
     }
 
+    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
         self.inner.is_same_file(metadata)

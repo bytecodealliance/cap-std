@@ -338,7 +338,7 @@ pub(crate) enum OpenUncheckedError {
 }
 
 impl From<OpenUncheckedError> for io::Error {
-    fn from(error: OpenUncheckedError) -> io::Error {
+    fn from(error: OpenUncheckedError) -> Self {
         match error {
             OpenUncheckedError::Other(err)
             | OpenUncheckedError::Symlink(err)

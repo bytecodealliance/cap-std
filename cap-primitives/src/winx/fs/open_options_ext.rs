@@ -41,8 +41,15 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
         self
     }
 
+    /// Re-enable this once https://github.com/rust-lang/rust/pull/74074 is in stable.
+    #[cfg(feature = "windows_security_qos_flags")]
     fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
         self.security_qos_flags = flags;
         self
+    }
+
+    #[cfg(not(feature = "windows_security_qos_flags"))]
+    fn security_qos_flags(&mut self, flags: u32) -> &mut std::fs::OpenOptions {
+        panic!("OpenOptionsExt::security_qos_flags requires the \"nightly\" feature")
     }
 }

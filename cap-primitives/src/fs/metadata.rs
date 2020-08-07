@@ -1,4 +1,6 @@
-use crate::fs::{FileType, MetadataExt, Permissions};
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+use crate::fs::MetadataExt;
+use crate::fs::{FileType, Permissions};
 use std::{fs, io, time::SystemTime};
 
 /// Metadata information about a file.
@@ -20,7 +22,11 @@ pub struct Metadata {
     pub(crate) accessed: Option<SystemTime>,
     pub(crate) created: Option<SystemTime>,
 
-    #[cfg(any(unix, windows, target_os = "vxworks"))]
+    #[cfg(any(
+        unix,
+        all(windows, feature = "windows_file_type_ext"),
+        target_os = "vxworks"
+    ))]
     pub(crate) ext: MetadataExt,
 }
 
@@ -37,7 +43,11 @@ impl Metadata {
             accessed: std.accessed().ok(),
             created: std.created().ok(),
 
-            #[cfg(any(unix, windows, target_os = "vxworks"))]
+            #[cfg(any(
+                unix,
+                all(windows, feature = "windows_file_type_ext"),
+                target_os = "vxworks"
+            ))]
             ext: MetadataExt::from_std(std),
         }
     }
@@ -123,6 +133,7 @@ impl Metadata {
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
+    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }
@@ -299,7 +310,7 @@ impl std::os::vxworks::fs::MetadataExt for Metadata {
     }
 }
 
-#[cfg(windows)]
+#[cfg(all(windows, feature = "windows_file_type_ext"))]
 impl std::os::windows::fs::MetadataExt for Metadata {
     #[inline]
     fn file_attributes(&self) -> u32 {

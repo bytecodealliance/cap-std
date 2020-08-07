@@ -27,8 +27,13 @@ pub(crate) fn stat_via_parent(
 
         // If the user didn't want us to follow a symlink in the last component, or we didn't
         // find a symlink, we're done.
+        #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
         if !metadata.file_type().is_symlink() || follow == FollowSymlinks::No {
             return Ok(metadata);
+        }
+        #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
+        if follow == FollowSymlinks::Yes {
+            panic!("stat_via_parent with FollowSymlinks::Yes requires the \"nightly\" feature");
         }
 
         // Dereference the symlink and iterate.

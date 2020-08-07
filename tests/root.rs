@@ -16,6 +16,7 @@ fn open_root() {
 
 /// Attempt to remove the root directory, which should fail, and check that the
 /// error message is as expected.
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn remove_root() {

@@ -42,6 +42,11 @@ winapi = { version = "0.3.9", features = [
 ] }
 winx = "0.19.0"
 
+[features]
+# "nightly" is required when building with Rust nightly, and it enables
+# support for `FileTypeExt`, `remove_dir_all`, and related features.
+nightly = ["cap-primitives/nightly"]
+
 [badges]
 maintenance = { status = "actively-developed" }
 

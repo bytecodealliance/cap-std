@@ -57,6 +57,7 @@ impl DirEntryInner {
     }
 
     #[inline]
+    #[cfg(feature = "windows_file_type_ext")]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
         // Don't use `self.metadata()`, because that doesn't include the
         // volume serial number which we need.

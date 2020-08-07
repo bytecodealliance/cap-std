@@ -2,8 +2,14 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
-#![cfg_attr(windows, feature(windows_by_handle))]
-#![cfg_attr(windows, feature(windows_file_type_ext))]
+#![cfg_attr(
+    all(windows, feature = "windows_by_handle"),
+    feature(windows_by_handle)
+)]
+#![cfg_attr(
+    all(windows, feature = "windows_file_type_ext"),
+    feature(windows_file_type_ext)
+)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.svg"
 )]

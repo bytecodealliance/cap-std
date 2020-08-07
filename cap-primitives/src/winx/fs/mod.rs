@@ -1,12 +1,15 @@
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
+#[cfg(feature = "windows_file_type_ext")]
 mod file_type_ext;
 mod flags_impl;
 mod get_path;
 mod is_root_dir;
+#[cfg(feature = "windows_file_type_ext")]
 mod is_same_file;
 mod link_unchecked;
+#[cfg(feature = "windows_file_type_ext")]
 mod metadata_ext;
 mod mkdir_unchecked;
 mod oflags;
@@ -14,6 +17,7 @@ mod open_options_ext;
 mod open_unchecked;
 mod read_dir_inner;
 mod readlink_unchecked;
+#[cfg(feature = "windows_file_type_ext")]
 mod remove_dir_all_impl;
 mod rename_unchecked;
 mod rmdir_unchecked;
@@ -37,18 +41,21 @@ pub(crate) use crate::fs::{
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) use crate::fs::{
-    open_manually_wrapper as open_impl, remove_open_dir_by_searching as remove_open_dir_impl,
-};
+pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+#[cfg(feature = "windows_file_type_ext")]
+pub(crate) use crate::fs::remove_open_dir_by_searching as remove_open_dir_impl;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use file_type_ext::*;
 pub(crate) use flags_impl::*;
 pub(crate) use get_path::get_path as get_path_impl;
 pub(crate) use is_root_dir::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;
 pub(crate) use oflags::*;
@@ -56,6 +63,7 @@ pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_unchecked::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;

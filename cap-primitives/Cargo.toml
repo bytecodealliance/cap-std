@@ -38,6 +38,10 @@ winapi = { version = "0.3.9", features = [
 [features]
 default = ["no_racy_asserts"]
 no_racy_asserts = []
+nightly = ["windows_by_handle", "windows_file_type_ext", "windows_security_qos_flags"]
+windows_by_handle = []
+windows_file_type_ext = []
+windows_security_qos_flags = []
 
 [badges]
 maintenance = { status = "actively-developed" }
