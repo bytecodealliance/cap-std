@@ -33,7 +33,7 @@ impl Iterator for ReadDirInner {
     fn next(&mut self) -> Option<Self::Item> {
         self.std
             .next()
-            .map(|result| result.map(|std| DirEntryInner { std }))
+            .map(|result| result.map(DirEntryInner::from_std))
     }
 }
 

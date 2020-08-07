@@ -5,13 +5,23 @@ use crate::fs::{
 use std::{ffi::OsString, fmt, fs, io};
 
 pub(crate) struct DirEntryInner {
-    pub(crate) std: fs::DirEntry,
+    std: fs::DirEntry,
 }
 
 impl DirEntryInner {
     #[inline]
     pub fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
-        todo!("DirEntryInner::open")
+        match options.follow {
+            FollowSymlinks::No => open_options_to_std(options).open(self.std.path()),
+            FollowSymlinks::Yes => unsafe {
+                let path = self.std.path();
+                open(
+                    &open_ambient_dir(path.parent().unwrap())?,
+                    path.file_name().unwrap().as_ref(),
+                    options,
+                )
+            },
+        }
     }
 
     #[inline]
@@ -49,6 +59,11 @@ impl DirEntryInner {
     #[inline]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
         Ok(self.metadata()?.is_same_file(metadata))
+    }
+
+    #[inline]
+    pub(super) fn from_std(std: fs::DirEntry) -> Self {
+        Self { std }
     }
 }
 
