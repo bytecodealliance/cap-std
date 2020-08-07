@@ -586,8 +586,7 @@ fn recursive_mkdir_empty() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
     let d1 = PathBuf::from("d1");
@@ -760,8 +759,7 @@ fn copy_file_src_dir() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn copy_file_preserves_perm_bits() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -783,8 +781,7 @@ fn copy_file_preserves_perm_bits() {
 
 #[test]
 #[cfg(windows)]
-#[ignore]
-// TODO enable once more Win syscalls are added
+#[ignore] // TODO investigate why this one is failing
 fn copy_file_preserves_streams() {
     let tmp = tmpdir();
     check!(check!(tmp.create("in.txt:bunny")).write("carrot".as_bytes()));
@@ -808,8 +805,7 @@ fn copy_file_returns_metadata_len() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
     if !got_symlink_permission(&tmp) {
@@ -834,8 +830,7 @@ fn copy_file_follows_dst_symlink() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn symlinks_work() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -874,8 +869,7 @@ fn symlink_noexist() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn read_link() {
     let tmpdir = tmpdir();
     if cfg!(windows) {
@@ -951,8 +945,7 @@ fn links_work() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
@@ -1277,8 +1270,7 @@ fn canonicalize_works_simple() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn realpath_works() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -1309,8 +1301,7 @@ fn realpath_works() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn realpath_works_tricky() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -1382,8 +1373,7 @@ fn read_dir_not_found() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once more Win syscalls are added
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();
     let target = "target";
