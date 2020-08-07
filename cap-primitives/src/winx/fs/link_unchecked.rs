@@ -1,3 +1,4 @@
+use super::get_path::concatenate_or_return_absolute;
 use crate::fs::FollowSymlinks;
 use std::{fs, io, path::Path};
 
@@ -9,5 +10,7 @@ pub(crate) fn link_unchecked(
     new_path: &Path,
     follow: FollowSymlinks,
 ) -> io::Result<()> {
-    todo!("link_unchecked")
+    let old_full_path = concatenate_or_return_absolute(old_start, old_path)?;
+    let new_full_path = concatenate_or_return_absolute(new_start, new_path)?;
+    fs::hard_link(old_full_path, new_full_path)
 }
