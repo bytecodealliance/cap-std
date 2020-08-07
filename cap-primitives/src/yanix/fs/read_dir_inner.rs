@@ -1,7 +1,7 @@
 use crate::fs::{
     dir_options, open, open_entry_impl, open_unchecked, read_dir_unchecked, rmdir_unchecked,
     stat_unchecked, unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
-    OpenUncheckedError, ReadDir,
+    ReadDir,
 };
 use std::{
     ffi::OsStr,
@@ -28,8 +28,7 @@ impl ReadDirInner {
     }
 
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let dir = open_unchecked(start, path, &dir_options())
-            .map_err(OpenUncheckedError::into_io_error)?;
+        let dir = open_unchecked(start, path, &dir_options())?;
         Ok(Self {
             yanix: Arc::new(Dir::from(dir)?),
         })
