@@ -13,8 +13,6 @@ use std::{
 use sys_common::io::tmpdir;
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once `stat_unchecked` is implemented
 fn recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
@@ -26,8 +24,6 @@ fn recursive_mkdir() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO investigate why this one is failing
 fn open_various() {
     let tmpdir = tmpdir();
     #[cfg(not(windows))]
@@ -42,8 +38,6 @@ fn open_various() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once `stat_unchecked` is implemented
 fn dir_writable() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("dir"));
@@ -79,8 +73,6 @@ fn dir_writable() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO investigate why this one is failing
 fn trailing_slash() {
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
@@ -92,8 +84,6 @@ fn trailing_slash() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once `rename_unchecked` is implemented
 fn rename_slashdots() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("dir"));
@@ -107,8 +97,6 @@ fn rename_slashdots() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once `stat_unchecked` is implemented
 fn optionally_recursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";
@@ -132,8 +120,6 @@ fn optionally_nonrecursive_mkdir() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)]
-// TODO enable once `readdir` is implemented
 fn file_test_directoryinfo_readdir() {
     let tmpdir = tmpdir();
     let dir = "di_readdir";

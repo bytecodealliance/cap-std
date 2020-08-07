@@ -1,4 +1,8 @@
+mod symlink_junction;
+
 pub mod io;
+
+pub use symlink_junction::*;
 
 #[allow(unused)]
 macro_rules! check {

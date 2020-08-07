@@ -8,12 +8,12 @@ pub(crate) fn no_such_file_or_directory() -> io::Error {
 
 #[cold]
 pub(crate) fn is_directory() -> io::Error {
-    todo!("is_directory")
+    io::Error::new(io::ErrorKind::Other, "TODO: errors::is_directory")
 }
 
 #[cold]
 pub(crate) fn is_not_directory() -> io::Error {
-    todo!("is_not_directory")
+    io::Error::new(io::ErrorKind::Other, "TODO: errors::is_not_directory")
 }
 
 #[cold]
