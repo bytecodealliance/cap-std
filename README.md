@@ -82,7 +82,7 @@ and `cap-std` APIs.
 [`cap-directories`]: https://crates.io/crates/cap-directories
 [`cap-tempfile`]: https://crates.io/crates/cap-tempfile
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
-[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/examples/kv-cli.rs
+[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/examples/kv-cli.rs
 
 ## What can I use `cap-std` for?
 
