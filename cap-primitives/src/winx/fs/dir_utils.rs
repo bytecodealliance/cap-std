@@ -1,6 +1,6 @@
 use crate::fs::OpenOptions;
 use std::{
-    ffi::{OsStr, OsString},
+    ffi::OsString,
     fs, io,
     ops::Deref,
     os::windows::{

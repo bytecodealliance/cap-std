@@ -1,5 +1,5 @@
 use super::get_path::concatenate_or_return_absolute;
-use crate::fs::{open_dir, DirEntryInner, Metadata};
+use crate::fs::{open_dir, DirEntryInner};
 use std::{
     fmt, fs, io,
     path::{Component, Path},

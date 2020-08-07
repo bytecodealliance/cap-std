@@ -37,15 +37,15 @@ impl FileType {
     /// Constructs a new instance of `Self` from the given `std::fs::FileType`.
     #[inline]
     pub(crate) fn from_std(std: fs::FileType) -> Self {
-        Self(if std.is_dir() {
-            Inner::Dir
+        if std.is_dir() {
+            Self::dir()
         } else if std.is_file() {
-            Inner::File
+            Self::file()
         } else if let Some(ext) = FileTypeExt::from_std(std) {
-            Inner::Ext(ext)
+            Self::ext(ext)
         } else {
-            Inner::Unknown
-        })
+            Self::unknown()
+        }
     }
 
     /// Creates a `FileType` for which `is_dir()` returns `true`.
