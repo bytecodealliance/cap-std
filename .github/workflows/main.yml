@@ -17,7 +17,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: stable
-    - run: cargo fmt --workspace -- --check
+    - run: cargo fmt --all -- --check
 
   build:
     name: Build
