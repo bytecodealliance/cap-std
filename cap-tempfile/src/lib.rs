@@ -9,9 +9,11 @@
 )]
 
 use cap_std::fs::Dir;
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+use std::mem;
 #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
 use std::path::PathBuf;
-use std::{env, fmt, fs, io, mem, ops::Deref};
+use std::{env, fmt, fs, io, ops::Deref};
 use uuid::Uuid;
 
 /// A directory in a filesystem that is automatically deleted when it goes out of scope.
@@ -106,7 +108,7 @@ impl TempDir {
     pub fn close(mut self) -> io::Result<()> {
         #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
         {
-            fs::remove_dir_all(&self.path)
+            fs::remove_dir_all(&mut self.path)
         }
 
         #[cfg(any(not(windows), feature = "windows_file_type_ext"))]

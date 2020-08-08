@@ -18,6 +18,7 @@ mod mkdir;
 mod mkdir_via_parent;
 mod open;
 mod open_dir;
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 mod open_entry_manually;
 mod open_manually;
 mod open_options;
@@ -52,6 +53,7 @@ pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
 pub(crate) use maybe_owned_file::*;
 pub(crate) use mkdir_via_parent::*;
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 pub(crate) use open_entry_manually::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;

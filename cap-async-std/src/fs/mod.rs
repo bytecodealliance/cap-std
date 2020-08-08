@@ -71,11 +71,13 @@ unsafe fn _as_sync(async_file: &async_std::fs::File) -> std::mem::ManuallyDrop<s
 
 /// Utility for converting an `async_std::fs::File` into a `std::fs::File`
 /// for synchronous operations.
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[inline]
 pub(crate) fn into_sync(async_file: async_std::fs::File) -> std::fs::File {
     _into_sync(async_file)
 }
 
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg(any(
     unix,
     target_os = "redox",
@@ -87,6 +89,7 @@ fn _into_sync(async_file: async_std::fs::File) -> std::fs::File {
     unsafe { std::fs::File::from_raw_fd(async_file.as_raw_fd()) }
 }
 
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg(windows)]
 fn _into_sync(async_file: async_std::fs::File) -> std::fs::File {
     use std::os::windows::io::{AsRawHandle, FromRawHandle};

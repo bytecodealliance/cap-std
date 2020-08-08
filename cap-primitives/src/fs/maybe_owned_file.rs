@@ -96,6 +96,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     }
 
     /// Assuming `self` holds an owned `File`, return it.
+    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     pub(crate) fn unwrap_owned(self) -> fs::File {
         match self.inner {
             Inner::Owned(file) => file,

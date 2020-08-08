@@ -2,7 +2,9 @@
 mod sys_common;
 
 use cap_std::fs::Dir;
-use std::{fs, path::Component};
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+use std::fs;
+use std::path::Component;
 
 #[test]
 fn open_root() {

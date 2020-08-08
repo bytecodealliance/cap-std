@@ -193,7 +193,7 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
 
     #[cfg(not(feature = "windows_security_qos_flags"))]
     #[inline]
-    fn security_qos_flags(&mut self, flags: u32) -> &mut std::fs::OpenOptions {
+    fn security_qos_flags(&mut self, _flags: u32) -> &mut std::fs::OpenOptions {
         panic!("OpenOptionsExt::security_qos_flags requires the \"nightly\" feature")
     }
 }

@@ -53,6 +53,7 @@ pub(crate) fn dir_options() -> OpenOptions {
 }
 
 /// Test whether an `OpenOptions` is set to only open directories.
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
     (options.ext.attributes & Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
         == Flags::FILE_FLAG_BACKUP_SEMANTICS.bits()

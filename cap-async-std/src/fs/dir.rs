@@ -1,4 +1,6 @@
-use crate::fs::{as_sync, into_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
+#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+use crate::fs::into_sync;
+use crate::fs::{as_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use cap_primitives::fs::{
     canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink, rename, rmdir,

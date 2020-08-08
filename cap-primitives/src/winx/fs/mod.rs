@@ -5,6 +5,7 @@ mod dir_utils;
 mod file_type_ext;
 mod flags_impl;
 mod get_path;
+#[cfg(feature = "windows_file_type_ext")]
 mod is_root_dir;
 #[cfg(feature = "windows_file_type_ext")]
 mod is_same_file;
@@ -21,6 +22,7 @@ mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod rename_unchecked;
 mod rmdir_unchecked;
+#[cfg(feature = "windows_file_type_ext")]
 mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
@@ -50,7 +52,9 @@ pub(crate) use dir_utils::*;
 #[cfg(feature = "windows_file_type_ext")]
 pub(crate) use file_type_ext::*;
 pub(crate) use flags_impl::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use get_path::get_path as get_path_impl;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use is_root_dir::*;
 #[cfg(feature = "windows_file_type_ext")]
 pub(crate) use is_same_file::*;
@@ -58,7 +62,6 @@ pub(crate) use link_unchecked::*;
 #[cfg(feature = "windows_file_type_ext")]
 pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;
-pub(crate) use oflags::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use read_dir_inner::*;
@@ -67,6 +70,7 @@ pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
+#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
@@ -74,3 +78,5 @@ pub(crate) use unlink_unchecked::*;
 // On Windows, there is a limit of 63 reparse points on any given path.
 // https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;
+
+pub(super) use oflags::*;
