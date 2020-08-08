@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macros, beta, nightly]
+        build: [stable, windows, macos, beta, nightly]
         include:
           - build: stable
             os: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: cargo build --workspace --features=fs_utf8 --release -vv
 
-  windows_nightly:
+  build_windows_nightly:
     name: Build Windows with Rust nightly
     runs-on: ${{ matrix.os }}
     strategy:
@@ -76,10 +76,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, beta, nightly, macos, windows]
+        build: [stable, windows, macos, beta, nightly]
         include:
           - build: stable
             os: ubuntu-latest
+            rust: stable
+          - build: windows
+            os: windows-latest
+            rust: stable
+          - build: macos
+            os: macos-latest
             rust: stable
           - build: beta
             os: ubuntu-latest
@@ -87,14 +93,23 @@ jobs:
           - build: nightly
             os: ubuntu-latest
             rust: nightly
-          - build: macos
-            os: macos-latest
-            rust: stable
-          # Enable once we figure out how to build stable on Windows,
-          # tests build and run
-          # - build: windows
-          #   os: windows-latest
-          #   rust: stable
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: cargo test --no-default-features --features fs_utf8 --workspace
+
+  test_windows_nightly:
+    name: Test Windows with Rust nightly
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [windows]
+        include:
           - build: windows
             os: windows-latest
             rust: nightly
@@ -106,7 +121,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --no-default-features --features fs_utf8 --workspace
+    - run: cargo test --no-default-features --features fs_utf8,nightly --workspace
 
   fuzz_targets:
     name: Fuzz Targets
