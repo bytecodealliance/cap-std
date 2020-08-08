@@ -46,6 +46,7 @@ winx = "0.19.0"
 # "nightly" is required when building with Rust nightly, and it enables
 # support for `FileTypeExt`, `remove_dir_all`, and related features.
 nightly = ["cap-primitives/nightly"]
+fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
 
 [badges]
 maintenance = { status = "actively-developed" }

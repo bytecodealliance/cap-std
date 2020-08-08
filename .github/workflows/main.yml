@@ -89,7 +89,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --all-features --workspace
+    - run: cargo test --no-default-features --features fs_utf8 --workspace
 
   fuzz_targets:
     name: Fuzz Targets
