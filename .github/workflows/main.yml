@@ -41,6 +41,23 @@ jobs:
           - build: windows
             os: windows-latest
             rust: stable
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: cargo build --workspace --features=fs_utf8 --release -vv
+
+  windows_nightly:
+    name: Build Windows with Rust nightly
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [windows]
+        include:
           - build: windows
             os: windows-latest
             rust: nightly
@@ -52,7 +69,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo build --workspace --all-features --release -vv
+    - run: cargo build --workspace --features=fs_utf8,nightly --release -vv
 
   test:
     name: Test
