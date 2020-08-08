@@ -22,7 +22,6 @@ mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod rename_unchecked;
 mod rmdir_unchecked;
-#[cfg(feature = "windows_file_type_ext")]
 mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
@@ -70,7 +69,6 @@ pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
-#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;
