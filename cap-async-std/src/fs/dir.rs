@@ -412,10 +412,7 @@ impl Dir {
     /// This corresponds to [`async_std::fs::symlink_metadata`], but only accesses paths
     /// relative to `self`.
     ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    ///
     /// [`async_std::fs::symlink_metadata`]: https://docs.rs/async-std/latest/async_std/fs/fn.symlink_metadata.html
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         let file = unsafe { as_sync(&self.std_file) };

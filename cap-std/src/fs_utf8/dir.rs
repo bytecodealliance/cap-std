@@ -327,10 +327,7 @@ impl Dir {
     /// This corresponds to [`std::fs::symlink_metadata`], but only accesses paths
     /// relative to `self`.
     ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    ///
     /// [`std::fs::symlink_metadata`]: https://doc.rust-lang.org/std/fs/fn.symlink_metadata.html
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn symlink_metadata<P: AsRef<str>>(&self, path: P) -> io::Result<Metadata> {
         let path = from_utf8(path)?;
