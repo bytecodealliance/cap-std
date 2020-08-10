@@ -2,6 +2,10 @@ use crate::{
     fs::{FileType, Metadata, OpenOptions},
     fs_utf8::{to_utf8, Dir, File},
 };
+#[cfg(unix)]
+use async_std::os::unix::fs::DirEntryExt;
+#[cfg(target_os = "wasi")]
+use async_std::os::wasi::fs::DirEntryExt;
 use std::{fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.
@@ -94,8 +98,8 @@ impl DirEntry {
     }
 }
 
-#[cfg(any(unix, target_os = "fuchsia", target_os = "vxworks"))]
-impl async_std::os::unix::fs::DirEntryExt for DirEntry {
+#[cfg(any(unix, target_os = "wasi"))]
+impl DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {
         self.cap_std.ino()

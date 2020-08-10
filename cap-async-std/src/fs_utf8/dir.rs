@@ -5,7 +5,7 @@ use crate::{
 use async_std::{fs, io};
 use std::fmt;
 
-#[cfg(any(unix, target_os = "fuchsia"))]
+#[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},

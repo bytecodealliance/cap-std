@@ -4,7 +4,7 @@ use crate::{
 };
 use std::{fmt, fs, io};
 
-#[cfg(any(unix, target_os = "fuchsia"))]
+#[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
