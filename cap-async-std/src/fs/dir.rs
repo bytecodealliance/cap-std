@@ -13,7 +13,7 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-#[cfg(any(unix, target_os = "fuchsia"))]
+#[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
@@ -709,7 +709,7 @@ impl fmt::Debug for Dir {
     }
 }
 
-#[cfg(any(unix, target_os = "fuchsia", target_os = "wasi"))]
+#[cfg(any(unix, target_os = "wasi"))]
 fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
     let fd = fd.as_raw_fd();
     b.field("fd", &fd);
