@@ -4,7 +4,8 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use async_std::{
-    io, net,
+    io::{self, IoSlice, IoSliceMut, Read, Write},
+    net,
     task::{Context, Poll},
 };
 use std::pin::Pin;
@@ -165,56 +166,62 @@ impl IntoRawSocket for TcpStream {
     }
 }
 
-impl io::Read for TcpStream {
+impl Read for TcpStream {
     #[inline]
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut Context,
         buf: &mut [u8],
     ) -> Poll<io::Result<usize>> {
-        io::Read::poll_read(Pin::new(&mut self.std), cx, buf)
+        Read::poll_read(Pin::new(&mut self.std), cx, buf)
     }
 
     #[inline]
     fn poll_read_vectored(
         mut self: Pin<&mut Self>,
         cx: &mut Context,
-        bufs: &mut [io::IoSliceMut],
+        bufs: &mut [IoSliceMut],
     ) -> Poll<io::Result<usize>> {
-        io::Read::poll_read_vectored(Pin::new(&mut self.std), cx, bufs)
+        Read::poll_read_vectored(Pin::new(&mut self.std), cx, bufs)
     }
 
-    // TODO: nightly-only APIs initializer?
+    // async_std doesn't have `is_read_vectored`.
+
+    // async_std doesn't have `initializer`.
 }
 
-impl io::Write for TcpStream {
+impl Write for TcpStream {
     #[inline]
     fn poll_write(
         mut self: Pin<&mut Self>,
         cx: &mut Context,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        io::Write::poll_write(Pin::new(&mut self.std), cx, buf)
+        Write::poll_write(Pin::new(&mut self.std), cx, buf)
     }
 
     #[inline]
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
-        io::Write::poll_flush(Pin::new(&mut self.std), cx)
+        Write::poll_flush(Pin::new(&mut self.std), cx)
     }
 
     #[inline]
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
-        io::Write::poll_close(Pin::new(&mut self.std), cx)
+        Write::poll_close(Pin::new(&mut self.std), cx)
     }
 
     #[inline]
     fn poll_write_vectored(
         mut self: Pin<&mut Self>,
         cx: &mut Context,
-        bufs: &[io::IoSlice],
+        bufs: &[IoSlice],
     ) -> Poll<io::Result<usize>> {
-        io::Write::poll_write_vectored(Pin::new(&mut self.std), cx, bufs)
+        Write::poll_write_vectored(Pin::new(&mut self.std), cx, bufs)
     }
+
+    // async_std doesn't have `is_write_vectored`.
+
+    // async_std doesn't have `write_all_vectored`.
 }
 
 // TODO: impl Debug for TcpStream
