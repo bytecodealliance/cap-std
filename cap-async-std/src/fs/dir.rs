@@ -694,7 +694,7 @@ impl fmt::Debug for Dir {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
     let fd = fd.as_raw_fd();
     b.field("fd", &fd);
@@ -702,5 +702,5 @@ fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
 
 #[cfg(windows)]
 fn fmt_debug_dir(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    b.field("TODO fill in the blanks", &fd.as_raw_handle());
+    b.field("handle", &fd.as_raw_handle());
 }
