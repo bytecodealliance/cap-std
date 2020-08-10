@@ -1,5 +1,9 @@
+#[cfg(feature = "with_options")]
+use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
 use cap_primitives::fs::flags;
+#[cfg(feature = "read_initializer")]
+use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -8,7 +12,11 @@ use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 #[cfg(target_os = "wasi")]
 use std::path::Path;
-use std::{fmt, fs, io, process};
+use std::{
+    fmt, fs,
+    io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
+    process,
+};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -31,6 +39,17 @@ impl File {
     #[inline]
     pub fn from_std(std: fs::File) -> Self {
         Self { std }
+    }
+
+    /// Returns a new `OpenOptions` object.
+    ///
+    /// This corresponds to [`std::fs::File::with_options`].
+    ///
+    /// [`std::fs::File::with_options`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.with_options
+    #[inline]
+    #[cfg(feature = "with_options")]
+    pub fn with_options() -> OpenOptions {
+        OpenOptions::new()
     }
 
     /// Attempts to sync all OS-internal metadata to disk.
@@ -170,14 +189,14 @@ impl IntoRawHandle for File {
     }
 }
 
-impl io::Read for File {
+impl Read for File {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.read(buf)
     }
 
     #[inline]
-    fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut]) -> io::Result<usize> {
+    fn read_vectored(&mut self, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
         self.std.read_vectored(bufs)
     }
 
@@ -196,10 +215,20 @@ impl io::Read for File {
         self.std.read_to_string(buf)
     }
 
-    // TODO: nightly-only APIs initializer?
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_read_vectored(&self) -> bool {
+        self.std.is_read_vectored()
+    }
+
+    #[cfg(feature = "read_initializer")]
+    #[inline]
+    unsafe fn initializer(&self) -> Initializer {
+        self.std.initializer()
+    }
 }
 
-impl io::Write for File {
+impl Write for File {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.std.write(buf)
@@ -211,7 +240,7 @@ impl io::Write for File {
     }
 
     #[inline]
-    fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
+    fn write_vectored(&mut self, bufs: &[IoSlice]) -> io::Result<usize> {
         self.std.write_vectored(bufs)
     }
 
@@ -219,15 +248,37 @@ impl io::Write for File {
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         self.std.write_all(buf)
     }
+
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_write_vectored(&self) -> bool {
+        self.std.is_write_vectored()
+    }
+
+    #[cfg(feature = "write_all_vectored")]
+    #[inline]
+    fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
+        self.std.write_all_vectored(bufs)
+    }
 }
 
-impl io::Seek for File {
+impl Seek for File {
     #[inline]
-    fn seek(&mut self, pos: io::SeekFrom) -> io::Result<u64> {
+    fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         self.std.seek(pos)
     }
 
-    // TODO: nightly-only APIs stream_len, stream_position?
+    #[cfg(feature = "seek_convenience")]
+    #[inline]
+    fn stream_len(&mut self) -> io::Result<u64> {
+        self.std.stream_len()
+    }
+
+    #[cfg(feature = "seek_convenience")]
+    #[inline]
+    fn stream_position(&mut self) -> io::Result<u64> {
+        self.std.stream_position()
+    }
 }
 
 impl From<File> for process::Stdio {
@@ -263,12 +314,12 @@ impl std::os::unix::fs::FileExt for File {
 #[cfg(target_os = "wasi")]
 impl std::os::wasi::fs::FileExt for File {
     #[inline]
-    fn read_at(&self, bufs: &mut [io::IoSliceMut], offset: u64) -> io::Result<usize> {
+    fn read_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
         self.std.read_at(bufs, offset)
     }
 
     #[inline]
-    fn write_at(&self, bufs: &[io::IoSlice], offset: u64) -> io::Result<usize> {
+    fn write_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
         self.std.write_at(bufs, offset)
     }
 

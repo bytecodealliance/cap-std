@@ -1,9 +1,15 @@
 use crate::net::{Shutdown, SocketAddr};
+#[cfg(feature = "read_initializer")]
+use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
-use std::{io, net, time::Duration};
+use std::{
+    io::{self, IoSlice, IoSliceMut, Read, Write},
+    net,
+    time::Duration,
+};
 
 /// A TCP stream between a local and a remote socket.
 ///
@@ -217,14 +223,14 @@ impl IntoRawSocket for TcpStream {
     }
 }
 
-impl io::Read for TcpStream {
+impl Read for TcpStream {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.read(buf)
     }
 
     #[inline]
-    fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut]) -> io::Result<usize> {
+    fn read_vectored(&mut self, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
         self.std.read_vectored(bufs)
     }
 
@@ -243,10 +249,20 @@ impl io::Read for TcpStream {
         self.std.read_to_string(buf)
     }
 
-    // TODO: nightly-only APIs initializer?
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_read_vectored(&self) -> bool {
+        self.std.is_read_vectored()
+    }
+
+    #[cfg(feature = "read_initializer")]
+    #[inline]
+    unsafe fn initializer(&self) -> Initializer {
+        self.std.initializer()
+    }
 }
 
-impl io::Write for TcpStream {
+impl Write for TcpStream {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.std.write(buf)
@@ -258,13 +274,25 @@ impl io::Write for TcpStream {
     }
 
     #[inline]
-    fn write_vectored(&mut self, bufs: &[io::IoSlice]) -> io::Result<usize> {
+    fn write_vectored(&mut self, bufs: &[IoSlice]) -> io::Result<usize> {
         self.std.write_vectored(bufs)
     }
 
     #[inline]
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         self.std.write_all(buf)
+    }
+
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_write_vectored(&self) -> bool {
+        self.std.is_write_vectored()
+    }
+
+    #[cfg(feature = "write_all_vectored")]
+    #[inline]
+    fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
+        self.std.write_all_vectored(bufs)
     }
 }
 

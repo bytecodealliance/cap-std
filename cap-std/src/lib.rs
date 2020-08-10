@@ -26,6 +26,11 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
+#![cfg_attr(feature = "can_vector", feature(can_vector))]
+#![cfg_attr(feature = "read_initializer", feature(read_initializer))]
+#![cfg_attr(feature = "seek_convenience", feature(seek_convenience))]
+#![cfg_attr(feature = "with_options", feature(with_options))]
+#![cfg_attr(feature = "write_all_vectored", feature(write_all_vectored))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.svg"
 )]

@@ -5,7 +5,8 @@ use cap_primitives::fs::{
     FollowSymlinks,
 };
 use std::{
-    fmt, fs, io,
+    fmt, fs,
+    io::{self, Read, Write},
     path::{Component, Path, PathBuf},
 };
 
@@ -291,7 +292,6 @@ impl Dir {
     /// [`std::fs::read`]: https://doc.rust-lang.org/std/fs/fn.read.html
     #[inline]
     pub fn read<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
-        use io::Read;
         let mut file = self.open(path)?;
         let mut bytes = Vec::with_capacity(initial_buffer_size(&file));
         file.read_to_end(&mut bytes)?;
@@ -317,7 +317,6 @@ impl Dir {
     /// [`std::fs::read_to_string`]: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
     #[inline]
     pub fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
-        use std::io::Read;
         let mut s = String::new();
         self.open(path)?.read_to_string(&mut s)?;
         Ok(s)
@@ -412,7 +411,6 @@ impl Dir {
     /// [`std::fs::write`]: https://doc.rust-lang.org/std/fs/fn.write.html
     #[inline]
     pub fn write<P: AsRef<Path>, C: AsRef<[u8]>>(&self, path: P, contents: C) -> io::Result<()> {
-        use io::Write;
         let mut file = self.create(path)?;
         file.write_all(contents.as_ref())
     }
