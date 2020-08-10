@@ -17,7 +17,6 @@ fn open_root() {
 /// Attempt to remove the root directory, which should fail, and check that the
 /// error message is as expected.
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn remove_root() {
     let root = unsafe { Dir::open_ambient_dir(Component::RootDir.as_os_str()) }
         .expect("expect to be able to open the root directory");
