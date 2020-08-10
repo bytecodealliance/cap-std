@@ -7,7 +7,6 @@ mod get_path;
 #[cfg(feature = "windows_by_handle")]
 mod is_same_file;
 mod link_unchecked;
-#[cfg(feature = "windows_file_type_ext")]
 mod metadata_ext;
 mod mkdir_unchecked;
 mod oflags;
@@ -51,7 +50,6 @@ pub(crate) use get_path::get_path as get_path_impl;
 #[allow(unused_imports)]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
-#[cfg(feature = "windows_file_type_ext")]
 pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;

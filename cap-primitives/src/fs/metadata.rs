@@ -1,6 +1,4 @@
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-use crate::fs::MetadataExt;
-use crate::fs::{FileType, Permissions};
+use crate::fs::{FileType, MetadataExt, Permissions};
 use std::{fs, io, time::SystemTime};
 
 /// Metadata information about a file.
@@ -21,12 +19,6 @@ pub struct Metadata {
     pub(crate) modified: Option<SystemTime>,
     pub(crate) accessed: Option<SystemTime>,
     pub(crate) created: Option<SystemTime>,
-
-    #[cfg(any(
-        unix,
-        all(windows, feature = "windows_file_type_ext"),
-        target_os = "vxworks"
-    ))]
     pub(crate) ext: MetadataExt,
 }
 
@@ -42,12 +34,6 @@ impl Metadata {
             modified: std.modified().ok(),
             accessed: std.accessed().ok(),
             created: std.created().ok(),
-
-            #[cfg(any(
-                unix,
-                all(windows, feature = "windows_file_type_ext"),
-                target_os = "vxworks"
-            ))]
             ext: MetadataExt::from_std(std),
         }
     }
@@ -311,7 +297,7 @@ impl std::os::vxworks::fs::MetadataExt for Metadata {
     }
 }
 
-#[cfg(all(windows, feature = "windows_file_type_ext"))]
+#[cfg(all(windows, feature = "windows_by_handle"))]
 impl std::os::windows::fs::MetadataExt for Metadata {
     #[inline]
     fn file_attributes(&self) -> u32 {
