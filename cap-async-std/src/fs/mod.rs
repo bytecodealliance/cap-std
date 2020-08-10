@@ -52,12 +52,7 @@ pub(crate) unsafe fn as_sync(
     _as_sync(async_file)
 }
 
-#[cfg(any(
-    unix,
-    target_os = "redox",
-    target_os = "vxworks",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 unsafe fn _as_sync(async_file: &async_std::fs::File) -> std::mem::ManuallyDrop<std::fs::File> {
     use std::os::unix::io::{AsRawFd, FromRawFd};
     std::mem::ManuallyDrop::new(std::fs::File::from_raw_fd(async_file.as_raw_fd()))
@@ -77,20 +72,13 @@ pub(crate) fn into_sync(async_file: async_std::fs::File) -> std::fs::File {
     _into_sync(async_file)
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-#[cfg(any(
-    unix,
-    target_os = "redox",
-    target_os = "vxworks",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 fn _into_sync(async_file: async_std::fs::File) -> std::fs::File {
     use std::os::unix::io::{AsRawFd, FromRawFd};
     unsafe { std::fs::File::from_raw_fd(async_file.as_raw_fd()) }
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-#[cfg(windows)]
+#[cfg(all(windows, feature = "windows_file_type_ext"))]
 fn _into_sync(async_file: async_std::fs::File) -> std::fs::File {
     use std::os::windows::io::{AsRawHandle, FromRawHandle};
     unsafe { std::fs::File::from_raw_handle(async_file.as_raw_handle()) }

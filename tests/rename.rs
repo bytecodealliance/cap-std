@@ -4,12 +4,7 @@ mod sys_common;
 use sys_common::io::tmpdir;
 
 /*
-#[cfg(any(
-    unix,
-    target_os = "vxworks",
-    target_os = "redox",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 fn rename_path_in_use() -> String {
     std::io::Error::from_raw_os_error(libc::EBUSY).to_string()
 }
@@ -19,12 +14,7 @@ fn rename_path_in_use() -> String {
 }
 */
 
-#[cfg(any(
-    unix,
-    target_os = "vxworks",
-    target_os = "redox",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 fn no_such_file_or_directory() -> String {
     std::io::Error::from_raw_os_error(libc::ENOENT).to_string()
 }

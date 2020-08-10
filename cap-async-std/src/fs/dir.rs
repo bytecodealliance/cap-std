@@ -457,13 +457,7 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`async_std::os::unix::fs::symlink`]: https://docs.rs/async-std/latest/async_std/os/unix/fs/fn.symlink.html
-    #[cfg(any(
-        unix,
-        target_os = "wasi",
-        target_os = "redox",
-        target_os = "vxwords",
-        target_os = "fuchsia"
-    ))]
+    #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };

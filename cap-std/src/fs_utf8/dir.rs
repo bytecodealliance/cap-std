@@ -364,13 +364,7 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    #[cfg(any(
-        unix,
-        target_os = "wasi",
-        target_os = "redox",
-        target_os = "vxwords",
-        target_os = "fuchsia"
-    ))]
+    #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
         let src = from_utf8(src)?;

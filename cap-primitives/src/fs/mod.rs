@@ -67,15 +67,10 @@ pub(crate) use stat_via_parent::*;
 pub(crate) use symlink_via_parent::*;
 pub(crate) use unlink_via_parent::*;
 
-cfg_if::cfg_if! {
-    if #[cfg(any(unix, target_os = "fuchsia"))] {
-        pub(crate) use super::yanix::fs::*;
-    } else if #[cfg(windows)] {
-        pub(crate) use super::winx::fs::*;
-    } else if #[cfg(not(target_os = "wasi"))] {
-        compile_error!("cap-std doesn't compile for this platform yet");
-    }
-}
+#[cfg(windows)]
+pub(crate) use super::winx::fs::*;
+#[cfg(not(windows))]
+pub(crate) use super::yanix::fs::*;
 
 pub use canonicalize::*;
 pub use dir_builder::*;

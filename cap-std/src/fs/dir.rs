@@ -436,13 +436,7 @@ impl Dir {
     /// relative to `self`.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    #[cfg(any(
-        unix,
-        target_os = "wasi",
-        target_os = "redox",
-        target_os = "vxwords",
-        target_os = "fuchsia"
-    ))]
+    #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         symlink(src.as_ref(), &self.std_file, dst.as_ref())
@@ -693,7 +687,7 @@ impl fmt::Debug for Dir {
     }
 }
 
-#[cfg(any(unix, target_os = "fuchsia", target_os = "wasi"))]
+#[cfg(not(windows))]
 fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
     let fd = fd.as_raw_fd();
     b.field("fd", &fd);

@@ -122,7 +122,7 @@ fn permissions_into_std(_file: &fs::File, permissions: Permissions) -> io::Resul
     permissions
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -138,7 +138,7 @@ impl FromRawHandle for File {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 impl AsRawFd for File {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -154,7 +154,7 @@ impl AsRawHandle for File {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 impl IntoRawFd for File {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -356,7 +356,7 @@ impl fmt::Debug for File {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi", target_os = "fuchsia"))]
+#[cfg(not(windows))]
 fn fmt_debug_file(file: &fs::File, b: &mut fmt::DebugStruct) {
     let fd = file.as_raw_fd();
     b.field("fd", &fd);

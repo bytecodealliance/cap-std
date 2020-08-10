@@ -38,7 +38,7 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     let string = arf_strings::PosixString::from_path_str(path.as_ref())
         .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string"))?;
 
-    #[cfg(any(unix, target_os = "redox", target_os = "wasi"))]
+    #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]
         use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
@@ -66,9 +66,9 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
     // in the future, the idea is we could avoid this.
     let osstr = path.as_ref().as_os_str();
 
-    #[cfg(any(unix, target_os = "redox", target_os = "wasi"))]
+    #[cfg(not(windows))]
     let cstr = {
-        #[cfg(any(unix, target_os = "redox"))]
+        #[cfg(unix)]
         use std::{ffi::CString, os::unix::ffi::OsStrExt};
         #[cfg(target_os = "wasi")]
         use std::{ffi::CString, os::wasi::ffi::OsStrExt};

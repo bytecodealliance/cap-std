@@ -3,12 +3,7 @@ use std::{fs, io, path::Path};
 
 /// Implement `symlink` by `open`ing up the parent component of the path and then
 /// calling `symlink_unchecked` on the last component.
-#[cfg(any(
-    unix,
-    target_os = "fuchsia",
-    target_os = "redox",
-    target_os = "vxworks"
-))]
+#[cfg(not(windows))]
 pub(crate) fn symlink_via_parent(
     old_path: &Path,
     new_start: &fs::File,
