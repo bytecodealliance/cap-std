@@ -14,7 +14,7 @@ pub(crate) fn stat_impl(
 ) -> io::Result<Metadata> {
     use std::os::unix::fs::OpenOptionsExt;
 
-    // Open the path with `O_PATH`. Use `read(true) even though we don't need
+    // Open the path with `O_PATH`. Use `read(true)` even though we don't need
     // `read` permissions, because Rust's libstd requires an access mode, and
     // Linux ignores `O_RDONLY` with `O_PATH`.
     let result = open_with_openat2(
