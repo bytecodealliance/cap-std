@@ -1,6 +1,7 @@
 use std::{fs, io, os::windows::fs::MetadataExt};
 
 /// Determine if `a` and `b` refer to the same inode on the same device.
+#[allow(dead_code)]
 pub(crate) fn is_same_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
     let a_metadata = a.metadata()?;
     let b_metadata = b.metadata()?;

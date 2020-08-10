@@ -264,10 +264,7 @@ impl Dir {
     /// This corresponds to [`std::fs::remove_dir_all`], but only accesses paths
     /// relative to `self`.
     ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    ///
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
@@ -279,9 +276,6 @@ impl Dir {
     /// Note that even though this implementation works in terms of handles
     /// as much as possible, removal is not guaranteed to be atomic with respect
     /// to a concurrent rename of the directory.
-    ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
         self.cap_std.remove_open_dir()
@@ -293,9 +287,6 @@ impl Dir {
     /// Note that even though this implementation works in terms of handles
     /// as much as possible, removal is not guaranteed to be atomic with respect
     /// to a concurrent rename of the directory.
-    ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
         self.cap_std.remove_open_dir_all()

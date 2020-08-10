@@ -18,7 +18,7 @@ mod mkdir;
 mod mkdir_via_parent;
 mod open;
 mod open_dir;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+#[cfg(not(windows))] // not needed on windows
 mod open_entry_manually;
 mod open_manually;
 mod open_options;
@@ -28,11 +28,9 @@ mod read_dir;
 mod readlink;
 mod readlink_one;
 mod readlink_via_parent;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 mod remove_dir_all;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 mod remove_open_dir;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+#[cfg(any(not(windows), feature = "windows_by_handle"))]
 mod remove_open_dir_by_searching;
 mod rename;
 mod rename_via_parent;
@@ -53,7 +51,7 @@ pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
 pub(crate) use maybe_owned_file::*;
 pub(crate) use mkdir_via_parent::*;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
+#[cfg(not(windows))] // not needed on windows
 pub(crate) use open_entry_manually::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
@@ -88,9 +86,7 @@ pub use open_options::*;
 pub use permissions::*;
 pub use read_dir::*;
 pub use readlink::*;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 pub use remove_dir_all::*;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 pub use remove_open_dir::*;
 pub use rename::*;
 pub use rmdir::*;

@@ -12,7 +12,6 @@ pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
 }
 
 /// Like `read_dir`, but doesn't perform sandboxing.
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[inline]
 pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     Ok(ReadDir {
