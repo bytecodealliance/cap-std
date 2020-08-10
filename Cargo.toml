@@ -16,7 +16,6 @@ async-std = { version = "1.6.2", features = ["attributes"] }
 anyhow = "1.0.32"
 cap-async-std = { path = "cap-async-std", version = "^0.1.0" }
 cap-directories = { path = "cap-directories", version = "^0.1.0" }
-cap-primitives = { path = "cap-primitives", version = "^0.1.0" }
 cap-std = { path = "cap-std", version = "^0.1.0" }
 cap-tempfile = { path = "cap-tempfile", version = "^0.1.0" }
 rand = "0.7.3"
@@ -44,9 +43,9 @@ winx = "0.19.0"
 
 [features]
 # "nightly" is required when building with Rust nightly, and it enables
-# support for `FileTypeExt`, `remove_dir_all`, and related features.
+# support for `FileTypeExt`, full `MetadataExt`, and related features.
 default = ["no_racy_asserts"]
-nightly = ["cap-primitives/nightly"]
+nightly = ["cap-std/nightly", "cap-async-std/nightly"]
 fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
 no_racy_asserts = ["cap-std/no_racy_asserts", "cap-async-std/no_racy_asserts"]
 

@@ -21,3 +21,4 @@ maintenance = { status = "actively-developed" }
 default = ["no_racy_asserts"]
 fs_utf8 = ["arf-strings"]
 no_racy_asserts = ["cap-primitives/no_racy_asserts"]
+nightly = ["cap-primitives/nightly"]
