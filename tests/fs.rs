@@ -574,7 +574,6 @@ fn recursive_mkdir_empty() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
@@ -595,7 +594,6 @@ fn recursive_rmdir() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
     let tmpdir = tmpdir();
@@ -612,7 +610,6 @@ fn recursive_rmdir_of_symlink() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 // only Windows makes a distinction between file and directory symlinks.
 #[cfg(windows)]
 fn recursive_rmdir_of_file_symlink() {

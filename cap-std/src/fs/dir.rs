@@ -1,10 +1,9 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink, rename, rmdir,
-    stat, unlink, DirOptions, FollowSymlinks,
+    canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, stat, unlink, DirOptions,
+    FollowSymlinks,
 };
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-use cap_primitives::fs::{remove_dir_all, remove_open_dir, remove_open_dir_all};
 use std::{
     fmt, fs, io,
     path::{Component, Path, PathBuf},
@@ -340,10 +339,7 @@ impl Dir {
     /// This corresponds to [`std::fs::remove_dir_all`], but only accesses paths
     /// relative to `self`.
     ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    ///
     /// [`std::fs::remove_dir_all`]: https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         remove_dir_all(&self.std_file, path.as_ref())
@@ -354,9 +350,6 @@ impl Dir {
     /// Note that even though this implementation works in terms of handles
     /// as much as possible, removal is not guaranteed to be atomic with respect
     /// to a concurrent rename of the directory.
-    ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
         remove_open_dir(self.std_file)
@@ -368,9 +361,6 @@ impl Dir {
     /// Note that even though this implementation works in terms of handles
     /// as much as possible, removal is not guaranteed to be atomic with respect
     /// to a concurrent rename of the directory.
-    ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
         remove_open_dir_all(self.std_file)

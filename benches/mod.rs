@@ -376,7 +376,6 @@ fn symlink_chasing_canonicalize_baseline(b: &mut test::Bencher) {
     });
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[bench]
 fn recursive_create_delete(b: &mut test::Bencher) {
     let dir = unsafe { cap_tempfile::tempdir().unwrap() };
@@ -392,7 +391,6 @@ fn recursive_create_delete(b: &mut test::Bencher) {
     });
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[bench]
 fn recursive_create_delete_baseline(b: &mut test::Bencher) {
     let dir = tempfile::tempdir().unwrap();

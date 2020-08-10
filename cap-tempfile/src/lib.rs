@@ -9,11 +9,7 @@
 )]
 
 use cap_std::fs::Dir;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-use std::mem;
-#[cfg(all(windows, not(feature = "windows_file_type_ext")))]
-use std::path::PathBuf;
-use std::{env, fmt, fs, io, ops::Deref};
+use std::{env, fmt, fs, io, mem, ops::Deref};
 use uuid::Uuid;
 
 /// A directory in a filesystem that is automatically deleted when it goes out of scope.
@@ -27,9 +23,6 @@ use uuid::Uuid;
 /// [`tempfile::TempDir`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html
 pub struct TempDir {
     dir: Option<Dir>,
-
-    #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
-    path: PathBuf,
 }
 
 impl TempDir {
@@ -53,16 +46,11 @@ impl TempDir {
                     let dir = match Dir::open_ambient_dir(&name) {
                         Ok(dir) => dir,
                         Err(e) => {
-                            let _ = fs::remove_dir(name);
+                            fs::remove_dir(name).ok();
                             return Err(e);
                         }
                     };
-                    return Ok(Self {
-                        dir: Some(dir),
-
-                        #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
-                        path: name,
-                    });
+                    return Ok(Self { dir: Some(dir) });
                 }
                 Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
                 Err(e) => return Err(e),
@@ -75,11 +63,8 @@ impl TempDir {
     ///
     /// This corresponds to [`tempfile::TempDir::new_in`].
     ///
-    /// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-    ///
     /// [`tempfile::TempDir::new_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir_in.html
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-    pub fn new_in(dir: &Dir) -> io::Result<TempDir> {
+    pub fn new_in(dir: &Dir) -> io::Result<Self> {
         for _ in 0..Self::num_iterations() {
             let name = &Self::new_name();
             match dir.create_dir(&name) {
@@ -87,7 +72,7 @@ impl TempDir {
                     let dir = match dir.open_dir(&name) {
                         Ok(dir) => dir,
                         Err(e) => {
-                            let _ = dir.remove_dir(name);
+                            dir.remove_dir(name).ok();
                             return Err(e);
                         }
                     };
@@ -106,17 +91,9 @@ impl TempDir {
     ///
     /// [`tempfile::TempDir::close`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.close
     pub fn close(mut self) -> io::Result<()> {
-        #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
-        {
-            fs::remove_dir_all(&mut self.path)
-        }
-
-        #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-        {
-            mem::replace(&mut self.dir, None)
-                .unwrap()
-                .remove_open_dir_all()
-        }
+        mem::replace(&mut self.dir, None)
+            .unwrap()
+            .remove_open_dir_all()
     }
 
     fn new_name() -> String {
@@ -145,14 +122,8 @@ impl Deref for TempDir {
 
 impl Drop for TempDir {
     fn drop(&mut self) {
-        #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
-        {
-            let _ = fs::remove_dir_all(&self.path);
-        }
-
-        #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
         if let Some(dir) = mem::replace(&mut self.dir, None) {
-            let _ = dir.remove_open_dir_all();
+            dir.remove_open_dir_all().ok();
         }
     }
 }
@@ -182,10 +153,7 @@ pub unsafe fn tempdir() -> io::Result<TempDir> {
 ///
 /// This corresponds to [`tempfile::tempdir_in`].
 ///
-/// XXX: On Windows, this requires Rust nightly and the "nightly" feature (windows_file_type_ext).
-///
 /// [`tempfile::tempdir`]: https://docs.rs/tempfile/3.1.0/tempfile/fn.tempdir_in.html
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
     TempDir::new_in(dir)
 }
@@ -202,7 +170,6 @@ fn close_tempdir() {
     t.close().unwrap();
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 fn drop_tempdir_in() {
     let dir = unsafe { Dir::open_ambient_dir(env::temp_dir()).unwrap() };
@@ -210,7 +177,6 @@ fn drop_tempdir_in() {
     drop(t);
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 fn close_tempdir_in() {
     let dir = unsafe { Dir::open_ambient_dir(env::temp_dir()).unwrap() };
@@ -218,7 +184,6 @@ fn close_tempdir_in() {
     t.close().unwrap();
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn close_outer() {
@@ -227,7 +192,6 @@ fn close_outer() {
     t.close().unwrap();
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 fn close_inner() {
     let t = unsafe { tempdir().unwrap() };

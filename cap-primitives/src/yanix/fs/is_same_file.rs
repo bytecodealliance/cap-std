@@ -1,5 +1,7 @@
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
+#[cfg(wasi)]
+use std::os::wasi::fs::MetadataExt;
 use std::{fs, io};
 
 /// Determine if `a` and `b` refer to the same inode on the same device.
