@@ -9,8 +9,11 @@ pub(crate) struct MetadataExt {
     last_access_time: u64,
     last_write_time: u64,
     file_size: u64,
+    #[cfg(feature = "windows_by_handle")]
     volume_serial_number: Option<u32>,
+    #[cfg(feature = "windows_by_handle")]
     number_of_links: Option<u32>,
+    #[cfg(feature = "windows_by_handle")]
     file_index: Option<u64>,
 }
 
@@ -25,13 +28,17 @@ impl MetadataExt {
             last_access_time: std.last_access_time(),
             last_write_time: std.last_write_time(),
             file_size: std.file_size(),
+            #[cfg(feature = "windows_by_handle")]
             volume_serial_number: std.volume_serial_number(),
+            #[cfg(feature = "windows_by_handle")]
             number_of_links: std.number_of_links(),
+            #[cfg(feature = "windows_by_handle")]
             file_index: std.file_index(),
         }
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
+    #[cfg(feature = "windows_by_handle")]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         // From [MSDN]:
         // The identifier (low and high parts) and the volume serial number
@@ -51,6 +58,7 @@ impl MetadataExt {
     }
 }
 
+#[cfg(feature = "windows_by_handle")]
 impl std::os::windows::fs::MetadataExt for MetadataExt {
     #[inline]
     fn file_attributes(&self) -> u32 {
