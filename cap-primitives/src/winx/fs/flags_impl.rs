@@ -1,5 +1,9 @@
-use std::{fs, io};
+use std::{fs, io, os::windows::io::AsRawHandle};
 
-pub(crate) fn flags_impl(_file: &fs::File) -> io::Result<(bool, bool)> {
-    todo!("flags_impl")
+pub(crate) fn flags_impl(file: &fs::File) -> io::Result<(bool, bool)> {
+    let handle = file.as_raw_handle();
+    let access_mode = winx::file::query_access_information(handle)?;
+    let read = access_mode.contains(winx::file::AccessMode::FILE_READ_DATA);
+    let write = access_mode.contains(winx::file::AccessMode::FILE_WRITE_DATA);
+    Ok((read, write))
 }

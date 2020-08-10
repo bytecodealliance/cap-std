@@ -40,6 +40,9 @@ impl Iterator for ReadDirInner {
 impl fmt::Debug for ReadDirInner {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "TODO: Debug for ReadDirInner")
+        let mut b = f.debug_struct("ReadDir");
+        // `fs::ReadDir`'s `Debug` just prints the path, and since we're not
+        // printing that, we don't have anything else to print.
+        b.finish()
     }
 }

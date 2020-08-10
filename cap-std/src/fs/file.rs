@@ -352,6 +352,9 @@ impl fmt::Debug for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
         fmt_debug_file(&self.std, &mut b);
+        if let Ok((read, write)) = flags(&self.std) {
+            b.field("read", &read).field("write", &write);
+        }
         b.finish()
     }
 }
@@ -360,16 +363,10 @@ impl fmt::Debug for File {
 fn fmt_debug_file(file: &fs::File, b: &mut fmt::DebugStruct) {
     let fd = file.as_raw_fd();
     b.field("fd", &fd);
-    if let Ok((read, write)) = flags(file) {
-        b.field("read", &read).field("write", &write);
-    }
 }
 
 #[cfg(windows)]
 fn fmt_debug_file(file: &fs::File, b: &mut fmt::DebugStruct) {
     let handle = file.as_raw_handle();
     b.field("handle", &handle);
-    if let Ok((read, write)) = flags(file) {
-        b.field("read", &read).field("write", &write);
-    }
 }
