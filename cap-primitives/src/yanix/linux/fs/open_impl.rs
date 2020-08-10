@@ -85,7 +85,8 @@ pub(crate) fn open_with_openat2(
 
         // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
         // while it's running, so use a loop to retry it a few times. But not too many
-        // times, because there's no limit on how often this can happen.
+        // times, because there's no limit on how often this can happen. The actual
+        // number here is currently an arbitrarily chosen guess.
         for _ in 0..4 {
             unsafe {
                 match libc::syscall(
