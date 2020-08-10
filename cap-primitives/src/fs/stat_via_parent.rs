@@ -39,11 +39,8 @@ pub(crate) fn stat_via_parent(
 
         #[cfg(all(windows, not(feature = "windows_file_type_ext")))]
         {
-            if follow == FollowSymlinks::No {
-                return Ok(metadata);
-            }
-
-            if basename == std::path::Component::CurDir.as_os_str() {
+            if follow == FollowSymlinks::No || basename == std::path::Component::CurDir.as_os_str()
+            {
                 return Ok(metadata);
             }
 
