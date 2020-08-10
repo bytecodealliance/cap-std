@@ -689,18 +689,10 @@ impl fmt::Debug for Dir {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("Dir");
-        fmt_debug_dir(&self.std_file, &mut b);
+        #[cfg(not(windows))]
+        b.field("fd", &self.std_file.as_raw_fd());
+        #[cfg(windows)]
+        b.field("handle", &self.std_file.as_raw_handle());
         b.finish()
     }
-}
-
-#[cfg(not(windows))]
-fn fmt_debug_dir(fd: &impl AsRawFd, b: &mut fmt::DebugStruct) {
-    let fd = fd.as_raw_fd();
-    b.field("fd", &fd);
-}
-
-#[cfg(windows)]
-fn fmt_debug_dir(fd: &impl AsRawHandle, b: &mut fmt::DebugStruct) {
-    b.field("handle", &fd.as_raw_handle());
 }

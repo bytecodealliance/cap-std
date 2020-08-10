@@ -40,7 +40,10 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
 
     #[cfg(not(windows))]
     let path = {
+        #[cfg(unix)]
         use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
+        #[cfg(target_os = "wasi")]
+        use std::{ffi::OsStr, os::wasi::ffi::OsStrExt};
         let bytes = string.as_cstr().to_bytes();
         OsStr::from_bytes(bytes).to_owned()
     };
