@@ -11,7 +11,7 @@
   </p>
 </div>
 
-The `cap-std` project is organized around the eponymous [`cap-std`] crate,
+The `cap-std` project is organized around the eponymous [`cap-std`] crate, and
 develops libraries to make it easy to write capability-oriented code, including:
 
  - [`cap-std`], which provides capability-oriented versions of `std` APIs
