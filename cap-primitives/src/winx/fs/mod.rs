@@ -5,8 +5,6 @@ mod dir_utils;
 mod file_type_ext;
 mod flags_impl;
 mod get_path;
-#[cfg(feature = "windows_file_type_ext")]
-mod is_root_dir;
 #[cfg(feature = "windows_by_handle")]
 mod is_same_file;
 mod link_unchecked;
@@ -51,8 +49,6 @@ pub(crate) use file_type_ext::*;
 pub(crate) use flags_impl::*;
 #[allow(unused_imports)]
 pub(crate) use get_path::get_path as get_path_impl;
-#[cfg(feature = "windows_file_type_ext")]
-pub(crate) use is_root_dir::*;
 #[cfg(feature = "windows_by_handle")]
 #[allow(unused_imports)]
 pub(crate) use is_same_file::*;

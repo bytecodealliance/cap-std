@@ -30,8 +30,6 @@ mod readlink_one;
 mod readlink_via_parent;
 mod remove_dir_all;
 mod remove_open_dir;
-#[cfg(any(not(windows), feature = "windows_by_handle"))]
-mod remove_open_dir_by_searching;
 mod rename;
 mod rename_via_parent;
 mod rmdir;
@@ -57,8 +55,6 @@ pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
 pub(crate) use readlink_one::*;
 pub(crate) use readlink_via_parent::*;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_via_parent::*;
 pub(crate) use rmdir_via_parent::*;
 pub(crate) use stat_via_parent::*;
