@@ -59,10 +59,10 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
             match rmdir(start, &path.join(child.file_name())) {
                 Ok(()) => (),
                 Err(e) => {
-                    if true {
-                        panic!("testing for error: {:?}", e);
-                    } else {
+                    if e.raw_os_error() == Some(winapi::shared::winerror::ERROR_DIRECTORY as i32) {
                         unlink(start, &path.join(child.file_name()))?;
+                    } else {
+                        return Err(e);
                     }
                 }
             }
