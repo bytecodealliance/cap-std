@@ -256,25 +256,13 @@ impl fmt::Debug for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
         let file = unsafe { as_sync(&self.std) };
-        fmt_debug_file(&file, &mut b);
+        #[cfg(not(windows))]
+        b.field("fd", &file.as_raw_fd());
+        #[cfg(windows)]
+        b.field("handle", &file.as_raw_handle());
+        if let Ok((read, write)) = flags(&file) {
+            b.field("read", &read).field("write", &write);
+        }
         b.finish()
-    }
-}
-
-#[cfg(not(windows))]
-fn fmt_debug_file(file: &std::fs::File, b: &mut fmt::DebugStruct) {
-    let fd = file.as_raw_fd();
-    b.field("fd", &fd);
-    if let Ok((read, write)) = flags(file) {
-        b.field("read", &read).field("write", &write);
-    }
-}
-
-#[cfg(windows)]
-fn fmt_debug_file(file: &std::fs::File, b: &mut fmt::DebugStruct) {
-    let handle = file.as_raw_handle();
-    b.field("handle", &handle);
-    if let Ok((read, write)) = flags(file) {
-        b.field("read", &read).field("write", &write);
     }
 }
