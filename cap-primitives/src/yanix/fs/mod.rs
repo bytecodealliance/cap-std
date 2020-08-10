@@ -31,15 +31,15 @@ pub(crate) mod errors;
 // different behavior on absolute and `..` paths in ways that make it unsuitable
 // for `cap-std`'s style of sandboxing. For more information, see the bug filed
 // upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
-cfg_if::cfg_if! {
-    if #[cfg(target_os = "linux")] {
-        pub(crate) use crate::yanix::linux::fs::*;
-    } else {
-        pub(crate) use crate::fs::open_manually_wrapper as open_impl;
-        pub(crate) use crate::fs::stat_via_parent as stat_impl;
-        pub(crate) use crate::fs::open_entry_manually as open_entry_impl;
-    }
-}
+#[cfg(target_os = "linux")]
+pub(crate) use crate::yanix::linux::fs::*;
+#[cfg(not(target_os = "linux"))]
+#[rustfmt::skip]
+pub(crate) use crate::fs::{
+    open_entry_manually as open_entry_impl,
+    open_manually_wrapper as open_impl,
+    stat_via_parent as stat_impl,
+};
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
