@@ -20,7 +20,8 @@ fn no_such_file_or_directory() -> String {
 }
 #[cfg(windows)]
 fn no_such_file_or_directory() -> String {
-    todo!("work out error for no_such_file_or_directory")
+    std::io::Error::from_raw_os_error(winapi::shared::winerror::ERROR_FILE_NOT_FOUND as i32)
+        .to_string()
 }
 
 /* // TODO: Platform-specific error code.
@@ -54,7 +55,7 @@ cfg_if::cfg_if! {
 */
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO: Blocked on `no_such_file_or_directory` for Windows
+#[cfg_attr(windows, ignore)] // TODO: Blocked on error message discrepancies
 fn rename_basics() {
     let tmpdir = tmpdir();
 

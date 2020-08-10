@@ -574,7 +574,6 @@ fn recursive_mkdir_empty() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn recursive_rmdir() {
     let tmpdir = tmpdir();
     let d1 = PathBuf::from("d1");
