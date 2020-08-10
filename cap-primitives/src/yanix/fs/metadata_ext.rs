@@ -72,12 +72,12 @@ impl MetadataExt {
                 gid: mode.st_gid,
                 rdev: u64::try_from(mode.st_rdev).unwrap(),
                 size: u64::try_from(mode.st_size).unwrap(),
-                atime: mode.st_atime,
-                atime_nsec: mode.st_atime_nsec,
-                mtime: mode.st_mtime,
-                mtime_nsec: mode.st_mtime_nsec,
-                ctime: mode.st_ctime,
-                ctime_nsec: mode.st_ctime_nsec,
+                atime: i64::from(mode.st_atime),
+                atime_nsec: i64::from(mode.st_atime_nsec),
+                mtime: i64::from(mode.st_mtime),
+                mtime_nsec: i64::from(mode.st_mtime_nsec),
+                ctime: i64::from(mode.st_ctime),
+                ctime_nsec: i64::from(mode.st_ctime_nsec),
                 blksize: u64::try_from(mode.st_blksize).unwrap(),
                 blocks: u64::try_from(mode.st_blocks).unwrap(),
             },
@@ -91,7 +91,7 @@ impl MetadataExt {
 }
 
 #[allow(clippy::similar_names)]
-fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
+fn system_time_from_libc(sec: libc::time_t, nsec: libc::time_t) -> Option<SystemTime> {
     SystemTime::UNIX_EPOCH.checked_add(Duration::new(
         u64::try_from(sec).unwrap(),
         u32::try_from(nsec).unwrap(),
