@@ -11,12 +11,9 @@
 
 mod sys_common;
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 use std::io;
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 use sys_common::io::tmpdir;
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 fn assert_invalid_input<T>(on: &str, result: io::Result<T>) {
     fn inner(on: &str, result: io::Result<()>) {
         match result {
@@ -32,7 +29,6 @@ fn assert_invalid_input<T>(on: &str, result: io::Result<T>) {
     inner(on, result.map(drop))
 }
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[test]
 fn paths_containing_nul() {
     let tmpdir = tmpdir();

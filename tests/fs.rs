@@ -793,7 +793,6 @@ fn copy_file_returns_metadata_len() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
@@ -819,7 +818,6 @@ fn copy_file_follows_dst_symlink() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn symlinks_work() {
     let tmpdir = tmpdir();
@@ -1260,7 +1258,6 @@ fn canonicalize_works_simple() {
 }
 
 #[test]
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn realpath_works() {
     let tmpdir = tmpdir();
