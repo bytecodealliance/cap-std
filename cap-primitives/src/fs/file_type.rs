@@ -1,6 +1,5 @@
 //! The `FileType` struct.
 
-#[cfg(any(not(windows), feature = "windows_file_type_ext"))]
 use crate::fs::FileTypeExt;
 use std::fs;
 
@@ -17,7 +16,6 @@ enum Inner {
     Unknown,
 
     /// A `FileTypeExt` type.
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     Ext(FileTypeExt),
 }
 
@@ -42,12 +40,9 @@ impl FileType {
             Self::dir()
         } else if std.is_file() {
             Self::file()
+        } else if let Some(ext) = FileTypeExt::from_std(std) {
+            Self::ext(ext)
         } else {
-            #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
-            if let Some(ext) = FileTypeExt::from_std(std) {
-                return Self::ext(ext);
-            }
-
             Self::unknown()
         }
     }
@@ -71,7 +66,6 @@ impl FileType {
     }
 
     /// Creates a `FileType` from extension type.
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub(crate) const fn ext(ext: FileTypeExt) -> Self {
         Self(Inner::Ext(ext))
@@ -102,7 +96,6 @@ impl FileType {
     /// This corresponds to [`std::fs::FileType::is_symlink`].
     ///
     /// [`std::fs::FileType::is_symlink`]: https://doc.rust-lang.org/std/fs/struct.FileType.html#method.is_symlink
-    #[cfg(any(not(windows), feature = "windows_file_type_ext"))]
     #[inline]
     pub fn is_symlink(&self) -> bool {
         if let Inner::Ext(ext) = self.0 {
