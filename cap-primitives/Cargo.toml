@@ -12,7 +12,6 @@ readme = "README.md"
 
 [dependencies]
 arbitrary = { version = "0.4.5", optional = true, features = ["derive"] }
-cfg-if = "0.1.9"
 ipnet = "2.3.0"
 
 [target.'cfg(not(windows))'.dependencies]
