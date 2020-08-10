@@ -17,15 +17,10 @@
     html_favicon_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.ico"
 )]
 
-cfg_if::cfg_if! {
-    if #[cfg(any(unix, target_os = "fuchsia"))] {
-        mod yanix;
-    } else if #[cfg(windows)] {
-        mod winx;
-    } else if #[cfg(not(target_os = "wasi"))] {
-        compile_error!("cap-std doesn't compile for this platform yet");
-    }
-}
+#[cfg(windows)]
+mod winx;
+#[cfg(not(windows))]
+mod yanix;
 
 pub mod fs;
 pub mod net;

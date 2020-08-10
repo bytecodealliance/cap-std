@@ -21,23 +21,11 @@ use sys_common::{
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
-#[cfg(any(
-    unix,
-    target_os = "wasi",
-    target_os = "redox",
-    target_os = "vxwords",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
     tmpdir.symlink(src, dst)
 }
-#[cfg(any(
-    unix,
-    target_os = "wasi",
-    target_os = "redox",
-    target_os = "vxwords",
-    target_os = "fuchsia"
-))]
+#[cfg(not(windows))]
 fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
     src: P,
     tmpdir: &TempDir,

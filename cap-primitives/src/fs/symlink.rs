@@ -1,12 +1,7 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
 #[cfg(not(feature = "no_racy_asserts"))]
-#[cfg(any(
-    unix,
-    target_os = "fuchsia",
-    target_os = "redox",
-    target_os = "vxworks"
-))]
+#[cfg(not(windows))]
 use crate::fs::symlink_unchecked;
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::{
@@ -17,12 +12,7 @@ use std::{fs, io, path::Path};
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
 #[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
-#[cfg(any(
-    unix,
-    target_os = "fuchsia",
-    target_os = "redox",
-    target_os = "vxworks"
-))]
+#[cfg(not(windows))]
 #[inline]
 pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_impl;
