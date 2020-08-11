@@ -14,5 +14,8 @@ readme = "README.md"
 cap-std = { path = "../cap-std", version = "^0.1.0"}
 uuid = { version = "0.8.1", features = ["v4"] }
 
+[dev-dependencies]
+winapi = { version = "0.3.9", features = ["winerror"] }
+
 [badges]
 maintenance = { status = "actively-developed" }

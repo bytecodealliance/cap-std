@@ -8,7 +8,7 @@ mod sys_common;
 
 use std::io::prelude::*;
 
-use cap_std::fs::{self, OpenOptions};
+use cap_std::fs::{self, Dir, OpenOptions};
 use std::{
     io::{self, ErrorKind, SeekFrom},
     path::{Path, PathBuf},
@@ -817,7 +817,6 @@ fn copy_file_follows_dst_symlink() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn symlinks_work() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
@@ -858,30 +857,29 @@ fn symlink_noexist() {
 #[test]
 #[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn read_link() {
-    let tmpdir = tmpdir();
     if cfg!(windows) {
         // directory symlink
+        let root = unsafe { Dir::open_ambient_dir(r"C:\").unwrap() };
         assert_eq!(
-            check!(tmpdir.read_link(r"C:\Users\All Users"))
-                .to_str()
-                .unwrap(),
+            check!(root.read_link(r"Users\All Users")).to_str().unwrap(),
             r"C:\ProgramData"
         );
         // junction
         assert_eq!(
-            check!(tmpdir.read_link(r"C:\Users\Default User"))
+            check!(root.read_link(r"Users\Default User"))
                 .to_str()
                 .unwrap(),
             r"C:\Users\Default"
         );
         // junction with special permissions
         assert_eq!(
-            check!(tmpdir.read_link(r"C:\Documents and Settings\"))
+            check!(root.read_link(r"Documents and Settings\"))
                 .to_str()
                 .unwrap(),
             r"C:\Users"
         );
     }
+    let tmpdir = tmpdir();
     let link = "link";
     if !got_symlink_permission(&tmpdir) {
         return;
@@ -1288,7 +1286,6 @@ fn realpath_works() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn realpath_works_tricky() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
