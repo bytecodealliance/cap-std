@@ -2,17 +2,31 @@ use crate::fs::{FollowSymlinks, OpenOptions};
 use std::{fs, os::windows::fs::OpenOptionsExt};
 use winx::file::Flags;
 
-pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> fs::OpenOptions {
+/// Translate the given `cap_std` into `std` options. Also return a bool
+/// indicating that the `trunc` flag was requested but could not be set,
+/// so the file should be truncated manually after opening.
+pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOptions, bool) {
+    let mut trunc = opts.truncate;
+    let mut manually_trunc = false;
+
     let custom_flags = match opts.follow {
         FollowSymlinks::Yes => opts.ext.custom_flags,
-        FollowSymlinks::No => opts.ext.custom_flags | Flags::FILE_FLAG_OPEN_REPARSE_POINT.bits(),
+        FollowSymlinks::No => {
+            if trunc && !opts.create_new && !opts.append && opts.write {
+                // On Windows, truncating overwrites a symlink with a
+                // non-symlink.
+                manually_trunc = true;
+                trunc = false;
+            }
+            opts.ext.custom_flags | Flags::FILE_FLAG_OPEN_REPARSE_POINT.bits()
+        }
     };
     let mut std_opts = fs::OpenOptions::new();
     std_opts
         .read(opts.read)
         .write(opts.write)
         .append(opts.append)
-        .truncate(opts.truncate)
+        .truncate(trunc)
         .create(opts.create)
         .create_new(opts.create_new)
         .share_mode(opts.ext.share_mode)
@@ -24,5 +38,5 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> fs::OpenOptio
         std_opts.access_mode(access_mode);
     }
 
-    std_opts
+    (std_opts, manually_trunc)
 }

@@ -12,7 +12,17 @@ impl DirEntryInner {
     #[inline]
     pub(crate) fn open(&self, options: &OpenOptions) -> io::Result<fs::File> {
         match options.follow {
-            FollowSymlinks::No => open_options_to_std(options).open(self.std.path()),
+            FollowSymlinks::No => {
+                let (opts, manually_trunc) = open_options_to_std(options);
+                let file = opts.open(self.std.path())?;
+                if manually_trunc {
+                    // Unwrap is ok because 0 never overflows, and we'll only
+                    // have `manually_trunc` set when the file is opened for
+                    // writing.
+                    file.set_len(0).unwrap();
+                }
+                Ok(file)
+            }
             FollowSymlinks::Yes => unsafe {
                 let path = self.std.path();
                 open(
