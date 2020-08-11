@@ -43,7 +43,10 @@ fn open_various() {
 fn dir_writable() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("dir"));
+    #[cfg(not(windows))]
     error_contains!(tmpdir.create("dir"), "Is a directory");
+    #[cfg(windows)]
+    error!(tmpdir.create("dir"), 5);
     error_contains!(
         tmpdir.open_with("dir", OpenOptions::new().write(true)),
         "Is a directory"
@@ -75,15 +78,45 @@ fn dir_writable() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn trailing_slash() {
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
 
     #[cfg(not(windows))]
-    error!(tmpdir.open("file/"), "Not a directory");
+    {
+        error!(tmpdir.open("file/"), "Not a directory");
+        error!(tmpdir.open_dir("file/"), "Not a directory");
+    }
+
     #[cfg(windows)]
-    error!(tmpdir.open("file/"), 2);
+    {
+        error!(tmpdir.open("file/"), 123);
+        error!(tmpdir.open_dir("file/"), 123);
+    }
+}
+
+#[test]
+fn trailing_slash_in_dir() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("dir"));
+    check!(tmpdir.create("dir/file"));
+
+    check!(tmpdir.open_dir("dir"));
+    check!(tmpdir.open_dir("dir/"));
+    check!(tmpdir.open_dir("dir/."));
+    check!(tmpdir.open("dir/file"));
+
+    #[cfg(not(windows))]
+    {
+        error!(tmpdir.open("dir/file/"), "Not a directory");
+        error!(tmpdir.open_dir("dir/file/"), "Not a directory");
+    }
+
+    #[cfg(windows)]
+    {
+        error!(tmpdir.open("dir/file/"), 123);
+        error!(tmpdir.open_dir("dir/file/"), 123);
+    }
 }
 
 #[test]

@@ -185,10 +185,15 @@ fn close_tempdir_in() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn close_outer() {
     let t = unsafe { tempdir().unwrap() };
     let _s = tempdir_in(&t).unwrap();
+    #[cfg(windows)]
+    assert_eq!(
+        t.close().unwrap_err().raw_os_error(),
+        Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY as i32)
+    );
+    #[cfg(not(windows))]
     t.close().unwrap();
 }
 
