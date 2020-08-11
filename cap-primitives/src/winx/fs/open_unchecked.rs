@@ -25,22 +25,30 @@ pub(crate) fn open_unchecked(
         full_path = PathBuf::from(OsString::from_wide(&wide));
     }
 
-    let opts = open_options_to_std(options);
+    let (opts, manually_trunc) = open_options_to_std(options);
     match opts.open(full_path) {
         Ok(f) => {
+            // Windows doesn't have a way to return errors like `O_NOFOLLOW`,
+            // so check for symlinks manualy.
             if options.follow == FollowSymlinks::No
                 && f.metadata()
                     .map_err(OpenUncheckedError::Other)?
                     .file_type()
                     .is_symlink()
             {
-                Err(OpenUncheckedError::Symlink(io::Error::new(
+                return Err(OpenUncheckedError::Symlink(io::Error::new(
                     io::ErrorKind::Other,
                     "symlink encountered",
-                )))
-            } else {
-                Ok(f)
+                )));
             }
+            // Windows truncates symlinks into normal files, so truncation
+            // may be disabled above; do it manually if needed.
+            if manually_trunc {
+                // Unwrap is ok because 0 never overflows, and we'll only
+                // have `manually_trunc` set when the file is opened for writing.
+                f.set_len(0).unwrap();
+            }
+            Ok(f)
         }
         Err(e) if e.kind() == io::ErrorKind::NotFound => Err(OpenUncheckedError::NotFound(e)),
         Err(e) => match e.raw_os_error() {

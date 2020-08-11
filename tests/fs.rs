@@ -792,7 +792,6 @@ fn copy_file_returns_metadata_len() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn copy_file_follows_dst_symlink() {
     let tmp = tmpdir();
     if !got_symlink_permission(&tmp) {
@@ -1357,7 +1356,6 @@ fn read_dir_not_found() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();
     let target = "target";
