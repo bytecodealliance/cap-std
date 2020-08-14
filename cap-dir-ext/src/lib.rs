@@ -585,30 +585,19 @@ unsafe fn as_file<Handle: AsRawHandle>(handle: &Handle) -> std::mem::ManuallyDro
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
-    // For now, for WASI use the same logic as other OS's, but
-    // in the future, the idea is we could avoid this.
-    let string = arf_strings::PosixString::from_path_str(path.as_ref())
-        .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string"))?;
-
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]
-        use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
+        use std::{ffi::OsString, os::unix::ffi::OsStringExt};
         #[cfg(target_os = "wasi")]
-        use std::{ffi::OsStr, os::wasi::ffi::OsStrExt};
-        let bytes = string.as_c_str().to_bytes();
-        OsStr::from_bytes(bytes).to_owned()
+        use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
+
+        let string = arf_strings::str_to_host(path.as_ref())?;
+        OsString::from_vec(string.into_bytes())
     };
 
     #[cfg(windows)]
-    let path = {
-        use std::{ffi::OsString, os::windows::ffi::OsStringExt};
-        let utf8 = string.as_c_str().to_str().map_err(|_| {
-            std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string")
-        })?;
-        let utf16: Vec<_> = utf8.encode_utf16().collect();
-        OsString::from_wide(&utf16)
-    };
+    let path = arf_strings::str_to_host(path.as_ref())?;
 
     Ok(path.into())
 }
