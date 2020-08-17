@@ -15,10 +15,8 @@
 The `cap-primitives` crate provides primitive sandboxing operations that
 [`cap-std`] and [`cap-async-std`] are built on.
 
-The filesystem module, [`cap_std::fs`], is known to compile on Linux, macOS, and
-FreeBSD, and probably can be easily ported to other modern Unix-family platforms.
-Windows support is in development; basic functionality works, but not all features
-are implemented yet. WASI support is in development, though not yet usable.
+The filesystem module, [`cap_std::fs`], currently supports Linux, macOS,
+FreeBSD, and Windows. WASI support is in development, though not yet usable.
 
 The networking module, `net`, is not yet usable.
 

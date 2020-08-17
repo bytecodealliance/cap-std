@@ -28,6 +28,9 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     if options.follow == FollowSymlinks::No {
         oflags |= OFlags::NOFOLLOW;
     }
+    if options.dir_required {
+        oflags |= OFlags::DIRECTORY;
+    }
     oflags |=
         OFlags::from_bits(options.ext.custom_flags).expect("unrecognized OFlags") & !accmode();
     Ok(oflags)

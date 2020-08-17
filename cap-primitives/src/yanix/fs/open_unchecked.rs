@@ -1,7 +1,7 @@
 use super::compute_oflags;
 #[cfg(target_os = "linux")]
 use crate::fs::ensure_cloexec;
-use crate::fs::{is_dir_options, stat_unchecked, OpenOptions, OpenUncheckedError};
+use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd};
 use std::{fs, path::Path};
@@ -45,7 +45,7 @@ pub(crate) fn open_unchecked(
 
         Some(libc::ENOENT) => Err(OpenUncheckedError::NotFound(err)),
         Some(libc::ENOTDIR) => {
-            if is_dir_options(options)
+            if options.dir_required
                 && stat_unchecked(start, path, options.follow)
                     .map(|m| m.file_type().is_symlink())
                     .unwrap_or(false)

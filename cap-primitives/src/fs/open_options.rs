@@ -24,6 +24,7 @@ pub struct OpenOptions {
     pub(crate) truncate: bool,
     pub(crate) create: bool,
     pub(crate) create_new: bool,
+    pub(crate) dir_required: bool,
     pub(crate) follow: FollowSymlinks,
 
     #[cfg(any(unix, windows, target_os = "vxworks"))]
@@ -46,6 +47,7 @@ impl OpenOptions {
             truncate: false,
             create: false,
             create_new: false,
+            dir_required: false,
             follow: FollowSymlinks::Yes,
 
             #[cfg(any(unix, windows, target_os = "vxworks"))]
@@ -123,6 +125,13 @@ impl OpenOptions {
     #[inline]
     pub(crate) fn follow(&mut self, follow: FollowSymlinks) -> &mut Self {
         self.follow = follow;
+        self
+    }
+
+    /// Sets the option to enable an error if the opened object is not a directory.
+    #[inline]
+    pub(crate) fn dir_required(&mut self, dir_required: bool) -> &mut Self {
+        self.dir_required = dir_required;
         self
     }
 }

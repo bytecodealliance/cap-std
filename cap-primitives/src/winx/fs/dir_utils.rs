@@ -48,14 +48,17 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
 pub(crate) fn dir_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
-        .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .dir_required(true)
+        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
         .clone()
 }
 
-/// Test whether an `OpenOptions` is set to only open directories.
-pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
-    (options.ext.attributes & Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
-        == Flags::FILE_FLAG_BACKUP_SEMANTICS.bits()
+/// Return an `OpenOptions` for canonicalizing paths.
+pub(crate) fn canonicalize_options() -> OpenOptions {
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .clone()
 }
 
 /// Open a directory named by a bare path, using the host process' ambient
@@ -68,6 +71,6 @@ pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
 pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
     fs::OpenOptions::new()
         .read(true)
-        .attributes(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
         .open(&path)
 }
