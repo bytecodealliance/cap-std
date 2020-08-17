@@ -112,8 +112,8 @@ extra code to handle absolute paths.
 
 On Linux 5.6 and newer, `cap-std` uses [`openat2`] to implement `open` and with
 a single system call in common cases. Several other operations internally
-utilize `openat2`, [`O_PATH`], and [`/proc/self/fd`] for fast path resolution as
-well.
+utilize [`openat2`], [`O_PATH`], and [`/proc/self/fd`] (when available) for fast
+path resolution as well.
 
 Otherwise, `cap-std` opens each component of a path individually, in order to
 specially handle `..` and symlinks. The algorithm is carefully designed to
