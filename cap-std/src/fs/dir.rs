@@ -1,8 +1,8 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
     canonicalize, copy, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
-    remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, stat, unlink, DirOptions,
-    FollowSymlinks,
+    remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions, stat,
+    unlink, DirOptions, FollowSymlinks, Permissions,
 };
 use std::{
     fmt, fs,
@@ -36,14 +36,10 @@ use std::os::wasi::{
 /// [`std::fs::File`].
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model. And it lacks
-/// a `set_permissions` method because popular host platforms don't have a way to
-/// perform that operation in a manner compatible with cap-std's sandbox; instead,
-/// open the file and call [`File::set_permissions`].
+/// absolute paths don't interoperate well with the capability model.
 ///
 /// [functions in `std::fs`]: https://doc.rust-lang.org/std/fs/index.html#functions
 /// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
-/// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     std_file: fs::File,
 }
@@ -371,6 +367,16 @@ impl Dir {
         to: Q,
     ) -> io::Result<()> {
         rename(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
+    }
+
+    /// Changes the permissions found on a file or a directory.
+    ///
+    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
+        set_permissions(&self.std_file, path.as_ref(), perm)
     }
 
     /// Query the metadata about a file without following symlinks.

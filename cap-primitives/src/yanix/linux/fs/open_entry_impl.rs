@@ -1,4 +1,4 @@
-use crate::fs::{open_entry_manually, open_with_openat2, OpenOptions};
+use crate::fs::{open_beneath, open_entry_manually, OpenOptions};
 use std::{ffi::OsStr, fs, io};
 
 pub(crate) fn open_entry_impl(
@@ -6,7 +6,7 @@ pub(crate) fn open_entry_impl(
     path: &OsStr,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    let result = open_with_openat2(start, path.as_ref(), options);
+    let result = open_beneath(start, path.as_ref(), options);
 
     match result {
         Ok(file) => Ok(file),

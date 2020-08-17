@@ -319,19 +319,11 @@ fn set_get_unix_permissions() {
     check!(tmpdir.create_dir(filename));
     let mask = 0o7777;
 
-    // Modification: cap-std doesn't have a `set_permissions` that operates on
-    // paths, so open the file and call `set_permissions` on it that way. And
-    // use a non-zero mode so that we can actually open it to reset the
-    // permissions below.
-    check!(tmpdir
-        .open(filename)
-        .and_then(|file| file.set_permissions(fs::Permissions::from_mode(0o400))));
+    check!(tmpdir.set_permissions(filename, fs::Permissions::from_mode(0)));
     let metadata0 = check!(tmpdir.metadata(filename));
-    assert_eq!(mask & metadata0.permissions().mode(), 0o400);
+    assert_eq!(mask & metadata0.permissions().mode(), 0);
 
-    check!(tmpdir
-        .open(filename)
-        .and_then(|file| file.set_permissions(fs::Permissions::from_mode(0o1777))));
+    check!(tmpdir.set_permissions(filename, fs::Permissions::from_mode(0o1777)));
     let metadata1 = check!(tmpdir.metadata(filename));
     #[cfg(any(all(unix, not(target_os = "vxworks")), target_os = "wasi"))]
     assert_eq!(mask & metadata1.permissions().mode(), 0o1777);
@@ -754,15 +746,11 @@ fn copy_file_preserves_perm_bits() {
     let attr = check!(check!(tmpdir.create(&input)).metadata());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir.open(&input).and_then(|file| file.set_permissions(p)));
+    check!(tmpdir.set_permissions(&input, p));
     check!(tmpdir.copy(&input, &tmpdir, &out));
     assert!(check!(tmpdir.metadata(out)).permissions().readonly());
-    check!(tmpdir
-        .open(&input)
-        .and_then(|file| file.set_permissions(attr.permissions())));
-    check!(tmpdir
-        .open(&out)
-        .and_then(|file| file.set_permissions(attr.permissions())));
+    check!(tmpdir.set_permissions(&input, attr.permissions()));
+    check!(tmpdir.set_permissions(&out, attr.permissions()));
 }
 
 #[test]
@@ -927,7 +915,6 @@ fn links_work() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
@@ -937,22 +924,17 @@ fn chmod_works() {
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir
-        .open(&file)
-        .and_then(|file| file.set_permissions(p.clone())));
+    check!(tmpdir.set_permissions(&file, p.clone()));
     let attr = check!(tmpdir.metadata(&file));
     assert!(attr.permissions().readonly());
 
-    match tmpdir
-        .open("foo")
-        .and_then(|file| file.set_permissions(p.clone()))
-    {
+    match tmpdir.set_permissions("foo", p.clone()) {
         Ok(..) => panic!("wanted an error"),
         Err(..) => {}
     }
 
     p.set_readonly(false);
-    check!(tmpdir.open(&file).and_then(|file| file.set_permissions(p)));
+    check!(tmpdir.set_permissions(&file, p));
 }
 
 #[test]
@@ -1230,9 +1212,7 @@ fn unlink_readonly() {
     check!(tmpdir.create(&path));
     let mut perm = check!(tmpdir.metadata(&path)).permissions();
     perm.set_readonly(true);
-    check!(tmpdir
-        .open(&path)
-        .and_then(|file| file.set_permissions(perm)));
+    check!(tmpdir.set_permissions(&path, perm));
     check!(tmpdir.remove_file(&path));
 }
 

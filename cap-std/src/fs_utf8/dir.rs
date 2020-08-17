@@ -1,5 +1,5 @@
 use crate::{
-    fs::OpenOptions,
+    fs::{OpenOptions, Permissions},
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
 };
 use std::{fmt, fs, io};
@@ -20,14 +20,10 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 /// [`std::fs::File`].
 ///
 /// Unlike `std::fs`, this API's `canonicalize` returns a relative path since
-/// absolute paths don't interoperate well with the capability model. And it lacks
-/// a `set_permissions` method because popular host platforms don't have a way to
-/// perform that operation in a manner compatible with cap-std's sandbox; instead,
-/// open the file and call [`File::set_permissions`].
+/// absolute paths don't interoperate well with the capability model.
 ///
 /// [functions in `std::fs`]: https://doc.rust-lang.org/std/fs/index.html#functions
 /// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
-/// [`File::set_permissions`]: struct.File.html#method.set_permissions
 pub struct Dir {
     cap_std: crate::fs::Dir,
 }
@@ -320,6 +316,17 @@ impl Dir {
         let from = from_utf8(from)?;
         let to = from_utf8(to)?;
         self.cap_std.rename(from, &to_dir.cap_std, to)
+    }
+
+    /// Changes the permissions found on a file or a directory.
+    ///
+    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    pub fn set_permissions<P: AsRef<str>>(&self, path: P, perm: Permissions) -> io::Result<()> {
+        let path = from_utf8(path)?;
+        self.cap_std.set_permissions(path, perm)
     }
 
     /// Query the metadata about a file without following symlinks.

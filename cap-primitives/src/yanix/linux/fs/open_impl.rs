@@ -41,7 +41,7 @@ pub(crate) fn open_impl(
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    let result = open_with_openat2(start, path, options);
+    let result = open_beneath(start, path, options);
 
     // If that returned `ENOSYS`, use a fallback strategy.
     if let Err(e) = &result {
@@ -53,10 +53,10 @@ pub(crate) fn open_impl(
     result
 }
 
-/// Call the `openat2` system call. If the syscall is unavailable, mark it so
-/// for future calls. If `openat2` is unavailable either permanently or
-/// temporarily, return `ENOSYS`.
-pub(crate) fn open_with_openat2(
+/// Call the `openat2` system call with `RESOLVE_BENEATH`. If the syscall is
+/// unavailable, mark it so for future calls. If `openat2` is unavailable
+/// either permanently or temporarily, return `ENOSYS`.
+pub(crate) fn open_beneath(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
