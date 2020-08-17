@@ -1,3 +1,7 @@
+#[cfg(feature = "windows_security_qos_flags")]
+use winapi::um::winbase;
+use winapi::um::winnt;
+
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
     pub(super) access_mode: Option<u32>,
@@ -9,7 +13,6 @@ pub(crate) struct OpenOptionsExt {
 
 impl OpenOptionsExt {
     pub(crate) fn new() -> Self {
-        use winapi::um::winnt;
         Self {
             access_mode: None,
             share_mode: winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE | winnt::FILE_SHARE_DELETE,
@@ -44,7 +47,7 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
     /// Re-enable this once https://github.com/rust-lang/rust/pull/74074 is in stable.
     #[cfg(feature = "windows_security_qos_flags")]
     fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
-        self.security_qos_flags = flags;
+        self.security_qos_flags = flags | winbase::SECURITY_SQOS_PRESENT;
         self
     }
 

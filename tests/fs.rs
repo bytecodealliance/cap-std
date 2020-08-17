@@ -840,7 +840,6 @@ fn symlink_noexist() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn read_link() {
     if cfg!(windows) {
         // directory symlink
@@ -1232,7 +1231,6 @@ fn canonicalize_works_simple() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn realpath_works() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {

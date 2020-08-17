@@ -209,7 +209,7 @@ pub(crate) fn open_manually<'start>(
                     return Err(errors::is_directory());
                 }
 
-                let use_options = if components.is_empty() && !dir_required {
+                let use_options = if components.is_empty() {
                     options
                 } else {
                     &dir_options
@@ -217,7 +217,10 @@ pub(crate) fn open_manually<'start>(
                 match open_unchecked(
                     &base,
                     one.as_ref(),
-                    use_options.clone().follow(FollowSymlinks::No),
+                    use_options
+                        .clone()
+                        .follow(FollowSymlinks::No)
+                        .dir_required(dir_required),
                 ) {
                     Ok(file) => {
                         // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file` is a
