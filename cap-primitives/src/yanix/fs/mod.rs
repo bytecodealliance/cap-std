@@ -20,6 +20,8 @@ mod remove_dir_all_impl;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
 mod rmdir_unchecked;
+#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+mod set_permissions_unchecked;
 mod stat_unchecked;
 mod symlink_unchecked;
 mod unlink_unchecked;
@@ -41,11 +43,12 @@ pub(crate) use crate::fs::{
     open_entry_manually as open_entry_impl,
     open_manually_wrapper as open_impl,
     stat_via_parent as stat_impl,
+    canonicalize_manually_and_follow as canonicalize_impl,
+    set_permissions_via_parent as set_permissions_impl,
 };
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
-    canonicalize_manually_and_follow as canonicalize_impl,
     link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl,
     readlink_via_parent as readlink_impl,
@@ -77,6 +80,8 @@ pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
+#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+pub(crate) use set_permissions_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 pub(crate) use unlink_unchecked::*;

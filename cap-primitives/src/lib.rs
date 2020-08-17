@@ -17,6 +17,10 @@
     html_favicon_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.ico"
 )]
 
+#[cfg(target_os = "linux")]
+#[macro_use]
+extern crate lazy_static;
+
 #[cfg(windows)]
 mod winx;
 #[cfg(not(windows))]

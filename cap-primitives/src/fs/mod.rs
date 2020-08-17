@@ -35,6 +35,9 @@ mod rename;
 mod rename_via_parent;
 mod rmdir;
 mod rmdir_via_parent;
+mod set_permissions;
+#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+mod set_permissions_via_parent;
 mod stat;
 mod stat_via_parent;
 mod symlink;
@@ -58,6 +61,8 @@ pub(crate) use readlink_one::*;
 pub(crate) use readlink_via_parent::*;
 pub(crate) use rename_via_parent::*;
 pub(crate) use rmdir_via_parent::*;
+#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+pub(crate) use set_permissions_via_parent::*;
 pub(crate) use stat_via_parent::*;
 pub(crate) use symlink_via_parent::*;
 pub(crate) use unlink_via_parent::*;
@@ -88,6 +93,7 @@ pub use remove_dir_all::*;
 pub use remove_open_dir::*;
 pub use rename::*;
 pub use rmdir::*;
+pub use set_permissions::*;
 pub use stat::*;
 pub use symlink::*;
 pub use unlink::*;

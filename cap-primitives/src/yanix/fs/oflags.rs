@@ -2,6 +2,25 @@ use crate::fs::{FollowSymlinks, OpenOptions};
 use std::io;
 use yanix::file::OFlags;
 
+/// Return an `OFlags` mask which just includes the bits for reading and
+/// writing, like `O_ACCMODE`, but which doesn't include `O_PATH` on systems
+/// where that's part of `O_ACCMODE` (eg. musl).
+pub(super) fn accmode() -> OFlags {
+    #[allow(unused_mut)]
+    let mut accmode = OFlags::ACCMODE;
+
+    // TODO: use yanix's `OFlags::PATH` once it's available.
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "android",
+        target_os = "fuchsia",
+        target_os = "emscripten"
+    ))]
+    accmode.remove(OFlags::from_bits(libc::O_PATH).unwrap());
+
+    accmode
+}
+
 pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
     let mut oflags = OFlags::CLOEXEC;
     oflags |= get_access_mode(options)?;
@@ -9,8 +28,8 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     if options.follow == FollowSymlinks::No {
         oflags |= OFlags::NOFOLLOW;
     }
-    oflags |= OFlags::from_bits(options.ext.custom_flags).expect("unrecognized OFlag bits")
-        & !OFlags::ACCMODE;
+    oflags |=
+        OFlags::from_bits(options.ext.custom_flags).expect("unrecognized OFlags") & !accmode();
     Ok(oflags)
 }
 

@@ -2,7 +2,8 @@
 //! having read or write access to it; we can use that with `openat2` and
 //! `fstat` to perform a fast sandboxed `stat`.
 
-use crate::fs::{open_with_openat2, stat_via_parent, FollowSymlinks, Metadata, OpenOptions};
+use super::file_metadata;
+use crate::fs::{open_beneath, stat_via_parent, FollowSymlinks, Metadata, OpenOptions};
 use std::{fs, io, path::Path};
 
 /// Use `openat2` with `O_PATH` and `fstat`. If that's not available, fallback
@@ -17,7 +18,7 @@ pub(crate) fn stat_impl(
     // Open the path with `O_PATH`. Use `read(true)` even though we don't need
     // `read` permissions, because Rust's libstd requires an access mode, and
     // Linux ignores `O_RDONLY` with `O_PATH`.
-    let result = open_with_openat2(
+    let result = open_beneath(
         start,
         path,
         OpenOptions::new()
@@ -28,9 +29,9 @@ pub(crate) fn stat_impl(
 
     // If that worked, call `fstat`.
     match result {
-        Ok(file) => file.metadata().map(Metadata::from_std),
+        Ok(file) => file_metadata(&file),
         Err(err) => match err.raw_os_error() {
-            // `ENOSYS` from `open_with_openat2` means `openat2` is unavailable
+            // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
             Some(libc::ENOSYS) => stat_via_parent(start, path, follow),
             _ => Err(err),
