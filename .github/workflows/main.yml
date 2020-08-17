@@ -63,8 +63,8 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: cargo check --workspace --features=fs_utf8 --release -vv
 
-  build_windows_nightly:
-    name: Build Windows with Rust nightly
+  check_windows_nightly:
+    name: Check Windows with Rust nightly
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -81,7 +81,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo build --workspace --features=fs_utf8,nightly --release -vv
+    - run: cargo check --workspace --features=fs_utf8,nightly --release -vv
 
   test:
     name: Test
