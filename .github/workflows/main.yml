@@ -19,7 +19,7 @@ jobs:
         toolchain: stable
     - run: cargo fmt --all -- --check
 
-  build:
+  check:
     name: Check
     runs-on: ${{ matrix.os }}
     strategy:
