@@ -1,7 +1,7 @@
 use crate::fs::{as_sync, into_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use async_std::{fs, io};
 use cap_primitives::fs::{
-    canonicalize, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    canonicalize, copy, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
     remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, stat, unlink, DirOptions,
     FollowSymlinks,
 };
@@ -219,26 +219,9 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        // Implementation derived from `copy` in Rust's
-        // src/libstd/sys_common/fs.rs at revision
-        // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
-        //
-        // TODO: Move this to cap_primitives and implement the platform-specific
-        // optimizations.
-        if !self.is_file(from.as_ref()) {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "the source path is not an existing regular file",
-            ));
-        }
-
-        let mut reader = self.open(from)?;
-        let mut writer = to_dir.create(to.as_ref())?;
-        let perm = reader.metadata().await?.permissions();
-
-        let ret = io::copy(&mut reader, &mut writer).await?;
-        writer.set_permissions(perm).await?;
-        Ok(ret)
+        let from_file = unsafe { as_sync(&self.std_file) };
+        let to_file = unsafe { as_sync(&to_dir.std_file) };
+        copy(&from_file, from.as_ref(), &to_file, to.as_ref())
     }
 
     /// Creates a new hard link on a filesystem.

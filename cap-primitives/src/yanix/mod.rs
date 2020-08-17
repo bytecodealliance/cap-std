@@ -3,5 +3,7 @@
 
 #[cfg(target_os = "linux")]
 mod linux;
+#[macro_use]
+mod weak;
 
 pub(crate) mod fs;
