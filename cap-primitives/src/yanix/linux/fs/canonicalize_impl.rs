@@ -5,7 +5,7 @@ use crate::fs::{canonicalize_manually_and_follow, open_beneath, FollowSymlinks, 
 use std::{
     fs, io,
     os::unix::fs::OpenOptionsExt,
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
 
 /// Implement `canonicalize` by using readlink on `/proc/self/fd/*`.
@@ -35,7 +35,14 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
                             canonicalize_manually_and_follow(start, path).unwrap()
                         );
 
-                        return Ok(canonical_path.to_path_buf());
+                        let mut path_buf = canonical_path.to_path_buf();
+
+                        // Replace "" with ".", since "" as a relative path is interpreted as an error.
+                        if path_buf.as_os_str().is_empty() {
+                            path_buf.push(Component::CurDir);
+                        }
+
+                        return Ok(path_buf);
                     }
                 }
             }
