@@ -14,6 +14,7 @@ mod oflags;
 mod open_options_ext;
 mod open_unchecked;
 mod read_dir_inner;
+mod readlink_impl;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod remove_open_dir_impl;
@@ -31,7 +32,6 @@ pub(crate) use crate::fs::{
     canonicalize_manually_and_follow as canonicalize_impl,
     link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl,
-    readlink_via_parent as readlink_impl,
     rename_via_parent as rename_impl,
     rmdir_via_parent as rmdir_impl,
     set_permissions_via_parent as set_permissions_impl,
@@ -59,6 +59,7 @@ pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use read_dir_inner::*;
+pub(crate) use readlink_impl::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_open_dir_impl::*;

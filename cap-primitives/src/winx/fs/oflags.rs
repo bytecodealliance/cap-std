@@ -31,8 +31,14 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
         .create_new(opts.create_new)
         .share_mode(opts.ext.share_mode)
         .custom_flags(custom_flags)
-        .attributes(opts.ext.attributes)
-        .security_qos_flags(opts.ext.security_qos_flags);
+        .attributes(opts.ext.attributes);
+
+    // Calling `sequence_qos_flags` with a value of 0 has the side effect
+    // of setting `SECURITY_SQOS_PRESENT`, so don't call it if we don't
+    // have any flags.
+    if opts.ext.security_qos_flags != 0 {
+        std_opts.security_qos_flags(opts.ext.security_qos_flags);
+    }
 
     if let Some(access_mode) = opts.ext.access_mode {
         std_opts.access_mode(access_mode);

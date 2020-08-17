@@ -1,12 +1,12 @@
 use super::{get_path::concatenate_or_return_absolute, open_options_to_std};
-use crate::fs::{is_dir_options, FollowSymlinks, OpenOptions, OpenUncheckedError};
+use crate::fs::{FollowSymlinks, OpenOptions, OpenUncheckedError};
 use std::{
     ffi::OsString,
     fs, io,
     os::windows::ffi::{OsStrExt, OsStringExt},
     path::{Path, PathBuf},
 };
-use winapi::shared::winerror;
+use winapi::{shared::winerror, um::winbase};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
 pub(crate) fn open_unchecked(
@@ -19,7 +19,7 @@ pub(crate) fn open_unchecked(
 
     // If we're expected to open this as a directory, append a trailing separator
     // so that we fail if it's not a directory.
-    if is_dir_options(options) {
+    if options.dir_required {
         let mut wide = full_path.into_os_string().encode_wide().collect::<Vec<_>>();
         wide.push('\\' as u16);
         full_path = PathBuf::from(OsString::from_wide(&wide));
@@ -29,8 +29,11 @@ pub(crate) fn open_unchecked(
     match opts.open(full_path) {
         Ok(f) => {
             // Windows doesn't have a way to return errors like `O_NOFOLLOW`,
-            // so check for symlinks manualy.
+            // so if we're not following symlinks and we're not using
+            // `FILE_FLAG_OPEN_REPARSE_POINT` manually to open a symlink itself,
+            // check for symlinks and report them as a distinct error.
             if options.follow == FollowSymlinks::No
+                && (options.ext.custom_flags & winbase::FILE_FLAG_OPEN_REPARSE_POINT) == 0
                 && f.metadata()
                     .map_err(OpenUncheckedError::Other)?
                     .file_type()

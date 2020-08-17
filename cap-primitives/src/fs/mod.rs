@@ -28,6 +28,7 @@ mod permissions;
 mod read_dir;
 mod readlink;
 mod readlink_one;
+#[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 mod readlink_via_parent;
 mod remove_dir_all;
 mod remove_open_dir;
@@ -58,6 +59,7 @@ pub(crate) use open_entry_manually::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
 pub(crate) use readlink_one::*;
+#[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink_via_parent::*;
 pub(crate) use rename_via_parent::*;
 pub(crate) use rmdir_via_parent::*;

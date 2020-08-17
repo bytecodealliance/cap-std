@@ -45,15 +45,12 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
 
 /// Return an `OpenOptions` for opening directories.
 pub(crate) fn dir_options() -> OpenOptions {
-    OpenOptions::new()
-        .read(true)
-        .custom_flags(OFlags::DIRECTORY.bits())
-        .clone()
+    OpenOptions::new().read(true).dir_required(true).clone()
 }
 
-/// Test whether an `OpenOptions` is set to only open directories.
-pub(crate) fn is_dir_options(options: &OpenOptions) -> bool {
-    (options.ext.custom_flags & OFlags::DIRECTORY.bits()) == OFlags::DIRECTORY.bits()
+/// Return an `OpenOptions` for canonicalizing paths.
+pub(crate) fn canonicalize_options() -> OpenOptions {
+    OpenOptions::new().read(true).clone()
 }
 
 /// Open a directory named by a bare path, using the host process' ambient
