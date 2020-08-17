@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, nightly]
+        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
         include:
           - build: stable
             os: ubuntu-latest
@@ -41,6 +41,18 @@ jobs:
           - build: nightly
             os: ubuntu-latest
             rust: nightly
+          - build: ubuntu-16.04
+            os: ubuntu-16.04
+            rust: stable
+          - build: ubuntu-20.04
+            os: ubuntu-20.04
+            rust: stable
+          - build: macos-10.15
+            os: macos-10.15
+            rust: stable
+          - build: windows-2016
+            os: windows-2016
+            rust: stable
 
     steps:
     - uses: actions/checkout@v1
