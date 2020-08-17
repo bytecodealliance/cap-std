@@ -1,9 +1,9 @@
 //! Linux 5.6 and later have a syscall `openat2`, with flags that allow it to
 //! enforce the sandboxing property we want. See the [LWN article] for an
-//! overview and the [openat2 documentation] for details.
+//! overview and the [`openat2` documentation] for details.
 //!
 //! [LWN article]: https://lwn.net/Articles/796868/
-//! [openat2 documentation]: https://man7.org/linux/man-pages/man2/openat2.2.html
+//! [`openat2` documentation]: https://man7.org/linux/man-pages/man2/openat2.2.html
 //!
 //! On older Linux, fall back to `open_manually`.
 
@@ -71,7 +71,7 @@ pub(crate) fn open_beneath(
         let mode = if (oflags.bits() & libc::O_CREAT == libc::O_CREAT)
             || (oflags.bits() & libc::O_TMPFILE == libc::O_TMPFILE)
         {
-            options.ext.mode
+            options.ext.mode & 0o7777
         } else {
             0
         };
