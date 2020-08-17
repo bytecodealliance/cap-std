@@ -20,7 +20,7 @@ jobs:
     - run: cargo fmt --all -- --check
 
   build:
-    name: Build
+    name: Check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -61,7 +61,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo build --workspace --features=fs_utf8 --release -vv
+    - run: cargo check --workspace --features=fs_utf8 --release -vv
 
   build_windows_nightly:
     name: Build Windows with Rust nightly
@@ -88,7 +88,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, nightly]
+        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
         include:
           - build: stable
             os: ubuntu-latest
@@ -105,6 +105,18 @@ jobs:
           - build: nightly
             os: ubuntu-latest
             rust: nightly
+          - build: ubuntu-16.04
+            os: ubuntu-16.04
+            rust: stable
+          - build: ubuntu-20.04
+            os: ubuntu-20.04
+            rust: stable
+          - build: macos-10.15
+            os: macos-10.15
+            rust: stable
+          - build: windows-2016
+            os: windows-2016
+            rust: stable
 
     steps:
     - uses: actions/checkout@v1
