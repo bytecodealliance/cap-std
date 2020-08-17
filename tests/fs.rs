@@ -746,7 +746,6 @@ fn copy_file_src_dir() {
 }
 
 #[test]
-#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
 fn copy_file_preserves_perm_bits() {
     let tmpdir = tmpdir();
     let input = "in.txt";
@@ -768,7 +767,6 @@ fn copy_file_preserves_perm_bits() {
 
 #[test]
 #[cfg(windows)]
-#[ignore] // TODO investigate why this one is failing
 fn copy_file_preserves_streams() {
     let tmp = tmpdir();
     check!(check!(tmp.create("in.txt:bunny")).write("carrot".as_bytes()));

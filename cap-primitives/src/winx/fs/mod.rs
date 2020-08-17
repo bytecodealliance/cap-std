@@ -1,3 +1,4 @@
+mod copy;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -39,6 +40,7 @@ pub(crate) use crate::fs::{
 };
 
 pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+pub(crate) use copy::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;

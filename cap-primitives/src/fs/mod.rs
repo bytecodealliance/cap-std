@@ -2,6 +2,7 @@
 
 mod canonicalize;
 mod canonicalize_manually;
+mod copy;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
@@ -67,6 +68,7 @@ pub(crate) use super::winx::fs::*;
 pub(crate) use super::yanix::fs::*;
 
 pub use canonicalize::*;
+pub use copy::*;
 pub use dir_builder::*;
 pub use dir_entry::*;
 pub use dir_options::*;

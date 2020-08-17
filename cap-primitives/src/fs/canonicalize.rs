@@ -1,5 +1,4 @@
-//! Manual path canonicalization, one component at a time, with manual symlink
-//! resolution, in order to enforce sandboxing.
+//! Sandboxed path canonicalization.
 
 use crate::fs::canonicalize_impl;
 #[cfg(not(feature = "no_racy_asserts"))]

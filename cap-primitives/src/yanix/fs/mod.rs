@@ -1,3 +1,4 @@
+mod copy;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -55,6 +56,7 @@ pub(crate) use crate::fs::{
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
+pub(crate) use copy::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
