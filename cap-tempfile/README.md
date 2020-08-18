@@ -1,5 +1,5 @@
 <div align="center">
-  <h1><code>cap-tempdir</code></h1>
+  <h1><code>cap-tempfile</code></h1>
 
   <p>
     <strong>Capability-oriented temporary directories</strong>
