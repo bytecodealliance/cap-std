@@ -312,7 +312,7 @@ impl Dir {
         Ok(s)
     }
 
-    /// Removes an existing, empty directory.
+    /// Removes an empty directory.
     ///
     /// This corresponds to [`async_std::fs::remove_dir`], but only accesses paths
     /// relative to `self`.
