@@ -246,7 +246,7 @@ impl Dir {
         self.cap_std.read_to_string(path)
     }
 
-    /// Removes an existing, empty directory.
+    /// Removes an empty directory.
     ///
     /// This corresponds to [`std::fs::remove_dir`], but only accesses paths
     /// relative to `self`.

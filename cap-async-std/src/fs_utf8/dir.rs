@@ -247,7 +247,7 @@ impl Dir {
         self.cap_std.read_to_string(path).await
     }
 
-    /// Removes an existing, empty directory.
+    /// Removes an empty directory.
     ///
     /// This corresponds to [`async_std::fs::remove_dir`], but only accesses paths
     /// relative to `self`.
