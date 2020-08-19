@@ -1,5 +1,9 @@
+//! Utilities for working with `/proc`, where Linux's `procfs` is typically
+//! mounted. `/proc` serves as an adjunct to Linux's main syscall surface area,
+//! providing additional features with an awkward interface.
+
 use super::file_metadata;
-use crate::fs::{open_unchecked, readlink_unchecked, FollowSymlinks, OpenOptions};
+use crate::fs::{open_unchecked, readlink_unchecked, FollowSymlinks, Metadata, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,
@@ -28,113 +32,123 @@ lazy_static! {
     static ref PROC_SELF_FD: io::Result<fs::File> = init_proc_self_fd();
 }
 
+// Identify a subdirectory of "/proc", to determine which anomolies to
+// check for.
+enum Subdir {
+    Proc,
+    Pid,
+    Fd,
+}
+
+/// Open a handle for "/proc/self/fd".
 fn init_proc_self_fd() -> io::Result<fs::File> {
-    // Open "/proc".
+    // Open "/proc". Here and below, use `read(true)` even though we don't need
+    // read permissions, because Rust's libstd requires an access mode, and
+    // Linux ignores `O_RDONLY` with `O_PATH`.
     // TODO: Here and below, add O_NOCTTY once yanix has it.
     let proc = fs::OpenOptions::new()
         .read(true)
         .custom_flags(libc::O_PATH | libc::O_DIRECTORY | libc::O_NOFOLLOW)
         .open("/proc")?;
+    let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
 
-    // Check the filesystem magic.
-    confirm_procfs(&proc)?;
+    let (uid, gid, pid) = unsafe { (libc::getuid(), libc::getgid(), libc::getpid()) };
+    let mut options = OpenOptions::new();
+    let options = options
+        .read(true)
+        .follow(FollowSymlinks::No)
+        .custom_flags(libc::O_PATH | libc::O_DIRECTORY);
 
-    let proc_metadata = file_metadata(&proc)?;
+    // Open "/proc/self". Use our pid to compute the name rather than literally
+    // using "self", as "self" is a symlink.
+    let proc_self = open_unchecked(&proc, Path::new(&pid.to_string()), options)?;
+    drop(proc);
+    check_proc_dir(Subdir::Pid, &proc_self, Some(&proc_metadata), uid, gid)?;
 
-    if !proc_metadata.is_dir() {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc isn't a directory",
-        ));
-    }
-
-    // Check the root inode number.
-    if proc_metadata.ino() != PROC_ROOT_INO {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "unexpected root inode in /proc",
-        ));
-    }
-
-    // Check that root owns "/proc".
-    if proc_metadata.uid() != 0 || proc_metadata.gid() != 0 || proc_metadata.mode() != 0o40555 {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc isn't owned by root",
-        ));
-    }
-
-    // Check that the "/proc" directory isn't empty.
-    if proc_metadata.nlink() <= 2 {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc appears to not have subdirectories",
-        ));
-    }
-
-    // Open "/proc/self/fd". Use `read(true) even though we don't need `read`
-    // permissions, because Rust's libstd requires an access mode, and Linux
-    // ignores `O_RDONLY` with `O_PATH`.
-    let proc_self_fd = open_unchecked(
-        &proc,
-        Path::new("self/fd"),
-        OpenOptions::new()
-            .read(true)
-            .follow(FollowSymlinks::No)
-            .custom_flags(libc::O_PATH | libc::O_DIRECTORY),
-    )?;
-
-    // Double-check that "/proc/self/fd" is still in procfs.
-    confirm_procfs(&proc_self_fd)?;
-
-    // Check that /proc is sane.
-    let proc_self_fd_metadata = file_metadata(&proc_self_fd)?;
-
-    if proc_self_fd_metadata.ino() == PROC_ROOT_INO {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "unexpected non-root inode in /proc/self/fd",
-        ));
-    }
-
-    // Triple-check that we're still in procfs.
-    if proc_self_fd_metadata.dev() != proc_metadata.dev() {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc/self/fd is on a different filesystem from /proc",
-        ));
-    }
-
-    // Check that our process owns the "/proc/self/fd" directory.
-    if proc_self_fd_metadata.uid() != unsafe { libc::getuid() }
-        || proc_self_fd_metadata.gid() != unsafe { libc::getgid() }
-        || proc_self_fd_metadata.mode() != 0o40500
-    {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc/self/fd isn't owned by the process' owner",
-        ));
-    }
-
-    // Check that the "/proc/self/fd" directory doesn't have any extraneous
-    // links into it (which would include unexpected subdirectories).
-    if proc_self_fd_metadata.nlink() != 2 {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "/proc/self/fd has an unexpected number of links",
-        ));
-    }
+    // Open "/proc/self/fd".
+    let proc_self_fd = open_unchecked(&proc_self, Path::new("fd"), options)?;
+    drop(proc_self);
+    check_proc_dir(Subdir::Fd, &proc_self_fd, Some(&proc_metadata), uid, gid)?;
 
     Ok(proc_self_fd)
 }
 
-fn proc_self_fd() -> io::Result<&'static fs::File> {
-    PROC_SELF_FD
-        .as_ref()
-        .map_err(|e| io::Error::new(e.kind(), e.to_string()))
+/// Check a subdirectory of "/proc" for anomolies.
+fn check_proc_dir(
+    kind: Subdir,
+    dir: &fs::File,
+    proc_metadata: Option<&Metadata>,
+    uid: libc::uid_t,
+    gid: libc::gid_t,
+) -> io::Result<Metadata> {
+    // Check the filesystem magic.
+    check_procfs(dir)?;
+
+    let dir_metadata = file_metadata(dir)?;
+
+    // Check the root inode number.
+    if let Subdir::Proc = kind {
+        if dir_metadata.ino() != PROC_ROOT_INO {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "unexpected root inode in /proc",
+            ));
+        }
+    } else {
+        // Check that we haven't been linked back to the root of "/proc".
+        if dir_metadata.ino() == PROC_ROOT_INO {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "unexpected non-root inode in /proc subdirectory",
+            ));
+        }
+
+        // Check that we're still in procfs.
+        if dir_metadata.dev() != proc_metadata.unwrap().dev() {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc subdirectory is on a different filesystem from /proc",
+            ));
+        }
+    }
+
+    let mode = if let Subdir::Fd = kind {
+        0o40500
+    } else {
+        0o40555
+    };
+
+    // Check that our process owns the directory.
+    if dir_metadata.uid() != uid || dir_metadata.gid() != gid || dir_metadata.mode() != mode {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "/proc pid subdirectory isn't owned by the process' owner",
+        ));
+    }
+
+    if let Subdir::Fd = kind {
+        // Check that the "/proc/self/fd" directory doesn't have any extraneous
+        // links into it (which would include unexpected subdirectories).
+        if dir_metadata.nlink() != 2 {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc/self/fd has unexpected subdirectories or links",
+            ));
+        }
+    } else {
+        // Check that the "/proc" directory isn't empty.
+        if dir_metadata.nlink() <= 2 {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc subdirectory is unexpectedly empty",
+            ));
+        }
+    }
+
+    Ok(dir_metadata)
 }
 
-fn confirm_procfs(file: &fs::File) -> io::Result<()> {
+fn check_procfs(file: &fs::File) -> io::Result<()> {
     let mut statfs = MaybeUninit::<libc::statfs>::uninit();
     cvt_i32(unsafe { libc::fstatfs(file.as_raw_fd(), statfs.as_mut_ptr()) })?;
 
@@ -147,6 +161,12 @@ fn confirm_procfs(file: &fs::File) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn proc_self_fd() -> io::Result<&'static fs::File> {
+    PROC_SELF_FD
+        .as_ref()
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("error opening /proc: {}", e)))
 }
 
 fn cvt_i32(t: i32) -> io::Result<i32> {
@@ -163,7 +183,6 @@ fn cstr(path: &Path) -> io::Result<CString> {
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
     readlink_unchecked(proc_self_fd()?, Path::new(&file.as_raw_fd().to_string()))
-        .map_err(Into::into)
 }
 
 pub(crate) fn set_permissions_through_proc_self_fd(
