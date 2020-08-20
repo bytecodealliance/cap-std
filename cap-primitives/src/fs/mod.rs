@@ -3,6 +3,7 @@
 mod canonicalize;
 mod canonicalize_manually;
 mod copy;
+mod cow_component;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
@@ -24,6 +25,7 @@ mod open_entry_manually;
 mod open_manually;
 mod open_options;
 mod open_parent;
+mod open_unchecked_error;
 mod permissions;
 mod read_dir;
 mod readlink;
@@ -48,6 +50,8 @@ mod unlink_via_parent;
 
 pub(crate) mod errors;
 
+use cow_component::*;
+
 pub(crate) use canonicalize_manually::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
@@ -58,6 +62,7 @@ pub(crate) use mkdir_via_parent::*;
 pub(crate) use open_entry_manually::*;
 pub(crate) use open_manually::*;
 pub(crate) use open_parent::*;
+pub(crate) use open_unchecked_error::*;
 pub(crate) use readlink_one::*;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink_via_parent::*;

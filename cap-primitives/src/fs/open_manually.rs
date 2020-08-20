@@ -4,46 +4,15 @@
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{
-    dir_options, errors, open_unchecked, path_requires_dir, readlink_one, FollowSymlinks,
-    MaybeOwnedFile, OpenOptions,
+    dir_options, errors, open_unchecked, path_requires_dir, readlink_one, to_borrowed_component,
+    to_owned_component, CowComponent, FollowSymlinks, MaybeOwnedFile, OpenOptions,
+    OpenUncheckedError,
 };
 use std::{
-    borrow::Cow,
     ffi::OsStr,
     fs, io,
     path::{Component, Path, PathBuf},
 };
-
-/// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
-/// we don't support absolute paths, and `Normal` has a `Cow` instead of a plain
-/// `OsStr` reference, so it can optionally own its own string.
-#[derive(Debug)]
-enum CowComponent<'borrow> {
-    PrefixOrRootDir,
-    CurDir,
-    ParentDir,
-    Normal(Cow<'borrow, OsStr>),
-}
-
-/// Convert a `Component` into a `CowComponent` which borrows strings.
-fn to_borrowed_component(component: Component) -> CowComponent {
-    match component {
-        Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
-        Component::CurDir => CowComponent::CurDir,
-        Component::ParentDir => CowComponent::ParentDir,
-        Component::Normal(os_str) => CowComponent::Normal(os_str.into()),
-    }
-}
-
-/// Convert a `Component` into a `CowComponent` which owns strings.
-fn to_owned_component<'borrow>(component: Component) -> CowComponent<'borrow> {
-    match component {
-        Component::Prefix(_) | Component::RootDir => CowComponent::PrefixOrRootDir,
-        Component::CurDir => CowComponent::CurDir,
-        Component::ParentDir => CowComponent::ParentDir,
-        Component::Normal(os_str) => CowComponent::Normal(os_str.to_os_string().into()),
-    }
-}
 
 /// Utility for collecting the canonical path components.
 struct CanonicalPath<'path_buf> {
@@ -122,8 +91,8 @@ pub(crate) fn open_manually_wrapper(
 ) -> io::Result<fs::File> {
     let mut symlink_count = 0;
     let start = MaybeOwnedFile::borrowed(start);
-    open_manually(start, path, options, &mut symlink_count, None)
-        .and_then(|maybe_owned| maybe_owned.into_file(options))
+    let maybe_owned = open_manually(start, path, options, &mut symlink_count, None)?;
+    maybe_owned.into_file(options)
 }
 
 /// Implement `open` by breaking up the path into components, resolving each
@@ -171,7 +140,7 @@ pub(crate) fn open_manually<'start>(
         match c {
             CowComponent::PrefixOrRootDir => return Err(errors::escape_attempt()),
             CowComponent::CurDir => {
-                // If the path ends in `.` and we want write access, fail.
+                // If the path ends in `.` and we can't open a directory, fail.
                 if components.is_empty() {
                     if dir_precluded {
                         return Err(errors::is_directory());
@@ -204,7 +173,7 @@ pub(crate) fn open_manually<'start>(
                 assert!(canonical_path.pop());
             }
             CowComponent::Normal(one) => {
-                // If the path requires a directory and we'd open it for writing, fail.
+                // If the path requires a directory and we can't open a directory, fail.
                 if components.is_empty() && dir_required && dir_precluded {
                     return Err(errors::is_directory());
                 }
@@ -275,7 +244,7 @@ pub(crate) fn open_manually<'start>(
     }
 
     #[cfg(not(feature = "no_racy_asserts"))]
-    check_open(&start_clone, path, options, &canonical_path, &base);
+    check_open_manually(&start_clone, path, options, &canonical_path, &base);
 
     canonical_path.complete();
     Ok(base)
@@ -290,7 +259,7 @@ fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
 }
 
 #[cfg(not(feature = "no_racy_asserts"))]
-fn check_open(
+fn check_open_manually(
     start: &fs::File,
     path: &Path,
     options: &OpenOptions,
@@ -329,23 +298,6 @@ fn check_open(
                 canonical_path.debug.display(),
                 unchecked_error,
             */
-        }
-    }
-}
-
-#[derive(Debug)]
-pub(crate) enum OpenUncheckedError {
-    Other(io::Error),
-    Symlink(io::Error),
-    NotFound(io::Error),
-}
-
-impl From<OpenUncheckedError> for io::Error {
-    fn from(error: OpenUncheckedError) -> Self {
-        match error {
-            OpenUncheckedError::Other(err)
-            | OpenUncheckedError::Symlink(err)
-            | OpenUncheckedError::NotFound(err) => err,
         }
     }
 }
