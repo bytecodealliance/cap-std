@@ -381,13 +381,13 @@ fn recursive_create_delete(b: &mut test::Bencher) {
     let dir = unsafe { cap_tempfile::tempdir().unwrap() };
 
     let mut path = PathBuf::new();
-    for _ in 0..256 {
-        path.push("abc");
+    for depth in 0..256 {
+        path.push(format!("depth{}", depth));
     }
 
     b.iter(|| {
         dir.create_dir_all(&path).unwrap();
-        dir.remove_dir_all(&path).unwrap();
+        dir.remove_dir_all("depth0").unwrap();
     });
 }
 
@@ -397,13 +397,13 @@ fn recursive_create_delete_baseline(b: &mut test::Bencher) {
 
     let mut path = PathBuf::new();
     path.push(dir);
-    for _ in 0..256 {
-        path.push("abc");
+    for depth in 0..256 {
+        path.push(format!("depth{}", depth));
     }
 
     b.iter(|| {
         fs::create_dir_all(&path).unwrap();
-        fs::remove_dir_all(&path).unwrap();
+        fs::remove_dir_all("depth0").unwrap();
     });
 }
 
