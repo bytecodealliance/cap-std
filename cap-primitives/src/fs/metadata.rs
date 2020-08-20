@@ -27,13 +27,35 @@ impl Metadata {
     /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
     #[inline]
     pub fn from_std(std: fs::Metadata) -> Self {
+        // TODO: Initialize `created` on Linux with `std.created().ok()` once yanix
+        // has `statx` and we make use of it.
         Self {
             file_type: FileType::from_std(std.file_type()),
             len: std.len(),
             permissions: Permissions::from_std(std.permissions()),
             modified: std.modified().ok(),
             accessed: std.accessed().ok(),
+
+            #[cfg(any(
+                target_os = "freebsd",
+                target_os = "openbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "netbsd",
+                windows,
+            ))]
             created: std.created().ok(),
+
+            #[cfg(not(any(
+                target_os = "freebsd",
+                target_os = "openbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "netbsd",
+                windows,
+            )))]
+            created: None,
+
             ext: MetadataExt::from_std(std),
         }
     }

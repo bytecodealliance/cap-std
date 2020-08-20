@@ -10,7 +10,7 @@
 use super::super::super::fs::compute_oflags;
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
-use crate::fs::{errors, open_manually_wrapper, OpenOptions};
+use crate::fs::{errors, open_manually, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,
@@ -46,7 +46,7 @@ pub(crate) fn open_impl(
     // If that returned `ENOSYS`, use a fallback strategy.
     if let Err(e) = &result {
         if let Some(libc::ENOSYS) = e.raw_os_error() {
-            return open_manually_wrapper(start, path, options);
+            return open_manually(start, path, options);
         }
     }
 
@@ -133,7 +133,7 @@ fn other_error(errno: i32) -> io::Result<fs::File> {
 
 #[cfg(not(feature = "no_racy_asserts"))]
 fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::File) {
-    let check = open_manually_wrapper(
+    let check = open_manually(
         start,
         path,
         options

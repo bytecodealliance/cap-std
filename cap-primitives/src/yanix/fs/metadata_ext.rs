@@ -54,32 +54,95 @@ impl MetadataExt {
 
     /// Constructs a new instance of `Metadata` from the given `libc::stat`.
     #[inline]
-    pub(crate) fn from_libc(mode: libc::stat) -> Metadata {
+    pub(crate) fn from_libc(stat: libc::stat) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_libc(mode.st_mode),
-            len: u64::try_from(mode.st_size).unwrap(),
-            permissions: PermissionsExt::from_libc(mode.st_mode),
-            modified: system_time_from_libc(mode.st_mtime, mode.st_mtime_nsec),
-            accessed: system_time_from_libc(mode.st_atime, mode.st_atime_nsec),
-            created: system_time_from_libc(mode.st_ctime, mode.st_ctime_nsec),
+            file_type: FileTypeExt::from_libc(stat.st_mode),
+            len: u64::try_from(stat.st_size).unwrap(),
+            permissions: PermissionsExt::from_libc(stat.st_mode),
+            modified: system_time_from_libc(stat.st_mtime, stat.st_mtime_nsec),
+            accessed: system_time_from_libc(stat.st_atime, stat.st_atime_nsec),
+
+            #[cfg(any(
+                target_os = "freebsd",
+                target_os = "openbsd",
+                target_os = "macos",
+                target_os = "ios"
+            ))]
+            created: system_time_from_libc(stat.st_birthtime, stat.st_birthtime_nsec),
+
+            #[cfg(target_os = "netbsd")]
+            created: system_time_from_libc(stat.st_birthtime, stat.st_birthtimensec),
+
+            // `stat.st_ctime` is the latest status change; we want the creation.
+            #[cfg(not(any(
+                target_os = "freebsd",
+                target_os = "openbsd",
+                target_os = "macos",
+                target_os = "ios",
+                target_os = "netbsd"
+            )))]
+            created: None,
 
             ext: Self {
-                dev: u64::try_from(mode.st_dev).unwrap(),
-                ino: mode.st_ino.into(),
-                mode: u32::from(mode.st_mode),
-                nlink: u64::from(mode.st_nlink),
-                uid: mode.st_uid,
-                gid: mode.st_gid,
-                rdev: u64::try_from(mode.st_rdev).unwrap(),
-                size: u64::try_from(mode.st_size).unwrap(),
-                atime: i64::from(mode.st_atime),
-                atime_nsec: i64::from(mode.st_atime_nsec),
-                mtime: i64::from(mode.st_mtime),
-                mtime_nsec: i64::from(mode.st_mtime_nsec),
-                ctime: i64::from(mode.st_ctime),
-                ctime_nsec: i64::from(mode.st_ctime_nsec),
-                blksize: u64::try_from(mode.st_blksize).unwrap(),
-                blocks: u64::try_from(mode.st_blocks).unwrap(),
+                dev: u64::try_from(stat.st_dev).unwrap(),
+                ino: stat.st_ino.into(),
+                mode: u32::from(stat.st_mode),
+                nlink: u64::from(stat.st_nlink),
+                uid: stat.st_uid,
+                gid: stat.st_gid,
+                rdev: u64::try_from(stat.st_rdev).unwrap(),
+                size: u64::try_from(stat.st_size).unwrap(),
+                atime: i64::from(stat.st_atime),
+                atime_nsec: i64::from(stat.st_atime_nsec),
+                mtime: i64::from(stat.st_mtime),
+                mtime_nsec: i64::from(stat.st_mtime_nsec),
+                ctime: i64::from(stat.st_ctime),
+                ctime_nsec: i64::from(stat.st_ctime_nsec),
+                blksize: u64::try_from(stat.st_blksize).unwrap(),
+                blocks: u64::try_from(stat.st_blocks).unwrap(),
+            },
+        }
+    }
+
+    /// Constructs a new instance of `Metadata` from the given `libc::statx`.
+    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+    #[inline]
+    #[allow(dead_code)] // TODO: Add `statx` to yanix and use this when possible.
+    pub(crate) fn from_libc_statx(statx: libc::statx) -> Metadata {
+        Metadata {
+            file_type: FileTypeExt::from_libc(libc::mode_t::from(statx.stx_mode)),
+            len: u64::try_from(statx.stx_size).unwrap(),
+            permissions: PermissionsExt::from_libc(libc::mode_t::from(statx.stx_mode)),
+            modified: system_time_from_libc(
+                statx.stx_mtime.tv_sec,
+                i64::from(statx.stx_mtime.tv_nsec),
+            ),
+            accessed: system_time_from_libc(
+                statx.stx_atime.tv_sec,
+                i64::from(statx.stx_atime.tv_nsec),
+            ),
+            created: system_time_from_libc(
+                statx.stx_btime.tv_sec,
+                i64::from(statx.stx_btime.tv_nsec),
+            ),
+
+            ext: Self {
+                dev: unsafe { libc::makedev(statx.stx_dev_major, statx.stx_dev_minor) },
+                ino: statx.stx_ino.into(),
+                mode: u32::from(statx.stx_mode),
+                nlink: u64::from(statx.stx_nlink),
+                uid: statx.stx_uid,
+                gid: statx.stx_gid,
+                rdev: unsafe { libc::makedev(statx.stx_rdev_major, statx.stx_rdev_minor) },
+                size: statx.stx_size,
+                atime: i64::from(statx.stx_atime.tv_sec),
+                atime_nsec: i64::from(statx.stx_atime.tv_nsec),
+                mtime: i64::from(statx.stx_mtime.tv_sec),
+                mtime_nsec: i64::from(statx.stx_mtime.tv_nsec),
+                ctime: i64::from(statx.stx_ctime.tv_sec),
+                ctime_nsec: i64::from(statx.stx_ctime.tv_nsec),
+                blksize: u64::from(statx.stx_blksize),
+                blocks: statx.stx_blocks,
             },
         }
     }

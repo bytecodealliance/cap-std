@@ -1,7 +1,7 @@
 //! Manual path canonicalization, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-use crate::fs::{canonicalize_options, open_manually, FollowSymlinks, MaybeOwnedFile};
+use crate::fs::{canonicalize_options, open_manually_impl, FollowSymlinks, MaybeOwnedFile};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -28,7 +28,7 @@ pub(crate) fn canonicalize_manually(
     let mut canonical_path = PathBuf::new();
     let start = MaybeOwnedFile::borrowed(start);
 
-    if let Err(e) = open_manually(
+    if let Err(e) = open_manually_impl(
         start,
         path,
         canonicalize_options().follow(follow),

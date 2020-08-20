@@ -35,13 +35,13 @@ pub(crate) use crate::fs::{
     rename_via_parent as rename_impl,
     rmdir_via_parent as rmdir_impl,
     set_permissions_via_parent as set_permissions_impl,
-    stat_via_parent as stat_impl,
+    stat_manually as stat_impl,
     symlink_dir_via_parent as symlink_dir_impl,
     symlink_file_via_parent as symlink_file_impl,
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) use crate::fs::open_manually_wrapper as open_impl;
+pub(crate) use crate::fs::open_manually as open_impl;
 pub(crate) use copy::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
