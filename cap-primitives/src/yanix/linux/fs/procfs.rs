@@ -168,6 +168,7 @@ fn check_proc_dir(
     Ok(dir_metadata)
 }
 
+/// Check that `file` is opened on a `procfs` filesystem.
 fn check_procfs(file: &fs::File) -> io::Result<()> {
     let mut statfs = MaybeUninit::<libc::statfs>::uninit();
     cvt_i32(unsafe { libc::fstatfs(file.as_raw_fd(), statfs.as_mut_ptr()) })?;
