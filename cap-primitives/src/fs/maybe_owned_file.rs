@@ -19,7 +19,7 @@ enum Inner<'borrow> {
 ///
 /// And, this type has the special `descend_to`, which just does an assignment,
 /// but also some useful assertion checks.
-pub(crate) struct MaybeOwnedFile<'borrow> {
+pub(super) struct MaybeOwnedFile<'borrow> {
     inner: Inner<'borrow>,
 
     #[cfg(not(feature = "no_racy_asserts"))]
@@ -28,7 +28,7 @@ pub(crate) struct MaybeOwnedFile<'borrow> {
 
 impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Constructs a new `MaybeOwnedFile` which is not owned.
-    pub(crate) fn borrowed(file: &'borrow fs::File) -> Self {
+    pub(super) fn borrowed(file: &'borrow fs::File) -> Self {
         #[cfg(not(feature = "no_racy_asserts"))]
         let path = get_path(file);
 
@@ -41,7 +41,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     }
 
     /// Constructs a new `MaybeOwnedFile` which is owned.
-    pub(crate) fn owned(file: fs::File) -> Self {
+    pub(super) fn owned(file: fs::File) -> Self {
         #[cfg(not(feature = "no_racy_asserts"))]
         let path = get_path(&file);
 
@@ -56,7 +56,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Set this `MaybeOwnedFile` to a new owned file which is from a subtree
     /// of the current file. Return a `MaybeOwnedFile` representing the previous
     /// state.
-    pub(crate) fn descend_to(&mut self, to: MaybeOwnedFile<'borrow>) -> Self {
+    pub(super) fn descend_to(&mut self, to: MaybeOwnedFile<'borrow>) -> Self {
         #[cfg(not(feature = "no_racy_asserts"))]
         let path = self.path.clone();
 
@@ -83,7 +83,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
 
     /// Produce an owned `File`. This uses `open` on "." if needed to convert a
     /// borrowed `File` to an owned one.
-    pub(crate) fn into_file(self, options: &OpenOptions) -> io::Result<fs::File> {
+    pub(super) fn into_file(self, options: &OpenOptions) -> io::Result<fs::File> {
         match self.inner {
             Inner::Owned(file) => Ok(file),
             Inner::Borrowed(file) => {
@@ -97,7 +97,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
 
     /// Assuming `self` holds an owned `File`, return it.
     #[cfg_attr(windows, allow(dead_code))]
-    pub(crate) fn unwrap_owned(self) -> fs::File {
+    pub(super) fn unwrap_owned(self) -> fs::File {
         match self.inner {
             Inner::Owned(file) => file,
             Inner::Borrowed(_) => panic!("expected owned file"),

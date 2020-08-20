@@ -1,5 +1,6 @@
 //! Filesystem utilities.
 
+mod canonical_path;
 mod canonicalize;
 mod canonicalize_manually;
 mod copy;
@@ -49,20 +50,21 @@ mod unlink_via_parent;
 
 pub(crate) mod errors;
 
-use cow_component::*;
+use canonical_path::CanonicalPath;
+use cow_component::{to_borrowed_component, to_owned_component, CowComponent};
+use maybe_owned_file::MaybeOwnedFile;
+use open_parent::open_parent;
+use readlink_one::readlink_one;
 
 pub(crate) use canonicalize_manually::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
-pub(crate) use maybe_owned_file::*;
 pub(crate) use mkdir_via_parent::*;
 #[cfg(not(windows))] // not needed on windows
 pub(crate) use open_entry_manually::*;
 pub(crate) use open_manually::*;
-pub(crate) use open_parent::*;
 pub(crate) use open_unchecked_error::*;
-pub(crate) use readlink_one::*;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink_via_parent::*;
 pub(crate) use rename_via_parent::*;

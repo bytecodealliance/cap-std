@@ -5,81 +5,14 @@
 use crate::fs::is_same_file;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_requires_dir, readlink_one, stat_unchecked,
-    to_borrowed_component, to_owned_component, CowComponent, FollowSymlinks, MaybeOwnedFile,
-    Metadata, OpenOptions, OpenUncheckedError,
+    to_borrowed_component, to_owned_component, CanonicalPath, CowComponent, FollowSymlinks,
+    MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
 use std::{
     ffi::OsStr,
     fs, io,
     path::{Component, Path, PathBuf},
 };
-
-/// Utility for collecting the canonical path components.
-struct CanonicalPath<'path_buf> {
-    /// If the user requested a canonical path, a reference to the `PathBuf` to
-    /// write it to.
-    path: Option<&'path_buf mut PathBuf>,
-
-    /// Our own private copy of the canonical path, for assertion checking.
-    #[cfg(not(feature = "no_racy_asserts"))]
-    debug: PathBuf,
-}
-
-impl<'path_buf> CanonicalPath<'path_buf> {
-    fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
-        Self {
-            #[cfg(not(feature = "no_racy_asserts"))]
-            debug: PathBuf::new(),
-
-            path,
-        }
-    }
-
-    fn push(&mut self, one: &OsStr) {
-        #[cfg(not(feature = "no_racy_asserts"))]
-        self.debug.push(one);
-
-        if let Some(path) = &mut self.path {
-            path.push(one)
-        }
-    }
-
-    fn pop(&mut self) -> bool {
-        #[cfg(not(feature = "no_racy_asserts"))]
-        self.debug.pop();
-
-        if let Some(path) = &mut self.path {
-            path.pop()
-        } else {
-            true
-        }
-    }
-
-    /// The complete canonical path has been scanned. Set `path` to `None`
-    /// so that it isn't cleared when `self` is dropped.
-    fn complete(&mut self) {
-        // Replace "" with ".", since "" as a relative path is interpreted as an error.
-        if let Some(path) = &mut self.path {
-            if path.as_os_str().is_empty() {
-                path.push(Component::CurDir);
-            }
-            self.path = None;
-        }
-    }
-}
-
-impl<'path_buf> Drop for CanonicalPath<'path_buf> {
-    fn drop(&mut self) {
-        // If `self.path` is still `Some` here, it means that we haven't called
-        // `complete()` yet, meaning the `CanonicalPath` is being dropped before
-        // the complete path has been processed. In that case, clear `path` to
-        // indicate that we weren't able to obtain a complete path.
-        if let Some(path) = &mut self.path {
-            path.clear();
-            self.path = None;
-        }
-    }
-}
 
 /// Implement `open` by breaking up the path into components, resolving each
 /// component individually, and resolving symbolic links manually.
@@ -285,7 +218,7 @@ impl<'start> Context<'start> {
 /// A note on lifetimes: `path` and `canonical_path` here don't strictly
 /// need `'start`, but using them makes it easier to store them in the
 /// `Context` struct.
-pub(crate) fn open_manually_impl<'start>(
+pub(super) fn open_manually_impl<'start>(
     start: MaybeOwnedFile<'start>,
     path: &'start Path,
     options: &OpenOptions,
