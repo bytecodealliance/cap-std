@@ -8,7 +8,7 @@ use std::{
 /// This is a wrapper around `readlink_unchecked` which performs a single
 /// symlink expansion on a single path component, and which enforces the
 /// recursion limit.
-pub(crate) fn readlink_one(
+pub(super) fn readlink_one(
     base: &fs::File,
     name: &OsStr,
     symlink_count: &mut u8,
