@@ -4,7 +4,7 @@
 task:
   name: stable x86_64-unknown-freebsd-13
   freebsd_instance:
-    image: freebsd-13-0-release-amd64
+    image_family: freebsd-13-0-snap
   setup_script:
     - pkg install -y curl
     - curl https://sh.rustup.rs -sSf --output rustup.sh
@@ -18,7 +18,7 @@ task:
 task:
   name: stable x86_64-unknown-freebsd-12
   freebsd_instance:
-    image: freebsd-12-1-release-amd64
+    image_family: freebsd-12-1
   setup_script:
     - pkg install -y curl
     - curl https://sh.rustup.rs -sSf --output rustup.sh
@@ -32,7 +32,7 @@ task:
 task:
   name: stable x86_64-unknown-freebsd-11
   freebsd_instance:
-    image: freebsd-11-4-release-amd64
+    image_family: freebsd-11-4
   setup_script:
     - pkg install -y curl
     - curl https://sh.rustup.rs -sSf --output rustup.sh
