@@ -98,6 +98,14 @@ fn check_proc_dir(
                 "unexpected root inode in /proc",
             ));
         }
+
+        // Check that "/proc" is a mountpoint.
+        if !is_mountpoint(dir)? {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc isn't a mount point",
+            ));
+        }
     } else {
         // Check that we haven't been linked back to the root of "/proc".
         if dir_metadata.ino() == PROC_ROOT_INO {
@@ -112,6 +120,14 @@ fn check_proc_dir(
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "/proc subdirectory is on a different filesystem from /proc",
+            ));
+        }
+
+        // Check that subdirectories of "/proc" are not mount points.
+        if is_mountpoint(dir)? {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc subdirectory is a mount point",
             ));
         }
     }
@@ -165,6 +181,19 @@ fn check_procfs(file: &fs::File) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+/// Check whether the given directory handle is a mount point. We use
+/// a `rename` call that would otherwise fail, but which fails with `EXDEV`
+/// first if it would cross a mount point.
+fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
+    let fd = file.as_raw_fd();
+    let e = unsafe { yanix::file::renameat(fd, "../.", fd, ".") }.unwrap_err();
+    match e.raw_os_error() {
+        Some(libc::EXDEV) => Ok(true), // the rename failed due to crossing a mount point
+        Some(libc::EBUSY) => Ok(false), // the rename failed normally
+        _ => panic!("Unexpected error from `renameat`: {:?}", e),
+    }
 }
 
 fn proc_self_fd() -> io::Result<&'static fs::File> {
