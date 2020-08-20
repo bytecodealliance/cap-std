@@ -2,7 +2,7 @@
 /// It opens the parent directory of the given path, and returns the basename,
 /// so that all the `*_via_parent` routines need to do is make sure they
 /// don't follow symlinks in the basename.
-use crate::fs::{dir_options, errors, open, open_manually, path_requires_dir, MaybeOwnedFile};
+use crate::fs::{dir_options, errors, open, path_requires_dir, MaybeOwnedFile};
 use std::{
     ffi::OsStr,
     io,
@@ -24,27 +24,6 @@ pub(crate) fn open_parent<'path, 'borrow>(
         start
     } else {
         MaybeOwnedFile::owned(open(&start, dirname, &dir_options())?)
-    };
-
-    Ok((dir, basename.as_os_str()))
-}
-
-/// Similar to `open_parent`, but with a `symlink_count` argument which allows it
-/// to be part of a multi-part lookup that operates under a single symlink count.
-///
-/// To do this, it uses `open_manually`, so it doesn't benefit from the same
-/// optimizations that using plain `open` does.
-pub(crate) fn open_parent_manually<'path, 'borrow>(
-    start: MaybeOwnedFile<'borrow>,
-    path: &'path Path,
-    symlink_count: &mut u8,
-) -> io::Result<(MaybeOwnedFile<'borrow>, &'path OsStr)> {
-    let (dirname, basename) = split_parent(path).ok_or_else(errors::no_such_file_or_directory)?;
-
-    let dir = if dirname.as_os_str().is_empty() {
-        start
-    } else {
-        open_manually(start, dirname, &dir_options(), symlink_count, None)?
     };
 
     Ok((dir, basename.as_os_str()))

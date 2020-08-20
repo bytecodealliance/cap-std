@@ -42,7 +42,6 @@ mod set_permissions;
 #[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
 mod set_permissions_via_parent;
 mod stat;
-mod stat_via_parent;
 mod symlink;
 mod symlink_via_parent;
 mod unlink;
@@ -70,7 +69,6 @@ pub(crate) use rename_via_parent::*;
 pub(crate) use rmdir_via_parent::*;
 #[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
 pub(crate) use set_permissions_via_parent::*;
-pub(crate) use stat_via_parent::*;
 pub(crate) use symlink_via_parent::*;
 pub(crate) use unlink_via_parent::*;
 

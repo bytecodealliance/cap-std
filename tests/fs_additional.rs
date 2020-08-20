@@ -7,10 +7,36 @@ mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};
 use std::{
-    io::{Read, Write},
+    io::{self, Read, Write},
+    path::Path,
     str,
 };
-use sys_common::io::tmpdir;
+use sys_common::io::{tmpdir, TempDir};
+
+#[cfg(not(windows))]
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+    tmpdir.symlink(src, dst)
+}
+#[cfg(not(windows))]
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink(src, dst)
+}
+#[cfg(windows)]
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+    tmpdir.symlink_dir(src, dst)
+}
+#[cfg(windows)]
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink_file(src, dst)
+}
 
 #[test]
 fn recursive_mkdir() {
@@ -182,4 +208,43 @@ fn file_test_directoryinfo_readdir() {
         check!(f.remove_file());
     }
     check!(tmpdir.remove_dir(dir));
+}
+
+#[test]
+fn follow_dotdot_symlink() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir_all("a/b"));
+    check!(symlink_dir("..", &tmpdir, "a/b/c"));
+    check!(symlink_dir("../..", &tmpdir, "a/b/d"));
+    check!(symlink_dir("../../..", &tmpdir, "a/b/e"));
+    check!(symlink_dir("../../../..", &tmpdir, "a/b/f"));
+
+    check!(tmpdir.open_dir("a/b/c"));
+    assert!(check!(tmpdir.metadata("a/b/c")).is_dir());
+
+    check!(tmpdir.open_dir("a/b/d"));
+    assert!(check!(tmpdir.metadata("a/b/d")).is_dir());
+
+    assert!(tmpdir.open_dir("a/b/e").is_err());
+    assert!(tmpdir.metadata("a/b/e").is_err());
+
+    assert!(tmpdir.open_dir("a/b/f").is_err());
+    assert!(tmpdir.metadata("a/b/f").is_err());
+}
+
+#[test]
+fn follow_file_symlink() {
+    let tmpdir = tmpdir();
+
+    check!(tmpdir.create("file"));
+
+    check!(symlink_file("file", &tmpdir, "link"));
+    check!(symlink_file("file/", &tmpdir, "link_slash"));
+    check!(symlink_file("file/.", &tmpdir, "link_slashdot"));
+    check!(symlink_file("file/..", &tmpdir, "link_slashdotdot"));
+
+    check!(tmpdir.open("link"));
+    assert!(tmpdir.open("link_slash").is_err());
+    assert!(tmpdir.open("link_slashdot").is_err());
+    assert!(dbg!(tmpdir.open("link_slashdotdot")).is_err());
 }

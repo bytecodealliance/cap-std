@@ -41,8 +41,8 @@ pub(crate) use crate::yanix::linux::fs::*;
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     open_entry_manually as open_entry_impl,
-    open_manually_wrapper as open_impl,
-    stat_via_parent as stat_impl,
+    open_manually as open_impl,
+    stat_manually as stat_impl,
     canonicalize_manually_and_follow as canonicalize_impl,
     set_permissions_via_parent as set_permissions_impl,
 };
