@@ -46,6 +46,9 @@ pub struct Dir {
 
 impl Dir {
     /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
+    ///
+    /// To prevent race conditions on Windows, the file must be opened without
+    /// `FILE_SHARE_DELETE`.
     #[inline]
     pub fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
@@ -624,6 +627,8 @@ impl FromRawFd for Dir {
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
+    /// To prevent race conditions on Windows, the handle must be opened without
+    /// `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle))

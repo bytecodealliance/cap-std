@@ -29,6 +29,8 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
         self
     }
 
+    /// To prevent race conditions on Windows, handles must be opened without
+    /// `FILE_SHARE_DELETE`.
     fn share_mode(&mut self, share: u32) -> &mut Self {
         self.share_mode = share;
         self

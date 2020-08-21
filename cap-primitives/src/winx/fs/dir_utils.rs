@@ -9,6 +9,7 @@ use std::{
     },
     path::{Path, PathBuf},
 };
+use winapi::um::winnt;
 use winx::file::Flags;
 
 /// Rust's `Path` implicitly strips redundant slashes and `.` components, however
@@ -46,10 +47,14 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
 
 /// Return an `OpenOptions` for opening directories.
 pub(crate) fn dir_options() -> OpenOptions {
+    // Set `FILE_FLAG_BACKUP_SEMANTICS` so that we can open directories. Unset
+    // `FILE_SHARE_DELETE` so that directories can't be renamed or deleted
+    // underneath us, since we use paths to implement many directory operations.
     OpenOptions::new()
         .read(true)
         .dir_required(true)
         .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .share_mode(winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE)
         .clone()
 }
 
