@@ -10,7 +10,6 @@ pub(crate) fn remove_open_dir_by_searching(dir: fs::File) -> io::Result<()> {
     while let Some(child) = iter.next() {
         let child = child?;
         if child.is_same_file(&metadata)? {
-            drop(dir);
             return child.remove_dir();
         }
     }
