@@ -11,9 +11,24 @@ enum AddrSet {
     NameWildcard(String),
 }
 
+impl AddrSet {
+    fn contains(&self, addr: net::IpAddr) -> bool {
+        match self {
+            Self::Net(ip_net) => ip_net.contains(&addr),
+            Self::NameWildcard(name) => false,
+        }
+    }
+}
+
 struct IpGrant {
     set: AddrSet,
     port: u16, // TODO: IANA port names, TODO: range
+}
+
+impl IpGrant {
+    fn contains(&self, addr: &net::SocketAddr) -> bool {
+        self.set.contains(addr.ip()) && addr.port() == self.port
+    }
 }
 
 /// A representation of a set of network resources that may be accessed.
@@ -27,9 +42,14 @@ pub struct Catalog {
 
 impl Catalog {
     pub fn check_addr(&self, addr: &net::SocketAddr) -> io::Result<()> {
-        todo!("Catalog::check_addr({:?})", addr)
-        //self.grants.iter().any(|grant| grant.
-        //PermissionDenied
+        if self.grants.iter().any(|grant| grant.contains(addr)) {
+            Ok(())
+        } else {
+            Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "An address led outside the catalog",
+            ))
+        }
     }
 }
 
