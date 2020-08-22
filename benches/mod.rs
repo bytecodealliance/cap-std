@@ -396,14 +396,14 @@ fn recursive_create_delete_baseline(b: &mut test::Bencher) {
     let dir = tempfile::tempdir().unwrap();
 
     let mut path = PathBuf::new();
-    path.push(dir);
+    path.push(&dir);
     for depth in 0..256 {
         path.push(format!("depth{}", depth));
     }
 
     b.iter(|| {
         fs::create_dir_all(&path).unwrap();
-        fs::remove_dir_all("depth0").unwrap();
+        fs::remove_dir_all(dir.as_ref().join("depth0")).unwrap();
     });
 }
 
