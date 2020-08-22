@@ -11,55 +11,34 @@ mod follow_symlinks;
 #[cfg(not(feature = "no_racy_asserts"))]
 mod get_path;
 mod link;
-mod link_via_parent;
 mod maybe_owned_file;
 mod metadata;
 mod mkdir;
-mod mkdir_via_parent;
 mod open;
 mod open_dir;
 mod open_options;
-mod open_parent;
 mod open_unchecked_error;
 mod permissions;
 mod read_dir;
 mod readlink;
-#[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
-mod readlink_via_parent;
 mod remove_dir_all;
 mod remove_open_dir;
 mod rename;
-mod rename_via_parent;
 mod rmdir;
-mod rmdir_via_parent;
 mod set_permissions;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
-mod set_permissions_via_parent;
 mod stat;
 mod symlink;
-mod symlink_via_parent;
 mod unlink;
-mod unlink_via_parent;
 
 pub(crate) mod errors;
 pub(crate) mod manually;
+pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
-use open_parent::open_parent;
 
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
-pub(crate) use link_via_parent::*;
-pub(crate) use mkdir_via_parent::*;
 pub(crate) use open_unchecked_error::*;
-#[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
-pub(crate) use readlink_via_parent::*;
-pub(crate) use rename_via_parent::*;
-pub(crate) use rmdir_via_parent::*;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
-pub(crate) use set_permissions_via_parent::*;
-pub(crate) use symlink_via_parent::*;
-pub(crate) use unlink_via_parent::*;
 
 #[cfg(windows)]
 pub(crate) use super::winx::fs::*;

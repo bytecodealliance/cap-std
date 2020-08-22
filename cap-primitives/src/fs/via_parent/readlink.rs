@@ -1,4 +1,5 @@
-use crate::fs::{open_parent, readlink_unchecked, MaybeOwnedFile};
+use super::open_parent;
+use crate::fs::{readlink_unchecked, MaybeOwnedFile};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -13,7 +14,7 @@ use std::{
 /// `open_parent`'s technique of returning a relative path of `.` from that
 /// point doesn't work, because opening `.` within such a directory is denied.
 /// Consequently, we use a different implementation on Windows.
-pub(crate) fn readlink_via_parent(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+pub(crate) fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let start = MaybeOwnedFile::borrowed(start);
 
     let (dir, basename) = open_parent(start, path)?;

@@ -1,9 +1,10 @@
-use crate::fs::{link_unchecked, open_parent, MaybeOwnedFile};
+use super::open_parent;
+use crate::fs::{link_unchecked, MaybeOwnedFile};
 use std::{fs, io, path::Path};
 
 /// Implement `link` by `open`ing up the parent component of the path and then
 /// calling `link_unchecked` on the last component.
-pub(crate) fn link_via_parent(
+pub(crate) fn link(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,

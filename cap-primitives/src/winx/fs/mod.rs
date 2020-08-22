@@ -32,15 +32,15 @@ pub(crate) mod errors;
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     manually::canonicalize as canonicalize_impl,
-    link_via_parent as link_impl,
-    mkdir_via_parent as mkdir_impl,
-    rename_via_parent as rename_impl,
-    rmdir_via_parent as rmdir_impl,
-    set_permissions_via_parent as set_permissions_impl,
+    via_parent::link as link_impl,
+    via_parent::mkdir as mkdir_impl,
+    via_parent::rename as rename_impl,
+    via_parent::rmdir as rmdir_impl,
+    via_parent::set_permissions as set_permissions_impl,
     manually::stat as stat_impl,
-    symlink_dir_via_parent as symlink_dir_impl,
-    symlink_file_via_parent as symlink_file_impl,
-    unlink_via_parent as unlink_impl,
+    via_parent::symlink_dir as symlink_dir_impl,
+    via_parent::symlink_file as symlink_file_impl,
+    via_parent::unlink as unlink_impl,
 };
 
 pub(crate) use copy::*;

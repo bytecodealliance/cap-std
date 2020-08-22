@@ -1,6 +1,6 @@
-/// `open_parent` is the key building block in all `*_via_parent` functions.
+/// `open_parent` is the key building block in all `via_parent` functions.
 /// It opens the parent directory of the given path, and returns the basename,
-/// so that all the `*_via_parent` routines need to do is make sure they
+/// so that all the `via_parent` functions need to do is make sure they
 /// don't follow symlinks in the basename.
 use crate::fs::{dir_options, errors, open, path_requires_dir, MaybeOwnedFile};
 use std::{
