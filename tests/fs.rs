@@ -9,10 +9,12 @@ mod sys_common;
 use std::io::prelude::*;
 
 use cap_std::fs::{self, Dir, OpenOptions};
+#[cfg(feature = "no_racy_asserts")] // racy asserts are racy
+use std::thread;
 use std::{
     io::{self, ErrorKind, SeekFrom},
     path::{Path, PathBuf},
-    str, thread,
+    str,
 };
 use sys_common::{
     io::{tmpdir, TempDir},
@@ -522,7 +524,7 @@ fn recursive_mkdir_failure() {
 }
 
 #[test]
-#[ignore] // cap-primitives contains racy checks that fail under threads
+#[cfg(feature = "no_racy_asserts")] // racy asserts are racy
 fn concurrent_recursive_mkdir() {
     for _ in 0..100 {
         let dir = tmpdir();
