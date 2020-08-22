@@ -44,18 +44,18 @@ pub(crate) use crate::fs::{
     manually::open as open_impl,
     manually::stat as stat_impl,
     manually::canonicalize as canonicalize_impl,
-    set_permissions_via_parent as set_permissions_impl,
+    via_parent::set_permissions as set_permissions_impl,
 };
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
-    link_via_parent as link_impl,
-    mkdir_via_parent as mkdir_impl,
-    readlink_via_parent as readlink_impl,
-    rename_via_parent as rename_impl,
-    rmdir_via_parent as rmdir_impl,
-    symlink_via_parent as symlink_impl,
-    unlink_via_parent as unlink_impl,
+    via_parent::link as link_impl,
+    via_parent::mkdir as mkdir_impl,
+    via_parent::readlink as readlink_impl,
+    via_parent::rename as rename_impl,
+    via_parent::rmdir as rmdir_impl,
+    via_parent::symlink as symlink_impl,
+    via_parent::unlink as unlink_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
