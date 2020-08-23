@@ -49,8 +49,6 @@ pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use flags_impl::*;
-#[allow(unused_imports)]
-pub(crate) use get_path::get_path as get_path_impl;
 #[cfg(feature = "windows_by_handle")]
 #[allow(unused_imports)]
 pub(crate) use is_same_file::*;
@@ -75,5 +73,10 @@ pub(crate) use unlink_unchecked::*;
 // On Windows, there is a limit of 63 reparse points on any given path.
 // https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;
+
+#[cfg(any(test, not(feature = "no_racy_asserts")))]
+pub(crate) fn file_path(file: &std::fs::File) -> Option<std::path::PathBuf> {
+    get_path::get_path(file).ok()
+}
 
 pub(super) use oflags::*;
