@@ -2,7 +2,7 @@
 
 use crate::fs::canonicalize_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{get_path, is_same_file, open, OpenOptions};
+use crate::fs::{file_path, is_same_file, open, OpenOptions};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -41,7 +41,7 @@ fn check_canonicalize(start: &fs::File, path: &Path, result: &io::Result<PathBuf
         // On operating systems which can tell us the path of a file descriptor,
         // assert that the path we computed canonicalizes to the same thing as
         // the input canonicalizes too.
-        if let Some(start_abspath) = get_path(start) {
+        if let Some(start_abspath) = file_path(start) {
             let check_abspath = start_abspath.join(path);
             let result_abspath = start_abspath.join(canonical_path);
             let check_abspath =

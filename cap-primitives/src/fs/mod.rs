@@ -8,8 +8,6 @@ mod dir_options;
 mod file_type;
 mod flags;
 mod follow_symlinks;
-#[cfg(not(feature = "no_racy_asserts"))]
-mod get_path;
 mod link;
 mod maybe_owned_file;
 mod metadata;
@@ -36,8 +34,6 @@ pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
 
-#[cfg(not(feature = "no_racy_asserts"))]
-pub(crate) use get_path::*;
 pub(crate) use open_unchecked_error::*;
 
 #[cfg(windows)]
@@ -76,5 +72,20 @@ fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::Erro
     match result {
         Ok(t) => Ok(t.clone()),
         Err(e) => Err((e.kind(), e.to_string())),
+    }
+}
+
+/// Test that `file_path` works on a few miscelleanous directory paths.
+#[test]
+fn dir_paths() {
+    for path in &[std::env::current_dir().unwrap(), std::env::temp_dir()] {
+        let dir = unsafe { open_ambient_dir(&path).unwrap() };
+        assert_eq!(
+            file_path(&dir)
+                .as_ref()
+                .map(std::fs::canonicalize)
+                .map(Result::unwrap),
+            Some(std::fs::canonicalize(path).unwrap())
+        );
     }
 }

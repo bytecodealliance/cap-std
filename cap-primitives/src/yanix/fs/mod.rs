@@ -35,6 +35,9 @@ pub(crate) mod errors;
 // different behavior on absolute and `..` paths in ways that make it unsuitable
 // for `cap-std`'s style of sandboxing. For more information, see the bug filed
 // upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(test, not(feature = "no_racy_asserts")))]
+pub(crate) use crate::yanix::darwin::fs::*;
 #[cfg(target_os = "linux")]
 pub(crate) use crate::yanix::linux::fs::*;
 #[cfg(not(target_os = "linux"))]
@@ -46,6 +49,9 @@ pub(crate) use crate::fs::{
     manually::canonicalize as canonicalize_impl,
     via_parent::set_permissions as set_permissions_impl,
 };
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
+#[cfg(any(test, not(feature = "no_racy_asserts")))]
+pub(crate) use crate::fs::manually::file_path;
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{

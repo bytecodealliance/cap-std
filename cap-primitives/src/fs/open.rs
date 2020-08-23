@@ -1,7 +1,7 @@
 //! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
 
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{get_path, is_same_file, open_unchecked, stat_unchecked, Metadata};
+use crate::fs::{file_path, is_same_file, open_unchecked, stat_unchecked, Metadata};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
 
@@ -87,8 +87,8 @@ fn check_open(
     // On operating systems which can tell us the path of a file descriptor,
     // assert that the start path is a parent of the result path.
     if let Ok(result_file) = &result {
-        if let Some(result_path) = get_path(result_file) {
-            if let Some(start_path) = get_path(start) {
+        if let Some(result_path) = file_path(result_file) {
+            if let Some(start_path) = file_path(start) {
                 assert!(
                     result_path.starts_with(start_path),
                     "sandbox escape: start='{:?}' result='{}'",

@@ -1,7 +1,7 @@
 use crate::fs::{open_unchecked, OpenOptions};
 use std::{fmt, fs, io, mem, ops::Deref, path::Component};
 #[cfg(not(feature = "no_racy_asserts"))]
-use {crate::fs::get_path, std::path::PathBuf};
+use {crate::fs::file_path, std::path::PathBuf};
 
 enum Inner<'borrow> {
     Owned(fs::File),
@@ -30,7 +30,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Constructs a new `MaybeOwnedFile` which is not owned.
     pub(super) fn borrowed(file: &'borrow fs::File) -> Self {
         #[cfg(not(feature = "no_racy_asserts"))]
-        let path = get_path(file);
+        let path = file_path(file);
 
         Self {
             inner: Inner::Borrowed(file),
@@ -43,13 +43,35 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Constructs a new `MaybeOwnedFile` which is owned.
     pub(super) fn owned(file: fs::File) -> Self {
         #[cfg(not(feature = "no_racy_asserts"))]
-        let path = get_path(&file);
+        let path = file_path(&file);
 
         Self {
             inner: Inner::Owned(file),
 
             #[cfg(not(feature = "no_racy_asserts"))]
             path,
+        }
+    }
+
+    /// Like `borrowed` but does not do path checks.
+    #[allow(dead_code)]
+    pub(super) fn borrowed_noassert(file: &'borrow fs::File) -> Self {
+        Self {
+            inner: Inner::Borrowed(file),
+
+            #[cfg(not(feature = "no_racy_asserts"))]
+            path: None,
+        }
+    }
+
+    /// Like `owned` but does not do path checks.
+    #[allow(dead_code)]
+    pub(super) fn owned_noassert(file: fs::File) -> Self {
+        Self {
+            inner: Inner::Owned(file),
+
+            #[cfg(not(feature = "no_racy_asserts"))]
+            path: None,
         }
     }
 
@@ -61,7 +83,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         let path = self.path.clone();
 
         #[cfg(not(feature = "no_racy_asserts"))]
-        if let Some(to_path) = get_path(&to) {
+        if let Some(to_path) = file_path(&to) {
             if let Some(current_path) = &self.path {
                 assert!(
                     to_path.starts_with(current_path),
