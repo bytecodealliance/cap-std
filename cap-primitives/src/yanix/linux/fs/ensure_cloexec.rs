@@ -5,8 +5,8 @@ use yanix::{
 };
 
 // Implementation derived from `ensure_cloexec` in Rust's
-// src/libstd/sys/unix/fs.rs at revision
-// 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+// library/std/src/sys/unix/fs.rs at revision
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 // Currently the standard library supports Linux 2.6.18 which did not
 // have the O_CLOEXEC flag (passed above). If we're running on an older
@@ -49,8 +49,8 @@ pub(crate) unsafe fn ensure_cloexec(fd: RawFd) -> io::Result<()> {
 }
 
 // Implementation derived from the Linux variants of `get_cloexec` and
-// `set_cloexec` in Rust's src/libstd/sys/unix/fd.rs at revision
-// 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+// `set_cloexec` in Rust's library/std/src/sys/unix/fd.rs at revision
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 unsafe fn get_cloexec(fd: RawFd) -> io::Result<bool> {
     Ok(get_fd_flags(fd)?.contains(FdFlags::CLOEXEC))

@@ -7,8 +7,9 @@ use std::{
 };
 
 pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<()> {
-    // Code adapted from `remove_dir_all` in Rust's src/libstd/sys_common/fs.rs
-    // at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+    // Code adapted from `remove_dir_all` in Rust's
+    // library/std/src/sys_common/fs.rs at revision
+    // 108e90ca78f052c0c1c49c42a22c85620be19712.
     let filetype = stat(start, path, FollowSymlinks::No)?.file_type();
     if filetype.is_symlink() {
         unlink(start, path)

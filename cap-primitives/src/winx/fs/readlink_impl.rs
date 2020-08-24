@@ -18,7 +18,7 @@ mod c {
 
     // Interfaces derived from Rust's
     // library/std/src/sys/windows/c.rs at revision
-    // f9d17312c9e51e6f9da86db4c6aa7210397ca5f6.
+    // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
     #[repr(C)]
     pub(super) struct REPARSE_DATA_BUFFER {
@@ -53,7 +53,7 @@ mod c {
 
 // Implementation derived from Rust's
 // library/std/src/sys/windows/mod.rs at revision
-// f9d17312c9e51e6f9da86db4c6aa7210397ca5f6.
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 fn cvt(i: i32) -> io::Result<i32> {
     if i == 0 {
         Err(io::Error::last_os_error())
@@ -64,7 +64,7 @@ fn cvt(i: i32) -> io::Result<i32> {
 
 // Implementation derived from Rust's
 // library/std/src/sys/windows/fs.rs at revision
-// f9d17312c9e51e6f9da86db4c6aa7210397ca5f6.
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 /// *Unsandboxed* function similar to `readlink`, but which does not perform sandboxing.
 pub(crate) fn readlink_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
