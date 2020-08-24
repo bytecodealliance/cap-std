@@ -1,6 +1,6 @@
 // Implementation derived from `symlink_junction` and related code in Rust's
 // library/std/src/sys/windows/fs.rs at revision
-// d08eb98698cbce56e599324fb83d55eef2cac408.
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 use cap_std::fs::Dir;
 use std::{io, path::Path};

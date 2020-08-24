@@ -36,8 +36,9 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     Ok(oflags)
 }
 
-// `OpenOptions` translation code derived from Rust's src/libstd/sys/unix/fs.rs
-// at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+// `OpenOptions` translation code derived from Rust's
+// library/std/src/sys/unix/fs.rs at revision
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
     match (options.read, options.write, options.append) {

@@ -7,8 +7,8 @@ use std::{
 };
 
 pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<()> {
-    // Code adapted from `remove_dir_all` in Rust's src/libstd/sys/windows/fs.rs
-    // at revision 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+    // Code derived from `remove_dir_all` in Rust's library/std/src/sys/windows/fs.rs
+    // at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
     let filetype = stat(start, path, FollowSymlinks::No)?.file_type();
     if filetype.is_symlink() {
         // On Windows symlinks to files and directories are removed differently.
@@ -27,9 +27,9 @@ pub(crate) fn remove_open_dir_all_impl(dir: fs::File) -> io::Result<()> {
 
 #[cfg(feature = "windows_file_type_ext")]
 fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
-    // Code adapted from `remove_dir_all_recursive` in Rust's
-    // src/libstd/sys/windows/fs.rs at revision
-    // 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+    // Code derived from `remove_dir_all_recursive` in Rust's
+    // library/std/src/sys/windows/fs.rs at revision
+    // 108e90ca78f052c0c1c49c42a22c85620be19712.
     for child in read_dir_unchecked(start, path)? {
         let child = child?;
         let child_type = child.file_type()?;

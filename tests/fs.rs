@@ -1,5 +1,5 @@
-// This file is adapted from Rust's src/libstd/fs.rs at revision
-// 7e11379f3b4c376fbb9a6c4d44f3286ccc28d149.
+// This file is derived from Rust's library/std/src/fs.rs at revision
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 //
 // This is the contents of the `tests` module, ported to use `cap_std`.
 

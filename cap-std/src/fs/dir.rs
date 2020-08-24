@@ -647,7 +647,8 @@ impl IntoRawHandle for Dir {
 
 /// Indicates how large a buffer to pre-allocate before reading the entire file.
 ///
-/// Derived from the function of the same name in libstd.
+/// Derived from the function of the same name in Rust's library/std/src/fs.rs
+/// at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
 fn initial_buffer_size(file: &File) -> usize {
     // Allocate one extra byte so the buffer doesn't need to grow before the
     // final `read` call at the end of the file. Don't worry about `usize`

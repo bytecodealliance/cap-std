@@ -1,6 +1,6 @@
 // Implementation derived from `weak` in Rust's
 // library/std/src/sys/unix/weak.rs at revision
-// f9d17312c9e51e6f9da86db4c6aa7210397ca5f6.
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 //! Support for "weak linkage" to symbols on Unix
 //!
