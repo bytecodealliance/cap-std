@@ -7,17 +7,13 @@
 //!
 //! On older Linux, fall back to `manually::open`.
 
-use super::super::super::fs::compute_oflags;
+use super::super::super::fs::{compute_oflags, cstr};
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
 use std::{
-    ffi::CString,
     fs, io,
-    os::unix::{
-        ffi::OsStrExt,
-        io::{AsRawFd, FromRawFd, RawFd},
-    },
+    os::unix::io::{AsRawFd, FromRawFd, RawFd},
     path::Path,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
@@ -76,7 +72,7 @@ pub(crate) fn open_beneath(
             0
         };
 
-        let path_cstr = CString::new(path.as_os_str().as_bytes())?;
+        let path_cstr = cstr(path)?;
         let open_how = OpenHow {
             oflag: u64::from(oflags.bits() as u32),
             mode: u64::from(mode),

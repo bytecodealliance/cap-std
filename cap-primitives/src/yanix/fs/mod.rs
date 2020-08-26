@@ -1,4 +1,6 @@
 mod copy;
+mod cstr;
+mod cvt;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -20,10 +22,13 @@ mod remove_dir_all_impl;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
 mod rmdir_unchecked;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
-mod set_permissions_unchecked;
+#[cfg(not(target_os = "linux"))]
+mod set_permissions_impl;
+#[cfg(not(target_os = "linux"))]
+mod set_times_impl;
 mod stat_unchecked;
 mod symlink_unchecked;
+mod times;
 mod unlink_unchecked;
 
 pub(crate) mod errors;
@@ -47,11 +52,13 @@ pub(crate) use crate::fs::{
     manually::open as open_impl,
     manually::stat as stat_impl,
     manually::canonicalize as canonicalize_impl,
-    via_parent::set_permissions as set_permissions_impl,
+    via_parent::set_times_nofollow as set_times_nofollow_impl,
 };
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
 #[cfg(any(test, not(feature = "no_racy_asserts")))]
 pub(crate) use crate::fs::manually::file_path;
+#[cfg(not(target_os = "linux"))]
+pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
@@ -66,6 +73,8 @@ pub(crate) use crate::fs::{
 };
 
 pub(crate) use copy::*;
+pub(crate) use cstr::cstr;
+pub(crate) use cvt::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
@@ -86,10 +95,11 @@ pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
-pub(crate) use set_permissions_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
+pub(crate) use times::{
+    set_file_times_impl, set_file_times_syscall, set_times_nofollow_unchecked, to_timespec,
+};
 pub(crate) use unlink_unchecked::*;
 
 // On Linux, there is a limit of 40 symlink expansions.

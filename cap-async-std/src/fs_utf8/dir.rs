@@ -1,5 +1,5 @@
 use crate::{
-    fs::OpenOptions,
+    fs::{OpenOptions, Permissions},
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
 };
 use async_std::{fs, io};
@@ -320,6 +320,18 @@ impl Dir {
         let from = from_utf8(from)?;
         let to = from_utf8(to)?;
         self.cap_std.rename(from, &to_dir.cap_std, to)
+    }
+
+    /// Changes the permissions found on a file or a directory.
+    ///
+    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
+    /// relative to `self`. Also, on some platforms, this function may fail if the
+    /// file or directory cannot be opened for reading or writing first.
+    ///
+    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    pub fn set_permissions<P: AsRef<str>>(&self, path: P, perm: Permissions) -> io::Result<()> {
+        let path = from_utf8(path)?;
+        self.cap_std.set_permissions(path, perm)
     }
 
     /// Query the metadata about a file without following symlinks.

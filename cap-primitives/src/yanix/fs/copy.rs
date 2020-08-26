@@ -2,6 +2,8 @@
 // library/std/src/sys/unix/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use super::{cstr, cvt_i32};
 use crate::fs::{open, OpenOptions};
 #[cfg(any(
     target_os = "linux",
@@ -10,11 +12,9 @@ use crate::fs::{open, OpenOptions};
     target_os = "ios"
 ))]
 use std::os::unix::io::AsRawFd;
-#[cfg(any(target_os = "linux", target_os = "android"))]
-use std::ptr;
 use std::{fs, io, path::Path};
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-use {std::ffi::CString, std::os::unix::ffi::OsStrExt};
+#[cfg(any(target_os = "linux", target_os = "android"))]
+use {super::cvt_i64, std::ptr};
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 macro_rules! syscall {
@@ -30,29 +30,6 @@ macro_rules! syscall {
             }
         }
     )
-}
-
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-fn cstr(path: &Path) -> io::Result<CString> {
-    Ok(CString::new(path.as_os_str().as_bytes())?)
-}
-
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-fn cvt_i32(t: i32) -> io::Result<i32> {
-    if t == -1 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(t)
-    }
-}
-
-#[cfg(any(target_os = "linux", target_os = "android"))]
-fn cvt_i64(t: i64) -> io::Result<i64> {
-    if t == -1 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(t)
-    }
 }
 
 fn open_from(start: &fs::File, path: &Path) -> io::Result<(fs::File, fs::Metadata)> {

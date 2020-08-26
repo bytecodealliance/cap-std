@@ -375,7 +375,8 @@ impl Dir {
     /// Changes the permissions found on a file or a directory.
     ///
     /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`.
+    /// relative to `self`. Also, on some platforms, this function may fail if the
+    /// file or directory cannot be opened for reading or writing first.
     ///
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {

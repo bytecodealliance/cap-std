@@ -311,8 +311,12 @@ fn file_test_io_read_write_at() {
     check!(tmpdir.remove_file(filename));
 }
 
+// Darwin doesn't have a way to change the permissions on a file, relative
+// to a directory handle, with no read or write access, without blindly
+// following symlinks.
 #[test]
 #[cfg(unix)]
+#[cfg_attr(any(target_os = "macos", target_os = "ios"), ignore)]
 fn set_get_unix_permissions() {
     use std::os::unix::fs::PermissionsExt;
 
