@@ -18,6 +18,7 @@ cap-async-std = { path = "cap-async-std", version = "^0.1.0" }
 cap-directories = { path = "cap-directories", version = "^0.1.0" }
 cap-std = { path = "cap-std", version = "^0.1.0" }
 cap-tempfile = { path = "cap-tempfile", version = "^0.1.0" }
+cap-filetime = { path = "cap-filetime", version = "^0.1.0" }
 rand = "0.7.3"
 tempfile = "3.1.0"
 
@@ -59,6 +60,7 @@ members = [
   "cap-primitives",
   "cap-std",
   "cap-tempfile",
+  "cap-filetime",
   # Work around https://github.com/rust-lang/cargo/issues/8338.
   #"fuzz",
 ]

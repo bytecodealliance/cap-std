@@ -2,14 +2,15 @@
 //! mounted. `/proc` serves as an adjunct to Linux's main syscall surface area,
 //! providing additional features with an awkward interface.
 
-use super::file_metadata;
-use crate::fs::{open_unchecked, readlink_unchecked, FollowSymlinks, Metadata, OpenOptions};
+use super::{
+    super::super::fs::{cstr, cvt_i32},
+    file_metadata,
+};
+use crate::fs::{open, open_unchecked, readlink_unchecked, FollowSymlinks, Metadata, OpenOptions};
 use std::{
-    ffi::CString,
     fs, io,
     mem::MaybeUninit,
     os::unix::{
-        ffi::OsStrExt,
         fs::{MetadataExt, OpenOptionsExt, PermissionsExt},
         io::AsRawFd,
     },
@@ -203,45 +204,59 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
         .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("error opening /proc: {}", e)))
 }
 
-fn cvt_i32(t: i32) -> io::Result<i32> {
-    if t == -1 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(t)
-    }
-}
-
-fn cstr(path: &Path) -> io::Result<CString> {
-    Ok(CString::new(path.as_os_str().as_bytes())?)
-}
-
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
     readlink_unchecked(proc_self_fd()?, Path::new(&file.as_raw_fd().to_string()))
 }
 
 pub(crate) fn set_permissions_through_proc_self_fd(
-    file: &fs::File,
+    start: &fs::File,
+    path: &Path,
     perm: fs::Permissions,
 ) -> io::Result<()> {
-    // We the `fchmodat` below to follow the magiclink, but if that resolves
-    // to a symlink, we want it to stop following. So check for the file being
-    // a symlink first.
-    if file_metadata(file)?.file_type().is_symlink() {
-        return Err(io::Error::from_raw_os_error(libc::ENOTSUP));
-    }
+    let opath = open(
+        start,
+        path,
+        OpenOptions::new().read(true).custom_flags(libc::O_PATH),
+    )?;
 
     // Don't pass `AT_SYMLINK_NOFOLLOW`, because (a) Linux doesn't support it,
     // (b) some Linux libc implementations emulate it using procfs but without
     // the safety checks we do, and (c) we do actually want to follow the first
-    // symlink. We don't want to follow any subsequent symlinks, but the check
-    // above ensures that the destination of the link isn't a symlink.
+    // symlink. We don't want to follow any subsequent symlinks, but omitting
+    // `O_NOFOLLOW` above ensures that the destination of the link isn't a
+    // symlink.
     let atflags = 0;
 
     let fd = proc_self_fd()?.as_raw_fd();
     let mode = perm.mode();
-    let cstr = cstr(Path::new(&file.as_raw_fd().to_string()))?;
+    let cstr = cstr(Path::new(&opath.as_raw_fd().to_string()))?;
 
     cvt_i32(unsafe { libc::fchmodat(fd, cstr.as_ptr(), mode, atflags) })?;
+
+    Ok(())
+}
+
+pub(crate) fn set_times_through_proc_self_fd(
+    start: &fs::File,
+    path: &Path,
+    times: &[libc::timespec; 2],
+) -> io::Result<()> {
+    let opath = open(
+        start,
+        path,
+        OpenOptions::new().read(true).custom_flags(libc::O_PATH),
+    )?;
+
+    // Don't pass `AT_SYMLINK_NOFOLLOW`, because we do actually want to follow
+    // the first symlink. We don't want to follow any subsequent symlinks, but
+    // omitting `O_NOFOLLOW` above ensures that the destination of the link
+    // isn't a symlink.
+    let atflags = 0;
+
+    let fd = proc_self_fd()?.as_raw_fd();
+    let cstr = cstr(Path::new(&opath.as_raw_fd().to_string()))?;
+
+    cvt_i32(unsafe { libc::utimensat(fd, cstr.as_ptr(), times.as_ptr(), atflags) })?;
 
     Ok(())
 }

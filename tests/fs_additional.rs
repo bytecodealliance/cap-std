@@ -246,5 +246,5 @@ fn follow_file_symlink() {
     check!(tmpdir.open("link"));
     assert!(tmpdir.open("link_slash").is_err());
     assert!(tmpdir.open("link_slashdot").is_err());
-    assert!(dbg!(tmpdir.open("link_slashdotdot")).is_err());
+    assert!(tmpdir.open("link_slashdotdot").is_err());
 }

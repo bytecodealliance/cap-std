@@ -9,8 +9,10 @@ mod open_parent;
 mod readlink;
 mod rename;
 mod rmdir;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+#[cfg(windows)]
 mod set_permissions;
+#[cfg(not(windows))]
+mod set_times_nofollow;
 mod symlink;
 mod unlink;
 
@@ -22,8 +24,10 @@ pub(crate) use mkdir::mkdir;
 pub(crate) use readlink::readlink;
 pub(crate) use rename::rename;
 pub(crate) use rmdir::rmdir;
-#[cfg(not(target_os = "linux"))] // doesn't work reliably on linux
+#[cfg(windows)]
 pub(crate) use set_permissions::set_permissions;
+#[cfg(not(windows))]
+pub(crate) use set_times_nofollow::set_times_nofollow;
 #[cfg(not(windows))]
 pub(crate) use symlink::symlink;
 #[cfg(windows)]
