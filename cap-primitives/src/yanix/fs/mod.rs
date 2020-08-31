@@ -56,7 +56,7 @@ pub(crate) use crate::fs::{
 };
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
 #[cfg(any(test, not(feature = "no_racy_asserts")))]
-pub(crate) use crate::fs::manually::file_path;
+pub(crate) use crate::fs::file_path_by_searching as file_path;
 #[cfg(not(target_os = "linux"))]
 pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
 

@@ -4,9 +4,9 @@ use std::{
     path::{Component, PathBuf},
 };
 
-/// Implement `file_path` for directories by opening `..` and searching for
-/// a directory among `..`'s children to find its name.
-pub(crate) fn file_path(file: &fs::File) -> Option<PathBuf> {
+/// Implementation of `file_path` for directories by opening `..` and searching
+/// for a directory among `..`'s children to find its name.
+pub(crate) fn file_path_by_searching(file: &fs::File) -> Option<PathBuf> {
     // Use the `_noassert` functions because the asserts depend on `file_path`,
     // which is what we're implementing here.
     let mut base = MaybeOwnedFile::borrowed_noassert(file);

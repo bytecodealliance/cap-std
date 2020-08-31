@@ -1,4 +1,4 @@
-use crate::fs::{open, set_file_times, FileTimeSpec, FollowSymlinks, OpenOptions};
+use crate::fs::{open, set_file_times, FollowSymlinks, OpenOptions, SystemTimeSpec};
 use std::{fs, io, os::windows::fs::OpenOptionsExt, path::Path};
 use winapi::{
     shared::winerror::ERROR_NOT_SUPPORTED,
@@ -8,8 +8,8 @@ use winapi::{
 pub(crate) fn set_times_impl(
     start: &fs::File,
     path: &Path,
-    atime: Option<FileTimeSpec>,
-    mtime: Option<FileTimeSpec>,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     let mut custom_flags = FILE_FLAG_BACKUP_SEMANTICS;

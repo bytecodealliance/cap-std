@@ -20,20 +20,17 @@ develops libraries to make it easy to write capability-oriented code, including:
  - [`cap-directories`] which provides capability-oriented access to
    [standard application directories]
  - [`cap-tempfile`], which provides capability-oriented access to
- - [`cap-filetime`], which provides capability-oriented functions for
-   [modifying filesystem timestamps]
+   [temporary directories]
 
 [`std`]: https://doc.rust-lang.org/std/
 [`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-async-std/README.md
 [`cap-directories`]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/README.md
 [`cap-tempfile`]: https://github.com/sunfishcode/cap-std/blob/main/cap-tempfile/README.md
-[`cap-filetime`]: https://github.com/sunfishcode/cap-std/blob/main/cap-filetime/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`async-std`]: https://docs.rs/async-std/
 [standard application directories]: https://docs.rs/directories/
 [temporary directories]: https://docs.rs/tempfile/
-[modifying filesystem timestamps]: https://docs.rs/filetime/
 
 ## Capability-oriented security
 

@@ -5,7 +5,9 @@ mod copy;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
-mod file_time;
+#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios", windows)))]
+mod file_path_by_searching;
 mod file_type;
 mod flags;
 mod follow_symlinks;
@@ -28,6 +30,7 @@ mod set_permissions;
 mod set_times;
 mod stat;
 mod symlink;
+mod system_time_spec;
 mod unlink;
 
 pub(crate) mod errors;
@@ -36,6 +39,9 @@ pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
 
+#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios", windows)))]
+pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
 
 #[cfg(windows)]
@@ -48,7 +54,6 @@ pub use copy::*;
 pub use dir_builder::*;
 pub use dir_entry::*;
 pub use dir_options::*;
-pub use file_time::*;
 pub use file_type::*;
 pub use flags::*;
 pub use follow_symlinks::*;
@@ -69,6 +74,7 @@ pub use set_permissions::*;
 pub use set_times::*;
 pub use stat::*;
 pub use symlink::*;
+pub use system_time_spec::*;
 pub use unlink::*;
 
 #[cfg(not(feature = "no_racy_asserts"))]

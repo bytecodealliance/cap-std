@@ -2,16 +2,16 @@
 //! with setting the file times.
 
 use crate::fs::{
-    open, set_file_times_syscall, set_times_nofollow, to_timespec, FileTimeSpec, FollowSymlinks,
-    OpenOptions,
+    open, set_file_times_syscall, set_times_nofollow, to_timespec, FollowSymlinks, OpenOptions,
+    SystemTimeSpec,
 };
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
     start: &fs::File,
     path: &Path,
-    atime: Option<FileTimeSpec>,
-    mtime: Option<FileTimeSpec>,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     match follow {
@@ -23,8 +23,8 @@ pub(crate) fn set_times_impl(
 fn set_path_times(
     start: &fs::File,
     path: &Path,
-    atime: Option<FileTimeSpec>,
-    mtime: Option<FileTimeSpec>,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
 
