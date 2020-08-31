@@ -1,6 +1,6 @@
 [package]
 name = "cap-async-std"
-version = "0.2.0"
+version = "0.2.1-alpha.0"
 description = "Capability-oriented version of async-std"
 authors = ["Dan Gohman <sunfish@mozilla.com>", "Jakub Konka <kubkon@jakubkonka.com>"]
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
@@ -13,7 +13,7 @@ readme = "README.md"
 [dependencies]
 arf-strings = { version = "0.1.2", optional = true }
 async-std = { version = "1.6.2", features = ["attributes"] }
-cap-primitives = { path = "../cap-primitives", version = "^0.2.0", default-features = false }
+cap-primitives = { path = "../cap-primitives", version = "^0.2.1-alpha.0", default-features = false }
 
 [badges]
 maintenance = { status = "actively-developed" }
