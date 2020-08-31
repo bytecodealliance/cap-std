@@ -3,16 +3,16 @@
 
 use super::procfs::set_times_through_proc_self_fd;
 use crate::fs::{
-    open, set_file_times_syscall, set_times_nofollow, to_timespec, FileTimeSpec, FollowSymlinks,
-    OpenOptions,
+    open, set_file_times_syscall, set_times_nofollow, to_timespec, FollowSymlinks, OpenOptions,
+    SystemTimeSpec,
 };
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
     start: &fs::File,
     path: &Path,
-    atime: Option<FileTimeSpec>,
-    mtime: Option<FileTimeSpec>,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     match follow {
@@ -24,13 +24,13 @@ pub(crate) fn set_times_impl(
 fn set_path_times(
     start: &fs::File,
     path: &Path,
-    atime: Option<FileTimeSpec>,
-    mtime: Option<FileTimeSpec>,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
 
-    // Then try `futimens` with a normal handle. Normal handles need some kind
-    // of access, so first try write.
+    // Try `futimens` with a normal handle. Normal handles need some kind of
+    // access, so first try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_times_syscall(&file, &times),
         Err(err) => match err.raw_os_error() {

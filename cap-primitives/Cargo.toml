@@ -13,7 +13,6 @@ readme = "README.md"
 [dependencies]
 arbitrary = { version = "0.4.5", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
-filetime = "0.2.12"
 
 [target.'cfg(not(windows))'.dependencies]
 yanix = "0.19.0"

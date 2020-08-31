@@ -1,20 +1,20 @@
-pub use filetime::FileTime;
+use std::time::SystemTime;
 
 /// A value for specifying a time.
 #[derive(Debug)]
 #[allow(clippy::module_name_repetitions)]
-pub enum FileTimeSpec {
+pub enum SystemTimeSpec {
     /// A value which always represents the current time, in symbolic
     /// form, so that even as time elapses, it continues to represent
     /// the current time.
     SymbolicNow,
 
     /// An abslute time value.
-    Absolute(FileTime),
+    Absolute(SystemTime),
 }
 
-impl From<FileTime> for FileTimeSpec {
-    fn from(time: FileTime) -> Self {
+impl From<SystemTime> for SystemTimeSpec {
+    fn from(time: SystemTime) -> Self {
         Self::Absolute(time)
     }
 }
