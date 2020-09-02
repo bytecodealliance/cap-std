@@ -1,5 +1,5 @@
 use crate::fs::{
-    dir_options, open, open_entry_impl, open_unchecked, read_dir_unchecked, rmdir_unchecked,
+    open_dir, open_dir_unchecked, open_entry_impl, read_dir_unchecked, rmdir_unchecked,
     stat_unchecked, unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
     ReadDir,
 };
@@ -23,12 +23,12 @@ pub(crate) struct ReadDirInner {
 impl ReadDirInner {
     pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
         Ok(Self {
-            yanix: Arc::new(Dir::from(open(start, path, &dir_options())?)?),
+            yanix: Arc::new(Dir::from(open_dir(start, path)?)?),
         })
     }
 
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let dir = open_unchecked(start, path, &dir_options())?;
+        let dir = open_dir_unchecked(start, path)?;
         Ok(Self {
             yanix: Arc::new(Dir::from(dir)?),
         })
