@@ -33,7 +33,7 @@ lazy_static! {
     static ref PROC_SELF_FD: io::Result<fs::File> = init_proc_self_fd();
 }
 
-// Identify a subdirectory of "/proc", to determine which anomolies to
+// Identify a subdirectory of "/proc", to determine which anomalies to
 // check for.
 enum Subdir {
     Proc,
@@ -78,7 +78,7 @@ fn init_proc_self_fd() -> io::Result<fs::File> {
     Ok(proc_self_fd)
 }
 
-/// Check a subdirectory of "/proc" for anomolies.
+/// Check a subdirectory of "/proc" for anomalies.
 fn check_proc_dir(
     kind: Subdir,
     dir: &fs::File,
