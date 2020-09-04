@@ -21,10 +21,10 @@
 #[macro_use]
 extern crate lazy_static;
 
+#[cfg(not(windows))]
+mod posish;
 #[cfg(windows)]
 mod winx;
-#[cfg(not(windows))]
-mod yanix;
 
 pub mod fs;
 pub mod net;

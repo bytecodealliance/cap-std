@@ -27,8 +27,8 @@ impl Metadata {
     /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
     #[inline]
     pub fn from_std(std: fs::Metadata) -> Self {
-        // TODO: Initialize `created` on Linux with `std.created().ok()` once yanix
-        // has `statx` and we make use of it.
+        // TODO: Initialize `created` on Linux with `std.created().ok()` once we
+        // make use of `statx`.
         Self {
             file_type: FileType::from_std(std.file_type()),
             len: std.len(),

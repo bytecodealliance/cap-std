@@ -44,10 +44,10 @@ use maybe_owned_file::MaybeOwnedFile;
 pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
 
+#[cfg(not(windows))]
+pub(crate) use super::posish::fs::*;
 #[cfg(windows)]
 pub(crate) use super::winx::fs::*;
-#[cfg(not(windows))]
-pub(crate) use super::yanix::fs::*;
 
 pub use canonicalize::*;
 pub use copy::*;

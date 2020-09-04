@@ -1,9 +1,9 @@
 use std::io;
 
+#[cfg(not(windows))]
+pub(crate) use crate::posish::fs::errors::*;
 #[cfg(windows)]
 pub(crate) use crate::winx::fs::errors::*;
-#[cfg(not(windows))]
-pub(crate) use crate::yanix::fs::errors::*;
 
 #[cold]
 pub(crate) fn escape_attempt() -> io::Error {
