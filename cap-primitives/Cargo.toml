@@ -30,17 +30,8 @@ errno = "0.2.6"
 [target.'cfg(windows)'.dependencies]
 winx = "0.19.0"
 winapi = { version = "0.3.9", features = [
-    "std",
-    "errhandlingapi",
-    "handleapi",
-    "processthreadsapi",
-    "profileapi",
-    "securitybaseapi",
-    "winbase",
-    "winerror",
-    "ws2def",
-    "fileapi",
-    "aclapi"
+    "ioapiset",
+    "winioctl"
 ] }
 
 [features]
