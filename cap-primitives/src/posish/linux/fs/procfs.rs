@@ -45,6 +45,7 @@ enum Subdir {
 }
 
 /// Open a handle for "/proc/self/fd".
+#[allow(clippy::useless_conversion)]
 fn init_proc_self_fd() -> io::Result<fs::File> {
     // When libc does have this constant, check that our copy has the same value.
     #[cfg(not(target_env = "musl"))]

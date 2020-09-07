@@ -2,6 +2,7 @@ use crate::{fs::SystemTimeSpec, time::SystemClock};
 use posish::fs::{futimens, utimensat, AtFlags};
 use std::{convert::TryInto, fs, io, path::Path};
 
+#[allow(clippy::useless_conversion)]
 pub(crate) fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timespec> {
     Ok(match ft {
         None => libc::timespec {
