@@ -1,0 +1,25 @@
+[package]
+name = "cap-dir-ext"
+version = "0.2.1-alpha.0"
+description = "Extension traits for `Dir`"
+authors = ["Dan Gohman <dev@sunfishcode.online>", "Jakub Konka <kubkon@jakubkonka.com>"]
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+keywords = ["filesystem"]
+categories = ["filesystem"]
+repository = "https://github.com/sunfishcode/cap-std"
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.2.1-alpha.0"}
+cap-std = { path = "../cap-std", optional = true, version = "^0.2.1-alpha.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.2.1-alpha.0"}
+
+[features]
+default = ["std"]
+fs_utf8 = []
+std = ["cap-std"]
+async_std = ["cap-async-std"]
+
+[badges]
+maintenance = { status = "actively-developed" }
