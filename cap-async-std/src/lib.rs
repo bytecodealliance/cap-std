@@ -44,3 +44,4 @@ pub mod fs_utf8;
 #[cfg(not(target_os = "wasi"))] // Disable `net` on WASI until it has networking support.
 pub mod net;
 pub mod os;
+pub mod time;

@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use crate::time::SystemTime;
 
 /// A value for specifying a time.
 #[derive(Debug)]

@@ -1,22 +1,22 @@
-use crate::fs::SystemTimeSpec;
+use crate::{fs::SystemTimeSpec, time::SystemClock};
 use posish::fs::{futimens, utimensat, AtFlags};
-use std::{convert::TryInto, fs, io, path::Path, time::SystemTime};
+use std::{convert::TryInto, fs, io, path::Path};
 
 pub(crate) fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timespec> {
     Ok(match ft {
         None => libc::timespec {
             tv_sec: 0,
-            tv_nsec: libc::UTIME_OMIT,
+            tv_nsec: libc::UTIME_OMIT.into(),
         },
         Some(SystemTimeSpec::SymbolicNow) => libc::timespec {
             tv_sec: 0,
-            tv_nsec: libc::UTIME_NOW,
+            tv_nsec: libc::UTIME_NOW.into(),
         },
         Some(SystemTimeSpec::Absolute(ft)) => {
-            let duration = ft.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+            let duration = ft.duration_since(SystemClock::UNIX_EPOCH).unwrap();
             let nanoseconds = duration.subsec_nanos();
-            assert_ne!(libc::c_long::from(nanoseconds), libc::UTIME_OMIT);
-            assert_ne!(libc::c_long::from(nanoseconds), libc::UTIME_NOW);
+            assert_ne!(i64::from(nanoseconds), i64::from(libc::UTIME_OMIT));
+            assert_ne!(i64::from(nanoseconds), i64::from(libc::UTIME_NOW));
             libc::timespec {
                 tv_sec: duration
                     .as_secs()

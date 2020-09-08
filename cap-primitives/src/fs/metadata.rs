@@ -1,5 +1,8 @@
-use crate::fs::{FileType, MetadataExt, Permissions};
-use std::{fs, io, time::SystemTime};
+use crate::{
+    fs::{FileType, MetadataExt, Permissions},
+    time::SystemTime,
+};
+use std::{fs, io};
 
 /// Metadata information about a file.
 ///
@@ -33,8 +36,8 @@ impl Metadata {
             file_type: FileType::from_std(std.file_type()),
             len: std.len(),
             permissions: Permissions::from_std(std.permissions()),
-            modified: std.modified().ok(),
-            accessed: std.accessed().ok(),
+            modified: std.modified().ok().map(SystemTime::from_std),
+            accessed: std.accessed().ok().map(SystemTime::from_std),
 
             #[cfg(any(
                 target_os = "freebsd",
@@ -44,7 +47,7 @@ impl Metadata {
                 target_os = "netbsd",
                 windows,
             ))]
-            created: std.created().ok(),
+            created: std.created().ok().map(SystemTime::from_std),
 
             #[cfg(not(any(
                 target_os = "freebsd",

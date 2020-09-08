@@ -1,14 +1,13 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
+use crate::{
+    fs::{FileTypeExt, Metadata, PermissionsExt},
+    time::{Duration, SystemClock, SystemTime},
+};
 use posish::fs::LibcStat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use posish::fs::LibcStatx;
-use std::{
-    convert::TryFrom,
-    fs,
-    time::{Duration, SystemTime},
-};
+use std::{convert::TryFrom, fs};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -62,8 +61,16 @@ impl MetadataExt {
             file_type: FileTypeExt::from_libc(stat.st_mode),
             len: u64::try_from(stat.st_size).unwrap(),
             permissions: PermissionsExt::from_libc(stat.st_mode),
-            modified: system_time_from_libc(stat.st_mtime, stat.st_mtime_nsec),
-            accessed: system_time_from_libc(stat.st_atime, stat.st_atime_nsec),
+
+            #[cfg(not(target_os = "netbsd"))]
+            modified: system_time_from_libc(stat.st_mtime.into(), stat.st_mtime_nsec.into()),
+            #[cfg(not(target_os = "netbsd"))]
+            accessed: system_time_from_libc(stat.st_atime.into(), stat.st_atime_nsec.into()),
+
+            #[cfg(target_os = "netbsd")]
+            modified: system_time_from_libc(stat.st_mtime.into(), stat.st_mtimensec.into()),
+            #[cfg(target_os = "netbsd")]
+            accessed: system_time_from_libc(stat.st_atime.into(), stat.st_atimensec.into()),
 
             #[cfg(any(
                 target_os = "freebsd",
@@ -71,10 +78,10 @@ impl MetadataExt {
                 target_os = "macos",
                 target_os = "ios"
             ))]
-            created: system_time_from_libc(stat.st_birthtime, stat.st_birthtime_nsec),
+            created: system_time_from_libc(stat.st_birthtime.into(), stat.st_birthtime_nsec.into()),
 
             #[cfg(target_os = "netbsd")]
-            created: system_time_from_libc(stat.st_birthtime, stat.st_birthtimensec),
+            created: system_time_from_libc(stat.st_birthtime.into(), stat.st_birthtimensec.into()),
 
             // `stat.st_ctime` is the latest status change; we want the creation.
             #[cfg(not(any(
@@ -96,11 +103,20 @@ impl MetadataExt {
                 rdev: u64::try_from(stat.st_rdev).unwrap(),
                 size: u64::try_from(stat.st_size).unwrap(),
                 atime: i64::from(stat.st_atime),
+                #[cfg(not(target_os = "netbsd"))]
                 atime_nsec: i64::from(stat.st_atime_nsec),
+                #[cfg(target_os = "netbsd")]
+                atime_nsec: i64::from(stat.st_atimensec),
                 mtime: i64::from(stat.st_mtime),
+                #[cfg(not(target_os = "netbsd"))]
                 mtime_nsec: i64::from(stat.st_mtime_nsec),
+                #[cfg(target_os = "netbsd")]
+                mtime_nsec: i64::from(stat.st_mtimensec),
                 ctime: i64::from(stat.st_ctime),
+                #[cfg(not(target_os = "netbsd"))]
                 ctime_nsec: i64::from(stat.st_ctime_nsec),
+                #[cfg(target_os = "netbsd")]
+                ctime_nsec: i64::from(stat.st_ctimensec),
                 blksize: u64::try_from(stat.st_blksize).unwrap(),
                 blocks: u64::try_from(stat.st_blocks).unwrap(),
             },
@@ -157,8 +173,8 @@ impl MetadataExt {
 }
 
 #[allow(clippy::similar_names)]
-fn system_time_from_libc(sec: libc::time_t, nsec: libc::time_t) -> Option<SystemTime> {
-    SystemTime::UNIX_EPOCH.checked_add(Duration::new(
+fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
+    SystemClock::UNIX_EPOCH.checked_add(Duration::new(
         u64::try_from(sec).unwrap(),
         u32::try_from(nsec).unwrap(),
     ))

@@ -17,10 +17,13 @@
 The `cap-primitives` crate provides primitive sandboxing operations that
 [`cap-std`] and [`cap-async-std`] are built on.
 
-The filesystem module, [`cap_std::fs`], currently supports Linux, macOS,
-FreeBSD, and Windows. WASI support is in development, though not yet usable.
+The filesystem module [`cap_primitives::fs`] and time module
+[`cap_primitives::time`] currently support Linux, macOS, FreeBSD, and Windows.
+WASI support is in development, though not yet usable.
 
 The networking module, `net`, is not yet usable.
 
 [`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-async-std/README.md
+[`cap_primitives::fs`]: https://docs.rs/cap-primitives/current/cap_primitives/fs/index.html
+[`cap_primitives::time`]: https://docs.rs/cap-primitives/current/cap_primitives/time/index.html

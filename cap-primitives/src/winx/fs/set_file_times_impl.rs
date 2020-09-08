@@ -1,10 +1,8 @@
-use crate::fs::SystemTimeSpec;
-use std::{
-    fs, io,
-    os::windows::io::AsRawHandle,
-    ptr,
-    time::{Duration, SystemTime},
+use crate::{
+    fs::SystemTimeSpec,
+    time::{Duration, SystemClock, SystemTime},
 };
+use std::{fs, io, os::windows::io::AsRawHandle, ptr};
 use winapi::{
     shared::{
         minwindef::{DWORD, FILETIME},
@@ -23,7 +21,7 @@ pub(crate) fn set_file_times_impl(
     let atime = match atime {
         None => None,
         Some(SystemTimeSpec::SymbolicNow) => {
-            let right_now = SystemTime::now();
+            let right_now = unsafe { SystemClock::new() }.now();
             now = Some(right_now);
             Some(right_now)
         }
@@ -35,7 +33,7 @@ pub(crate) fn set_file_times_impl(
             if let Some(prev_now) = now {
                 Some(prev_now)
             } else {
-                Some(SystemTime::now())
+                Some(unsafe { SystemClock::new() }.now())
             }
         }
         Some(SystemTimeSpec::Absolute(time)) => Some(time),
@@ -69,7 +67,7 @@ fn to_filetime(ft: SystemTime) -> io::Result<FILETIME> {
     // a reference point. The `UNIX_EPOCH` is the only reference point provided
     // by the standard library, so use that.
     let ft = ft
-        .duration_since(SystemTime::UNIX_EPOCH)
+        .duration_since(SystemClock::UNIX_EPOCH)
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
 
     // Windows' time stamps are relative to January 1, 1601 so adjust by the
