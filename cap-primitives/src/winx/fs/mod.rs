@@ -7,7 +7,7 @@ mod dir_utils;
 mod file_type_ext;
 mod get_path;
 mod is_read_write_impl;
-#[cfg(feature = "windows_by_handle")]
+#[cfg(racy_asserts)]
 mod is_same_file;
 mod link_unchecked;
 mod metadata_ext;
@@ -50,8 +50,7 @@ pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use is_read_write_impl::*;
-#[cfg(feature = "windows_by_handle")]
-#[allow(unused_imports)]
+#[cfg(racy_asserts)]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
 pub(crate) use manually::open as open_impl;
@@ -76,7 +75,7 @@ pub(crate) use unlink_unchecked::*;
 // https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;
 
-#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(any(test, racy_asserts))]
 pub(crate) fn file_path(file: &std::fs::File) -> Option<std::path::PathBuf> {
     get_path::get_path(file).ok()
 }

@@ -1,8 +1,8 @@
 //! Sandboxed path canonicalization.
 
 use crate::fs::canonicalize_impl;
-#[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{file_path, is_same_file, open, OpenOptions};
+#[cfg(racy_asserts)]
+use crate::fs::{file_path, open, OpenOptions};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -10,28 +10,29 @@ use std::{
 
 /// Canonicalize the given path, ensuring that the resolution of the path never
 /// escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn canonicalize(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
     let result = canonicalize_impl(start, path);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_canonicalize(start, path, &result);
 
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn check_canonicalize(start: &fs::File, path: &Path, result: &io::Result<PathBuf>) {
     if let Ok(canonical_path) = result {
         let path_result = open(start, path, OpenOptions::new().read(true));
         let canonical_result = open(start, canonical_path, OpenOptions::new().read(true));
         match (path_result, canonical_result) {
-            (Ok(path_file), Ok(canonical_file)) => {
-                assert!(is_same_file(&path_file, &canonical_file)
-                    .expect("we should be able to stat paths that we just canonicalized"))
-            }
+            (Ok(path_file), Ok(canonical_file)) => assert_same_file!(
+                &path_file,
+                &canonical_file,
+                "we should be able to stat paths that we just canonicalized"
+            ),
             (Err(path_err), Err(canonical_err)) => {
                 assert_eq!(path_err.to_string(), canonical_err.to_string())
             }

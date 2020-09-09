@@ -8,7 +8,7 @@
 //! On older Linux, fall back to `manually::open`.
 
 use super::super::super::fs::{compute_oflags, cstr};
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
 use posish::fs::OFlags;
@@ -111,7 +111,7 @@ pub(crate) fn open_beneath(
                         // and `openat2` was introduced in 5.6.
                         let file = fs::File::from_raw_fd(ret as RawFd);
 
-                        #[cfg(not(feature = "no_racy_asserts"))]
+                        #[cfg(racy_asserts)]
                         check_open(start, path, options, &file);
 
                         return Ok(file);
@@ -129,7 +129,7 @@ fn other_error(errno: i32) -> io::Result<fs::File> {
     Err(io::Error::from_raw_os_error(errno))
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::File) {
     let check = manually::open(
         start,
@@ -142,7 +142,7 @@ fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::F
     )
     .expect("manually::open failed when open_openat2 succeeded");
     assert!(
-        is_same_file(file, &check).expect("manually::open should be able to stat the result"),
+        is_same_file(file, &check).unwrap(),
         "manually::open should open the same inode as open_openat2"
     );
 }

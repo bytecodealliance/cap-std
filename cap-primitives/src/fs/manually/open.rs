@@ -2,8 +2,6 @@
 //! resolution, in order to enforce sandboxing.
 
 use super::{readlink_one, CanonicalPath, CowComponent};
-#[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::is_same_file;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_requires_dir, stat_unchecked, FollowSymlinks,
     MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
@@ -43,7 +41,7 @@ struct Context<'start> {
     /// Are we requesting write permissions, so we can't open a directory?
     dir_precluded: bool,
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     start_clone: MaybeOwnedFile<'start>,
 }
 
@@ -61,7 +59,7 @@ impl<'start> Context<'start> {
             .map(CowComponent::borrowed)
             .collect::<Vec<_>>();
 
-        #[cfg(not(feature = "no_racy_asserts"))]
+        #[cfg(racy_asserts)]
         let start_clone = MaybeOwnedFile::owned(start.try_clone().unwrap());
 
         Self {
@@ -72,7 +70,7 @@ impl<'start> Context<'start> {
             dir_required: path_requires_dir(path),
             dir_precluded: options.write || options.append,
 
-            #[cfg(not(feature = "no_racy_asserts"))]
+            #[cfg(racy_asserts)]
             start_clone,
         }
     }
@@ -98,8 +96,10 @@ impl<'start> Context<'start> {
 
     /// Handle a ".." path component.
     fn parent_dir(&mut self) -> io::Result<()> {
-        #[cfg(not(feature = "no_racy_asserts"))]
-        assert!(self.dirs.is_empty() || !is_same_file(&self.start_clone, &self.base)?);
+        #[cfg(racy_asserts)]
+        if !self.dirs.is_empty() {
+            assert_different_file!(&self.start_clone, &self.base);
+        }
 
         if self.components.is_empty() && self.dir_precluded {
             return Err(errors::is_directory());
@@ -131,7 +131,7 @@ impl<'start> Context<'start> {
         }
 
         // Otherwise we're doing an open.
-        let mut use_options = if self.components.is_empty() {
+        let use_options = if self.components.is_empty() {
             options.clone()
         } else {
             dir_options()
@@ -141,6 +141,7 @@ impl<'start> Context<'start> {
             &self.base,
             one.as_ref(),
             use_options
+                .clone()
                 .follow(FollowSymlinks::No)
                 .dir_required(dir_required),
         ) {
@@ -238,7 +239,7 @@ pub(super) fn internal_open<'start>(
         }
     }
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_internal_open(&ctx, path, options);
 
     ctx.canonical_path.complete();
@@ -304,7 +305,7 @@ fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
         && use_options.follow == FollowSymlinks::Yes
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn check_internal_open(ctx: &Context, path: &Path, options: &OpenOptions) {
     match open_unchecked(
         &ctx.start_clone,
@@ -316,15 +317,13 @@ fn check_internal_open(ctx: &Context, path: &Path, options: &OpenOptions) {
             .truncate(false),
     ) {
         Ok(unchecked_file) => {
-            assert!(
-                is_same_file(&ctx.base, &unchecked_file).unwrap(),
-                "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'; \
-                 got='{:?}' expected='{:?}'",
+            assert_same_file!(
+                &ctx.base,
+                &unchecked_file,
+                "path resolution inconsistency: start='{:?}', path='{}'; canonical_path='{}'",
                 ctx.start_clone,
                 path.display(),
                 ctx.canonical_path.debug.display(),
-                ctx.base,
-                &unchecked_file,
             );
         }
         Err(_unchecked_error) => {

@@ -36,8 +36,7 @@ winapi = { version = "0.3.9", features = [
 ] }
 
 [features]
-default = ["no_racy_asserts", "windows_security_qos_flags"]
-no_racy_asserts = []
+default = ["windows_security_qos_flags"]
 nightly = ["windows_by_handle", "windows_file_type_ext"]
 windows_by_handle = [] # https://github.com/rust-lang/rust/issues/63010
 windows_file_type_ext = []

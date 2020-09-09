@@ -1,6 +1,6 @@
 //! This defines `mkdir`, the primary entrypoint to sandboxed directory creation.
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use crate::fs::{
     canonicalize, map_result, mkdir_unchecked, stat_unchecked, FollowSymlinks, Metadata,
 };
@@ -9,25 +9,25 @@ use std::{fs, io, path::Path};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn mkdir(start: &fs::File, path: &Path, options: &DirOptions) -> io::Result<()> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
     let result = mkdir_impl(start, path, options);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_mkdir(start, path, options, &stat_before, &result, &stat_after);
 
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 #[allow(clippy::enum_glob_use)]
 fn check_mkdir(
     start: &fs::File,
@@ -46,17 +46,19 @@ fn check_mkdir(
     ) {
         (Err((NotFound, _)), Ok(()), Ok(metadata)) => {
             assert!(metadata.is_dir());
-            assert!(stat_unchecked(
-                start,
-                &canonicalize(start, path).unwrap(),
-                FollowSymlinks::No
-            )
-            .unwrap()
-            .is_same_file(&metadata));
+            assert_same_file_metadata!(
+                &stat_unchecked(
+                    start,
+                    &canonicalize(start, path).unwrap(),
+                    FollowSymlinks::No
+                )
+                .unwrap(),
+                &metadata
+            );
         }
 
         (Ok(metadata_before), Err((AlreadyExists, _)), Ok(metadata_after)) => {
-            assert!(metadata_before.is_same_file(&metadata_after));
+            assert_same_file_metadata!(&metadata_before, &metadata_after);
         }
 
         (_, Err((kind, message)), _) => match map_result(&canonicalize(start, path)) {

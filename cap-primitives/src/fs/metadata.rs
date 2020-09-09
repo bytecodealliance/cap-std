@@ -145,7 +145,6 @@ impl Metadata {
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
     #[cfg(any(not(windows), feature = "windows_by_handle"))]
-    #[cfg_attr(windows, allow(dead_code))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }

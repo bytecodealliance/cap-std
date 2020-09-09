@@ -1,31 +1,31 @@
 //! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
 
-#[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{file_path, is_same_file, open_unchecked, stat_unchecked, Metadata};
+#[cfg(racy_asserts)]
+use crate::fs::{file_path, open_unchecked, stat_unchecked, Metadata};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(start, path, options.follow);
 
     // Call the underlying implementation.
     let result = open_impl(start, path, options);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_after = stat_unchecked(start, path, options.follow);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_open(start, path, options, &stat_before, &result, &stat_after);
 
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn check_open(
     start: &fs::File,
     path: &Path,
@@ -46,22 +46,27 @@ fn check_open(
 
     match (&result, &unchecked_result) {
         (Ok(result_file), Ok(unchecked_file)) => {
-            assert!(
-                is_same_file(result_file, unchecked_file).unwrap(),
-                "path resolution inconsistency: start='{:?}', path='{}' got='{:?}' expected='{:?}'",
+            assert_same_file!(
+                &result_file,
+                &unchecked_file,
+                "path resolution inconsistency: start='{:?}', path='{}'",
                 start,
                 path.display(),
-                result_file,
-                &unchecked_file
             );
         }
-        (Ok(result_file), Err(unchecked_error)) => panic!(
-            "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
-            start,
-            path.display(),
-            unchecked_error,
-            result_file
-        ),
+        (Ok(result_file), Err(unchecked_error)) => {
+            if unchecked_error.kind() == io::ErrorKind::PermissionDenied {
+                assert!(options.create || options.create_new);
+            } else {
+                panic!(
+                    "unexpected success opening start='{:?}', path='{}'; expected {:?}; got {:?}",
+                    start,
+                    path.display(),
+                    unchecked_error,
+                    result_file
+                );
+            }
+        }
         (Err(result_error), Ok(_unchecked_file)) => match result_error.kind() {
             io::ErrorKind::PermissionDenied | io::ErrorKind::InvalidInput => (),
             io::ErrorKind::AlreadyExists if options.create_new => (),

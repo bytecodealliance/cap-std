@@ -22,12 +22,6 @@ For more details on our fuzzer, see [fuzz/README.md].
 
 [fuzz/README.md]: https://github.com/sunfishcode/cap-std/blob/main/fuzz/README.md
 
-To run the `cap-primitives` fuzzer, run:
-
-```
-cargo +nightly fuzz run cap-primitives
-```
-
 ## Benchmarking
 
 There are several micro-benchmarks for the `cap-std` crate which stress-test

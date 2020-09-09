@@ -1,31 +1,31 @@
 //! This defines `unlink`, the primary entrypoint to sandboxed file removal.
 
 use crate::fs::unlink_impl;
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use crate::fs::{manually, map_result, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `unlinkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn unlink(start: &fs::File, path: &Path) -> io::Result<()> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
     let result = unlink_impl(start, path);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_unlink(start, path, &stat_before, &result, &stat_after);
 
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 #[allow(clippy::enum_glob_use)]
 fn check_unlink(
     start: &fs::File,

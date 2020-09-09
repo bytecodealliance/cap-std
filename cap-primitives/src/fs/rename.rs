@@ -2,7 +2,7 @@
 
 use crate::fs::rename_impl;
 use std::{fs, io, path::Path};
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use {
     crate::fs::{
         append_dir_suffix, manually, map_result, path_requires_dir, rename_unchecked,
@@ -14,7 +14,7 @@ use {
 /// Perform a `renameat`-like operation, ensuring that the resolution of both
 /// the old and new paths never escape the directory tree rooted at their
 /// respective starts.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn rename(
     old_start: &fs::File,
@@ -22,7 +22,7 @@ pub fn rename(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let (old_metadata_before, new_metadata_before) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
@@ -31,13 +31,13 @@ pub fn rename(
     // Call the underlying implementation.
     let result = rename_impl(old_start, old_path, new_start, new_path);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let (old_metadata_after, new_metadata_after) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
     );
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_rename(
         old_start,
         old_path,
@@ -53,7 +53,7 @@ pub fn rename(
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::enum_glob_use)]
 fn check_rename(
@@ -83,11 +83,11 @@ fn check_rename(
             Err((NotFound, _)),
             Ok(new_metadata_after),
         ) => {
-            assert!(old_metadata_before.is_same_file(&new_metadata_after));
+            assert_same_file_metadata!(&old_metadata_before, &new_metadata_after);
         }
 
         (_, Ok(new_metadata_before), Err((AlreadyExists, _)), _, Ok(new_metadata_after)) => {
-            assert!(new_metadata_before.is_same_file(&new_metadata_after));
+            assert_same_file_metadata!(&new_metadata_before, &new_metadata_after);
         }
 
         (_, _, Err((kind, message)), _, _) => match (
@@ -138,7 +138,7 @@ fn check_rename(
     }
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn canonicalize_for_rename(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let mut canon = manually::canonicalize_with(start, path, FollowSymlinks::No)?;
 

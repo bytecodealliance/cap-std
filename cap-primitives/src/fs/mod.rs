@@ -1,11 +1,15 @@
 //! Filesystem utilities.
 
+#[cfg(racy_asserts)]
+#[macro_use]
+pub(crate) mod assert_same_file;
+
 mod canonicalize;
 mod copy;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
-#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(any(test, racy_asserts))]
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios", windows)))]
 mod file_path_by_searching;
 mod file_type;
@@ -39,7 +43,7 @@ pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
 
-#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(any(test, racy_asserts))]
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios", windows)))]
 pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
@@ -77,7 +81,7 @@ pub use symlink::*;
 pub use system_time_spec::*;
 pub use unlink::*;
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::ErrorKind, String)> {
     match result {
         Ok(t) => Ok(t.clone()),

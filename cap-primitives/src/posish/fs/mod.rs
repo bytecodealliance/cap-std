@@ -7,7 +7,7 @@ mod dir_utils;
 mod file_type_ext;
 mod is_read_write_impl;
 mod is_root_dir;
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 mod is_same_file;
 mod link_unchecked;
 mod metadata_ext;
@@ -41,7 +41,7 @@ pub(crate) mod errors;
 // for `cap-std`'s style of sandboxing. For more information, see the bug filed
 // upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(any(test, racy_asserts))]
 pub(crate) use crate::posish::darwin::fs::*;
 #[cfg(target_os = "linux")]
 pub(crate) use crate::posish::linux::fs::*;
@@ -55,7 +55,7 @@ pub(crate) use crate::fs::{
     via_parent::set_times_nofollow as set_times_nofollow_impl,
 };
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
-#[cfg(any(test, not(feature = "no_racy_asserts")))]
+#[cfg(any(test, racy_asserts))]
 pub(crate) use crate::fs::file_path_by_searching as file_path;
 #[cfg(not(target_os = "linux"))]
 pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
@@ -83,7 +83,7 @@ pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
 pub(crate) use is_read_write_impl::*;
 pub(crate) use is_root_dir::*;
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
 pub(crate) use metadata_ext::*;

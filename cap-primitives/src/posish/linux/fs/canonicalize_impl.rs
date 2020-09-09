@@ -28,7 +28,7 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
             if let Ok(start_path) = get_path_from_proc_self_fd(start) {
                 if let Ok(file_path) = get_path_from_proc_self_fd(&file) {
                     if let Ok(canonical_path) = file_path.strip_prefix(start_path) {
-                        #[cfg(not(feature = "no_racy_asserts"))]
+                        #[cfg(racy_asserts)]
                         assert_eq!(canonical_path, manually::canonicalize(start, path).unwrap());
 
                         let mut path_buf = canonical_path.to_path_buf();

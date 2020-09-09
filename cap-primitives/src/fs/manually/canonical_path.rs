@@ -10,14 +10,14 @@ pub(super) struct CanonicalPath<'path_buf> {
     path: Option<&'path_buf mut PathBuf>,
 
     /// Our own private copy of the canonical path, for assertion checking.
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     pub(super) debug: PathBuf,
 }
 
 impl<'path_buf> CanonicalPath<'path_buf> {
     pub(super) fn new(path: Option<&'path_buf mut PathBuf>) -> Self {
         Self {
-            #[cfg(not(feature = "no_racy_asserts"))]
+            #[cfg(racy_asserts)]
             debug: PathBuf::new(),
 
             path,
@@ -25,7 +25,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     pub(super) fn push(&mut self, one: &OsStr) {
-        #[cfg(not(feature = "no_racy_asserts"))]
+        #[cfg(racy_asserts)]
         self.debug.push(one);
 
         if let Some(path) = &mut self.path {
@@ -34,7 +34,7 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     }
 
     pub(super) fn pop(&mut self) -> bool {
-        #[cfg(not(feature = "no_racy_asserts"))]
+        #[cfg(racy_asserts)]
         self.debug.pop();
 
         if let Some(path) = &mut self.path {

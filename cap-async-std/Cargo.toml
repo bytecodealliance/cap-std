@@ -13,13 +13,13 @@ readme = "README.md"
 [dependencies]
 arf-strings = { version = "0.1.2", optional = true }
 async-std = { version = "1.6.2", features = ["attributes"] }
-cap-primitives = { path = "../cap-primitives", version = "^0.2.1-alpha.0", default-features = false }
+cap-primitives = { path = "../cap-primitives", version = "^0.2.1-alpha.0" }
 
 [badges]
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["no_racy_asserts"]
+default = []
 can_vector = [] # https://github.com/rust-lang/rust/issues/69941
 fs_utf8 = ["arf-strings"]
 nightly = [
@@ -30,7 +30,6 @@ nightly = [
     "write_all_vectored",
     "seek_convenience",
 ]
-no_racy_asserts = ["cap-primitives/no_racy_asserts"]
 read_initializer = [] # https://github.com/rust-lang/rust/issues/42788
 seek_convenience = [] # https://github.com/rust-lang/rust/issues/59359
 with_options = [] # https://github.com/rust-lang/rust/issues/65439

@@ -9,7 +9,7 @@ mod sys_common;
 use std::io::prelude::*;
 
 use cap_std::fs::{self, Dir, OpenOptions};
-#[cfg(feature = "no_racy_asserts")] // racy asserts are racy
+#[cfg(not(racy_asserts))] // racy asserts are racy
 use std::thread;
 use std::{
     io::{self, ErrorKind, SeekFrom},
@@ -528,7 +528,7 @@ fn recursive_mkdir_failure() {
 }
 
 #[test]
-#[cfg(feature = "no_racy_asserts")] // racy asserts are racy
+#[cfg(not(racy_asserts))] // racy asserts are racy
 fn concurrent_recursive_mkdir() {
     for _ in 0..100 {
         let dir = tmpdir();

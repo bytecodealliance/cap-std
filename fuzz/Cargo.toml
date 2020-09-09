@@ -11,10 +11,7 @@ cargo-fuzz = true
 libfuzzer-sys = "0.3.2"
 arbitrary = { version = "0.4.5", features = ["derive"] }
 tempfile = "3.1.0"
-# Disable default features, including `no_racy_asserts`, because we want to
-# enable the racy asserts, because the cap-primitives fuzz target doesn't
-# use threads, and does want extra checking.
-cap-primitives = { path = "../cap-primitives", default-features = false, features = ["arbitrary"] }
+cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
 
 [[bin]]
 name = "cap-primitives"

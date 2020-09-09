@@ -7,7 +7,7 @@ use std::{
     os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
     path::Path,
 };
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
 
 /// Rust's `Path` implicitly strips redundant slashes and `.` components, however
@@ -24,7 +24,7 @@ pub(crate) fn path_requires_dir(path: &Path) -> bool {
 
 /// Append a trailing `/`. This can be used to require that the given `path`
 /// names a directory.
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
     let mut bytes = path.into_os_string().into_vec();
     bytes.push(b'/');

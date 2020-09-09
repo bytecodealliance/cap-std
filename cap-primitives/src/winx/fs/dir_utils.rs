@@ -25,7 +25,7 @@ pub(crate) fn path_requires_dir(path: &Path) -> bool {
 
 /// Append a trailing `/`. This can be used to require that the given `path`
 /// names a directory.
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
     let mut wide: Vec<u16> = path.as_os_str().encode_wide().collect();
     wide.push('/' as u16);

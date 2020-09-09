@@ -1,7 +1,7 @@
 //! This defines `link`, the primary entrypoint to sandboxed hard-link creation.
 
 use crate::fs::link_impl;
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use crate::fs::{
     canonicalize, link_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
 };
@@ -9,7 +9,7 @@ use std::{fs, io, path::Path};
 
 /// Perform a `linkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn link(
     old_start: &fs::File,
@@ -17,7 +17,7 @@ pub fn link(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let (old_metadata_before, new_metadata_before) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
@@ -26,13 +26,13 @@ pub fn link(
     // Call the underlying implementation.
     let result = link_impl(old_start, old_path, new_start, new_path);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let (old_metadata_after, new_metadata_after) = (
         stat_unchecked(old_start, old_path, FollowSymlinks::No),
         stat_unchecked(new_start, new_path, FollowSymlinks::No),
     );
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_link(
         old_start,
         old_path,
@@ -48,7 +48,7 @@ pub fn link(
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::enum_glob_use)]
 fn check_link(
@@ -78,12 +78,12 @@ fn check_link(
             Ok(old_metadata_after),
             Ok(new_metadata_after),
         ) => {
-            assert!(old_metadata_before.is_same_file(&old_metadata_after));
-            assert!(old_metadata_before.is_same_file(&new_metadata_after));
+            assert_same_file_metadata!(old_metadata_before, old_metadata_after);
+            assert_same_file_metadata!(old_metadata_before, new_metadata_after);
         }
 
         (_, Ok(new_metadata_before), Err((AlreadyExists, _)), _, Ok(new_metadata_after)) => {
-            assert!(new_metadata_before.is_same_file(&new_metadata_after));
+            assert_same_file_metadata!(&new_metadata_before, &new_metadata_after);
         }
 
         (_, _, Err((_kind, _message)), _, _) => match (

@@ -1,31 +1,31 @@
 //! This defines `rmdir`, the primary entrypoint to sandboxed file removal.
 
 use crate::fs::rmdir_impl;
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 use crate::fs::{manually, map_result, rmdir_unchecked, stat_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `rmdirat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.
-#[cfg_attr(feature = "no_racy_asserts", allow(clippy::let_and_return))]
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn rmdir(start: &fs::File, path: &Path) -> io::Result<()> {
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
     let result = rmdir_impl(start, path);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
-    #[cfg(not(feature = "no_racy_asserts"))]
+    #[cfg(racy_asserts)]
     check_rmdir(start, path, &stat_before, &result, &stat_after);
 
     result
 }
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 #[allow(clippy::enum_glob_use)]
 fn check_rmdir(
     start: &fs::File,

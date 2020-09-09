@@ -14,7 +14,7 @@ use cow_component::CowComponent;
 use open::internal_open;
 use readlink_one::readlink_one;
 
-#[cfg(not(feature = "no_racy_asserts"))]
+#[cfg(racy_asserts)]
 pub(super) use canonicalize::canonicalize_with;
 
 pub(crate) use canonicalize::canonicalize;

@@ -32,10 +32,9 @@ winx = "0.19.0"
 [features]
 # "nightly" is required when building with Rust nightly, and it enables
 # support for `FileTypeExt`, `MetadataExt`, and full `OpenOptionsExt`.
-default = ["no_racy_asserts"]
+default = []
 nightly = ["cap-std/nightly", "cap-async-std/nightly"]
 fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
-no_racy_asserts = ["cap-std/no_racy_asserts", "cap-async-std/no_racy_asserts"]
 
 [badges]
 maintenance = { status = "actively-developed" }
