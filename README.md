@@ -21,12 +21,18 @@ develops libraries to make it easy to write capability-oriented code, including:
    [standard application directories]
  - [`cap-tempfile`], which provides capability-oriented access to
    [temporary directories]
+ - [`cap-dir-ext`], which provides additional filesystem features beyond
+   what's available in `std`.
+ - [`cap-time-ext`], which provides additional time features beyond
+   what's available in `std`.
 
 [`std`]: https://doc.rust-lang.org/std/
 [`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-async-std/README.md
 [`cap-directories`]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/README.md
 [`cap-tempfile`]: https://github.com/sunfishcode/cap-std/blob/main/cap-tempfile/README.md
+[`cap-dir-ext`]: https://github.com/sunfishcode/cap-std/blob/main/cap-dir-ext/README.md
+[`cap-time-ext`]: https://github.com/sunfishcode/cap-std/blob/main/cap-time-ext/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`async-std`]: https://docs.rs/async-std/
 [standard application directories]: https://docs.rs/directories/

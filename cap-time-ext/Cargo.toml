@@ -1,0 +1,26 @@
+[package]
+name = "cap-time-ext"
+version = "0.2.1-alpha.0"
+description = "Extension traits for `SystemClock` and `MonotonicClock`"
+authors = ["Dan Gohman <dev@sunfishcode.online>", "Jakub Konka <kubkon@jakubkonka.com>"]
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+keywords = ["time"]
+categories = ["time"]
+repository = "https://github.com/sunfishcode/cap-std"
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.2.1-alpha.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.2.1-alpha.0"}
+cap-std = { path = "../cap-std", optional = true, version = "^0.2.1-alpha.0"}
+
+[target.'cfg(not(windows))'.dependencies]
+posish = { git = "https://github.com/sunfishcode/posish", branch = "main" }
+
+[target.'cfg(windows)'.dependencies]
+lazy_static = "1.4.0"
+winx = "0.19.0"
+
+[badges]
+maintenance = { status = "actively-developed" }

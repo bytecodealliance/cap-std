@@ -48,6 +48,7 @@ members = [
   "cap-primitives",
   "cap-std",
   "cap-tempfile",
+  "cap-time-ext",
   # Work around https://github.com/rust-lang/cargo/issues/8338.
   #"fuzz",
 ]
