@@ -5,7 +5,7 @@
 
 #[cfg(not(windows))]
 use crate::fs::set_times_nofollow_impl;
-use crate::fs::{set_file_times_impl, set_times_impl, FollowSymlinks, SystemTimeSpec};
+use crate::fs::{set_times_impl, FollowSymlinks, SystemTimeSpec};
 use std::{fs, io, path::Path};
 
 /// Perform a `utimensat`-like operation, ensuring that the resolution of the path
@@ -31,14 +31,4 @@ pub(crate) fn set_times_nofollow(
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     set_times_nofollow_impl(start, path, atime, mtime)
-}
-
-/// Perform a `futimens`-like operation.
-#[inline]
-pub fn set_file_times(
-    file: &fs::File,
-    atime: Option<SystemTimeSpec>,
-    mtime: Option<SystemTimeSpec>,
-) -> io::Result<()> {
-    set_file_times_impl(file, atime, mtime)
 }

@@ -99,9 +99,8 @@ pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
-pub(crate) use times::{
-    set_file_times_impl, set_file_times_syscall, set_times_nofollow_unchecked, to_timespec,
-};
+#[allow(unused_imports)]
+pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked};
 pub(crate) use unlink_unchecked::*;
 
 // On Linux, there is a limit of 40 symlink expansions.

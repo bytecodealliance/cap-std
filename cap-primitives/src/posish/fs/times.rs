@@ -1,9 +1,9 @@
 use crate::{fs::SystemTimeSpec, time::SystemClock};
-use posish::fs::{futimens, utimensat, AtFlags};
+use posish::fs::{utimensat, AtFlags};
 use std::{convert::TryInto, fs, io, path::Path};
 
 #[allow(clippy::useless_conversion)]
-pub(crate) fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timespec> {
+fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timespec> {
     Ok(match ft {
         None => libc::timespec {
             tv_sec: 0,
@@ -29,22 +29,6 @@ pub(crate) fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timesp
     })
 }
 
-pub(crate) fn set_file_times_impl(
-    file: &fs::File,
-    atime: Option<SystemTimeSpec>,
-    mtime: Option<SystemTimeSpec>,
-) -> io::Result<()> {
-    let times = [to_timespec(atime)?, to_timespec(mtime)?];
-    set_file_times_syscall(file, &times)
-}
-
-pub(crate) fn set_file_times_syscall(
-    file: &fs::File,
-    times: &[libc::timespec; 2],
-) -> io::Result<()> {
-    futimens(file, times)
-}
-
 pub(crate) fn set_times_nofollow_unchecked(
     start: &fs::File,
     path: &Path,
@@ -53,4 +37,15 @@ pub(crate) fn set_times_nofollow_unchecked(
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
     utimensat(start, path, &times, AtFlags::SYMLINK_NOFOLLOW)
+}
+
+#[allow(dead_code)]
+pub(crate) fn set_times_follow_unchecked(
+    start: &fs::File,
+    path: &Path,
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
+) -> io::Result<()> {
+    let times = [to_timespec(atime)?, to_timespec(mtime)?];
+    utimensat(start, path, &times, AtFlags::empty())
 }

@@ -1,4 +1,5 @@
-use crate::fs::{open, set_file_times, FollowSymlinks, OpenOptions, SystemTimeSpec};
+use crate::fs::{open, FollowSymlinks, OpenOptions, SystemTimeSpec};
+use fs_set_times::SetTimes;
 use std::{fs, io, os::windows::fs::OpenOptionsExt, path::Path};
 use winapi::{
     shared::winerror::ERROR_NOT_SUPPORTED,
@@ -23,7 +24,12 @@ pub(crate) fn set_times_impl(
         path,
         OpenOptions::new().write(true).custom_flags(custom_flags),
     ) {
-        Ok(file) => return set_file_times(&file, atime, mtime),
+        Ok(file) => {
+            return file.set_times(
+                atime.map(SystemTimeSpec::into_std),
+                mtime.map(SystemTimeSpec::into_std),
+            )
+        }
         Err(err) => match err.kind() {
             io::ErrorKind::PermissionDenied => (),
             _ => return Err(err),
@@ -35,7 +41,12 @@ pub(crate) fn set_times_impl(
         path,
         OpenOptions::new().read(true).custom_flags(custom_flags),
     ) {
-        Ok(file) => return set_file_times(&file, atime, mtime),
+        Ok(file) => {
+            return file.set_times(
+                atime.map(SystemTimeSpec::into_std),
+                mtime.map(SystemTimeSpec::into_std),
+            )
+        }
         Err(err) => match err.kind() {
             io::ErrorKind::PermissionDenied => (),
             _ => return Err(err),

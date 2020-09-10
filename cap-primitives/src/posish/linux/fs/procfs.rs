@@ -8,9 +8,10 @@
 
 use super::file_metadata;
 use crate::fs::{
-    errors, open, open_unchecked, readlink_unchecked, FollowSymlinks, Metadata, OpenOptions,
+    errors, open, open_unchecked, readlink_unchecked, set_times_follow_unchecked, FollowSymlinks,
+    Metadata, OpenOptions, SystemTimeSpec,
 };
-use posish::fs::{chmodat, fstatfs, renameat, utimensat, AtFlags, Mode};
+use posish::fs::{chmodat, fstatfs, renameat, Mode};
 use std::{
     fs, io,
     os::unix::{
@@ -232,7 +233,8 @@ pub(crate) fn set_permissions_through_proc_self_fd(
 pub(crate) fn set_times_through_proc_self_fd(
     start: &fs::File,
     path: &Path,
-    times: &[libc::timespec; 2],
+    atime: Option<SystemTimeSpec>,
+    mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let opath = open(
         start,
@@ -246,8 +248,11 @@ pub(crate) fn set_times_through_proc_self_fd(
     // the first symlink. We don't want to follow any subsequent symlinks, but
     // omitting `O_NOFOLLOW` above ensures that the destination of the link
     // isn't a symlink.
-    let atflags = AtFlags::empty();
-
     let dirfd = proc_self_fd()?;
-    utimensat(dirfd, opath.as_raw_fd().to_string(), times, atflags)
+    set_times_follow_unchecked(
+        dirfd,
+        Path::new(&opath.as_raw_fd().to_string()),
+        atime,
+        mtime,
+    )
 }

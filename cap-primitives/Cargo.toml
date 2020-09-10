@@ -13,6 +13,7 @@ readme = "README.md"
 [dependencies]
 arbitrary = { version = "0.4.5", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
+fs-set-times = { git = "https://github.com/sunfishcode/fs-set-times", branch = "main" }
 
 [target.'cfg(not(windows))'.dependencies]
 posish = { git = "https://github.com/sunfishcode/posish", branch = "main" }

@@ -33,6 +33,12 @@ impl SystemTime {
         Self { std }
     }
 
+    /// Constructs a new instance of `std::time::SystemTime` from the given `Self`.
+    #[inline]
+    pub const fn into_std(self) -> time::SystemTime {
+        self.std
+    }
+
     /// Returns the amount of time elapsed from another instant to this one.
     ///
     /// This corresponds to [`std::time::SystemTime::duration_since`].

@@ -2,10 +2,8 @@
 //! with setting the file times specific to Linux.
 
 use super::procfs::set_times_through_proc_self_fd;
-use crate::fs::{
-    open, set_file_times_syscall, set_times_nofollow, to_timespec, FollowSymlinks, OpenOptions,
-    SystemTimeSpec,
-};
+use crate::fs::{open, set_times_nofollow, FollowSymlinks, OpenOptions, SystemTimeSpec};
+use fs_set_times::SetTimes;
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
@@ -16,23 +14,26 @@ pub(crate) fn set_times_impl(
     follow: FollowSymlinks,
 ) -> io::Result<()> {
     match follow {
-        FollowSymlinks::Yes => set_path_times(start, path, atime, mtime),
+        FollowSymlinks::Yes => set_times_follow(start, path, atime, mtime),
         FollowSymlinks::No => set_times_nofollow(start, path, atime, mtime),
     }
 }
 
-fn set_path_times(
+fn set_times_follow(
     start: &fs::File,
     path: &Path,
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
-    let times = [to_timespec(atime)?, to_timespec(mtime)?];
-
     // Try `futimens` with a normal handle. Normal handles need some kind of
     // access, so first try write.
     match open(start, path, OpenOptions::new().write(true)) {
-        Ok(file) => return set_file_times_syscall(&file, &times),
+        Ok(file) => {
+            return file.set_times(
+                atime.map(SystemTimeSpec::into_std),
+                mtime.map(SystemTimeSpec::into_std),
+            )
+        }
         Err(err) => match err.raw_os_error() {
             Some(libc::EACCES) | Some(libc::EISDIR) => (),
             _ => return Err(err),
@@ -41,7 +42,12 @@ fn set_path_times(
 
     // Next try read.
     match open(start, path, OpenOptions::new().read(true)) {
-        Ok(file) => return set_file_times_syscall(&file, &times),
+        Ok(file) => {
+            return file.set_times(
+                atime.map(SystemTimeSpec::into_std),
+                mtime.map(SystemTimeSpec::into_std),
+            )
+        }
         Err(err) => match err.raw_os_error() {
             Some(libc::EACCES) => (),
             _ => return Err(err),
@@ -49,5 +55,5 @@ fn set_path_times(
     }
 
     // If neither of those worked, turn to `/proc`.
-    set_times_through_proc_self_fd(start, path, &times)
+    set_times_through_proc_self_fd(start, path, atime, mtime)
 }
