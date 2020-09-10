@@ -1,9 +1,9 @@
-use crate::fs::flags_impl;
+use crate::fs::is_read_write_impl;
 use std::{fs, io};
 
 /// Return a pair of booleans indicating whether the given file is opened
 /// for reading and writing, respectively.
 #[inline]
-pub fn flags(file: &fs::File) -> io::Result<(bool, bool)> {
-    flags_impl(file)
+pub fn is_read_write(file: &fs::File) -> io::Result<(bool, bool)> {
+    is_read_write_impl(file)
 }

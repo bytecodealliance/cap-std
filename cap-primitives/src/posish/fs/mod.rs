@@ -5,7 +5,7 @@ mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
 mod file_type_ext;
-mod flags_impl;
+mod is_read_write_impl;
 mod is_root_dir;
 #[cfg(not(feature = "no_racy_asserts"))]
 mod is_same_file;
@@ -81,7 +81,7 @@ pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
-pub(crate) use flags_impl::*;
+pub(crate) use is_read_write_impl::*;
 pub(crate) use is_root_dir::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use is_same_file::*;

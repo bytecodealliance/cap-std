@@ -10,7 +10,7 @@ use async_std::{
     io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
     task::{Context, Poll},
 };
-use cap_primitives::fs::flags;
+use cap_primitives::fs::is_read_write;
 use std::{fmt, pin::Pin};
 
 /// A reference to an open file on a filesystem.
@@ -260,7 +260,7 @@ impl fmt::Debug for File {
         b.field("fd", &file.as_raw_fd());
         #[cfg(windows)]
         b.field("handle", &file.as_raw_handle());
-        if let Ok((read, write)) = flags(&file) {
+        if let Ok((read, write)) = is_read_write(&file) {
             b.field("read", &read).field("write", &write);
         }
         b.finish()

@@ -5,8 +5,8 @@ mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
 mod file_type_ext;
-mod flags_impl;
 mod get_path;
+mod is_read_write_impl;
 #[cfg(feature = "windows_by_handle")]
 mod is_same_file;
 mod link_unchecked;
@@ -22,7 +22,6 @@ mod remove_dir_all_impl;
 mod remove_open_dir_impl;
 mod rename_unchecked;
 mod rmdir_unchecked;
-mod set_file_times_impl;
 mod set_permissions_unchecked;
 mod set_times_impl;
 mod stat_unchecked;
@@ -50,7 +49,7 @@ pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
-pub(crate) use flags_impl::*;
+pub(crate) use is_read_write_impl::*;
 #[cfg(feature = "windows_by_handle")]
 #[allow(unused_imports)]
 pub(crate) use is_same_file::*;
@@ -67,7 +66,6 @@ pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_open_dir_impl::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use rmdir_unchecked::*;
-pub(crate) use set_file_times_impl::*;
 pub(crate) use set_permissions_unchecked::*;
 pub(crate) use set_times_impl::*;
 pub(crate) use stat_unchecked::*;

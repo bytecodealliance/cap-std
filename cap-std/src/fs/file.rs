@@ -1,7 +1,7 @@
 #[cfg(feature = "with_options")]
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
-use cap_primitives::fs::flags;
+use cap_primitives::fs::is_read_write;
 #[cfg(feature = "read_initializer")]
 use std::io::Initializer;
 #[cfg(unix)]
@@ -406,7 +406,7 @@ impl fmt::Debug for File {
         b.field("fd", &self.std.as_raw_fd());
         #[cfg(windows)]
         b.field("handle", &self.std.as_raw_handle());
-        if let Ok((read, write)) = flags(&self.std) {
+        if let Ok((read, write)) = is_read_write(&self.std) {
             b.field("read", &read).field("write", &write);
         }
         b.finish()
