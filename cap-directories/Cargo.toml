@@ -2,7 +2,10 @@
 name = "cap-directories"
 version = "0.2.1-alpha.0"
 description = "Capability-oriented standard directories for config, cache and other data"
-authors = ["Dan Gohman <dev@sunfishcode.online>", "Jakub Konka <kubkon@jakubkonka.com>"]
+authors = [
+    "Dan Gohman <dev@sunfishcode.online>",
+    "Jakub Konka <kubkon@jakubkonka.com>",
+]
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["app_dirs", "path", "folder", "xdg", "basedir"]
 categories = ["filesystem"]

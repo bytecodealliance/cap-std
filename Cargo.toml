@@ -2,7 +2,10 @@
 name = "cap-std-workspace"
 version = "0.0.0"
 description = "Capability-oriented version of the Rust standard library"
-authors = ["Dan Gohman <dev@sunfishcode.online>", "Jakub Konka <kubkon@jakubkonka.com>"]
+authors = [
+    "Dan Gohman <dev@sunfishcode.online>",
+    "Jakub Konka <kubkon@jakubkonka.com>",
+]
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["std", "api", "network", "file"]
 categories = ["filesystem", "network-programming"]
