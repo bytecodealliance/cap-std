@@ -850,23 +850,19 @@ fn read_link() {
     if cfg!(windows) {
         // directory symlink
         let root = unsafe { Dir::open_ambient_dir(r"C:\").unwrap() };
-        assert_eq!(
-            check!(root.read_link(r"Users\All Users")).to_str().unwrap(),
-            r"C:\ProgramData"
+        error_contains!(
+            root.read_link(r"Users\All Users"),
+            "a path led outside of the filesystem"
         );
         // junction
-        assert_eq!(
-            check!(root.read_link(r"Users\Default User"))
-                .to_str()
-                .unwrap(),
-            r"C:\Users\Default"
+        error_contains!(
+            root.read_link(r"Users\Default User"),
+            "a path led outside of the filesystem"
         );
         // junction with special permissions
-        assert_eq!(
-            check!(root.read_link(r"Documents and Settings\"))
-                .to_str()
-                .unwrap(),
-            r"C:\Users"
+        error_contains!(
+            root.read_link(r"Documents and Settings\"),
+            "a path led outside of the filesystem"
         );
     }
     let tmpdir = tmpdir();
@@ -1378,7 +1374,8 @@ fn metadata_access_times() {
 
     assert_eq!(check!(a.accessed()), check!(a.accessed()));
     assert_eq!(check!(a.modified()), check!(a.modified()));
-    assert_eq!(check!(b.accessed()), check!(b.modified()));
+    // This assert from std's testsuite is racy.
+    //assert_eq!(check!(b.accessed()), check!(b.modified()));
 
     if cfg!(target_os = "macos") || cfg!(target_os = "windows") {
         check!(a.created());

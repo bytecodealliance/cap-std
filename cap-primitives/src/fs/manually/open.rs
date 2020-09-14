@@ -2,6 +2,8 @@
 //! resolution, in order to enforce sandboxing.
 
 use super::{readlink_one, CanonicalPath, CowComponent};
+#[cfg(windows)]
+use crate::fs::SymlinkKind;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir, stat_unchecked,
     FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
@@ -117,7 +119,7 @@ impl<'start> Context<'start> {
             )
         }
         #[cfg(windows)]
-        crate::fs::open_dir(&self.base, component.as_os_str().as_ref()).map(|_| ())
+        crate::fs::open_dir_unchecked(&self.base, component.as_os_str().as_ref()).map(|_| ())
     }
 
     /// Handle a "." path component.
@@ -153,15 +155,18 @@ impl<'start> Context<'start> {
             return Err(errors::is_directory());
         }
 
-        // Check that we have permission to look up `..`.
-        self.check_access(Component::ParentDir)?;
-
         // We hold onto all the parent directory descriptors so that we
         // don't have to re-open anything when we encounter a `..`. This
         // way, even if the directory is concurrently moved, we don't have
         // to worry about `..` leaving the sandbox.
         match self.dirs.pop() {
-            Some(dir) => self.base = dir,
+            Some(dir) => {
+                // Check that we have permission to look up `..`.
+                self.check_access(Component::ParentDir)?;
+
+                // Looks good.
+                self.base = dir;
+            }
             None => return Err(errors::escape_attempt()),
         }
         assert!(self.canonical_path.pop());
@@ -233,13 +238,21 @@ impl<'start> Context<'start> {
 
                 Ok(())
             }
-            Err(OpenUncheckedError::Symlink(err)) => {
-                if options.follow == FollowSymlinks::No && self.at_last_component() {
-                    self.canonical_path.push(one);
-                    self.canonical_path.complete();
-                    return Err(err);
-                }
-                self.symlink(one, symlink_count)
+            #[cfg(not(windows))]
+            Err(OpenUncheckedError::Symlink(err, ())) => {
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
+            }
+            #[cfg(windows)]
+            Err(OpenUncheckedError::Symlink(err, SymlinkKind::Dir)) => {
+                // If this is a Windows directory symlink, require a directory.
+                self.dir_required |= self.components.is_empty();
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
+            }
+            #[cfg(windows)]
+            Err(OpenUncheckedError::Symlink(err, SymlinkKind::File)) => {
+                // If this is a Windows file symlink, preclude a directory.
+                self.dir_precluded = true;
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
             }
             Err(OpenUncheckedError::NotFound(err)) => Err(err),
             Err(OpenUncheckedError::Other(err)) => {
@@ -263,6 +276,24 @@ impl<'start> Context<'start> {
         self.components
             .extend(destination.components().rev().map(CowComponent::owned));
         Ok(())
+    }
+
+    /// Check whether this is the last component and we don't need
+    /// to dereference; otherwise call `Self::symlink`.
+    fn maybe_last_component_symlink(
+        &mut self,
+        one: &OsStr,
+        symlink_count: &mut u8,
+        follow: FollowSymlinks,
+        err: io::Error,
+    ) -> io::Result<()> {
+        if follow == FollowSymlinks::No && self.at_last_component() {
+            self.canonical_path.push(one);
+            self.canonical_path.complete();
+            return Err(err);
+        }
+
+        self.symlink(one, symlink_count)
     }
 }
 

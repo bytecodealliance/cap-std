@@ -301,8 +301,7 @@ fn check_dot_access() {
 #[cfg(unix)]
 #[test]
 fn check_dot_access_ambient() {
-    use std::os::unix::fs::DirBuilderExt;
-    use std::fs;
+    use std::{fs, os::unix::fs::DirBuilderExt};
 
     let dir = tempfile::tempdir().unwrap();
 
