@@ -265,14 +265,81 @@ fn check_dot_access() {
     check!(tmpdir.metadata("dir"));
     check!(tmpdir.metadata("dir/"));
     check!(tmpdir.metadata("dir//"));
-    assert!(tmpdir.metadata("dir/.").is_err());
-    assert!(tmpdir.metadata("dir/./").is_err());
-    assert!(tmpdir.metadata("dir/.//").is_err());
-    assert!(tmpdir.metadata("dir/./.").is_err());
-    assert!(tmpdir.metadata("dir/.//.").is_err());
-    assert!(tmpdir.metadata("dir/..").is_err());
-    assert!(tmpdir.metadata("dir/../").is_err());
-    assert!(tmpdir.metadata("dir/..//").is_err());
-    assert!(tmpdir.metadata("dir/../.").is_err());
-    assert!(tmpdir.metadata("dir/..//.").is_err());
+
+    #[cfg(not(target_os = "freebsd"))]
+    {
+        assert!(tmpdir.metadata("dir/.").is_err());
+        assert!(tmpdir.metadata("dir/./").is_err());
+        assert!(tmpdir.metadata("dir/.//").is_err());
+        assert!(tmpdir.metadata("dir/./.").is_err());
+        assert!(tmpdir.metadata("dir/.//.").is_err());
+        assert!(tmpdir.metadata("dir/..").is_err());
+        assert!(tmpdir.metadata("dir/../").is_err());
+        assert!(tmpdir.metadata("dir/..//").is_err());
+        assert!(tmpdir.metadata("dir/../.").is_err());
+        assert!(tmpdir.metadata("dir/..//.").is_err());
+    }
+
+    #[cfg(target_os = "freebsd")]
+    {
+        assert!(tmpdir.metadata("dir/.").is_ok());
+        assert!(tmpdir.metadata("dir/./").is_ok());
+        assert!(tmpdir.metadata("dir/.//").is_ok());
+        assert!(tmpdir.metadata("dir/./.").is_ok());
+        assert!(tmpdir.metadata("dir/.//.").is_ok());
+        assert!(tmpdir.metadata("dir/..").is_ok());
+        assert!(tmpdir.metadata("dir/../").is_ok());
+        assert!(tmpdir.metadata("dir/..//").is_ok());
+        assert!(tmpdir.metadata("dir/../.").is_ok());
+        assert!(tmpdir.metadata("dir/..//.").is_ok());
+    }
+}
+
+/// This test is the same as `check_dot_access` but uses `std::fs`'
+/// ambient API instead of `cap_std`. The purpose of this test is to
+/// confirm fundamentally OS-specific differences.
+#[cfg(unix)]
+#[test]
+fn check_dot_access_ambient() {
+    use std::os::unix::fs::DirBuilderExt;
+    use std::fs;
+
+    let dir = tempfile::tempdir().unwrap();
+
+    let mut options = std::fs::DirBuilder::new();
+    options.mode(0o477);
+    check!(options.create(dir.path().join("dir")));
+
+    check!(fs::metadata(dir.path().join(".")));
+    check!(fs::metadata(dir.path().join("dir")));
+    check!(fs::metadata(dir.path().join("dir/")));
+    check!(fs::metadata(dir.path().join("dir//")));
+
+    #[cfg(not(target_os = "freebsd"))]
+    {
+        assert!(fs::metadata(dir.path().join("dir/.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/./")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/.//")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/./.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/.//.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/../")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..//")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/../.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..//.")).is_err());
+    }
+
+    #[cfg(target_os = "freebsd")]
+    {
+        assert!(fs::metadata(dir.path().join("dir/.")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/./")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/.//")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/./.")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/.//.")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/..")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/../")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/..//")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/../.")).is_ok());
+        assert!(fs::metadata(dir.path().join("dir/..//.")).is_ok());
+    }
 }
