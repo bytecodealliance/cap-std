@@ -248,3 +248,31 @@ fn follow_file_symlink() {
     assert!(tmpdir.open("link_slashdot").is_err());
     assert!(tmpdir.open("link_slashdotdot").is_err());
 }
+
+#[cfg(unix)]
+#[test]
+fn check_dot_access() {
+    use cap_std::fs::DirBuilder;
+    use std::os::unix::fs::DirBuilderExt;
+
+    let tmpdir = tmpdir();
+
+    let mut options = DirBuilder::new();
+    options.mode(0o477);
+    check!(tmpdir.create_dir_with("dir", &options));
+
+    check!(tmpdir.metadata("."));
+    check!(tmpdir.metadata("dir"));
+    check!(tmpdir.metadata("dir/"));
+    check!(tmpdir.metadata("dir//"));
+    assert!(tmpdir.metadata("dir/.").is_err());
+    assert!(tmpdir.metadata("dir/./").is_err());
+    assert!(tmpdir.metadata("dir/.//").is_err());
+    assert!(tmpdir.metadata("dir/./.").is_err());
+    assert!(tmpdir.metadata("dir/.//.").is_err());
+    assert!(tmpdir.metadata("dir/..").is_err());
+    assert!(tmpdir.metadata("dir/../").is_err());
+    assert!(tmpdir.metadata("dir/..//").is_err());
+    assert!(tmpdir.metadata("dir/../.").is_err());
+    assert!(tmpdir.metadata("dir/..//.").is_err());
+}

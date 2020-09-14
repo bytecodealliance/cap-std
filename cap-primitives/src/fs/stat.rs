@@ -47,10 +47,11 @@ fn check_stat(
         (Err((PermissionDenied, message)), _) => {
             if let FollowSymlinks::Yes = follow {
                 match map_result(&canonicalize(start, path)) {
+                    Ok(_) => (),
                     Err((PermissionDenied, canon_message)) => {
                         assert_eq!(message, canon_message);
                     }
-                    _ => panic!("stat failed where canonicalize succeeded"),
+                    err => panic!("stat failed where canonicalize succeeded: {:?}", err),
                 }
             } else {
                 // TODO: Check that stat in the no-follow case got the right error.
@@ -59,7 +60,13 @@ fn check_stat(
 
         (Err((kind, message)), Err((unchecked_kind, unchecked_message))) => {
             assert_eq!(kind, unchecked_kind);
-            assert_eq!(message, unchecked_message);
+            assert_eq!(
+                message,
+                unchecked_message,
+                "start='{:?}', path='{:?}'",
+                start,
+                path.display()
+            );
         }
 
         other => panic!(

@@ -3,8 +3,8 @@
 
 use super::{readlink_one, CanonicalPath, CowComponent};
 use crate::fs::{
-    dir_options, errors, open_unchecked, path_requires_dir, stat_unchecked, FollowSymlinks,
-    MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
+    dir_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir, stat_unchecked,
+    FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
 use std::{
     ffi::OsStr,
@@ -41,6 +41,11 @@ struct Context<'start> {
     /// Are we requesting write permissions, so we can't open a directory?
     dir_precluded: bool,
 
+    /// Rust's `Path` implicitly strips off trailing `.` components, however
+    /// we need to treat the last component specially, so check for and remember
+    /// if there was a trailing `.` component.
+    trailing_dot: bool,
+
     #[cfg(racy_asserts)]
     start_clone: MaybeOwnedFile<'start>,
 }
@@ -69,16 +74,56 @@ impl<'start> Context<'start> {
             canonical_path: CanonicalPath::new(canonical_path),
             dir_required: path_requires_dir(path),
             dir_precluded: options.write || options.append,
+            trailing_dot: path_has_trailing_dot(path),
 
             #[cfg(racy_asserts)]
             start_clone,
         }
     }
 
+    /// The last component of a path is special -- unlike all other components,
+    /// it is not required to be a directory.
+    fn at_last_component(&self) -> bool {
+        // If we had a trailing dot that `std::path::Path` implicitly stripped,
+        // the last entry in `self.components` is not the actual last component.
+        self.components.is_empty() && !self.trailing_dot
+    }
+
+    fn check_access(&self, component: Component) -> io::Result<()> {
+        // Manually check that we have permissions to search `self.base` to
+        // search for `..` in it, since we don't actually open `..`.
+        #[cfg(not(windows))]
+        {
+            // Use `faccess` with `AT_EACCESS`. `AT_EACCCES` is not often the
+            // right tool for the job; in POSIX, it's better to ask for errno
+            // than to ask for permission. But we use `check_access` to check
+            // access for opening `.` and `..` in situations where we already
+            // have open handles to them, and now we're accessing them through
+            // different paths, and we need to check whether these paths allow
+            // us access.
+            //
+            // Android and Emscripten lack `AT_EACCESS`.
+            // https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp
+            #[cfg(any(target_os = "emscripten", target_os = "android"))]
+            let at_flags = posish::fs::AtFlags::empty();
+            #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
+            let at_flags = posish::fs::AtFlags::EACCESS;
+
+            posish::fs::accessat(
+                &*self.base,
+                component.as_os_str(),
+                posish::fs::Access::EXEC_OK,
+                at_flags,
+            )
+        }
+        #[cfg(windows)]
+        crate::fs::open_dir(&self.base, component.as_os_str().as_ref()).map(|_| ())
+    }
+
     /// Handle a "." path component.
     fn cur_dir(&mut self) -> io::Result<()> {
         // If the path ends in `.` and we can't open a directory, fail.
-        if self.components.is_empty() {
+        if self.at_last_component() {
             if self.dir_precluded {
                 return Err(errors::is_directory());
             }
@@ -89,6 +134,9 @@ impl<'start> Context<'start> {
             }
             self.canonical_path.push(Component::CurDir.as_os_str());
         }
+
+        // Check that we have permission to look up `.`.
+        self.check_access(Component::CurDir)?;
 
         // Otherwise do nothing.
         Ok(())
@@ -101,9 +149,12 @@ impl<'start> Context<'start> {
             assert_different_file!(&self.start_clone, &self.base);
         }
 
-        if self.components.is_empty() && self.dir_precluded {
+        if self.at_last_component() && self.dir_precluded {
             return Err(errors::is_directory());
         }
+
+        // Check that we have permission to look up `..`.
+        self.check_access(Component::ParentDir)?;
 
         // We hold onto all the parent directory descriptors so that we
         // don't have to re-open anything when we encounter a `..`. This
@@ -126,12 +177,14 @@ impl<'start> Context<'start> {
         symlink_count: &mut u8,
     ) -> io::Result<()> {
         // If the path requires a directory and we can't open a directory, fail.
+        // Don't use `at_last_component` here because trailing `.`s still require
+        // directories.
         if self.components.is_empty() && self.dir_required && self.dir_precluded {
             return Err(errors::is_directory());
         }
 
         // Otherwise we're doing an open.
-        let use_options = if self.components.is_empty() {
+        let use_options = if self.at_last_component() {
             options.clone()
         } else {
             dir_options()
@@ -152,9 +205,11 @@ impl<'start> Context<'start> {
                 if should_emulate_o_path(&use_options) {
                     match readlink_one(&file, Default::default(), symlink_count) {
                         Ok(destination) => {
+                            self.dir_required |=
+                                self.components.is_empty() && path_requires_dir(&destination);
+                            self.trailing_dot |= path_has_trailing_dot(&destination);
                             self.components
                                 .extend(destination.components().rev().map(CowComponent::owned));
-                            self.dir_required |= path_requires_dir(&destination);
                             return Ok(());
                         }
                         // If it isn't a symlink, handle it as normal. `readlinkat` returns
@@ -169,10 +224,17 @@ impl<'start> Context<'start> {
                 let prev_base = self.base.descend_to(MaybeOwnedFile::owned(file));
                 self.dirs.push(prev_base);
                 self.canonical_path.push(one);
+
+                // If Rust's `Path` stripped a trailing `.`, check that we have
+                // access to `.`.
+                if self.trailing_dot {
+                    self.check_access(Component::CurDir)?;
+                }
+
                 Ok(())
             }
             Err(OpenUncheckedError::Symlink(err)) => {
-                if options.follow == FollowSymlinks::No && self.components.is_empty() {
+                if options.follow == FollowSymlinks::No && self.at_last_component() {
                     self.canonical_path.push(one);
                     self.canonical_path.complete();
                     return Err(err);
@@ -184,7 +246,7 @@ impl<'start> Context<'start> {
                 // An error occurred. If this was the last component, and the error wasn't
                 // due to invalid inputs (eg. the path has an embedded NUL), record it as
                 // the last component of the canonical path, even if we couldn't open it.
-                if self.components.is_empty() && err.kind() != io::ErrorKind::InvalidInput {
+                if self.at_last_component() && err.kind() != io::ErrorKind::InvalidInput {
                     self.canonical_path.push(one);
                     self.canonical_path.complete();
                 }
@@ -196,9 +258,10 @@ impl<'start> Context<'start> {
     /// Dereference one symlink level.
     fn symlink(&mut self, one: &OsStr, symlink_count: &mut u8) -> io::Result<()> {
         let destination = readlink_one(&self.base, one, symlink_count)?;
+        self.dir_required |= self.components.is_empty() && path_requires_dir(&destination);
+        self.trailing_dot |= path_has_trailing_dot(&destination);
         self.components
             .extend(destination.components().rev().map(CowComponent::owned));
-        self.dir_required |= path_requires_dir(&destination);
         Ok(())
     }
 }
@@ -270,7 +333,7 @@ pub(crate) fn stat<'start>(
             CowComponent::CurDir => ctx.cur_dir()?,
             CowComponent::ParentDir => ctx.parent_dir()?,
             CowComponent::Normal(one) => {
-                if ctx.components.is_empty() {
+                if ctx.at_last_component() {
                     // If this is the last component, do a non-following `stat_unchecked` on it.
                     let stat = stat_unchecked(&ctx.base, one.as_ref(), FollowSymlinks::No)?;
 

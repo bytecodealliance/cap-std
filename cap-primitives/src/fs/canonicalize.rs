@@ -45,27 +45,27 @@ fn check_canonicalize(start: &fs::File, path: &Path, result: &io::Result<PathBuf
         if let Some(start_abspath) = file_path(start) {
             let check_abspath = start_abspath.join(path);
             let result_abspath = start_abspath.join(canonical_path);
-            let check_abspath =
-                fs::canonicalize(check_abspath).expect("we already canonicalized this");
-            let result_abspath =
-                fs::canonicalize(result_abspath).expect("we already canonicalized this");
-            assert_eq!(
-                check_abspath,
-                result_abspath,
-                "incorrect canonicalization: start='{:?}' path='{}' result='{}'",
-                start,
-                path.display(),
-                canonical_path.display()
-            );
-            // TODO: When porting to Windows, check whether `start_abspath` not being
-            // a canonicalized path leads to `\\?\` extended path prefix differences.
-            assert!(
-                result_abspath.starts_with(start_abspath),
-                "sandbox escape: start='{:?}' path='{}' result='{}'",
-                start,
-                path.display(),
-                canonical_path.display()
-            );
+            if let Ok(check_abspath) = fs::canonicalize(check_abspath) {
+                let result_abspath =
+                    fs::canonicalize(result_abspath).expect("we already canonicalized this");
+                assert_eq!(
+                    check_abspath,
+                    result_abspath,
+                    "incorrect canonicalization: start='{:?}' path='{}' result='{}'",
+                    start,
+                    path.display(),
+                    canonical_path.display()
+                );
+                // TODO: When porting to Windows, check whether `start_abspath` not being
+                // a canonicalized path leads to `\\?\` extended path prefix differences.
+                assert!(
+                    result_abspath.starts_with(start_abspath),
+                    "sandbox escape: start='{:?}' path='{}' result='{}'",
+                    start,
+                    path.display(),
+                    canonical_path.display()
+                );
+            }
         }
     }
 }
