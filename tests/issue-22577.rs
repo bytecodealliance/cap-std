@@ -15,9 +15,8 @@ fn assert_send<T: Send>() {}
 fn issue_22577() {
     assert_both::<fs::File>();
     assert_both::<fs::Metadata>();
-    // TODO: Make cap_std's directory types Send and Sync.
-    //assert_both::<fs::ReadDir>();
-    //assert_both::<fs::DirEntry>();
+    assert_both::<fs::ReadDir>();
+    assert_both::<fs::DirEntry>();
     assert_both::<fs::OpenOptions>();
     assert_both::<fs::Permissions>();
 
