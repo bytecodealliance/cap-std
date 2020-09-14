@@ -1,5 +1,6 @@
 //! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
 
+use crate::fs::errors;
 #[cfg(all(racy_asserts, not(windows)))]
 use crate::fs::symlink_unchecked;
 #[cfg(racy_asserts)]
@@ -15,6 +16,15 @@ use std::{fs, io, path::Path};
 #[inline]
 pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_impl;
+
+    // Don't allow creating symlinks to absolute paths. This isn't strictly
+    // necessary to preserve the sandbox, since `open` will refuse to follow
+    // absolute symlinks in any case. However, it is useful to enforce this
+    // restriction so that a WASI program can't trick some other non-WASI
+    // program into following an absolute path.
+    if old_path.has_root() {
+        return Err(errors::escape_attempt());
+    }
 
     #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);
@@ -46,6 +56,11 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
 pub fn symlink_file(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_file_impl;
 
+    // As above, don't allow creating symlinks to absolute paths.
+    if old_path.has_root() {
+        return Err(errors::escape_attempt());
+    }
+
     #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);
 
@@ -75,6 +90,11 @@ pub fn symlink_file(old_path: &Path, new_start: &fs::File, new_path: &Path) -> i
 #[inline]
 pub fn symlink_dir(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_dir_impl;
+
+    // As above, don't allow creating symlinks to absolute paths.
+    if old_path.has_root() {
+        return Err(errors::escape_attempt());
+    }
 
     #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);

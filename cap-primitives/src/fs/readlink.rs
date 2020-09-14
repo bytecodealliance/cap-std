@@ -1,7 +1,7 @@
 //! This defines `readlink`, the primary entrypoint to sandboxed symbolic link
 //! dereferencing.
 
-use crate::fs::readlink_impl;
+use crate::fs::{errors, readlink_impl};
 #[cfg(racy_asserts)]
 use crate::fs::{map_result, readlink_unchecked, stat, FollowSymlinks};
 use std::{
@@ -22,6 +22,17 @@ pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
 
     #[cfg(racy_asserts)]
     check_readlink(start, path, &result, &unchecked);
+
+    // Don't allow reading symlinks to absolute paths. This isn't strictly
+    // necessary to preserve the sandbox, since `open` will refuse to follow
+    // absolute paths in any case. However, it is useful to enforce this
+    // restriction to avoid leaking information about the host filesystem
+    // outside the sandbox.
+    if let Ok(path) = &result {
+        if path.has_root() {
+            return Err(errors::escape_attempt());
+        }
+    }
 
     result
 }
