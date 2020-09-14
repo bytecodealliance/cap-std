@@ -2,9 +2,9 @@
 //!
 //! This corresponds to [`std::fs`].
 //!
-//! Instead of [`std::fs`'s free functions] and [`std::fs::File`]'s constructors
-//! which operate on bare paths, this crate has methods on [`Dir`] which operate
-//! on paths which must be relative to the directory.
+//! Instead of [`std::fs`'s free functions] and [`std::fs::File`]'s
+//! constructors which operate on bare paths, this crate has methods on [`Dir`]
+//! which operate on paths which must be relative to the directory.
 //!
 //! Where `std` says "the filesystem", this API says "a filesystem", as
 //! it doesn't assume that there's a single global filesystem namespace.

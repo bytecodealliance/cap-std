@@ -4,29 +4,26 @@ use cap_primitives::fs::{
     remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions, stat,
     unlink, DirOptions, FollowSymlinks, Permissions,
 };
+#[cfg(target_os = "wasi")]
+use std::os::wasi::{
+    fs::OpenOptionsExt,
+    io::{AsRawFd, IntoRawFd},
+};
 use std::{
     fmt, fs,
     io::{self, Read, Write},
     path::{Component, Path, PathBuf},
 };
-
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::symlink,
     std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
-
 #[cfg(windows)]
 use {
     cap_primitives::fs::{symlink_dir, symlink_file},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-};
-
-#[cfg(target_os = "wasi")]
-use std::os::wasi::{
-    fs::OpenOptionsExt,
-    io::{AsRawFd, IntoRawFd},
 };
 
 /// A reference to an open directory on a filesystem.

@@ -1,4 +1,4 @@
-use std::{time, time::Duration};
+use std::time::{self, Duration};
 #[cfg(not(windows))]
 use {
     posish::time::{clock_getres, ClockId},

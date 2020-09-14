@@ -1,9 +1,9 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
 use async_std::{
     io,
-    os::{
-        unix,
-        unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    os::unix::{
+        self,
+        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
 

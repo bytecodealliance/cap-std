@@ -1,4 +1,9 @@
 use crate::fs::{as_sync, into_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
+#[cfg(target_os = "wasi")]
+use async_std::os::wasi::{
+    fs::OpenOptionsExt,
+    io::{AsRawFd, IntoRawFd},
+};
 use async_std::{fs, io};
 use cap_primitives::fs::{
     canonicalize, copy, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
@@ -9,24 +14,16 @@ use std::{
     fmt,
     path::{Component, Path, PathBuf},
 };
-
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     cap_primitives::fs::symlink,
 };
-
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{symlink_dir, symlink_file},
-};
-
-#[cfg(target_os = "wasi")]
-use async_std::os::wasi::{
-    fs::OpenOptionsExt,
-    io::{AsRawFd, IntoRawFd},
 };
 
 /// A reference to an open directory on a filesystem.

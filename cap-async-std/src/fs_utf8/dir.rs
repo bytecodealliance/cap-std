@@ -2,17 +2,15 @@ use crate::{
     fs::{OpenOptions, Permissions},
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
 };
+#[cfg(windows)]
+use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::{fs, io};
 use std::fmt;
-
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
-
-#[cfg(windows)]
-use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 
 /// A reference to an open directory on a filesystem.
 ///

@@ -1,9 +1,9 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
 use std::{
     io,
-    os::{
-        unix,
-        unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    os::unix::{
+        self,
+        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
 
