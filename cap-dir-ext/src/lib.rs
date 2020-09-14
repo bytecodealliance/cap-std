@@ -165,14 +165,11 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        match Self::symlink_file(self, src, dst) {
-            Ok(()) => return Ok(()),
-            Err(err) => match err.raw_os_error() {
-                _ => todo!("the error: {:?}", err),
-            },
+        if self.metadata(src.as_ref())?.is_dir() {
+            Self::symlink_dir(self, src, dst)
+        } else {
+            Self::symlink_file(self, src, dst)
         }
-
-        Self::symlink_dir(self, src, dst)
     }
 
     #[cfg(windows)]
@@ -265,14 +262,11 @@ impl DirExt for cap_async_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        match Self::symlink_file(self, src, dst) {
-            Ok(()) => return Ok(()),
-            Err(err) => match err.raw_os_error() {
-                _ => todo!("the error: {:?}", err),
-            },
+        if self.metadata(src.as_ref())?.is_dir() {
+            Self::symlink_dir(self, src, dst)
+        } else {
+            Self::symlink_file(self, src, dst)
         }
-
-        Self::symlink_dir(self, src, dst)
     }
 
     #[cfg(windows)]
@@ -365,14 +359,11 @@ impl DirExt for cap_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
-        match Self::symlink_file(self, src, dst) {
-            Ok(()) => return Ok(()),
-            Err(err) => match err.raw_os_error() {
-                _ => todo!("the error: {:?}", err),
-            },
+        if self.metadata(src.as_ref())?.is_dir() {
+            Self::symlink_dir(self, src, dst)
+        } else {
+            Self::symlink_file(self, src, dst)
         }
-
-        Self::symlink_dir(self, src, dst)
     }
 
     #[cfg(windows)]
@@ -465,14 +456,11 @@ impl DirExt for cap_async_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
-        match Self::symlink_file(self, src, dst) {
-            Ok(()) => return Ok(()),
-            Err(err) => match err.raw_os_error() {
-                _ => todo!("the error: {:?}", err),
-            },
+        if self.metadata(src.as_ref())?.is_dir() {
+            Self::symlink_dir(self, src, dst)
+        } else {
+            Self::symlink_file(self, src, dst)
         }
-
-        Self::symlink_dir(self, src, dst)
     }
 
     #[cfg(windows)]

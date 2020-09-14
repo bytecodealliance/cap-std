@@ -11,6 +11,8 @@ use std::{
     fs, io,
     path::{Component, Path, PathBuf},
 };
+#[cfg(windows)]
+use {crate::fs::SymlinkKind, winapi::um::winnt::FILE_ATTRIBUTE_DIRECTORY};
 
 /// Implement `open` by breaking up the path into components, resolving each
 /// component individually, and resolving symbolic links manually.
@@ -55,7 +57,7 @@ impl<'start> Context<'start> {
     fn new(
         start: MaybeOwnedFile<'start>,
         path: &'start Path,
-        options: &OpenOptions,
+        _options: &OpenOptions,
         canonical_path: Option<&'start mut PathBuf>,
     ) -> Self {
         let components = path
@@ -73,7 +75,13 @@ impl<'start> Context<'start> {
             components,
             canonical_path: CanonicalPath::new(canonical_path),
             dir_required: path_requires_dir(path),
-            dir_precluded: options.write || options.append,
+
+            #[cfg(not(windows))]
+            dir_precluded: _options.write || _options.append,
+
+            #[cfg(windows)]
+            dir_precluded: false,
+
             trailing_dot: path_has_trailing_dot(path),
 
             #[cfg(racy_asserts)]
@@ -117,7 +125,7 @@ impl<'start> Context<'start> {
             )
         }
         #[cfg(windows)]
-        crate::fs::open_dir(&self.base, component.as_os_str().as_ref()).map(|_| ())
+        crate::fs::open_dir_unchecked(&self.base, component.as_os_str().as_ref()).map(|_| ())
     }
 
     /// Handle a "." path component.
@@ -153,15 +161,18 @@ impl<'start> Context<'start> {
             return Err(errors::is_directory());
         }
 
-        // Check that we have permission to look up `..`.
-        self.check_access(Component::ParentDir)?;
-
         // We hold onto all the parent directory descriptors so that we
         // don't have to re-open anything when we encounter a `..`. This
         // way, even if the directory is concurrently moved, we don't have
         // to worry about `..` leaving the sandbox.
         match self.dirs.pop() {
-            Some(dir) => self.base = dir,
+            Some(dir) => {
+                // Check that we have permission to look up `..`.
+                self.check_access(Component::ParentDir)?;
+
+                // Looks good.
+                self.base = dir;
+            }
             None => return Err(errors::escape_attempt()),
         }
         assert!(self.canonical_path.pop());
@@ -233,13 +244,21 @@ impl<'start> Context<'start> {
 
                 Ok(())
             }
-            Err(OpenUncheckedError::Symlink(err)) => {
-                if options.follow == FollowSymlinks::No && self.at_last_component() {
-                    self.canonical_path.push(one);
-                    self.canonical_path.complete();
-                    return Err(err);
-                }
-                self.symlink(one, symlink_count)
+            #[cfg(not(windows))]
+            Err(OpenUncheckedError::Symlink(err, ())) => {
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
+            }
+            #[cfg(windows)]
+            Err(OpenUncheckedError::Symlink(err, SymlinkKind::Dir)) => {
+                // If this is a Windows directory symlink, require a directory.
+                self.dir_required |= self.components.is_empty();
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
+            }
+            #[cfg(windows)]
+            Err(OpenUncheckedError::Symlink(err, SymlinkKind::File)) => {
+                // If this is a Windows file symlink, preclude a directory.
+                self.dir_precluded = true;
+                self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
             }
             Err(OpenUncheckedError::NotFound(err)) => Err(err),
             Err(OpenUncheckedError::Other(err)) => {
@@ -263,6 +282,24 @@ impl<'start> Context<'start> {
         self.components
             .extend(destination.components().rev().map(CowComponent::owned));
         Ok(())
+    }
+
+    /// Check whether this is the last component and we don't need
+    /// to dereference; otherwise call `Self::symlink`.
+    fn maybe_last_component_symlink(
+        &mut self,
+        one: &OsStr,
+        symlink_count: &mut u8,
+        follow: FollowSymlinks,
+        err: io::Error,
+    ) -> io::Result<()> {
+        if follow == FollowSymlinks::No && self.at_last_component() {
+            self.canonical_path.push(one);
+            self.canonical_path.complete();
+            return Err(err);
+        }
+
+        self.symlink(one, symlink_count)
     }
 }
 
@@ -339,10 +376,24 @@ pub(crate) fn stat<'start>(
 
                     // If we weren't asked to follow symlinks, or it wasn't a symlink, we're done.
                     if options.follow == FollowSymlinks::No || !stat.file_type().is_symlink() {
-                        if ctx.dir_required && !stat.is_dir() {
-                            return Err(errors::is_not_directory());
+                        if stat.is_dir() {
+                            if ctx.dir_precluded {
+                                return Err(errors::is_directory());
+                            }
+                        } else {
+                            if ctx.dir_required {
+                                return Err(errors::is_not_directory());
+                            }
                         }
                         return Ok(stat);
+                    }
+
+                    // On Windows, symlinks know whether they are a file or directory.
+                    #[cfg(windows)]
+                    if stat.file_attributes() & FILE_ATTRIBUTE_DIRECTORY != 0 {
+                        ctx.dir_required = true;
+                    } else {
+                        ctx.dir_precluded = true;
                     }
 
                     // If it was a symlink and we're asked to follow symlinks, dereference it.

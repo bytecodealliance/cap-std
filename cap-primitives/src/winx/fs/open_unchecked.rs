@@ -1,12 +1,18 @@
 use super::{get_path::concatenate_or_return_absolute, open_options_to_std};
-use crate::fs::{FollowSymlinks, OpenOptions, OpenUncheckedError};
+use crate::fs::{FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
 use std::{
     ffi::OsString,
     fs, io,
-    os::windows::ffi::{OsStrExt, OsStringExt},
+    os::windows::{
+        ffi::{OsStrExt, OsStringExt},
+        fs::MetadataExt,
+    },
     path::{Path, PathBuf},
 };
-use winapi::{shared::winerror, um::winbase};
+use winapi::{
+    shared::winerror,
+    um::{winbase, winnt::FILE_ATTRIBUTE_DIRECTORY},
+};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
 pub(crate) fn open_unchecked(
@@ -34,15 +40,18 @@ pub(crate) fn open_unchecked(
             // check for symlinks and report them as a distinct error.
             if options.follow == FollowSymlinks::No
                 && (options.ext.custom_flags & winbase::FILE_FLAG_OPEN_REPARSE_POINT) == 0
-                && f.metadata()
-                    .map_err(OpenUncheckedError::Other)?
-                    .file_type()
-                    .is_symlink()
             {
-                return Err(OpenUncheckedError::Symlink(io::Error::new(
-                    io::ErrorKind::Other,
-                    "symlink encountered",
-                )));
+                let metadata = f.metadata().map_err(OpenUncheckedError::Other)?;
+                if metadata.file_type().is_symlink() {
+                    return Err(OpenUncheckedError::Symlink(
+                        io::Error::new(io::ErrorKind::Other, "symlink encountered"),
+                        if metadata.file_attributes() & FILE_ATTRIBUTE_DIRECTORY != 0 {
+                            SymlinkKind::Dir
+                        } else {
+                            SymlinkKind::File
+                        },
+                    ));
+                }
             }
             // Windows truncates symlinks into normal files, so truncation
             // may be disabled above; do it manually if needed.

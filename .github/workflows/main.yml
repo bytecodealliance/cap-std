@@ -125,7 +125,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --no-default-features --features fs_utf8 --workspace
+    - run: cargo test --features fs_utf8 --workspace
 
   test_windows_nightly:
     name: Test Windows with Rust nightly
@@ -145,7 +145,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --no-default-features --features fs_utf8,nightly --workspace
+    - run: cargo test --features fs_utf8,nightly --workspace
 
   test_musl:
     name: Test on Musl
@@ -166,7 +166,7 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
     - run: rustup target add x86_64-unknown-linux-musl
-    - run: cargo test --target x86_64-unknown-linux-musl --no-default-features --features fs_utf8 --workspace
+    - run: cargo test --target x86_64-unknown-linux-musl --features fs_utf8 --workspace
 
   fuzz_targets:
     name: Fuzz Targets
