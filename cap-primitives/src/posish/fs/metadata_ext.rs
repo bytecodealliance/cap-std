@@ -6,7 +6,7 @@ use crate::{
 };
 use posish::fs::LibcStat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-use posish::fs::LibcStatx;
+use posish::fs::{makedev, LibcStatx};
 use std::{convert::TryFrom, fs};
 
 #[derive(Debug, Clone)]
@@ -146,13 +146,13 @@ impl MetadataExt {
             ),
 
             ext: Self {
-                dev: unsafe { libc::makedev(statx.stx_dev_major, statx.stx_dev_minor) },
+                dev: makedev(statx.stx_dev_major, statx.stx_dev_minor),
                 ino: statx.stx_ino.into(),
                 mode: u32::from(statx.stx_mode),
                 nlink: u64::from(statx.stx_nlink),
                 uid: statx.stx_uid,
                 gid: statx.stx_gid,
-                rdev: unsafe { libc::makedev(statx.stx_rdev_major, statx.stx_rdev_minor) },
+                rdev: makedev(statx.stx_rdev_major, statx.stx_rdev_minor),
                 size: statx.stx_size,
                 atime: i64::from(statx.stx_atime.tv_sec),
                 atime_nsec: i64::from(statx.stx_atime.tv_nsec),

@@ -5,6 +5,10 @@ use std::{
 };
 
 /// *Unsandboxed* function similar to `readlink`, but which does not perform sandboxing.
-pub(crate) fn readlink_unchecked(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
-    readlinkat(start, path).map(Into::into)
+pub(crate) fn readlink_unchecked(
+    start: &fs::File,
+    path: &Path,
+    reuse: PathBuf,
+) -> io::Result<PathBuf> {
+    readlinkat(start, path, reuse.into()).map(Into::into)
 }

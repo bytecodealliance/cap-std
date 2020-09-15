@@ -1,6 +1,6 @@
 use super::{internal_open, readlink_one};
 use crate::fs::{open_unchecked, FollowSymlinks, MaybeOwnedFile, OpenOptions, OpenUncheckedError};
-use std::{ffi::OsStr, fs, io};
+use std::{ffi::OsStr, fs, io, path::PathBuf};
 
 pub(crate) fn open_entry(
     start: &fs::File,
@@ -15,7 +15,7 @@ pub(crate) fn open_entry(
         Ok(file) => Ok(file),
         Err(OpenUncheckedError::Symlink(_, _)) if options.follow == FollowSymlinks::Yes => {
             let mut symlink_count = 0;
-            let destination = readlink_one(start, path, &mut symlink_count)?;
+            let destination = readlink_one(start, path, &mut symlink_count, PathBuf::new())?;
             let maybe = MaybeOwnedFile::borrowed(start);
             internal_open(maybe, &destination, options, &mut symlink_count, None)
                 .map(MaybeOwnedFile::unwrap_owned)

@@ -1,6 +1,5 @@
 mod c_str;
 mod copy;
-mod cvt;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -75,8 +74,6 @@ pub(crate) use crate::fs::{
 #[allow(unused_imports)]
 pub(crate) use c_str::c_str;
 pub(crate) use copy::*;
-#[allow(unused_imports)]
-pub(crate) use cvt::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
