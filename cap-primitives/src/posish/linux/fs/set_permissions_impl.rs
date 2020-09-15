@@ -28,9 +28,7 @@ pub(crate) fn set_permissions_impl(
         let opath_result = open(
             start,
             path,
-            OpenOptions::new()
-                .read(true)
-                .custom_flags(libc::O_PATH | libc::O_NOCTTY),
+            OpenOptions::new().read(true).custom_flags(libc::O_PATH),
         );
 
         // If `O_PATH` worked, try to use `fchmod` on it.

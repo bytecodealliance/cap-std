@@ -19,7 +19,7 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
         OpenOptions::new()
             .read(true)
             .follow(FollowSymlinks::Yes)
-            .custom_flags(libc::O_PATH | libc::O_NOCTTY),
+            .custom_flags(libc::O_PATH),
     );
 
     // If that worked, call `readlink`.
