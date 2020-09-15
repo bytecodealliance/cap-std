@@ -12,8 +12,9 @@ use crate::fs::{
     Metadata, OpenOptions, SystemTimeSpec,
 };
 use posish::{
-    fs::{chmodat, fstatfs, renameat, Mode},
+    fs::{chmodat, fstatfs, major, renameat, Mode},
     path::DecInt,
+    process::{getgid, getpid, getuid},
 };
 use std::{
     fs, io,
@@ -65,7 +66,7 @@ fn init_proc_self_fd() -> io::Result<fs::File> {
         .open("/proc")?;
     let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
 
-    let (uid, gid, pid) = unsafe { (libc::getuid(), libc::getgid(), libc::getpid()) };
+    let (uid, gid, pid) = (getuid(), getgid(), getpid());
     let mut options = OpenOptions::new();
     let options = options
         .read(true)
@@ -91,8 +92,8 @@ fn check_proc_dir(
     kind: Subdir,
     dir: &fs::File,
     proc_metadata: Option<&Metadata>,
-    uid: libc::uid_t,
-    gid: libc::gid_t,
+    uid: u32,
+    gid: u32,
 ) -> io::Result<Metadata> {
     // Check the filesystem magic.
     check_procfs(dir)?;
@@ -113,7 +114,7 @@ fn check_proc_dir(
 
         // Proc is a non-device filesystem, so check for major number 0.
         // https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
-        if unsafe { libc::major(dir_metadata.dev()) } != 0 {
+        if major(dir_metadata.dev()) != 0 {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "/proc isn't a non-device mount",
@@ -230,7 +231,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
 }
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
-    readlink_unchecked(proc_self_fd()?, &DecInt::from_fd(file))
+    readlink_unchecked(proc_self_fd()?, &DecInt::from_fd(file), PathBuf::new())
 }
 
 pub(crate) fn set_permissions_through_proc_self_fd(

@@ -91,9 +91,7 @@ impl TempDir {
     ///
     /// [`tempfile::TempDir::close`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.close
     pub fn close(mut self) -> io::Result<()> {
-        mem::replace(&mut self.dir, None)
-            .unwrap()
-            .remove_open_dir_all()
+        mem::take(&mut self.dir).unwrap().remove_open_dir_all()
     }
 
     fn new_name() -> String {
@@ -122,7 +120,7 @@ impl Deref for TempDir {
 
 impl Drop for TempDir {
     fn drop(&mut self) {
-        if let Some(dir) = mem::replace(&mut self.dir, None) {
+        if let Some(dir) = mem::take(&mut self.dir) {
             dir.remove_open_dir_all().ok();
         }
     }

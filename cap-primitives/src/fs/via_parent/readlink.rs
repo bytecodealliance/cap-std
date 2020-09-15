@@ -19,5 +19,5 @@ pub(crate) fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
 
     let (dir, basename) = open_parent(start, path)?;
 
-    readlink_unchecked(&dir, basename.as_ref())
+    readlink_unchecked(&dir, basename.as_ref(), PathBuf::new())
 }

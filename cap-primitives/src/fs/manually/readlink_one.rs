@@ -12,6 +12,7 @@ pub(super) fn readlink_one(
     base: &fs::File,
     name: &OsStr,
     symlink_count: &mut u8,
+    reuse: PathBuf,
 ) -> io::Result<PathBuf> {
     let name: &Path = name.as_ref();
     assert!(
@@ -29,7 +30,7 @@ pub(super) fn readlink_one(
         return Err(errors::too_many_symlinks());
     }
 
-    let destination = readlink_unchecked(base, name)?;
+    let destination = readlink_unchecked(base, name, reuse)?;
 
     *symlink_count += 1;
 

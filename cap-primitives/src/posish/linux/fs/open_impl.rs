@@ -11,30 +11,12 @@ use super::super::super::fs::{c_str, compute_oflags};
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
-use posish::fs::OFlags;
+use posish::fs::{openat2, Mode, OFlags, ResolveFlags};
 use std::{
     fs, io,
-    os::unix::io::{AsRawFd, FromRawFd, RawFd},
     path::Path,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
-
-#[cfg(target_pointer_width = "32")]
-const SYS_OPENAT2: i32 = 437;
-#[cfg(target_pointer_width = "64")]
-const SYS_OPENAT2: i64 = 437;
-
-const RESOLVE_NO_MAGICLINKS: u64 = 0x02;
-const RESOLVE_BENEATH: u64 = 0x08;
-
-#[repr(C)]
-#[derive(Debug, Default)]
-struct OpenHow {
-    oflag: u64,
-    mode: u64,
-    resolve: u64,
-}
-const SIZEOF_OPEN_HOW: usize = std::mem::size_of::<OpenHow>();
 
 /// Call the `openat2` system call, or use a fallback if that's unavailable.
 pub(crate) fn open_impl(
@@ -66,67 +48,57 @@ pub(crate) fn open_beneath(
     if !INVALID.load(Relaxed) {
         let oflags = compute_oflags(options)?;
 
-        // Do two `contains` checks because `TMPFILE` may be represented
-        // with multiple flags and we need to ensure they're all set.
+        // Do two `contains` checks because `TMPFILE` may be represented with
+        // multiple flags and we need to ensure they're all set.
         let mode = if oflags.contains(OFlags::CREATE) || oflags.contains(OFlags::TMPFILE) {
-            options.ext.mode & 0o7777
+            Mode::from_bits(options.ext.mode & 0o7777).unwrap()
         } else {
-            0
+            Mode::empty()
         };
 
+        // We know `openat2` needs a `&CStr` internally; to avoid allocating on
+        // each iteration of the loop below, allocate the `CString` now.
         let path_c_str = c_str(path)?;
-        let open_how = OpenHow {
-            oflag: u64::from(oflags.bits() as u32),
-            mode: u64::from(mode),
-            resolve: RESOLVE_BENEATH | RESOLVE_NO_MAGICLINKS,
-        };
 
         // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
         // while it's running, so use a loop to retry it a few times. But not too many
         // times, because there's no limit on how often this can happen. The actual
         // number here is currently an arbitrarily chosen guess.
         for _ in 0..4 {
-            unsafe {
-                match libc::syscall(
-                    SYS_OPENAT2,
-                    start.as_raw_fd(),
-                    path_c_str.as_ptr(),
-                    &open_how,
-                    SIZEOF_OPEN_HOW,
-                ) {
-                    -1 => match io::Error::last_os_error().raw_os_error().unwrap() {
-                        libc::EAGAIN => continue,
-                        libc::EXDEV => return Err(errors::escape_attempt()),
-                        libc::ENOSYS => {
-                            // `openat2` is permanently unavailable; mark it so and
-                            // exit the loop.
-                            INVALID.store(true, Relaxed);
-                            break;
-                        }
-                        errno => return other_error(errno),
-                    },
-                    ret => {
-                        // Note that we don't bother with `ensure_cloexec` here
-                        // because Linux has supported `O_CLOEXEC` since 2.6.18,
-                        // and `openat2` was introduced in 5.6.
-                        let file = fs::File::from_raw_fd(ret as RawFd);
+            match openat2(
+                start,
+                path_c_str.as_c_str(),
+                oflags,
+                mode,
+                ResolveFlags::BENEATH | ResolveFlags::NO_MAGICLINKS,
+            ) {
+                Ok(file) => {
+                    // Note that we don't bother with `ensure_cloexec` here
+                    // because Linux has supported `O_CLOEXEC` since 2.6.18,
+                    // and `openat2` was introduced in 5.6.
 
-                        #[cfg(racy_asserts)]
-                        check_open(start, path, options, &file);
+                    #[cfg(racy_asserts)]
+                    check_open(start, path, options, &file);
 
-                        return Ok(file);
-                    }
+                    return Ok(file);
                 }
+                Err(err) => match err.raw_os_error() {
+                    Some(libc::EAGAIN) => continue,
+                    Some(libc::EXDEV) => return Err(errors::escape_attempt()),
+                    Some(libc::ENOSYS) => {
+                        // `openat2` is permanently unavailable; mark it so and
+                        // exit the loop.
+                        INVALID.store(true, Relaxed);
+                        break;
+                    }
+                    _ => return Err(err),
+                },
             }
         }
     }
 
     // `openat2` is unavailable, either temporarily or permanently.
-    other_error(libc::ENOSYS)
-}
-
-fn other_error(errno: i32) -> io::Result<fs::File> {
-    Err(io::Error::from_raw_os_error(errno))
+    Err(io::Error::from_raw_os_error(libc::ENOSYS))
 }
 
 #[cfg(racy_asserts)]

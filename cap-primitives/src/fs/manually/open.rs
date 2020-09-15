@@ -8,7 +8,7 @@ use crate::fs::{
 };
 use std::{
     ffi::OsStr,
-    fs, io,
+    fs, io, mem,
     path::{Component, Path, PathBuf},
 };
 #[cfg(windows)]
@@ -48,6 +48,10 @@ struct Context<'start> {
     /// if there was a trailing `.` component.
     trailing_dot: bool,
 
+    /// A `PathBuf` that we reuse for calling `readlink_one` to minimize
+    /// allocations.
+    reuse: PathBuf,
+
     #[cfg(racy_asserts)]
     start_clone: MaybeOwnedFile<'start>,
 }
@@ -83,6 +87,8 @@ impl<'start> Context<'start> {
             dir_precluded: false,
 
             trailing_dot: path_has_trailing_dot(path),
+
+            reuse: PathBuf::new(),
 
             #[cfg(racy_asserts)]
             start_clone,
@@ -214,13 +220,19 @@ impl<'start> Context<'start> {
                 // symlink, follow it.
                 #[cfg(target_os = "linux")]
                 if should_emulate_o_path(&use_options) {
-                    match readlink_one(&file, Default::default(), symlink_count) {
+                    match readlink_one(
+                        &file,
+                        Default::default(),
+                        symlink_count,
+                        mem::take(&mut self.reuse),
+                    ) {
                         Ok(destination) => {
                             self.dir_required |=
                                 self.components.is_empty() && path_requires_dir(&destination);
                             self.trailing_dot |= path_has_trailing_dot(&destination);
                             self.components
                                 .extend(destination.components().rev().map(CowComponent::owned));
+                            self.reuse = destination;
                             return Ok(());
                         }
                         // If it isn't a symlink, handle it as normal. `readlinkat` returns
@@ -276,11 +288,12 @@ impl<'start> Context<'start> {
 
     /// Dereference one symlink level.
     fn symlink(&mut self, one: &OsStr, symlink_count: &mut u8) -> io::Result<()> {
-        let destination = readlink_one(&self.base, one, symlink_count)?;
+        let destination = readlink_one(&self.base, one, symlink_count, mem::take(&mut self.reuse))?;
         self.dir_required |= self.components.is_empty() && path_requires_dir(&destination);
         self.trailing_dot |= path_has_trailing_dot(&destination);
         self.components
             .extend(destination.components().rev().map(CowComponent::owned));
+        self.reuse = destination;
         Ok(())
     }
 

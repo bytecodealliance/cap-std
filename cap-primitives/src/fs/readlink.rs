@@ -18,7 +18,7 @@ pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let result = readlink_impl(start, path);
 
     #[cfg(racy_asserts)]
-    let unchecked = readlink_unchecked(start, path);
+    let unchecked = readlink_unchecked(start, path, PathBuf::new());
 
     #[cfg(racy_asserts)]
     check_readlink(start, path, &result, &unchecked);
