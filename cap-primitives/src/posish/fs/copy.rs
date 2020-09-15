@@ -3,8 +3,10 @@
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-use super::{cstr, cvt_i32};
+use super::cvt_i32;
 use crate::fs::{open, OpenOptions};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use posish::fs::{fclonefileat, CloneFlags};
 #[cfg(any(
     target_os = "linux",
     target_os = "android",
@@ -15,22 +17,6 @@ use std::os::unix::io::AsRawFd;
 #[cfg(any(target_os = "linux", target_os = "android"))]
 use std::ptr;
 use std::{fs, io, path::Path};
-
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) -> $ret:ty) => (
-        unsafe fn $name($($arg_name: $t),*) -> $ret {
-            weak! { fn $name($($t),*) -> $ret }
-
-            if let Some(fun) = $name.get() {
-                fun($($arg_name),*)
-            } else {
-                errno::set_errno(errno::Errno(libc::ENOSYS));
-                -1
-            }
-        }
-    )
-}
 
 fn open_from(start: &fs::File, path: &Path) -> io::Result<(fs::File, fs::Metadata)> {
     let reader = open(start, path, OpenOptions::new().read(true))?;
@@ -250,29 +236,13 @@ pub(crate) fn copy_impl(
     // MacOS prior to 10.12 don't support `fclonefileat`
     // We store the availability in a global to avoid unnecessary syscalls
     static HAS_FCLONEFILEAT: AtomicBool = AtomicBool::new(true);
-    syscall! {
-        fn fclonefileat(
-            srcfd: libc::c_int,
-            dst_dirfd: libc::c_int,
-            dst: *const libc::c_char,
-            flags: libc::c_int
-        ) -> libc::c_int
-    }
 
     let (reader, reader_metadata) = open_from(from_start, from_path)?;
 
     // Opportunistically attempt to create a copy-on-write clone of `from_path`
     // using `fclonefileat`.
     if HAS_FCLONEFILEAT.load(Ordering::Relaxed) {
-        let to_path = cstr(to_path)?;
-        let clonefile_result = cvt_i32(unsafe {
-            fclonefileat(
-                reader.as_raw_fd(),
-                to_start.as_raw_fd(),
-                to_path.as_ptr(),
-                0,
-            )
-        });
+        let clonefile_result = fclonefileat(&reader, to_start, to_path, CloneFlags::empty());
         match clonefile_result {
             Ok(_) => return Ok(reader_metadata.len()),
             Err(err) => match err.raw_os_error() {

@@ -1,9 +1,6 @@
 //! The `posish` module contains code specific to the Unix-like platforms
 //! supported by the `posish` crate.
 
-#[macro_use]
-mod weak;
-
 pub(crate) mod fs;
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
