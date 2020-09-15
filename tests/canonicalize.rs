@@ -5,6 +5,12 @@ use std::path::Path;
 use sys_common::io::tmpdir;
 
 #[test]
+fn canonicalize_dot() {
+    let tmpdir = tmpdir();
+    assert_eq!(check!(tmpdir.canonicalize(".")), Path::new("."));
+}
+
+#[test]
 fn canonicalize_edge_cases() {
     let tmpdir = tmpdir();
     assert_eq!(check!(tmpdir.canonicalize(".")), Path::new("."));

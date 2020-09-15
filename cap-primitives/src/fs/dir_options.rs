@@ -43,10 +43,15 @@ impl arbitrary::Arbitrary for DirOptions {
         #[cfg(any(unix, target_os = "vxworks"))]
         use std::os::unix::fs::DirBuilderExt;
 
+        #[allow(unused_mut)]
         let mut dir_options = Self::new();
 
         #[cfg(any(unix, target_os = "vxworks"))]
         dir_options.mode(u.int_in_range(0..=0o777)?);
+
+        // Unix is currently the only platform with a `DirBuilderExt`.
+        #[cfg(not(any(unix, target_os = "vxworks")))]
+        let _ = u;
 
         Ok(dir_options)
     }
