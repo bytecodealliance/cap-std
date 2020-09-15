@@ -16,20 +16,13 @@ fn windows_symlinks() {
     check!(tmpdir.symlink_dir("file", "file_symlink_dir"));
     check!(tmpdir.symlink_file("dir", "dir_symlink_file"));
 
-    // That's just how it is.
-    dbg!("test");
+    // But accessing them fails.
     assert!(tmpdir.open("dir_symlink_file").is_err());
-    dbg!("test");
     assert!(tmpdir.open("file_symlink_dir").is_err());
-    dbg!("test");
     assert!(tmpdir.open_dir("dir_symlink_file").is_err());
-    dbg!("test");
     assert!(tmpdir.open_dir("file_symlink_dir").is_err());
-    dbg!("test");
     assert!(tmpdir.metadata("dir_symlink_file").is_err());
-    dbg!("test");
     assert!(tmpdir.metadata("file_symlink_dir").is_err());
-    dbg!("test");
 
     assert!(check!(tmpdir.symlink_metadata("file_symlink_dir"))
         .file_type()
@@ -55,46 +48,17 @@ fn windows_symlinks_ambient() {
     check!(symlink_dir("file", dir.path().join("file_symlink_dir")));
     check!(symlink_file("dir", dir.path().join("dir_symlink_file")));
 
-    // That's just how it is.
-    dbg!("test");
+    // But accessing them fails.
     assert!(fs::File::open(dir.path().join("dir_symlink_file")).is_err());
-    dbg!("test");
     assert!(fs::File::open(dir.path().join("file_symlink_dir")).is_err());
-    dbg!("test");
-    //assert!(
-    //unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("dir_symlink_file")) }.is_err()
-    //);
-    if unsafe {
-        dbg!(cap_std::fs::Dir::open_ambient_dir(
-            dir.path().join("dir_symlink_file")
-        ))
-    }
-    .is_err()
-    {
-    } else {
-        dbg!(fs::metadata(dir.path().join("dir_symlink_file")));
-        dbg!(fs::metadata(dir.path().join("dir")));
-    }
-    dbg!("test");
-    //assert!(
-    //unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("file_symlink_dir")) }.is_err()
-    //);
-    if unsafe {
-        dbg!(cap_std::fs::Dir::open_ambient_dir(
-            dir.path().join("file_symlink_dir")
-        ))
-    }
-    .is_err()
-    {
-    } else {
-        dbg!(fs::metadata(dir.path().join("file_symlink_dir")));
-        dbg!(fs::metadata(dir.path().join("file")));
-    }
-    dbg!("test");
+    assert!(
+        unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("dir_symlink_file")) }.is_err()
+    );
+    assert!(
+        unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("file_symlink_dir")) }.is_err()
+    );
     assert!(fs::metadata(dir.path().join("dir_symlink_file")).is_err());
-    dbg!("test");
     assert!(fs::metadata(dir.path().join("file_symlink_dir")).is_err());
-    dbg!("test");
 
     assert!(
         check!(fs::symlink_metadata(dir.path().join("file_symlink_dir")))

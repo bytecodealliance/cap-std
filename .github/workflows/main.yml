@@ -19,76 +19,77 @@ jobs:
         toolchain: stable
     - run: cargo fmt --all -- --check
 
-  check:
-    name: Check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
-        include:
-          - build: stable
-            os: ubuntu-latest
-            rust: stable
-          - build: windows
-            os: windows-latest
-            rust: stable
-          - build: macos
-            os: macos-latest
-            rust: stable
-          - build: beta
-            os: ubuntu-latest
-            rust: beta
-          - build: nightly
-            os: ubuntu-latest
-            rust: nightly
-          - build: ubuntu-16.04
-            os: ubuntu-16.04
-            rust: stable
-          - build: ubuntu-20.04
-            os: ubuntu-20.04
-            rust: stable
-          - build: macos-10.15
-            os: macos-10.15
-            rust: stable
-          - build: windows-2016
-            os: windows-2016
-            rust: stable
+  #check:
+  #  name: Check
+  #  runs-on: ${{ matrix.os }}
+  #  strategy:
+  #    matrix:
+  #      build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
+  #      include:
+  #        - build: stable
+  #          os: ubuntu-latest
+  #          rust: stable
+  #        - build: windows
+  #          os: windows-latest
+  #          rust: stable
+  #        - build: macos
+  #          os: macos-latest
+  #          rust: stable
+  #        - build: beta
+  #          os: ubuntu-latest
+  #          rust: beta
+  #        - build: nightly
+  #          os: ubuntu-latest
+  #          rust: nightly
+  #        - build: ubuntu-16.04
+  #          os: ubuntu-16.04
+  #          rust: stable
+  #        - build: ubuntu-20.04
+  #          os: ubuntu-20.04
+  #          rust: stable
+  #        - build: macos-10.15
+  #          os: macos-10.15
+  #          rust: stable
+  #        - build: windows-2016
+  #          os: windows-2016
+  #          rust: stable
 
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
-    - uses: ./.github/actions/install-rust
-      with:
-        toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --features=fs_utf8 --release -vv
+  #  steps:
+  #  - uses: actions/checkout@v1
+  #    with:
+  #      submodules: true
+  #  - uses: ./.github/actions/install-rust
+  #    with:
+  #      toolchain: ${{ matrix.rust }}
+  #  - run: cargo check --workspace --features=fs_utf8 --release -vv
 
-  check_windows_nightly:
-    name: Check Windows with Rust nightly
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        build: [windows]
-        include:
-          - build: windows
-            os: windows-latest
-            rust: nightly
+  #check_windows_nightly:
+  #  name: Check Windows with Rust nightly
+  #  runs-on: ${{ matrix.os }}
+  #  strategy:
+  #    matrix:
+  #      build: [windows]
+  #      include:
+  #        - build: windows
+  #          os: windows-latest
+  #          rust: nightly
 
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
-    - uses: ./.github/actions/install-rust
-      with:
-        toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --features=fs_utf8,nightly --release -vv
+  #  steps:
+  #  - uses: actions/checkout@v1
+  #    with:
+  #      submodules: true
+  #  - uses: ./.github/actions/install-rust
+  #    with:
+  #      toolchain: ${{ matrix.rust }}
+  #  - run: cargo check --workspace --features=fs_utf8,nightly --release -vv
 
   test:
     name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
+        #build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
+        build: [stable, windows]
         include:
           - build: stable
             os: ubuntu-latest
@@ -96,27 +97,27 @@ jobs:
           - build: windows
             os: windows-latest
             rust: stable
-          - build: macos
-            os: macos-latest
-            rust: stable
-          - build: beta
-            os: ubuntu-latest
-            rust: beta
-          - build: nightly
-            os: ubuntu-latest
-            rust: nightly
-          - build: ubuntu-16.04
-            os: ubuntu-16.04
-            rust: stable
-          - build: ubuntu-20.04
-            os: ubuntu-20.04
-            rust: stable
-          - build: macos-10.15
-            os: macos-10.15
-            rust: stable
-          - build: windows-2016
-            os: windows-2016
-            rust: stable
+        #  - build: macos
+        #    os: macos-latest
+        #    rust: stable
+        #  - build: beta
+        #    os: ubuntu-latest
+        #    rust: beta
+        #  - build: nightly
+        #    os: ubuntu-latest
+        #    rust: nightly
+        #  - build: ubuntu-16.04
+        #    os: ubuntu-16.04
+        #    rust: stable
+        #  - build: ubuntu-20.04
+        #    os: ubuntu-20.04
+        #    rust: stable
+        #  - build: macos-10.15
+        #    os: macos-10.15
+        #    rust: stable
+        #  - build: windows-2016
+        #    os: windows-2016
+        #    rust: stable
 
     steps:
     - uses: actions/checkout@v1
