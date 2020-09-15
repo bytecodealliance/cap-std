@@ -2,8 +2,6 @@
 //! resolution, in order to enforce sandboxing.
 
 use super::{readlink_one, CanonicalPath, CowComponent};
-#[cfg(windows)]
-use crate::fs::SymlinkKind;
 use crate::fs::{
     dir_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir, stat_unchecked,
     FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
@@ -13,6 +11,8 @@ use std::{
     fs, io,
     path::{Component, Path, PathBuf},
 };
+#[cfg(windows)]
+use {crate::fs::SymlinkKind, winapi::um::winnt::FILE_ATTRIBUTE_DIRECTORY};
 
 /// Implement `open` by breaking up the path into components, resolving each
 /// component individually, and resolving symbolic links manually.
@@ -57,7 +57,7 @@ impl<'start> Context<'start> {
     fn new(
         start: MaybeOwnedFile<'start>,
         path: &'start Path,
-        options: &OpenOptions,
+        _options: &OpenOptions,
         canonical_path: Option<&'start mut PathBuf>,
     ) -> Self {
         let components = path
@@ -75,7 +75,13 @@ impl<'start> Context<'start> {
             components,
             canonical_path: CanonicalPath::new(canonical_path),
             dir_required: path_requires_dir(path),
-            dir_precluded: options.write || options.append,
+
+            #[cfg(not(windows))]
+            dir_precluded: _options.write || _options.append,
+
+            #[cfg(windows)]
+            dir_precluded: false,
+
             trailing_dot: path_has_trailing_dot(path),
 
             #[cfg(racy_asserts)]
@@ -245,12 +251,14 @@ impl<'start> Context<'start> {
             #[cfg(windows)]
             Err(OpenUncheckedError::Symlink(err, SymlinkKind::Dir)) => {
                 // If this is a Windows directory symlink, require a directory.
+                dbg!("symlink(dir)", self.components.is_empty());
                 self.dir_required |= self.components.is_empty();
                 self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
             }
             #[cfg(windows)]
             Err(OpenUncheckedError::Symlink(err, SymlinkKind::File)) => {
                 // If this is a Windows file symlink, preclude a directory.
+                dbg!("symlink(file)");
                 self.dir_precluded = true;
                 self.maybe_last_component_symlink(one, symlink_count, options.follow, err)
             }
@@ -270,6 +278,7 @@ impl<'start> Context<'start> {
 
     /// Dereference one symlink level.
     fn symlink(&mut self, one: &OsStr, symlink_count: &mut u8) -> io::Result<()> {
+        dbg!("symlink");
         let destination = readlink_one(&self.base, one, symlink_count)?;
         self.dir_required |= self.components.is_empty() && path_requires_dir(&destination);
         self.trailing_dot |= path_has_trailing_dot(&destination);
@@ -370,10 +379,27 @@ pub(crate) fn stat<'start>(
 
                     // If we weren't asked to follow symlinks, or it wasn't a symlink, we're done.
                     if options.follow == FollowSymlinks::No || !stat.file_type().is_symlink() {
-                        if ctx.dir_required && !stat.is_dir() {
-                            return Err(errors::is_not_directory());
+                        if stat.is_dir() {
+                            if ctx.dir_precluded {
+                                return Err(errors::is_directory());
+                            }
+                        } else {
+                            if ctx.dir_required {
+                                return Err(errors::is_not_directory());
+                            }
                         }
                         return Ok(stat);
+                    }
+                    dbg!("follow");
+
+                    // On Windows, symlinks know whether they are a file or directory.
+                    #[cfg(windows)]
+                    if stat.file_attributes() & FILE_ATTRIBUTE_DIRECTORY != 0 {
+                        dbg!("dir_required");
+                        ctx.dir_required = true;
+                    } else {
+                        dbg!("dir_precluded");
+                        ctx.dir_precluded = true;
                     }
 
                     // If it was a symlink and we're asked to follow symlinks, dereference it.

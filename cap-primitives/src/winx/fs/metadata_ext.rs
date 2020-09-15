@@ -56,6 +56,13 @@ impl MetadataExt {
         let other_file_index = other.file_index.expect("could extract file index `other`");
         self_vsn == other_vsn && self_file_index == other_file_index
     }
+
+    /// `MetadataExt` requires nightly to be implemented, but we sometimes
+    /// just need the file attributes.
+    #[inline]
+    pub(crate) fn file_attributes(&self) -> u32 {
+        self.file_attributes
+    }
 }
 
 #[cfg(feature = "windows_by_handle")]

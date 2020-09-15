@@ -3,10 +3,16 @@ use crate::fs::{FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
 use std::{
     ffi::OsString,
     fs, io,
-    os::windows::ffi::{OsStrExt, OsStringExt},
+    os::windows::{
+        ffi::{OsStrExt, OsStringExt},
+        fs::MetadataExt,
+    },
     path::{Path, PathBuf},
 };
-use winapi::{shared::winerror, um::winbase};
+use winapi::{
+    shared::winerror,
+    um::{winbase, winnt::FILE_ATTRIBUTE_DIRECTORY},
+};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
 pub(crate) fn open_unchecked(
@@ -39,7 +45,7 @@ pub(crate) fn open_unchecked(
                 if metadata.file_type().is_symlink() {
                     return Err(OpenUncheckedError::Symlink(
                         io::Error::new(io::ErrorKind::Other, "symlink encountered"),
-                        if metadata.file_type().is_dir() {
+                        if metadata.file_attributes() & FILE_ATTRIBUTE_DIRECTORY != 0 {
                             SymlinkKind::Dir
                         } else {
                             SymlinkKind::File

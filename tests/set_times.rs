@@ -59,7 +59,9 @@ fn symlink_times() {
     );
 
     let dir_time = SystemClock::UNIX_EPOCH;
+    dbg!("test");
     check!(tmpdir.set_times("dir_symlink_dir", None, Some(file_time.into())));
+    dbg!("test");
     assert_eq!(modified_time(check!(tmpdir.metadata("dir"))), dir_time);
     assert_eq!(
         modified_time(check!(tmpdir.metadata("dir_symlink_dir"))),

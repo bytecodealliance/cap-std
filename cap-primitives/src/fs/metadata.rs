@@ -153,6 +153,14 @@ impl Metadata {
     fn not_available() -> io::Error {
         io::Error::new(io::ErrorKind::Other, "not available on this platform")
     }
+
+    /// `MetadataExt` requires nightly to be implemented, but we sometimes
+    /// just need the file attributes.
+    #[cfg(windows)]
+    #[inline]
+    pub(crate) fn file_attributes(&self) -> u32 {
+        self.ext.file_attributes()
+    }
 }
 
 #[cfg(unix)]
