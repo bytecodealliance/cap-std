@@ -207,6 +207,7 @@ impl<'start> Context<'start> {
             dir_options()
         };
         let dir_required = self.dir_required || use_options.dir_required;
+        #[allow(clippy::redundant_clone)]
         match open_unchecked(
             &self.base,
             one.as_ref(),
@@ -393,10 +394,8 @@ pub(crate) fn stat<'start>(
                             if ctx.dir_precluded {
                                 return Err(errors::is_directory());
                             }
-                        } else {
-                            if ctx.dir_required {
-                                return Err(errors::is_not_directory());
-                            }
+                        } else if ctx.dir_required {
+                            return Err(errors::is_not_directory());
                         }
                         return Ok(stat);
                     }
