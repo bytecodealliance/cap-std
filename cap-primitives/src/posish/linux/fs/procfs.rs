@@ -11,13 +11,13 @@ use crate::fs::{
     errors, open, open_unchecked, readlink_unchecked, set_times_follow_unchecked, FollowSymlinks,
     Metadata, OpenOptions, SystemTimeSpec,
 };
-use posish::fs::{chmodat, fstatfs, renameat, Mode};
+use posish::{
+    fs::{chmodat, fstatfs, renameat, Mode},
+    path::DecInt,
+};
 use std::{
     fs, io,
-    os::unix::{
-        fs::{MetadataExt, OpenOptionsExt, PermissionsExt},
-        io::AsRawFd,
-    },
+    os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt},
     path::{Path, PathBuf},
 };
 
@@ -73,7 +73,7 @@ fn init_proc_self_fd() -> io::Result<fs::File> {
 
     // Open "/proc/self". Use our pid to compute the name rather than literally
     // using "self", as "self" is a symlink.
-    let proc_self = open_unchecked(&proc, Path::new(&pid.to_string()), options)?;
+    let proc_self = open_unchecked(&proc, &DecInt::new(pid), options)?;
     drop(proc);
     check_proc_dir(Subdir::Pid, &proc_self, Some(&proc_metadata), uid, gid)?;
 
@@ -209,7 +209,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
 }
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
-    readlink_unchecked(proc_self_fd()?, Path::new(&file.as_raw_fd().to_string()))
+    readlink_unchecked(proc_self_fd()?, &DecInt::from_fd(file))
 }
 
 pub(crate) fn set_permissions_through_proc_self_fd(
@@ -225,7 +225,7 @@ pub(crate) fn set_permissions_through_proc_self_fd(
 
     let dirfd = proc_self_fd()?;
     let mode = Mode::from_bits(perm.mode()).ok_or_else(errors::invalid_flags)?;
-    chmodat(dirfd, opath.as_raw_fd().to_string(), mode)
+    chmodat(dirfd, DecInt::from_fd(&opath), mode)
 }
 
 pub(crate) fn set_times_through_proc_self_fd(
@@ -245,10 +245,5 @@ pub(crate) fn set_times_through_proc_self_fd(
     // omitting `O_NOFOLLOW` above ensures that the destination of the link
     // isn't a symlink.
     let dirfd = proc_self_fd()?;
-    set_times_follow_unchecked(
-        dirfd,
-        Path::new(&opath.as_raw_fd().to_string()),
-        atime,
-        mtime,
-    )
+    set_times_follow_unchecked(dirfd, &DecInt::from_fd(&opath), atime, mtime)
 }
