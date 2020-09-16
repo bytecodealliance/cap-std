@@ -15,16 +15,16 @@
 The `cap-std` project is organized around the eponymous [`cap-std`] crate, and
 develops libraries to make it easy to write capability-oriented code, including:
 
- - [`cap-std`], which provides capability-oriented versions of `std` APIs
+ - [`cap-std`] itself, which provides capability-oriented versions of `std` APIs
  - [`cap-async-std`], which is to [`async-std`] what `cap-std` is to `std`
  - [`cap-directories`] which provides capability-oriented access to
    [standard application directories]
  - [`cap-tempfile`], which provides capability-oriented access to
    [temporary directories]
  - [`cap-dir-ext`], which provides additional filesystem features beyond
-   what's available in `std`.
+   what's available in `std`
  - [`cap-time-ext`], which provides additional time features beyond
-   what's available in `std`.
+   what's available in `std`
 
 [`std`]: https://doc.rust-lang.org/std/
 [`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
@@ -117,8 +117,8 @@ extra code to handle absolute paths.
 
 ## How fast is it?
 
-On Linux 5.6 and newer, `cap-std` uses [`openat2`] to implement `open` and with
-a single system call in common cases. Several other operations internally
+On Linux 5.6 and newer, `cap-std` uses [`openat2`] to implement `Dir::open`
+with a single system call in common cases. Several other operations internally
 utilize [`openat2`], [`O_PATH`], and [`/proc/self/fd`] (when available) for fast
 path resolution as well.
 
