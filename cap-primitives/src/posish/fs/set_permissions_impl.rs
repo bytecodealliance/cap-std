@@ -40,6 +40,7 @@ pub(crate) fn set_permissions_impl(
 }
 
 pub(crate) fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {
+    #[allow(clippy::useless_conversion)]
     let mode =
         Mode::from_bits(perm.mode().try_into().unwrap()).ok_or_else(errors::invalid_flags)?;
     fchmod(file, mode)
