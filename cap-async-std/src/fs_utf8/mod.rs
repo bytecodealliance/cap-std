@@ -44,14 +44,14 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
         use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
         #[cfg(target_os = "wasi")]
         use std::{ffi::OsStr, os::wasi::ffi::OsStrExt};
-        let bytes = string.as_cstr().to_bytes();
+        let bytes = string.as_c_str().to_bytes();
         OsStr::from_bytes(bytes).to_owned()
     };
 
     #[cfg(windows)]
     let path = {
         use std::{ffi::OsString, os::windows::ffi::OsStringExt};
-        let utf8 = string.as_cstr().to_str().map_err(|_| {
+        let utf8 = string.as_c_str().to_str().map_err(|_| {
             std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string")
         })?;
         let utf16: Vec<_> = utf8.encode_utf16().collect();
@@ -67,7 +67,7 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
     let osstr = path.as_ref().as_os_str();
 
     #[cfg(not(windows))]
-    let cstr = {
+    let c_str = {
         #[cfg(unix)]
         use std::{ffi::CString, os::unix::ffi::OsStrExt};
         #[cfg(target_os = "wasi")]
@@ -76,7 +76,7 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
     };
 
     #[cfg(windows)]
-    let cstr = {
+    let c_str = {
         use std::{ffi::CString, os::windows::ffi::OsStrExt};
         let utf16: Vec<_> = osstr.encode_wide().collect();
         let str = String::from_utf16(&utf16).map_err(|_| {
@@ -85,7 +85,7 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
         CString::new(str)?
     };
 
-    Ok(arf_strings::WasiString::from_maybe_nonutf8_cstr(&cstr)
+    Ok(arf_strings::WasiString::from_maybe_nonutf8_c_str(&c_str)
         .as_str()
         .to_owned())
 }

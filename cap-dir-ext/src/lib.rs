@@ -596,14 +596,14 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
         use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
         #[cfg(target_os = "wasi")]
         use std::{ffi::OsStr, os::wasi::ffi::OsStrExt};
-        let bytes = string.as_cstr().to_bytes();
+        let bytes = string.as_c_str().to_bytes();
         OsStr::from_bytes(bytes).to_owned()
     };
 
     #[cfg(windows)]
     let path = {
         use std::{ffi::OsString, os::windows::ffi::OsStringExt};
-        let utf8 = string.as_cstr().to_str().map_err(|_| {
+        let utf8 = string.as_c_str().to_str().map_err(|_| {
             std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path string")
         })?;
         let utf16: Vec<_> = utf8.encode_utf16().collect();

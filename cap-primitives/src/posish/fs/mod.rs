@@ -1,5 +1,5 @@
+mod c_str;
 mod copy;
-mod cstr;
 mod cvt;
 mod dir_entry_inner;
 mod dir_options_ext;
@@ -72,9 +72,9 @@ pub(crate) use crate::fs::{
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
-pub(crate) use copy::*;
 #[allow(unused_imports)]
-pub(crate) use cstr::cstr;
+pub(crate) use c_str::c_str;
+pub(crate) use copy::*;
 #[allow(unused_imports)]
 pub(crate) use cvt::*;
 pub(crate) use dir_entry_inner::*;
