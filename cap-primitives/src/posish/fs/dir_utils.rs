@@ -84,6 +84,15 @@ pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> 
         .open(&path)
 }
 
+#[cfg(racy_asserts)]
+#[test]
+fn append_dir_suffix_tests() {
+    assert!(append_dir_suffix(Path::new("foo").to_path_buf())
+        .display()
+        .to_string()
+        .ends_with('/'));
+}
+
 #[test]
 fn strip_dir_suffix_tests() {
     assert_eq!(&*strip_dir_suffix(Path::new("/foo//")), Path::new("/foo"));
