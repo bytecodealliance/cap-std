@@ -25,6 +25,7 @@ use std::{
 const PROC_ROOT_INO: u64 = 1;
 
 /// The filesystem magic number for procfs.
+/// https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
 ///
 /// This is defined in the `libc` crate for linux-gnu but not for
 /// linux-musl, so we define it ourselves.
@@ -98,12 +99,24 @@ fn check_proc_dir(
 
     let dir_metadata = file_metadata(dir)?;
 
+    // We use `O_DIRECTORY`, so open should fail if we don't get a directory.
+    assert!(dir_metadata.is_dir());
+
     // Check the root inode number.
     if let Subdir::Proc = kind {
         if dir_metadata.ino() != PROC_ROOT_INO {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "unexpected root inode in /proc",
+            ));
+        }
+
+        // Proc is a non-device filesystem, so check for major number 0.
+        // https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
+        if unsafe { libc::major(dir_metadata.dev()) } != 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "/proc isn't a non-device mount",
             ));
         }
 
@@ -140,23 +153,28 @@ fn check_proc_dir(
         }
     }
 
-    let mode = if let Subdir::Fd = kind {
-        0o40500
-    } else {
-        0o40555
-    };
-
-    // Check that our process owns the directory.
-    if dir_metadata.uid() != uid || dir_metadata.gid() != gid || dir_metadata.mode() != mode {
+    // Check the ownership of the directory.
+    if (dir_metadata.uid(), dir_metadata.gid()) != (uid, gid) {
         return Err(io::Error::new(
             io::ErrorKind::Other,
-            "/proc pid subdirectory isn't owned by the process' owner",
+            "/proc subdirectory has unexpected ownership",
+        ));
+    }
+
+    // "/proc" directories are typically mounted r-xr-xr-x.
+    // "/proc/self/fd" is r-x------. Allow them to have fewer permissions, but
+    // not more.
+    let expected_mode = if let Subdir::Fd = kind { 0o500 } else { 0o555 };
+    if dir_metadata.mode() & 0o777 & !expected_mode != 0 {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "/proc subdirectory has unexpected permissions",
         ));
     }
 
     if let Subdir::Fd = kind {
         // Check that the "/proc/self/fd" directory doesn't have any extraneous
-        // links into it (which would include unexpected subdirectories).
+        // links into it (which might include unexpected subdirectories).
         if dir_metadata.nlink() != 2 {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
@@ -190,8 +208,8 @@ fn check_procfs(file: &fs::File) -> io::Result<()> {
     Ok(())
 }
 
-/// Check whether the given directory handle is a mount point. We use
-/// a `rename` call that would otherwise fail, but which fails with `EXDEV`
+/// Check whether the given directory handle is a mount point. We use a
+/// `rename` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
     let e = renameat(file, "../.", file, ".").unwrap_err();
@@ -203,9 +221,12 @@ fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
 }
 
 fn proc_self_fd() -> io::Result<&'static fs::File> {
-    PROC_SELF_FD
-        .as_ref()
-        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("error opening /proc: {}", e)))
+    PROC_SELF_FD.as_ref().map_err(|e| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("error opening /proc/self/fd: {}", e),
+        )
+    })
 }
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
