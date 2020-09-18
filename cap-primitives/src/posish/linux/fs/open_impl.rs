@@ -7,7 +7,7 @@
 //!
 //! On older Linux, fall back to `manually::open`.
 
-use super::super::super::fs::{compute_oflags, cstr};
+use super::super::super::fs::{c_str, compute_oflags};
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
@@ -74,7 +74,7 @@ pub(crate) fn open_beneath(
             0
         };
 
-        let path_cstr = cstr(path)?;
+        let path_c_str = c_str(path)?;
         let open_how = OpenHow {
             oflag: u64::from(oflags.bits() as u32),
             mode: u64::from(mode),
@@ -90,7 +90,7 @@ pub(crate) fn open_beneath(
                 match libc::syscall(
                     SYS_OPENAT2,
                     start.as_raw_fd(),
-                    path_cstr.as_ptr(),
+                    path_c_str.as_ptr(),
                     &open_how,
                     SIZEOF_OPEN_HOW,
                 ) {
