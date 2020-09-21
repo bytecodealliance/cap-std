@@ -10,6 +10,7 @@
 
 use cap_std::fs::Dir;
 use std::{env, fmt, fs, io, mem, ops::Deref};
+#[cfg(not(target_os = "emscripten"))]
 use uuid::Uuid;
 
 /// A directory in a filesystem that is automatically deleted when it goes out of scope.
@@ -95,7 +96,19 @@ impl TempDir {
     }
 
     fn new_name() -> String {
-        Uuid::new_v4().to_string()
+        #[cfg(not(target_os = "emscripten"))]
+        {
+            Uuid::new_v4().to_string()
+        }
+
+        // Uuid doesn't support Emscripten yet, but Emscripten isn't multi-user
+        // or multi-process yet, so we can do something simple.
+        #[cfg(target_os = "emscripten")]
+        {
+            use rand::RngCore;
+            let mut r = rand::thread_rng();
+            format!("cap-primitives.{}", r.next_u32())
+        }
     }
 
     const fn num_iterations() -> i32 {
