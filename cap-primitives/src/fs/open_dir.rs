@@ -3,7 +3,7 @@
 
 #[allow(unused_imports)]
 use crate::fs::open_unchecked;
-use crate::fs::{dir_options, open, open_ambient_dir_impl};
+use crate::fs::{dir_options, dir_path_options, open, open_ambient_dir_impl};
 use std::{fs, io, path::Path};
 
 /// Open a directory by performing an `openat`-like operation,
@@ -31,4 +31,11 @@ pub(crate) fn open_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<fs
 #[inline]
 pub unsafe fn open_ambient_dir(path: &Path) -> io::Result<fs::File> {
     open_ambient_dir_impl(path)
+}
+
+/// Similar to `openat`, but may only be usable for use as the `start`
+/// parameter in `cap-primitives` functions.
+#[inline]
+pub fn open_dir_path(start: &fs::File, path: &Path) -> io::Result<fs::File> {
+    open(start, path, &dir_path_options())
 }

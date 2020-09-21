@@ -2,7 +2,7 @@
 /// It opens the parent directory of the given path, and returns the basename,
 /// so that all the `via_parent` functions need to do is make sure they
 /// don't follow symlinks in the basename.
-use crate::fs::{errors, open_dir, path_requires_dir, MaybeOwnedFile};
+use crate::fs::{errors, open_dir_path, path_requires_dir, MaybeOwnedFile};
 use std::{
     ffi::OsStr,
     io,
@@ -23,7 +23,7 @@ pub(super) fn open_parent<'path, 'borrow>(
     let dir = if dirname.as_os_str().is_empty() {
         start
     } else {
-        MaybeOwnedFile::owned(open_dir(&start, dirname)?)
+        MaybeOwnedFile::owned(open_dir_path(&start, dirname)?)
     };
 
     Ok((dir, basename.as_os_str()))

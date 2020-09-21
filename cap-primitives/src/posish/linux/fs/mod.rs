@@ -23,6 +23,17 @@ pub(crate) use stat_impl::*;
 
 use file_metadata::file_metadata;
 
+/// Like `dir_options`, but for file descriptors that will only be used as
+/// the base in `*at` calls.
+pub(crate) fn dir_path_options() -> crate::fs::OpenOptions {
+    use std::os::unix::fs::OpenOptionsExt;
+    // Add `O_PATH` so that we can open directories that have search and not
+    // read permission.
+    crate::posish::fs::dir_options()
+        .custom_flags(libc::O_PATH)
+        .clone()
+}
+
 // In theory we could optimize `link` using `openat2` with `O_PATH` and
 // `linkat` with `AT_EMPTY_PATH`, however that requires `CAP_DAC_READ_SEARCH`,
 // so it isn't very widely applicable.
