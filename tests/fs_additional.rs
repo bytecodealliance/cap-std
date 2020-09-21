@@ -342,3 +342,32 @@ fn check_dot_access_ambient() {
         assert!(fs::metadata(dir.path().join("dir/..//.")).is_ok());
     }
 }
+
+#[cfg(unix)]
+#[test]
+fn dir_searchable_unreadable() {
+    use cap_std::fs::DirBuilder;
+    use std::os::unix::fs::DirBuilderExt;
+
+    let tmpdir = tmpdir();
+
+    let mut options = DirBuilder::new();
+    options.mode(0o333);
+    check!(tmpdir.create_dir_with("dir", &options));
+    options.mode(0o111);
+    check!(tmpdir.create_dir_with("dir/subdir", &options));
+
+    #[cfg(not(target_os = "freebsd"))]
+    {
+        assert!(check!(tmpdir.metadata("dir/.")).is_dir());
+        assert!(check!(tmpdir.metadata("dir/subdir")).is_dir());
+        assert!(check!(tmpdir.metadata("dir/subdir/.")).is_dir());
+    }
+
+    #[cfg(target_os = "freebsd")]
+    {
+        assert!(check!(tmpdir.metadata("dir/.")).is_dir());
+        assert!(tmpdir.metadata("dir/subdir").is_err());
+        assert!(tmpdir.metadata("dir/subdir/.").is_err());
+    }
+}

@@ -3,8 +3,8 @@
 
 use super::{readlink_one, CanonicalPath, CowComponent};
 use crate::fs::{
-    dir_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir, stat_unchecked,
-    FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
+    dir_path_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir,
+    stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
 use std::{
     ffi::OsStr,
@@ -204,7 +204,7 @@ impl<'start> Context<'start> {
         let use_options = if self.at_last_component() {
             options.clone()
         } else {
-            dir_options()
+            dir_path_options()
         };
         let dir_required = self.dir_required || use_options.dir_required;
         #[allow(clippy::redundant_clone)]
