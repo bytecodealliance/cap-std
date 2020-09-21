@@ -343,7 +343,7 @@ fn check_dot_access_ambient() {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
 #[test]
 fn dir_searchable_unreadable() {
     use cap_std::fs::DirBuilder;
@@ -354,20 +354,51 @@ fn dir_searchable_unreadable() {
     let mut options = DirBuilder::new();
     options.mode(0o333);
     check!(tmpdir.create_dir_with("dir", &options));
+    check!(tmpdir.create_dir_with("dir/writeable_subdir", &options));
     options.mode(0o111);
     check!(tmpdir.create_dir_with("dir/subdir", &options));
 
-    #[cfg(not(target_os = "freebsd"))]
-    {
-        assert!(check!(tmpdir.metadata("dir/.")).is_dir());
-        assert!(check!(tmpdir.metadata("dir/subdir")).is_dir());
-        assert!(check!(tmpdir.metadata("dir/subdir/.")).is_dir());
-    }
+    assert!(check!(tmpdir.metadata("dir/.")).is_dir());
+    assert!(check!(tmpdir.metadata("dir/subdir")).is_dir());
+    assert!(check!(tmpdir.metadata("dir/subdir/.")).is_dir());
+}
 
-    #[cfg(target_os = "freebsd")]
-    {
-        assert!(check!(tmpdir.metadata("dir/.")).is_dir());
-        assert!(tmpdir.metadata("dir/subdir").is_err());
-        assert!(tmpdir.metadata("dir/subdir/.").is_err());
-    }
+/// This test is the same as `dir_searchable_unreadable` but uses `std::fs`'
+/// ambient API instead of `cap_std`. The purpose of this test is to
+/// confirm fundamentally OS-specific differences.
+#[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
+#[test]
+fn dir_searchable_unreadable_ambient() {
+    use std::{fs, os::unix::fs::DirBuilderExt};
+
+    let dir = tempfile::tempdir().unwrap();
+
+    let mut options = std::fs::DirBuilder::new();
+    options.mode(0o333);
+    check!(options.create(dir.path().join("dir")));
+    check!(options.create(dir.path().join("dir/writeable_subdir")));
+    options.mode(0o111);
+    check!(options.create(dir.path().join("dir/subdir")));
+
+    assert!(check!(fs::metadata(dir.path().join("dir/."))).is_dir());
+    assert!(check!(fs::metadata(dir.path().join("dir/subdir"))).is_dir());
+    assert!(check!(fs::metadata(dir.path().join("dir/subdir/."))).is_dir());
+}
+
+/// On Darwin, we don't have a race-free way to create a subdirectory within
+/// a directory that we don't have read access to.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[test]
+fn dir_searchable_unreadable() {
+    use cap_std::fs::DirBuilder;
+    use std::os::unix::fs::DirBuilderExt;
+
+    let tmpdir = tmpdir();
+
+    let mut options = DirBuilder::new();
+    options.mode(0o333);
+    check!(tmpdir.create_dir_with("dir", &options));
+    assert!(tmpdir
+        .create_dir_with("dir/writeable_subdir", &options)
+        .is_err());
 }
