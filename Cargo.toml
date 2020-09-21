@@ -19,7 +19,7 @@ async-std = { version = "1.6.2", features = ["attributes"] }
 anyhow = "1.0.32"
 cap-async-std = { path = "cap-async-std", version = "^0.3.0"}
 cap-dir-ext = { path = "cap-dir-ext", version = "^0.3.0"}
-cap-directories = { path = "cap-directories", version = "^0.2.1-alpha.0"}
+cap-directories = { path = "cap-directories", version = "^0.3.0"}
 cap-std = { path = "cap-std", version = "^0.3.0"}
 cap-tempfile = { path = "cap-tempfile", version = "^0.2.1-alpha.0"}
 rand = "0.7.3"
