@@ -62,6 +62,6 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
 
     #[cfg(windows)]
     {
-        Ok(arf_strings::host_to_str(osstr))
+        arf_strings::host_to_str(osstr)
     }
 }
