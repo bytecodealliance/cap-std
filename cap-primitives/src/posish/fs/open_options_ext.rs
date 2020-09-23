@@ -11,15 +11,13 @@ impl OpenOptionsExt {
             custom_flags: 0,
         }
     }
-}
 
-impl std::os::unix::fs::OpenOptionsExt for OpenOptionsExt {
-    fn mode(&mut self, mode: u32) -> &mut Self {
+    pub(crate) fn mode(&mut self, mode: u32) -> &mut Self {
         self.mode = mode;
         self
     }
 
-    fn custom_flags(&mut self, flags: i32) -> &mut Self {
+    pub(crate) fn custom_flags(&mut self, flags: i32) -> &mut Self {
         self.custom_flags = flags;
         self
     }

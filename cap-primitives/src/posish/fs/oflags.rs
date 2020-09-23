@@ -28,7 +28,7 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
 // library/std/src/sys/unix/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
+pub(crate) fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
     match (options.read, options.write, options.append) {
         (true, false, false) => Ok(OFlags::RDONLY),
         (false, true, false) => Ok(OFlags::WRONLY),
@@ -39,7 +39,7 @@ fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
     }
 }
 
-fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlags> {
+pub(crate) fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlags> {
     match (options.write, options.append) {
         (true, false) => {}
         (false, false) => {
