@@ -1,3 +1,6 @@
+# Pin nightly to nightly-2020-09-21 until async-std supports
+# `open_options_ext_as_flags`.
+
 name: CI
 
 on:
@@ -81,7 +84,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2020-09-21
 
     steps:
     - uses: actions/checkout@v1
@@ -172,10 +175,10 @@ jobs:
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly
+            rust: nightly-2020-09-21
           - build: windows
             os: windows-latest
-            rust: nightly
+            rust: nightly-2020-09-21
 
     steps:
     - uses: actions/checkout@v1
@@ -216,7 +219,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/install-rust
       with:
-        toolchain: nightly
+        toolchain: nightly-2020-09-21
     - run: cargo install cargo-fuzz --vers "^0.8"
     - run: cargo fetch
       working-directory: ./fuzz
