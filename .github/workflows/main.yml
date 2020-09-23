@@ -19,40 +19,19 @@ jobs:
         toolchain: stable
     - run: cargo fmt --all -- --check
 
-  check:
-    name: Check
+  check_cross:
+    name: Check Cross-Compilation
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
+        build: [stable, beta]
         include:
           - build: stable
             os: ubuntu-latest
             rust: stable
-          - build: windows
-            os: windows-latest
-            rust: stable
-          - build: macos
-            os: macos-latest
-            rust: stable
           - build: beta
             os: ubuntu-latest
             rust: beta
-          - build: nightly
-            os: ubuntu-latest
-            rust: nightly
-          - build: ubuntu-16.04
-            os: ubuntu-16.04
-            rust: stable
-          - build: ubuntu-20.04
-            os: ubuntu-20.04
-            rust: stable
-          - build: macos-10.15
-            os: macos-10.15
-            rust: stable
-          - build: windows-2016
-            os: windows-2016
-            rust: stable
 
     steps:
     - uses: actions/checkout@v1
@@ -61,17 +40,47 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --features=fs_utf8 --release -vv
+    - run: >
+        rustup target add
+        x86_64-unknown-linux-musl
+        x86_64-unknown-linux-gnux32
+        x86_64-linux-android
+        x86_64-apple-darwin
+        x86_64-unknown-freebsd
+        x86_64-unknown-netbsd
+        i686-unknown-linux-gnu
+        i686-unknown-linux-musl
+        x86_64-pc-windows-msvc
+        x86_64-pc-windows-gnu
+        i686-pc-windows-msvc
+        i686-pc-windows-gnu
+        x86_64-fuchsia
+        wasm32-unknown-emscripten
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-linux-musl
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-linux-gnux32
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-linux-android
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-apple-darwin
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-freebsd
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-netbsd
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-musl
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-msvc
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=i686-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=wasm32-unknown-emscripten
 
-  check_windows_nightly:
-    name: Check Windows with Rust nightly
+  check_cross_nightly:
+    name: Check Cross-Compilation on Rust nightly
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [windows]
+        build: [nightly]
         include:
-          - build: windows
-            os: windows-latest
+          - build: nightly
+            os: ubuntu-latest
             rust: nightly
 
     steps:
@@ -81,14 +90,44 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo check --workspace --features=fs_utf8,nightly --release -vv
+    - run: >
+        rustup target add
+        x86_64-unknown-linux-musl
+        x86_64-unknown-linux-gnux32
+        x86_64-linux-android
+        x86_64-apple-darwin
+        x86_64-unknown-freebsd
+        x86_64-unknown-netbsd
+        i686-unknown-linux-gnu
+        i686-unknown-linux-musl
+        x86_64-pc-windows-msvc
+        x86_64-pc-windows-gnu
+        i686-pc-windows-msvc
+        i686-pc-windows-gnu
+        x86_64-fuchsia
+        wasm32-unknown-emscripten
+    - run: cargo check --workspace --all-targets --all-features --release -vv
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-musl
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-gnux32
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-linux-android
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-apple-darwin
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-freebsd
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-netbsd
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-gnu
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-musl
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=i686-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=wasm32-unknown-emscripten
 
   test:
     name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, nightly, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
+        build: [stable, windows, macos, beta, ubuntu-16.04, ubuntu-20.04, macos-10.15, windows-2016]
         include:
           - build: stable
             os: ubuntu-latest
@@ -102,9 +141,6 @@ jobs:
           - build: beta
             os: ubuntu-latest
             rust: beta
-          - build: nightly
-            os: ubuntu-latest
-            rust: nightly
           - build: ubuntu-16.04
             os: ubuntu-16.04
             rust: stable
@@ -127,13 +163,16 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: cargo test --features fs_utf8 --workspace
 
-  test_windows_nightly:
-    name: Test Windows with Rust nightly
+  test_nightly:
+    name: Test with Rust nightly
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [windows]
+        build: [ubuntu, windows]
         include:
+          - build: ubuntu
+            os: ubuntu-latest
+            rust: nightly
           - build: windows
             os: windows-latest
             rust: nightly
@@ -145,16 +184,16 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --features fs_utf8,nightly --workspace
+    - run: cargo test --all-features --workspace
 
   test_musl:
     name: Test on Musl
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [musl]
+        build: [ubuntu]
         include:
-          - build: musl
+          - build: ubuntu
             os: ubuntu-latest
             rust: stable
 
