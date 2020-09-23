@@ -183,7 +183,7 @@ fn check_proc_dir(
             ));
         }
     } else {
-        // Check that the "/proc" directory isn't empty.
+        // Check that the "/proc" and "/proc/self" directories aren't empty.
         if dir_metadata.nlink() <= 2 {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
