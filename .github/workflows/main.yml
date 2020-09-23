@@ -68,12 +68,12 @@ jobs:
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-msvc
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-gnu
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=i686-pc-windows-msvc
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=i686-pc-windows-gnu
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=x86_64-fuchsia
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --release -vv --target=wasm32-unknown-emscripten
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
 
   check_cross_nightly:
     name: Check Cross-Compilation on Rust nightly
@@ -118,12 +118,12 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-msvc
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-pc-windows-gnu
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=i686-pc-windows-msvc
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=i686-pc-windows-gnu
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=x86_64-fuchsia
-    - run: cargo check --workspace --all-targets --all-features --exclude=cap-async-std --release -vv --target=wasm32-unknown-emscripten
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-fuchsia
+    - run: cargo check --workspace --all-targets --features nightly,fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
 
   test:
     name: Test
