@@ -18,7 +18,7 @@ cap-primitives = { path = "../cap-primitives", version = "^0.3.1-alpha.0"}
 cap-std = { path = "../cap-std", optional = true, version = "^0.3.1-alpha.0"}
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.2.0"
+posish = "0.3.0"
 
 [target.'cfg(windows)'.dependencies]
 lazy_static = "1.4.0"
