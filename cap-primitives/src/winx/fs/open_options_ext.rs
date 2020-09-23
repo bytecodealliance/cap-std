@@ -19,30 +19,28 @@ impl OpenOptionsExt {
             security_qos_flags: 0,
         }
     }
-}
 
-impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
-    fn access_mode(&mut self, mode: u32) -> &mut Self {
+    pub(crate) fn access_mode(&mut self, mode: u32) -> &mut Self {
         self.access_mode = Some(mode);
         self
     }
 
-    fn share_mode(&mut self, share: u32) -> &mut Self {
+    pub(crate) fn share_mode(&mut self, share: u32) -> &mut Self {
         self.share_mode = share;
         self
     }
 
-    fn custom_flags(&mut self, flags: u32) -> &mut Self {
+    pub(crate) fn custom_flags(&mut self, flags: u32) -> &mut Self {
         self.custom_flags = flags;
         self
     }
 
-    fn attributes(&mut self, attributes: u32) -> &mut Self {
+    pub(crate) fn attributes(&mut self, attributes: u32) -> &mut Self {
         self.attributes = attributes;
         self
     }
 
-    fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
+    pub(crate) fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
         self.security_qos_flags = flags | winbase::SECURITY_SQOS_PRESENT;
         self
     }

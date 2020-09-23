@@ -1,9 +1,3 @@
-# Pin nightly to nightly-2020-09-21 until async-std supports
-# `open_options_ext_as_flags`.
-#
-# TODO: Test aarch64-apple-darwin once we update to the latest nightly.
-#    - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-apple-darwin
-
 name: CI
 
 on:
@@ -87,7 +81,7 @@ jobs:
         include:
           - build: nightly
             os: ubuntu-latest
-            rust: nightly-2020-09-21
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v2
@@ -106,6 +100,7 @@ jobs:
         x86_64-unknown-netbsd
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
+        aarch64-apple-darwin
         x86_64-pc-windows-msvc
         x86_64-pc-windows-gnu
         i686-pc-windows-msvc
@@ -121,6 +116,7 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-musl
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-apple-darwin
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
@@ -220,10 +216,10 @@ jobs:
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly-2020-09-21
+            rust: nightly
           - build: windows
             os: windows-latest
-            rust: nightly-2020-09-21
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v2
@@ -264,7 +260,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/install-rust
       with:
-        toolchain: nightly-2020-09-21
+        toolchain: nightly
     - run: cargo install cargo-fuzz --vers "^0.8"
     - run: cargo fetch
       working-directory: ./fuzz
