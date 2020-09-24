@@ -32,7 +32,7 @@ errno = "0.2.6"
 errno = "0.2.6"
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.19.0"
+winx = "0.20.0"
 winapi = { version = "0.3.9", features = [
     "ioapiset",
     "winioctl"

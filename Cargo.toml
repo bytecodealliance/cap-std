@@ -33,7 +33,7 @@ libc = "0.2.77"
 # for testing here.
 nt_version = "0.1.3"
 winapi = "0.3.9"
-winx = "0.19.0"
+winx = "0.20.0"
 
 [features]
 # "nightly" is required when building with Rust nightly, and it enables
