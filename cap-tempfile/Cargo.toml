@@ -1,6 +1,6 @@
 [package]
 name = "cap-tempfile"
-version = "0.4.0"
+version = "0.4.1-alpha.0"
 description = "Capability-oriented temporary directories"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^0.4.0"}
+cap-std = { path = "../cap-std", version = "^0.4.1-alpha.0"}
 uuid = { version = "0.8.1", features = ["v4"] }
 
 [target.'cfg(target_os = "emscripten")'.dependencies]

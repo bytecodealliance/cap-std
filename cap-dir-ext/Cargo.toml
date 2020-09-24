@@ -1,6 +1,6 @@
 [package]
 name = "cap-dir-ext"
-version = "0.4.0"
+version = "0.4.1-alpha.0"
 description = "Extension traits for `Dir`"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -15,9 +15,9 @@ readme = "README.md"
 
 [dependencies]
 arf-strings = { version = "0.3.0", optional = true }
-cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.4.0"}
-cap-std = { path = "../cap-std", optional = true, version = "^0.4.0"}
-cap-primitives = { path = "../cap-primitives", version = "^0.4.0"}
+cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.4.1-alpha.0"}
+cap-std = { path = "../cap-std", optional = true, version = "^0.4.1-alpha.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.4.1-alpha.0"}
 
 [features]
 default = ["std"]
