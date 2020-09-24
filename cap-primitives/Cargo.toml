@@ -16,7 +16,7 @@ readme = "README.md"
 [dependencies]
 arbitrary = { version = "0.4.5", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
-fs-set-times = "0.1.0"
+fs-set-times = "0.2.0"
 
 [target.'cfg(not(windows))'.dependencies]
 posish = "0.3.0"
