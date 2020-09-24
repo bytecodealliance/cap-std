@@ -51,6 +51,7 @@ members = [
   "cap-dir-ext",
   "cap-directories",
   "cap-primitives",
+  "cap-rand",
   "cap-std",
   "cap-tempfile",
   "cap-time-ext",
