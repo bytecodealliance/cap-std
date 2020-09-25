@@ -98,6 +98,7 @@ impl Add<Duration> for SystemTime {
     ///
     /// This function may panic if the resulting point in time cannot be represented by the
     /// underlying data structure. See [`SystemTime::checked_add`] for a version without panic.
+    #[inline]
     fn add(self, dur: Duration) -> Self {
         self.checked_add(dur)
             .expect("overflow when adding duration to instant")
@@ -105,6 +106,7 @@ impl Add<Duration> for SystemTime {
 }
 
 impl AddAssign<Duration> for SystemTime {
+    #[inline]
     fn add_assign(&mut self, other: Duration) {
         *self = *self + other;
     }
@@ -113,6 +115,7 @@ impl AddAssign<Duration> for SystemTime {
 impl Sub<Duration> for SystemTime {
     type Output = Self;
 
+    #[inline]
     fn sub(self, dur: Duration) -> Self {
         self.checked_sub(dur)
             .expect("overflow when subtracting duration from instant")
@@ -120,6 +123,7 @@ impl Sub<Duration> for SystemTime {
 }
 
 impl SubAssign<Duration> for SystemTime {
+    #[inline]
     fn sub_assign(&mut self, other: Duration) {
         *self = *self - other;
     }

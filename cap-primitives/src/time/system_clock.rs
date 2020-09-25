@@ -26,6 +26,7 @@ impl SystemClock {
     /// # Safety
     ///
     /// This is unsafe because access to clocks is an ambient authority.
+    #[inline]
     pub unsafe fn new() -> Self {
         Self(())
     }
@@ -35,6 +36,7 @@ impl SystemClock {
     /// This corresponds to [`SystemTime::now`].
     ///
     /// [`SystemTime::now`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.now
+    #[inline]
     pub fn now(&self) -> SystemTime {
         SystemTime::from_std(time::SystemTime::now())
     }
@@ -44,6 +46,7 @@ impl SystemClock {
     /// This corresponds to [`SystemTime::elapsed`].
     ///
     /// [`SystemTime::elapsed`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.elapsed
+    #[inline]
     pub fn elapsed(&self, system_time: SystemTime) -> Result<Duration, SystemTimeError> {
         system_time.std.elapsed()
     }

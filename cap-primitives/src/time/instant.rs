@@ -92,6 +92,7 @@ impl Add<Duration> for Instant {
     ///
     /// This function may panic if the resulting point in time cannot be represented by the
     /// underlying data structure. See [`Instant::checked_add`] for a version without panic.
+    #[inline]
     fn add(self, other: Duration) -> Self {
         self.checked_add(other)
             .expect("overflow when adding duration to instant")
@@ -99,6 +100,7 @@ impl Add<Duration> for Instant {
 }
 
 impl AddAssign<Duration> for Instant {
+    #[inline]
     fn add_assign(&mut self, other: Duration) {
         *self = *self + other;
     }
@@ -107,6 +109,7 @@ impl AddAssign<Duration> for Instant {
 impl Sub<Duration> for Instant {
     type Output = Self;
 
+    #[inline]
     fn sub(self, other: Duration) -> Self {
         self.checked_sub(other)
             .expect("overflow when subtracting duration from instant")
@@ -114,6 +117,7 @@ impl Sub<Duration> for Instant {
 }
 
 impl SubAssign<Duration> for Instant {
+    #[inline]
     fn sub_assign(&mut self, other: Duration) {
         *self = *self - other;
     }
@@ -122,6 +126,7 @@ impl SubAssign<Duration> for Instant {
 impl Sub<Instant> for Instant {
     type Output = Duration;
 
+    #[inline]
     fn sub(self, other: Self) -> Duration {
         self.duration_since(other)
     }

@@ -15,6 +15,7 @@ impl MonotonicClock {
     /// # Safety
     ///
     /// This is unsafe because access to clocks is an ambient authority.
+    #[inline]
     pub unsafe fn new() -> Self {
         Self(())
     }
@@ -24,6 +25,7 @@ impl MonotonicClock {
     /// This corresponds to [`Instant::now`].
     ///
     /// [`Instant::now`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.now
+    #[inline]
     pub fn now(&self) -> Instant {
         Instant::from_std(time::Instant::now())
     }
@@ -33,6 +35,7 @@ impl MonotonicClock {
     /// This corresponds to [`Instant::elapsed`].
     ///
     /// [`Instant::elapsed`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.elapsed
+    #[inline]
     pub fn elapsed(&self, instant: Instant) -> Duration {
         instant.std.elapsed()
     }
