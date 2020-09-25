@@ -16,11 +16,19 @@ use std::{
 /// [`SystemClock::elapsed`] instead. The `UNIX_EPOCH` constant is at
 /// [`SystemClock::UNIX_EPOCH`].
 ///
+/// Similar to the [`filetime` crate], when
+/// `RUSTFLAGS=--cfg emulate_second_only_system` is set, `SystemTime` will
+/// round times from the operating system down to the second. This emulates
+/// the behavior of some file systems, mostly
+/// [HFS](https://en.wikipedia.org/wiki/HFS_Plus), allowing debugging on other
+/// hardware.
+///
 /// [`std::time::SystemTime`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html
 /// [`SystemClock`]: struct.SystemClock.html
 /// [`SystemClock::now`]: struct.SystemClock.html#method.now
 /// [`SystemClock::elapsed`]: struct.SystemClock.html#method.elapsed
 /// [`SystemClock::UNIX_EPOCH`]: struct.SystemClock.html#associatedconstant.UNIX_EPOCH
+/// [`filetime` crate]: https://crates.io/crates/filetime
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct SystemTime {
     pub(crate) std: time::SystemTime,
@@ -28,9 +36,18 @@ pub struct SystemTime {
 
 impl SystemTime {
     /// Constructs a new instance of `Self` from the given `std::time::SystemTime`.
+    // TODO: Make this a `const fn` once `time::Duration::checked_add` is a `const fn`.
     #[inline]
-    pub const fn from_std(std: time::SystemTime) -> Self {
-        Self { std }
+    pub fn from_std(std: time::SystemTime) -> Self {
+        if cfg!(emulate_second_only_system) {
+            let duration = std.duration_since(time::SystemTime::UNIX_EPOCH).unwrap();
+            let secs = time::Duration::from_secs(duration.as_secs());
+            Self {
+                std: time::SystemTime::UNIX_EPOCH.checked_add(secs).unwrap(),
+            }
+        } else {
+            Self { std }
+        }
     }
 
     /// Constructs a new instance of `std::time::SystemTime` from the given `Self`.

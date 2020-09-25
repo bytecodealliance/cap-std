@@ -15,8 +15,9 @@ pub enum SystemTimeSpec {
 
 impl SystemTimeSpec {
     /// Constructs a new instance of `Self` from the given `fs_set_times::SystemTimeSpec`.
+    // TODO: Make this a `const fn` once `SystemTime::from_std` is a `const fn`.
     #[inline]
-    pub const fn from_std(std: fs_set_times::SystemTimeSpec) -> Self {
+    pub fn from_std(std: fs_set_times::SystemTimeSpec) -> Self {
         match std {
             fs_set_times::SystemTimeSpec::SymbolicNow => SystemTimeSpec::SymbolicNow,
             fs_set_times::SystemTimeSpec::Absolute(time) => {
