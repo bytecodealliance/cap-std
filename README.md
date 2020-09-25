@@ -88,7 +88,7 @@ requiring external configuration.
 If every resource requires some other resource to obtain, how does one obtain
 the first resource?
 
-There are three main ways:
+There currently are three main ways:
  - Use the [`cap-directories`] crate to create `Dir`s for config, cache and
    other data directories.
  - Use the [`cap-tempfile`] crate to create `Dir`s for temporary directories.
