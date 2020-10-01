@@ -3,7 +3,7 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
-use std::{io, net};
+use std::{fmt, io, net};
 
 /// A TCP socket server, listening for connections.
 ///
@@ -158,4 +158,10 @@ impl IntoRawSocket for TcpListener {
     }
 }
 
-// TODO: impl Debug for TcpListener
+impl fmt::Debug for TcpListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Don't leak the address/port.
+        let mut res = f.debug_struct("TcpListener");
+        res.finish()
+    }
+}
