@@ -37,19 +37,15 @@ pub use rand::{distributions, seq, AsByteSliceMut, CryptoRng, Error, Rng, RngCor
 ///
 /// [`rand::prelude`]: https://docs.rs/rand/current/rand/prelude/index.html
 pub mod prelude {
-    pub use crate::distributions::Distribution;
-    pub use crate::random;
-    pub use crate::rngs::CapRng;
     #[cfg(feature = "small_rng")]
     pub use crate::rngs::SmallRng;
-    pub use crate::rngs::StdRng;
-    pub use crate::seq::IteratorRandom;
-    pub use crate::seq::SliceRandom;
-    pub use crate::thread_rng;
-    pub use crate::CryptoRng;
-    pub use crate::Rng;
-    pub use crate::RngCore;
-    pub use crate::SeedableRng;
+    pub use crate::{
+        distributions::Distribution,
+        random,
+        rngs::{CapRng, StdRng},
+        seq::{IteratorRandom, SliceRandom},
+        thread_rng, CryptoRng, Rng, RngCore, SeedableRng,
+    };
 }
 
 /// Random number generators and adapters.
