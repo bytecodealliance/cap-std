@@ -1,13 +1,14 @@
 use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDir, ReadDirInner};
 use posish::fs::Entry;
 #[cfg(unix)]
+use std::os::unix::ffi::OsStrExt;
+#[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 #[cfg(target_os = "wasi")]
-use std::os::wasi::fs::MetadataExt;
+use std::os::wasi::{ffi::OsStrExt, fs::MetadataExt};
 use std::{
     ffi::{OsStr, OsString},
     fmt, fs, io,
-    os::unix::ffi::OsStrExt,
 };
 
 pub(crate) struct DirEntryInner {

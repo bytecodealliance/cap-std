@@ -1,10 +1,13 @@
 use crate::fs::OpenOptions;
 use posish::fs::OFlags;
+#[cfg(unix)]
+use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
+#[cfg(target_os = "wasi")]
+use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
 use std::{
     ffi::OsStr,
     fs, io,
     ops::Deref,
-    os::unix::{ffi::OsStrExt, fs::OpenOptionsExt},
     path::{Component, Path},
 };
 #[cfg(racy_asserts)]

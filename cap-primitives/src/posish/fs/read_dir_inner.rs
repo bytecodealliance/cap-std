@@ -4,14 +4,20 @@ use crate::fs::{
     ReadDir,
 };
 use posish::fs::Dir;
+#[cfg(unix)]
+use std::os::unix::{
+    ffi::OsStrExt,
+    io::{AsRawFd, FromRawFd},
+};
+#[cfg(target_os = "wasi")]
+use std::os::wasi::{
+    ffi::OsStrExt,
+    io::{AsRawFd, FromRawFd},
+};
 use std::{
     ffi::OsStr,
     fmt, fs, io,
     mem::ManuallyDrop,
-    os::unix::{
-        ffi::OsStrExt,
-        io::{AsRawFd, FromRawFd},
-    },
     path::{Component, Path},
     sync::Arc,
 };
