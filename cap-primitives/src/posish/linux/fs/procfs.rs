@@ -11,6 +11,7 @@ use crate::fs::{
     errors, open, open_unchecked, readlink_unchecked, set_times_follow_unchecked, FollowSymlinks,
     Metadata, OpenOptions, SystemTimeSpec,
 };
+use once_cell::sync::Lazy;
 use posish::{
     fs::{chmodat, fstatfs, major, renameat, Mode},
     path::DecInt,
@@ -35,56 +36,12 @@ const PROC_SUPER_MAGIC: libc::__fsword_t = 0x0000_9fa0;
 #[cfg(target_env = "musl")]
 const PROC_SUPER_MAGIC: libc::c_ulong = 0x0000_9fa0;
 
-lazy_static! {
-    static ref PROC_SELF_FD: io::Result<fs::File> = init_proc_self_fd();
-}
-
 // Identify a subdirectory of "/proc", to determine which anomalies to
 // check for.
 enum Subdir {
     Proc,
     Pid,
     Fd,
-}
-
-/// Open a handle for "/proc/self/fd".
-#[allow(clippy::useless_conversion)]
-fn init_proc_self_fd() -> io::Result<fs::File> {
-    // When libc does have this constant, check that our copy has the same value.
-    #[cfg(not(target_env = "musl"))]
-    assert_eq!(
-        PROC_SUPER_MAGIC,
-        libc::__fsword_t::from(libc::PROC_SUPER_MAGIC)
-    );
-
-    // Open "/proc". Here and below, use `read(true)` even though we don't need
-    // read permissions, because Rust's libstd requires an access mode, and
-    // Linux ignores `O_RDONLY` with `O_PATH`.
-    let proc = fs::OpenOptions::new()
-        .read(true)
-        .custom_flags(libc::O_PATH | libc::O_DIRECTORY | libc::O_NOFOLLOW)
-        .open("/proc")?;
-    let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
-
-    let (uid, gid, pid) = (getuid(), getgid(), getpid());
-    let mut options = OpenOptions::new();
-    let options = options
-        .read(true)
-        .follow(FollowSymlinks::No)
-        .custom_flags(libc::O_PATH | libc::O_DIRECTORY);
-
-    // Open "/proc/self". Use our pid to compute the name rather than literally
-    // using "self", as "self" is a symlink.
-    let proc_self = open_unchecked(&proc, &DecInt::new(pid), options)?;
-    drop(proc);
-    check_proc_dir(Subdir::Pid, &proc_self, Some(&proc_metadata), uid, gid)?;
-
-    // Open "/proc/self/fd".
-    let proc_self_fd = open_unchecked(&proc_self, Path::new("fd"), options)?;
-    drop(proc_self);
-    check_proc_dir(Subdir::Fd, &proc_self_fd, Some(&proc_metadata), uid, gid)?;
-
-    Ok(proc_self_fd)
 }
 
 /// Check a subdirectory of "/proc" for anomalies.
@@ -222,6 +179,45 @@ fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
 }
 
 fn proc_self_fd() -> io::Result<&'static fs::File> {
+    #[allow(clippy::useless_conversion)]
+    static PROC_SELF_FD: Lazy<io::Result<fs::File>> = Lazy::new(|| {
+        // When libc does have this constant, check that our copy has the same value.
+        #[cfg(not(target_env = "musl"))]
+        assert_eq!(
+            PROC_SUPER_MAGIC,
+            libc::__fsword_t::from(libc::PROC_SUPER_MAGIC)
+        );
+
+        // Open "/proc". Here and below, use `read(true)` even though we don't need
+        // read permissions, because Rust's libstd requires an access mode, and
+        // Linux ignores `O_RDONLY` with `O_PATH`.
+        let proc = fs::OpenOptions::new()
+            .read(true)
+            .custom_flags(libc::O_PATH | libc::O_DIRECTORY | libc::O_NOFOLLOW)
+            .open("/proc")?;
+        let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
+
+        let (uid, gid, pid) = (getuid(), getgid(), getpid());
+        let mut options = OpenOptions::new();
+        let options = options
+            .read(true)
+            .follow(FollowSymlinks::No)
+            .custom_flags(libc::O_PATH | libc::O_DIRECTORY);
+
+        // Open "/proc/self". Use our pid to compute the name rather than literally
+        // using "self", as "self" is a symlink.
+        let proc_self = open_unchecked(&proc, &DecInt::new(pid), options)?;
+        drop(proc);
+        check_proc_dir(Subdir::Pid, &proc_self, Some(&proc_metadata), uid, gid)?;
+
+        // Open "/proc/self/fd".
+        let proc_self_fd = open_unchecked(&proc_self, Path::new("fd"), options)?;
+        drop(proc_self);
+        check_proc_dir(Subdir::Fd, &proc_self_fd, Some(&proc_metadata), uid, gid)?;
+
+        Ok(proc_self_fd)
+    });
+
     PROC_SELF_FD.as_ref().map_err(|e| {
         io::Error::new(
             io::ErrorKind::Other,

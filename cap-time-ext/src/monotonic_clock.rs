@@ -2,7 +2,7 @@
 use posish::time::{clock_getres, ClockId};
 use std::{convert::TryInto, time, time::Duration};
 #[cfg(windows)]
-use winx::time::perf_counter_frequency;
+use {once_cell::sync::Lazy, winx::time::perf_counter_frequency};
 
 /// Extension trait for `cap_std::time::MonotonicClock`.
 pub trait MonotonicClockExt {
@@ -55,6 +55,5 @@ impl MonotonicClockExt for cap_primitives::time::MonotonicClock {
 }
 
 #[cfg(windows)]
-lazy_static! {
-    static ref PERF_COUNTER_RES: u64 = 1_000_000_000 / perf_counter_frequency().unwrap();
-}
+static PERF_COUNTER_RES: Lazy<u64> =
+    Lazy::new(|| 1_000_000_000 / perf_counter_frequency().unwrap());
