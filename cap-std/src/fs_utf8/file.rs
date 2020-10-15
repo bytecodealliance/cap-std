@@ -208,6 +208,45 @@ impl Read for File {
     }
 }
 
+impl Read for &File {
+    #[inline]
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        (&mut &self.cap_std).read(buf)
+    }
+
+    #[inline]
+    fn read_vectored(&mut self, bufs: &mut [IoSliceMut]) -> io::Result<usize> {
+        (&mut &self.cap_std).read_vectored(bufs)
+    }
+
+    #[inline]
+    fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
+        (&mut &self.cap_std).read_exact(buf)
+    }
+
+    #[inline]
+    fn read_to_end(&mut self, buf: &mut Vec<u8>) -> io::Result<usize> {
+        (&mut &self.cap_std).read_to_end(buf)
+    }
+
+    #[inline]
+    fn read_to_string(&mut self, buf: &mut String) -> io::Result<usize> {
+        (&mut &self.cap_std).read_to_string(buf)
+    }
+
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_read_vectored(&self) -> bool {
+        (&mut &self.cap_std).is_read_vectored()
+    }
+
+    #[cfg(feature = "read_initializer")]
+    #[inline]
+    unsafe fn initializer(&self) -> Initializer {
+        (&mut &self.cap_std).initializer()
+    }
+}
+
 impl Write for File {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -242,6 +281,40 @@ impl Write for File {
     }
 }
 
+impl Write for &File {
+    #[inline]
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        (&mut &self.cap_std).write(buf)
+    }
+
+    #[inline]
+    fn flush(&mut self) -> io::Result<()> {
+        (&mut &self.cap_std).flush()
+    }
+
+    #[inline]
+    fn write_vectored(&mut self, bufs: &[IoSlice]) -> io::Result<usize> {
+        (&mut &self.cap_std).write_vectored(bufs)
+    }
+
+    #[inline]
+    fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
+        (&mut &self.cap_std).write_all(buf)
+    }
+
+    #[cfg(feature = "can_vector")]
+    #[inline]
+    fn is_write_vectored(&self) -> bool {
+        (&mut &self.cap_std).is_write_vectored()
+    }
+
+    #[cfg(feature = "write_all_vectored")]
+    #[inline]
+    fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
+        (&mut &self.cap_std).write_all_vectored(bufs)
+    }
+}
+
 impl Seek for File {
     #[inline]
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
@@ -258,6 +331,25 @@ impl Seek for File {
     #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         self.cap_std.stream_position()
+    }
+}
+
+impl Seek for &File {
+    #[inline]
+    fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
+        (&mut &self.cap_std).seek(pos)
+    }
+
+    #[cfg(feature = "seek_convenience")]
+    #[inline]
+    fn stream_len(&mut self) -> io::Result<u64> {
+        (&mut &self.cap_std).stream_len()
+    }
+
+    #[cfg(feature = "seek_convenience")]
+    #[inline]
+    fn stream_position(&mut self) -> io::Result<u64> {
+        (&mut &self.cap_std).stream_position()
     }
 }
 

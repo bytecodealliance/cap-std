@@ -133,6 +133,30 @@ impl Read for UnixStream {
     // async_std doesn't have `initializer`.
 }
 
+impl Read for &UnixStream {
+    #[inline]
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context,
+        buf: &mut [u8],
+    ) -> Poll<io::Result<usize>> {
+        Read::poll_read(Pin::new(&mut &self.std), cx, buf)
+    }
+
+    #[inline]
+    fn poll_read_vectored(
+        self: Pin<&mut Self>,
+        cx: &mut Context,
+        bufs: &mut [IoSliceMut],
+    ) -> Poll<io::Result<usize>> {
+        Read::poll_read_vectored(Pin::new(&mut &self.std), cx, bufs)
+    }
+
+    // async_std doesn't have `is_read_vectored`.
+
+    // async_std doesn't have `initializer`.
+}
+
 impl Write for UnixStream {
     #[inline]
     fn poll_write(
@@ -160,6 +184,36 @@ impl Write for UnixStream {
         bufs: &[IoSlice],
     ) -> Poll<io::Result<usize>> {
         Write::poll_write_vectored(Pin::new(&mut self.std), cx, bufs)
+    }
+
+    // async_std doesn't have `is_write_vectored`.
+
+    // async_std doesn't have `write_all_vectored`.
+}
+
+impl Write for &UnixStream {
+    #[inline]
+    fn poll_write(self: Pin<&mut Self>, cx: &mut Context, buf: &[u8]) -> Poll<io::Result<usize>> {
+        Write::poll_write(Pin::new(&mut &self.std), cx, buf)
+    }
+
+    #[inline]
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
+        Write::poll_flush(Pin::new(&mut &self.std), cx)
+    }
+
+    #[inline]
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
+        Write::poll_close(Pin::new(&mut &self.std), cx)
+    }
+
+    #[inline]
+    fn poll_write_vectored(
+        self: Pin<&mut Self>,
+        cx: &mut Context,
+        bufs: &[IoSlice],
+    ) -> Poll<io::Result<usize>> {
+        Write::poll_write_vectored(Pin::new(&mut &self.std), cx, bufs)
     }
 
     // async_std doesn't have `is_write_vectored`.
