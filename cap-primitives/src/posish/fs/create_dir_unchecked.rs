@@ -2,8 +2,8 @@ use crate::fs::DirOptions;
 use posish::fs::{mkdirat, Mode};
 use std::{fs, io, path::Path};
 
-/// *Unsandboxed* function similar to `mkdir`, but which does not perform sandboxing.
-pub(crate) fn mkdir_unchecked(
+/// *Unsandboxed* function similar to `create_dir`, but which does not perform sandboxing.
+pub(crate) fn create_dir_unchecked(
     start: &fs::File,
     path: &Path,
     options: &DirOptions,

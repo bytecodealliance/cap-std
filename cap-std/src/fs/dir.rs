@@ -1,8 +1,8 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, copy, hard_link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
-    remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions, stat,
-    unlink, DirOptions, FollowSymlinks, Permissions,
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
+    readlink, remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions,
+    stat, unlink, DirOptions, FollowSymlinks, Permissions,
 };
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{
@@ -139,7 +139,7 @@ impl Dir {
     }
 
     fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
-        mkdir(&self.std_file, path, dir_options)
+        create_dir(&self.std_file, path, dir_options)
     }
 
     fn _create_dir_all(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {

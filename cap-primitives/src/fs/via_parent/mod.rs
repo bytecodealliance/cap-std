@@ -1,9 +1,9 @@
 //! In many operations, the last component of a path is special. For example,
-//! in `mkdir`, the last component names the path to be created, while the
+//! in `create_dir`, the last component names the path to be created, while the
 //! rest of the components just name the place to create it in.
 
+mod create_dir;
 mod hard_link;
-mod mkdir;
 mod open_parent;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 mod readlink;
@@ -18,8 +18,8 @@ mod unlink;
 
 use open_parent::open_parent;
 
+pub(crate) use create_dir::create_dir;
 pub(crate) use hard_link::hard_link;
-pub(crate) use mkdir::mkdir;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink::readlink;
 pub(crate) use rename::rename;

@@ -1,5 +1,6 @@
 mod c_str;
 mod copy;
+mod create_dir_unchecked;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -10,7 +11,6 @@ mod is_root_dir;
 #[cfg(racy_asserts)]
 mod is_same_file;
 mod metadata_ext;
-mod mkdir_unchecked;
 mod oflags;
 mod open_options_ext;
 mod open_unchecked;
@@ -63,7 +63,7 @@ pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     via_parent::hard_link as hard_link_impl,
-    via_parent::mkdir as mkdir_impl,
+    via_parent::create_dir as create_dir_impl,
     via_parent::readlink as readlink_impl,
     via_parent::rename as rename_impl,
     via_parent::rmdir as rmdir_impl,
@@ -75,6 +75,7 @@ pub(crate) use crate::fs::{
 #[allow(unused_imports)]
 pub(crate) use c_str::c_str;
 pub(crate) use copy::*;
+pub(crate) use create_dir_unchecked::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
@@ -85,7 +86,6 @@ pub(crate) use is_root_dir::*;
 #[cfg(racy_asserts)]
 pub(crate) use is_same_file::*;
 pub(crate) use metadata_ext::*;
-pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use permissions_ext::*;

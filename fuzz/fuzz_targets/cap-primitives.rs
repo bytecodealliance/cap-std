@@ -75,7 +75,7 @@ impl Plan {
                     .ok();
                 }
                 Operation::Mkdir(dirno, path, options) => {
-                    cap_primitives::fs::mkdir(
+                    cap_primitives::fs::create_dir(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                         options,
