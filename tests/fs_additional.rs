@@ -407,6 +407,7 @@ fn dir_searchable_unreadable() {
 /// ambient API instead of `cap_std`. The purpose of this test is to
 /// confirm fundamentally OS-specific behaviors.
 #[test]
+#[cfg_attr(any(target_os = "macos", target_os = "freebsd"), ignore)] // submitted to upstream as https://github.com/rust-lang/rust/pull/78026
 fn symlink_hard_link_ambient() {
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
