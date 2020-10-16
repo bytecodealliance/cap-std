@@ -46,6 +46,12 @@ impl File {
         Self { cap_std }
     }
 
+    /// Consumes `self` and returns a `std::fs::File`.
+    #[inline]
+    pub fn into_std(self) -> fs::File {
+        self.cap_std.into_std()
+    }
+
     /// Returns a new `OpenOptions` object.
     ///
     /// This corresponds to [`std::fs::File::with_options`].

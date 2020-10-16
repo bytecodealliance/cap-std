@@ -36,6 +36,12 @@ impl File {
         Self { std }
     }
 
+    /// Consumes `self` and returns an `async_std::fs::File`.
+    #[inline]
+    pub fn into_std(self) -> fs::File {
+        self.std
+    }
+
     // async_std doesn't have `with_options`.
 
     /// Attempts to sync all OS-internal metadata to disk.
