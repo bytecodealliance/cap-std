@@ -1,33 +1,35 @@
-//! This defines `unlink`, the primary entrypoint to sandboxed file removal.
+//! This defines `remove_file`, the primary entrypoint to sandboxed file removal.
 
-use crate::fs::unlink_impl;
+use crate::fs::remove_file_impl;
 #[cfg(racy_asserts)]
-use crate::fs::{manually, map_result, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata};
+use crate::fs::{
+    manually, map_result, remove_file_unchecked, stat_unchecked, FollowSymlinks, Metadata,
+};
 use std::{fs, io, path::Path};
 
-/// Perform a `unlinkat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `remove_fileat`-like operation, ensuring that the resolution of
+/// the path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
-pub fn unlink(start: &fs::File, path: &Path) -> io::Result<()> {
+pub fn remove_file(start: &fs::File, path: &Path) -> io::Result<()> {
     #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(start, path, FollowSymlinks::No);
 
     // Call the underlying implementation.
-    let result = unlink_impl(start, path);
+    let result = remove_file_impl(start, path);
 
     #[cfg(racy_asserts)]
     let stat_after = stat_unchecked(start, path, FollowSymlinks::No);
 
     #[cfg(racy_asserts)]
-    check_unlink(start, path, &stat_before, &result, &stat_after);
+    check_remove_file(start, path, &stat_before, &result, &stat_after);
 
     result
 }
 
 #[cfg(racy_asserts)]
 #[allow(clippy::enum_glob_use)]
-fn check_unlink(
+fn check_remove_file(
     start: &fs::File,
     path: &Path,
     stat_before: &io::Result<Metadata>,
@@ -56,13 +58,13 @@ fn check_unlink(
                 path,
                 FollowSymlinks::No,
             )) {
-                Ok(canon) => match map_result(&unlink_unchecked(start, &canon)) {
+                Ok(canon) => match map_result(&remove_file_unchecked(start, &canon)) {
                     Err((_unchecked_kind, _unchecked_message)) => {
                         /* TODO: Check error messages.
                         assert_eq!(
                             kind,
                             unchecked_kind,
-                            "unexpected error kind from unlink start='{:?}', \
+                            "unexpected error kind from remove_file start='{:?}', \
                              path='{}':\nstat_before={:#?}\nresult={:#?}\nstat_after={:#?}",
                             start,
                             path.display(),
@@ -73,7 +75,7 @@ fn check_unlink(
                         assert_eq!(message, unchecked_message);
                         */
                     }
-                    _ => panic!("unsandboxed unlink success"),
+                    _ => panic!("unsandboxed remove_file success"),
                 },
                 Err((_canon_kind, _canon_message)) => {
                     /* TODO: Check error messages.
@@ -85,7 +87,7 @@ fn check_unlink(
         }
 
         other => panic!(
-            "inconsistent unlink checks: start='{:?}' path='{}':\n{:#?}",
+            "inconsistent remove_file checks: start='{:?}' path='{}':\n{:#?}",
             start,
             path.display(),
             other,
@@ -94,7 +96,7 @@ fn check_unlink(
 
     match (result, stat_after) {
         (Ok(()), Ok(_unchecked_metadata)) => panic!(
-            "file still exists after unlink start='{:?}', path='{}'",
+            "file still exists after remove_file start='{:?}', path='{}'",
             start,
             path.display()
         ),
@@ -102,7 +104,7 @@ fn check_unlink(
             io::ErrorKind::PermissionDenied => (),
             io::ErrorKind::Other if unchecked_metadata.is_dir() => (),
             _ => panic!(
-                "unexpected error unlinking start='{:?}', path='{}': {:?}",
+                "unexpected error removing file start='{:?}', path='{}': {:?}",
                 start,
                 path.display(),
                 e

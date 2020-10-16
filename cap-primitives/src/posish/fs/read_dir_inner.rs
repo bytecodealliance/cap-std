@@ -1,6 +1,6 @@
 use crate::fs::{
     open_dir, open_dir_unchecked, open_entry_impl, read_dir_unchecked, remove_dir_unchecked,
-    stat_unchecked, unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
+    remove_file_unchecked, stat_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
     ReadDir,
 };
 use posish::fs::Dir;
@@ -49,7 +49,7 @@ impl ReadDirInner {
     }
 
     pub(super) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
-        unsafe { unlink_unchecked(&self.to_std_file(), file_name.as_ref()) }
+        unsafe { remove_file_unchecked(&self.to_std_file(), file_name.as_ref()) }
     }
 
     pub(super) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {

@@ -20,13 +20,13 @@ mod readlink_impl;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod remove_dir_unchecked;
+mod remove_file_unchecked;
 mod remove_open_dir_impl;
 mod rename_unchecked;
 mod set_permissions_unchecked;
 mod set_times_impl;
 mod stat_unchecked;
 mod symlink_unchecked;
-mod unlink_unchecked;
 
 pub(crate) mod errors;
 
@@ -41,7 +41,7 @@ pub(crate) use crate::fs::{
     manually::stat as stat_impl,
     via_parent::symlink_dir as symlink_dir_impl,
     via_parent::symlink_file as symlink_file_impl,
-    via_parent::unlink as unlink_impl,
+    via_parent::remove_file as remove_file_impl,
     dir_options as dir_path_options,
 };
 
@@ -64,13 +64,13 @@ pub(crate) use readlink_impl::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_dir_unchecked::*;
+pub(crate) use remove_file_unchecked::*;
 pub(crate) use remove_open_dir_impl::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use set_permissions_unchecked::*;
 pub(crate) use set_times_impl::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
-pub(crate) use unlink_unchecked::*;
 
 // On Windows, there is a limit of 63 reparse points on any given path.
 // https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points

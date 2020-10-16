@@ -1,5 +1,5 @@
 use crate::fs::{
-    read_dir, read_dir_unchecked, remove_dir, remove_open_dir, stat, unlink, FollowSymlinks,
+    read_dir, read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat, FollowSymlinks,
     ReadDir,
 };
 use std::{
@@ -13,7 +13,7 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
     // 108e90ca78f052c0c1c49c42a22c85620be19712.
     let filetype = stat(start, path, FollowSymlinks::No)?.file_type();
     if filetype.is_symlink() {
-        unlink(start, path)
+        remove_file(start, path)
     } else {
         remove_dir_all_recursive(read_dir(start, path)?)?;
         remove_dir(start, path)

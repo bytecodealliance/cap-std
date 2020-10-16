@@ -19,6 +19,7 @@ mod read_dir_inner;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
 mod remove_dir_unchecked;
+mod remove_file_unchecked;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
 #[cfg(not(target_os = "linux"))]
@@ -28,7 +29,6 @@ mod set_times_impl;
 mod stat_unchecked;
 mod symlink_unchecked;
 mod times;
-mod unlink_unchecked;
 
 pub(crate) mod errors;
 
@@ -68,7 +68,7 @@ pub(crate) use crate::fs::{
     via_parent::rename as rename_impl,
     via_parent::remove_dir as remove_dir_impl,
     via_parent::symlink as symlink_impl,
-    via_parent::unlink as unlink_impl,
+    via_parent::remove_file as remove_file_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
@@ -93,13 +93,13 @@ pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_dir_unchecked::*;
+pub(crate) use remove_file_unchecked::*;
 pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 #[allow(unused_imports)]
 pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked};
-pub(crate) use unlink_unchecked::*;
 
 // On Linux, there is a limit of 40 symlink expansions.
 // Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html

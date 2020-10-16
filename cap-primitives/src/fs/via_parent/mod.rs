@@ -8,13 +8,13 @@ mod open_parent;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 mod readlink;
 mod remove_dir;
+mod remove_file;
 mod rename;
 #[cfg(windows)]
 mod set_permissions;
 #[cfg(not(windows))]
 mod set_times_nofollow;
 mod symlink;
-mod unlink;
 
 use open_parent::open_parent;
 
@@ -23,6 +23,7 @@ pub(crate) use hard_link::hard_link;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink::readlink;
 pub(crate) use remove_dir::remove_dir;
+pub(crate) use remove_file::remove_file;
 pub(crate) use rename::rename;
 #[cfg(windows)]
 pub(crate) use set_permissions::set_permissions;
@@ -32,4 +33,3 @@ pub(crate) use set_times_nofollow::set_times_nofollow;
 pub(crate) use symlink::symlink;
 #[cfg(windows)]
 pub(crate) use symlink::{symlink_dir, symlink_file};
-pub(crate) use unlink::unlink;

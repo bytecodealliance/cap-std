@@ -28,6 +28,7 @@ mod read_dir;
 mod readlink;
 mod remove_dir;
 mod remove_dir_all;
+mod remove_file;
 mod remove_open_dir;
 mod rename;
 mod set_permissions;
@@ -35,7 +36,6 @@ mod set_times;
 mod stat;
 mod symlink;
 mod system_time_spec;
-mod unlink;
 
 pub(crate) mod errors;
 pub(crate) mod manually;
@@ -72,6 +72,7 @@ pub use read_dir::*;
 pub use readlink::*;
 pub use remove_dir::*;
 pub use remove_dir_all::*;
+pub use remove_file::*;
 pub use remove_open_dir::*;
 pub use rename::*;
 pub use set_permissions::*;
@@ -79,7 +80,6 @@ pub use set_times::*;
 pub use stat::*;
 pub use symlink::*;
 pub use system_time_spec::*;
-pub use unlink::*;
 
 #[cfg(racy_asserts)]
 fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::ErrorKind, String)> {

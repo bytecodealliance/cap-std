@@ -1,4 +1,6 @@
-use crate::fs::{read_dir_unchecked, remove_dir, remove_open_dir, stat, unlink, FollowSymlinks};
+use crate::fs::{
+    read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat, FollowSymlinks,
+};
 #[cfg(feature = "windows_file_type_ext")]
 use std::os::windows::fs::FileTypeExt;
 use std::{
@@ -41,7 +43,7 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         } else if child_type.is_symlink_dir() {
             remove_dir(start, &path.join(child.file_name()))?;
         } else {
-            unlink(start, &path.join(child.file_name()))?;
+            remove_file(start, &path.join(child.file_name()))?;
         }
     }
     Ok(())
@@ -61,7 +63,7 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
                 Ok(()) => (),
                 Err(e) => {
                     if e.raw_os_error() == Some(winapi::shared::winerror::ERROR_DIRECTORY as i32) {
-                        unlink(start, &path.join(child.file_name()))?;
+                        remove_file(start, &path.join(child.file_name()))?;
                     } else {
                         return Err(e);
                     }

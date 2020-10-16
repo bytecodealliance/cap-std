@@ -123,7 +123,7 @@ impl Plan {
                     .ok();
                 }
                 Operation::Unlink(dirno, path) => {
-                    cap_primitives::fs::unlink(
+                    cap_primitives::fs::remove_file(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                     )
