@@ -402,3 +402,18 @@ fn dir_searchable_unreadable() {
         .create_dir_with("dir/writeable_subdir", &options)
         .is_err());
 }
+
+/// POSIX says that whether or not `link` follows symlinks in the `old`
+/// path is implementation-defined. We want `hard_link` to not follow
+/// symbolic links.
+#[test]
+fn symlink_hard_link() {
+    let tmpdir = tmpdir();
+
+    check!(tmpdir.create("file"));
+    check!(symlink_file("file", &tmpdir, "symlink"));
+    check!(tmpdir.hard_link("symlink", &tmpdir, "hard_link"));
+    let _ = check!(tmpdir.open("hard_link"));
+    check!(tmpdir.rename("file", &tmpdir, "file.renamed"));
+    assert!(tmpdir.open("hard_link").is_err());
+}
