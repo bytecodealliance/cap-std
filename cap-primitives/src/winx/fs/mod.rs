@@ -19,9 +19,9 @@ mod read_dir_inner;
 mod readlink_impl;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
+mod remove_dir_unchecked;
 mod remove_open_dir_impl;
 mod rename_unchecked;
-mod rmdir_unchecked;
 mod set_permissions_unchecked;
 mod set_times_impl;
 mod stat_unchecked;
@@ -36,7 +36,7 @@ pub(crate) use crate::fs::{
     via_parent::hard_link as hard_link_impl,
     via_parent::create_dir as create_dir_impl,
     via_parent::rename as rename_impl,
-    via_parent::rmdir as rmdir_impl,
+    via_parent::remove_dir as remove_dir_impl,
     via_parent::set_permissions as set_permissions_impl,
     manually::stat as stat_impl,
     via_parent::symlink_dir as symlink_dir_impl,
@@ -63,9 +63,9 @@ pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_impl::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
+pub(crate) use remove_dir_unchecked::*;
 pub(crate) use remove_open_dir_impl::*;
 pub(crate) use rename_unchecked::*;
-pub(crate) use rmdir_unchecked::*;
 pub(crate) use set_permissions_unchecked::*;
 pub(crate) use set_times_impl::*;
 pub(crate) use stat_unchecked::*;

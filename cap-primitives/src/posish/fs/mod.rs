@@ -18,9 +18,9 @@ mod permissions_ext;
 mod read_dir_inner;
 mod readlink_unchecked;
 mod remove_dir_all_impl;
+mod remove_dir_unchecked;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
-mod rmdir_unchecked;
 #[cfg(not(target_os = "linux"))]
 mod set_permissions_impl;
 #[cfg(not(target_os = "linux"))]
@@ -66,7 +66,7 @@ pub(crate) use crate::fs::{
     via_parent::create_dir as create_dir_impl,
     via_parent::readlink as readlink_impl,
     via_parent::rename as rename_impl,
-    via_parent::rmdir as rmdir_impl,
+    via_parent::remove_dir as remove_dir_impl,
     via_parent::symlink as symlink_impl,
     via_parent::unlink as unlink_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
@@ -92,9 +92,9 @@ pub(crate) use permissions_ext::*;
 pub(crate) use read_dir_inner::*;
 pub(crate) use readlink_unchecked::*;
 pub(crate) use remove_dir_all_impl::*;
+pub(crate) use remove_dir_unchecked::*;
 pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_unchecked::*;
-pub(crate) use rmdir_unchecked::*;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 #[allow(unused_imports)]

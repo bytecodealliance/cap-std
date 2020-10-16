@@ -1,5 +1,5 @@
 use crate::fs::{
-    open_dir, open_dir_unchecked, open_entry_impl, read_dir_unchecked, rmdir_unchecked,
+    open_dir, open_dir_unchecked, open_entry_impl, read_dir_unchecked, remove_dir_unchecked,
     stat_unchecked, unlink_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
     ReadDir,
 };
@@ -53,7 +53,7 @@ impl ReadDirInner {
     }
 
     pub(super) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
-        unsafe { rmdir_unchecked(&self.to_std_file(), file_name.as_ref()) }
+        unsafe { remove_dir_unchecked(&self.to_std_file(), file_name.as_ref()) }
     }
 
     pub(super) fn self_metadata(&self) -> io::Result<Metadata> {

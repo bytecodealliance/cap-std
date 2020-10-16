@@ -1,8 +1,8 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
-    readlink, remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions,
-    stat, unlink, DirOptions, FollowSymlinks, Permissions,
+    readlink, remove_dir, remove_dir_all, remove_open_dir, remove_open_dir_all, rename,
+    set_permissions, stat, unlink, DirOptions, FollowSymlinks, Permissions,
 };
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{
@@ -307,7 +307,7 @@ impl Dir {
     /// [`std::fs::remove_dir`]: https://doc.rust-lang.org/std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        rmdir(&self.std_file, path.as_ref())
+        remove_dir(&self.std_file, path.as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!

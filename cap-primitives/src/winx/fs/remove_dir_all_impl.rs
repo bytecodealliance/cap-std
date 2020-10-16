@@ -1,4 +1,4 @@
-use crate::fs::{read_dir_unchecked, remove_open_dir, rmdir, stat, unlink, FollowSymlinks};
+use crate::fs::{read_dir_unchecked, remove_dir, remove_open_dir, stat, unlink, FollowSymlinks};
 #[cfg(feature = "windows_file_type_ext")]
 use std::os::windows::fs::FileTypeExt;
 use std::{
@@ -12,11 +12,12 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
     let filetype = stat(start, path, FollowSymlinks::No)?.file_type();
     if filetype.is_symlink() {
         // On Windows symlinks to files and directories are removed differently.
-        // rmdir only deletes dir symlinks and junctions, not file symlinks.
-        rmdir(start, path)
+        // `remove_dir` only deletes dir symlinks and junctions, not file
+        // symlinks.
+        remove_dir(start, path)
     } else {
         remove_dir_all_recursive(start, path)?;
-        rmdir(start, path)
+        remove_dir(start, path)
     }
 }
 
@@ -36,9 +37,9 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         if child_type.is_dir() {
             let path = path.join(child.file_name());
             remove_dir_all_recursive(start, &path)?;
-            rmdir(start, &path)?;
+            remove_dir(start, &path)?;
         } else if child_type.is_symlink_dir() {
-            rmdir(start, &path.join(child.file_name()))?;
+            remove_dir(start, &path.join(child.file_name()))?;
         } else {
             unlink(start, &path.join(child.file_name()))?;
         }
@@ -54,9 +55,9 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         if child_type.is_dir() {
             let path = path.join(child.file_name());
             remove_dir_all_recursive(start, &path)?;
-            rmdir(start, &path)?;
+            remove_dir(start, &path)?;
         } else {
-            match rmdir(start, &path.join(child.file_name())) {
+            match remove_dir(start, &path.join(child.file_name())) {
                 Ok(()) => (),
                 Err(e) => {
                     if e.raw_os_error() == Some(winapi::shared::winerror::ERROR_DIRECTORY as i32) {

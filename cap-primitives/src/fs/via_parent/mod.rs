@@ -7,8 +7,8 @@ mod hard_link;
 mod open_parent;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 mod readlink;
+mod remove_dir;
 mod rename;
-mod rmdir;
 #[cfg(windows)]
 mod set_permissions;
 #[cfg(not(windows))]
@@ -22,8 +22,8 @@ pub(crate) use create_dir::create_dir;
 pub(crate) use hard_link::hard_link;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink::readlink;
+pub(crate) use remove_dir::remove_dir;
 pub(crate) use rename::rename;
-pub(crate) use rmdir::rmdir;
 #[cfg(windows)]
 pub(crate) use set_permissions::set_permissions;
 #[cfg(not(windows))]

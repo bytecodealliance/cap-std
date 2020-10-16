@@ -1,5 +1,6 @@
 use crate::fs::{
-    read_dir, read_dir_unchecked, remove_open_dir, rmdir, stat, unlink, FollowSymlinks, ReadDir,
+    read_dir, read_dir_unchecked, remove_dir, remove_open_dir, stat, unlink, FollowSymlinks,
+    ReadDir,
 };
 use std::{
     fs, io,
@@ -15,7 +16,7 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
         unlink(start, path)
     } else {
         remove_dir_all_recursive(read_dir(start, path)?)?;
-        rmdir(start, path)
+        remove_dir(start, path)
     }
 }
 

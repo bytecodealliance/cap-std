@@ -130,7 +130,7 @@ impl Plan {
                     .ok();
                 }
                 Operation::Rmdir(dirno, path) => {
-                    cap_primitives::fs::rmdir(
+                    cap_primitives::fs::remove_dir(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                     )
