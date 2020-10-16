@@ -134,6 +134,18 @@ impl OpenOptions {
         self.dir_required = dir_required;
         self
     }
+
+    /// Wrapper to allow `follow` to be exposed by the `cap-dir-ext` crate.
+    ///
+    /// # Safety
+    ///
+    /// This is hidden from the main API since this functionality isn't present in `std`.
+    /// Use `cap-dir-ext::OpenOptionsFollowExt` instead of calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub unsafe fn _cap_dir_ext_follow(&mut self, follow: FollowSymlinks) -> &mut Self {
+        self.follow(follow)
+    }
 }
 
 #[cfg(unix)]
