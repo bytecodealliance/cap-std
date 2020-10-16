@@ -416,4 +416,5 @@ fn symlink_hard_link() {
     let _ = check!(tmpdir.open("hard_link"));
     check!(tmpdir.rename("file", &tmpdir, "file.renamed"));
     assert!(tmpdir.open("hard_link").is_err());
+    assert_eq!(check!(tmpdir.read_link("hard_link")), Path::new("file"));
 }
