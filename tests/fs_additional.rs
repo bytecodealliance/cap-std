@@ -413,6 +413,9 @@ fn symlink_hard_link() {
     check!(tmpdir.create("file"));
     check!(symlink_file("file", &tmpdir, "symlink"));
     check!(tmpdir.hard_link("symlink", &tmpdir, "hard_link"));
+    assert!(check!(tmpdir.symlink_metadata("hard_link"))
+        .file_type()
+        .is_symlink());
     let _ = check!(tmpdir.open("file"));
     assert!(tmpdir.open("file.renamed").is_err());
     let _ = check!(tmpdir.open("symlink"));
@@ -426,4 +429,12 @@ fn symlink_hard_link() {
     assert!(tmpdir.read_link("file.renamed").is_err());
     assert_eq!(check!(tmpdir.read_link("symlink")), Path::new("file"));
     assert_eq!(check!(tmpdir.read_link("hard_link")), Path::new("file"));
+    check!(tmpdir.remove_file("file.renamed"));
+    assert!(tmpdir.open("file").is_err());
+    assert!(tmpdir.open("file.renamed").is_err());
+    assert!(tmpdir.open("symlink").is_err());
+    assert!(tmpdir.open("hard_link").is_err());
+    assert!(check!(tmpdir.symlink_metadata("hard_link"))
+        .file_type()
+        .is_symlink());
 }
