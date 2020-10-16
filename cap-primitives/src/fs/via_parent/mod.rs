@@ -2,7 +2,7 @@
 //! in `mkdir`, the last component names the path to be created, while the
 //! rest of the components just name the place to create it in.
 
-mod link;
+mod hard_link;
 mod mkdir;
 mod open_parent;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
@@ -18,7 +18,7 @@ mod unlink;
 
 use open_parent::open_parent;
 
-pub(crate) use link::link;
+pub(crate) use hard_link::hard_link;
 pub(crate) use mkdir::mkdir;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink::readlink;

@@ -1,9 +1,9 @@
-//! This defines `link`, the primary entrypoint to sandboxed hard-link creation.
+//! This defines `hard_link`, the primary entrypoint to sandboxed hard-link creation.
 
-use crate::fs::link_impl;
+use crate::fs::hard_link_impl;
 #[cfg(racy_asserts)]
 use crate::fs::{
-    canonicalize, link_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
+    canonicalize, hard_link_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
 };
 use std::{fs, io, path::Path};
 
@@ -11,7 +11,7 @@ use std::{fs, io, path::Path};
 /// never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
-pub fn link(
+pub fn hard_link(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,
@@ -24,7 +24,7 @@ pub fn link(
     );
 
     // Call the underlying implementation.
-    let result = link_impl(old_start, old_path, new_start, new_path);
+    let result = hard_link_impl(old_start, old_path, new_start, new_path);
 
     #[cfg(racy_asserts)]
     let (old_metadata_after, new_metadata_after) = (
@@ -33,7 +33,7 @@ pub fn link(
     );
 
     #[cfg(racy_asserts)]
-    check_link(
+    check_hard_link(
         old_start,
         old_path,
         new_start,
@@ -51,7 +51,7 @@ pub fn link(
 #[cfg(racy_asserts)]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::enum_glob_use)]
-fn check_link(
+fn check_hard_link(
     old_start: &fs::File,
     old_path: &Path,
     new_start: &fs::File,
@@ -90,7 +90,7 @@ fn check_link(
             map_result(&canonicalize(old_start, old_path)),
             map_result(&canonicalize(new_start, new_path)),
         ) {
-            (Ok(old_canon), Ok(new_canon)) => match map_result(&link_unchecked(
+            (Ok(old_canon), Ok(new_canon)) => match map_result(&hard_link_unchecked(
                 old_start, &old_canon, new_start, &new_canon,
             )) {
                 Err((_unchecked_kind, _unchecked_message)) => {

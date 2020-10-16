@@ -6,7 +6,7 @@ use async_std::os::wasi::{
 };
 use async_std::{fs, io};
 use cap_primitives::fs::{
-    canonicalize, copy, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    canonicalize, copy, hard_link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
     remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions, stat,
     unlink, DirOptions, FollowSymlinks, Permissions,
 };
@@ -235,7 +235,7 @@ impl Dir {
     ) -> io::Result<()> {
         let src_file = unsafe { as_sync(&self.std_file) };
         let dst_file = unsafe { as_sync(&dst_dir.std_file) };
-        link(&src_file, src.as_ref(), &dst_file, dst.as_ref())
+        hard_link(&src_file, src.as_ref(), &dst_file, dst.as_ref())
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.

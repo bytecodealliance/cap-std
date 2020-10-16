@@ -90,7 +90,7 @@ impl Plan {
                     .ok();
                 }
                 Operation::Link(old_dirno, old_path, new_dirno, new_path) => {
-                    cap_primitives::fs::link(
+                    cap_primitives::fs::hard_link(
                         &files[*old_dirno % files.len()],
                         &paths[*old_path % paths.len()],
                         &files[*new_dirno % files.len()],

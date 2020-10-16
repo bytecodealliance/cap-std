@@ -6,10 +6,10 @@ mod dir_options_ext;
 mod dir_utils;
 mod file_type_ext;
 mod get_path;
+mod hard_link_unchecked;
 mod is_read_write_impl;
 #[cfg(racy_asserts)]
 mod is_same_file;
-mod link_unchecked;
 mod metadata_ext;
 mod mkdir_unchecked;
 mod oflags;
@@ -33,7 +33,7 @@ pub(crate) mod errors;
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     manually::canonicalize as canonicalize_impl,
-    via_parent::link as link_impl,
+    via_parent::hard_link as hard_link_impl,
     via_parent::mkdir as mkdir_impl,
     via_parent::rename as rename_impl,
     via_parent::rmdir as rmdir_impl,
@@ -50,10 +50,10 @@ pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::*;
+pub(crate) use hard_link_unchecked::*;
 pub(crate) use is_read_write_impl::*;
 #[cfg(racy_asserts)]
 pub(crate) use is_same_file::*;
-pub(crate) use link_unchecked::*;
 pub(crate) use manually::open as open_impl;
 pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;

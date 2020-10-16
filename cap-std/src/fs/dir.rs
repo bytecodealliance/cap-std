@@ -1,6 +1,6 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, copy, link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
+    canonicalize, copy, hard_link, mkdir, open, open_ambient_dir, open_dir, read_dir, readlink,
     remove_dir_all, remove_open_dir, remove_open_dir_all, rename, rmdir, set_permissions, stat,
     unlink, DirOptions, FollowSymlinks, Permissions,
 };
@@ -225,7 +225,7 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        link(
+        hard_link(
             &self.std_file,
             src.as_ref(),
             &dst_dir.std_file,
