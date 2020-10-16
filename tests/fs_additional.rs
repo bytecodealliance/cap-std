@@ -403,6 +403,66 @@ fn dir_searchable_unreadable() {
         .is_err());
 }
 
+/// This test is the same as `symlink_hard_link` but uses `std::fs`'
+/// ambient API instead of `cap_std`. The purpose of this test is to
+/// confirm fundamentally OS-specific behaviors.
+#[test]
+fn symlink_hard_link_ambient() {
+    #[cfg(unix)]
+    use std::os::unix::fs::symlink;
+    #[cfg(windows)]
+    use std::os::windows::fs::symlink_file;
+
+    let dir = tempfile::tempdir().unwrap();
+
+    check!(std::fs::File::create(dir.path().join("file")));
+    #[cfg(not(windows))]
+    check!(symlink("file", dir.path().join("symlink")));
+    #[cfg(windows)]
+    check!(symlink_file("file", dir.path().join("symlink")));
+    check!(std::fs::hard_link(
+        dir.path().join("symlink"),
+        dir.path().join("hard_link")
+    ));
+    assert!(
+        check!(std::fs::symlink_metadata(dir.path().join("hard_link")))
+            .file_type()
+            .is_symlink()
+    );
+    let _ = check!(std::fs::File::open(dir.path().join("file")));
+    assert!(std::fs::File::open(dir.path().join("file.renamed")).is_err());
+    let _ = check!(std::fs::File::open(dir.path().join("symlink")));
+    let _ = check!(std::fs::File::open(dir.path().join("hard_link")));
+    check!(std::fs::rename(
+        dir.path().join("file"),
+        dir.path().join("file.renamed")
+    ));
+    assert!(std::fs::File::open(dir.path().join("file")).is_err());
+    let _ = check!(std::fs::File::open(dir.path().join("file.renamed")));
+    assert!(std::fs::File::open(dir.path().join("symlink")).is_err());
+    assert!(std::fs::File::open(dir.path().join("hard_link")).is_err());
+    assert!(std::fs::read_link(dir.path().join("file")).is_err());
+    assert!(std::fs::read_link(dir.path().join("file.renamed")).is_err());
+    assert_eq!(
+        check!(std::fs::read_link(dir.path().join("symlink"))),
+        Path::new("file")
+    );
+    assert_eq!(
+        check!(std::fs::read_link(dir.path().join("hard_link"))),
+        Path::new("file")
+    );
+    check!(std::fs::remove_file(dir.path().join("file.renamed")));
+    assert!(std::fs::File::open(dir.path().join("file")).is_err());
+    assert!(std::fs::File::open(dir.path().join("file.renamed")).is_err());
+    assert!(std::fs::File::open(dir.path().join("symlink")).is_err());
+    assert!(std::fs::File::open(dir.path().join("hard_link")).is_err());
+    assert!(
+        check!(std::fs::symlink_metadata(dir.path().join("hard_link")))
+            .file_type()
+            .is_symlink()
+    );
+}
+
 /// POSIX says that whether or not `link` follows symlinks in the `old`
 /// path is implementation-defined. We want `hard_link` to not follow
 /// symbolic links.
