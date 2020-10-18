@@ -1,4 +1,4 @@
-use crate::fs::{open_beneath, open_entry_manually, OpenOptions};
+use crate::fs::{manually, open_beneath, OpenOptions};
 use std::{ffi::OsStr, fs, io};
 
 pub(crate) fn open_entry_impl(
@@ -11,7 +11,7 @@ pub(crate) fn open_entry_impl(
     match result {
         Ok(file) => Ok(file),
         Err(err) => match err.raw_os_error() {
-            Some(libc::ENOSYS) => open_entry_manually(start, path, options),
+            Some(libc::ENOSYS) => manually::open_entry(start, path, options),
             _ => Err(err),
         },
     }

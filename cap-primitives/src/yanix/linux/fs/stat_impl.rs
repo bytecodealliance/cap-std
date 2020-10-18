@@ -3,11 +3,11 @@
 //! `fstat` to perform a fast sandboxed `stat`.
 
 use super::file_metadata;
-use crate::fs::{open_beneath, stat_manually, FollowSymlinks, Metadata, OpenOptions};
+use crate::fs::{manually, open_beneath, FollowSymlinks, Metadata, OpenOptions};
 use std::{fs, io, path::Path};
 
 /// Use `openat2` with `O_PATH` and `fstat`. If that's not available, fallback
-/// to `stat_manually`.
+/// to `manually::stat`.
 pub(crate) fn stat_impl(
     start: &fs::File,
     path: &Path,
@@ -33,7 +33,7 @@ pub(crate) fn stat_impl(
         Err(err) => match err.raw_os_error() {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(libc::ENOSYS) => stat_manually(start, path, follow),
+            Some(libc::ENOSYS) => manually::stat(start, path, follow),
             _ => Err(err),
         },
     }

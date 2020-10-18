@@ -40,10 +40,10 @@ pub(crate) use crate::yanix::linux::fs::*;
 #[cfg(not(target_os = "linux"))]
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
-    open_entry_manually as open_entry_impl,
-    open_manually as open_impl,
-    stat_manually as stat_impl,
-    canonicalize_manually_and_follow as canonicalize_impl,
+    manually::open_entry as open_entry_impl,
+    manually::open as open_impl,
+    manually::stat as stat_impl,
+    manually::canonicalize as canonicalize_impl,
     set_permissions_via_parent as set_permissions_impl,
 };
 

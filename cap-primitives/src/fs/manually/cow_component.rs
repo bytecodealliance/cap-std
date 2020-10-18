@@ -1,0 +1,34 @@
+use std::{borrow::Cow, ffi::OsStr, path::Component};
+
+/// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
+/// we don't support absolute paths, and `Normal` has a `Cow` instead of a plain
+/// `OsStr` reference, so it can optionally own its own string.
+#[derive(Debug)]
+pub(super) enum CowComponent<'borrow> {
+    PrefixOrRootDir,
+    CurDir,
+    ParentDir,
+    Normal(Cow<'borrow, OsStr>),
+}
+
+impl<'borrow> CowComponent<'borrow> {
+    /// Convert a `Component` into a `CowComponent` which borrows strings.
+    pub(super) fn borrowed(component: Component<'borrow>) -> Self {
+        match component {
+            Component::Prefix(_) | Component::RootDir => Self::PrefixOrRootDir,
+            Component::CurDir => Self::CurDir,
+            Component::ParentDir => Self::ParentDir,
+            Component::Normal(os_str) => Self::Normal(os_str.into()),
+        }
+    }
+
+    /// Convert a `Component` into a `CowComponent` which owns strings.
+    pub(super) fn owned(component: Component) -> Self {
+        match component {
+            Component::Prefix(_) | Component::RootDir => Self::PrefixOrRootDir,
+            Component::CurDir => Self::CurDir,
+            Component::ParentDir => Self::ParentDir,
+            Component::Normal(os_str) => Self::Normal(os_str.to_os_string().into()),
+        }
+    }
+}
