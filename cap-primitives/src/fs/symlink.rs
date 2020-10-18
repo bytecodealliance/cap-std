@@ -4,9 +4,7 @@
 #[cfg(not(windows))]
 use crate::fs::symlink_unchecked;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{
-    canonicalize, canonicalize_manually, map_result, stat_unchecked, FollowSymlinks, Metadata,
-};
+use crate::fs::{canonicalize, manually, map_result, stat_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
@@ -118,7 +116,8 @@ fn check_symlink(
     ) {
         (Err((NotFound, _)), Ok(()), Ok(metadata)) => {
             assert!(metadata.file_type().is_symlink());
-            let canon = canonicalize_manually(new_start, new_path, FollowSymlinks::No).unwrap();
+            let canon =
+                manually::canonicalize_with(new_start, new_path, FollowSymlinks::No).unwrap();
             assert!(stat_unchecked(new_start, &canon, FollowSymlinks::No)
                 .unwrap()
                 .is_same_file(&metadata));

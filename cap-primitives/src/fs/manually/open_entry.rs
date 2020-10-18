@@ -1,10 +1,8 @@
-use crate::fs::{
-    open_manually_impl, open_unchecked, readlink_one, FollowSymlinks, MaybeOwnedFile, OpenOptions,
-    OpenUncheckedError,
-};
+use super::{internal_open, readlink_one};
+use crate::fs::{open_unchecked, FollowSymlinks, MaybeOwnedFile, OpenOptions, OpenUncheckedError};
 use std::{ffi::OsStr, fs, io};
 
-pub(crate) fn open_entry_manually(
+pub(crate) fn open_entry(
     start: &fs::File,
     path: &OsStr,
     options: &OpenOptions,
@@ -19,7 +17,7 @@ pub(crate) fn open_entry_manually(
             let mut symlink_count = 0;
             let destination = readlink_one(start, path, &mut symlink_count)?;
             let maybe = MaybeOwnedFile::borrowed(start);
-            open_manually_impl(maybe, &destination, options, &mut symlink_count, None)
+            internal_open(maybe, &destination, options, &mut symlink_count, None)
                 .map(MaybeOwnedFile::unwrap_owned)
         }
         Err(OpenUncheckedError::NotFound(err)) | Err(OpenUncheckedError::Other(err)) => Err(err),

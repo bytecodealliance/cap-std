@@ -1,3 +1,5 @@
+use crate::fs::manually;
+
 mod copy;
 mod dir_entry_inner;
 mod dir_options_ext;
@@ -29,19 +31,18 @@ pub(crate) mod errors;
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
-    canonicalize_manually_and_follow as canonicalize_impl,
+    manually::canonicalize as canonicalize_impl,
     link_via_parent as link_impl,
     mkdir_via_parent as mkdir_impl,
     rename_via_parent as rename_impl,
     rmdir_via_parent as rmdir_impl,
     set_permissions_via_parent as set_permissions_impl,
-    stat_manually as stat_impl,
+    manually::stat as stat_impl,
     symlink_dir_via_parent as symlink_dir_impl,
     symlink_file_via_parent as symlink_file_impl,
     unlink_via_parent as unlink_impl,
 };
 
-pub(crate) use crate::fs::open_manually as open_impl;
 pub(crate) use copy::*;
 pub(crate) use dir_entry_inner::*;
 pub(crate) use dir_options_ext::*;
@@ -54,6 +55,7 @@ pub(crate) use get_path::get_path as get_path_impl;
 #[allow(unused_imports)]
 pub(crate) use is_same_file::*;
 pub(crate) use link_unchecked::*;
+pub(crate) use manually::open as open_impl;
 pub(crate) use metadata_ext::*;
 pub(crate) use mkdir_unchecked::*;
 pub(crate) use open_options_ext::*;

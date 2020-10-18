@@ -1,11 +1,11 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
+use super::{readlink_one, CanonicalPath, CowComponent};
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
 use crate::fs::{
-    dir_options, errors, open_unchecked, path_requires_dir, readlink_one, stat_unchecked,
-    to_borrowed_component, to_owned_component, CanonicalPath, CowComponent, FollowSymlinks,
+    dir_options, errors, open_unchecked, path_requires_dir, stat_unchecked, FollowSymlinks,
     MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
 use std::{
@@ -16,14 +16,10 @@ use std::{
 
 /// Implement `open` by breaking up the path into components, resolving each
 /// component individually, and resolving symbolic links manually.
-pub(crate) fn open_manually(
-    start: &fs::File,
-    path: &Path,
-    options: &OpenOptions,
-) -> io::Result<fs::File> {
+pub(crate) fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {
     let mut symlink_count = 0;
     let start = MaybeOwnedFile::borrowed(start);
-    let maybe_owned = open_manually_impl(start, path, options, &mut symlink_count, None)?;
+    let maybe_owned = internal_open(start, path, options, &mut symlink_count, None)?;
     maybe_owned.into_file(options)
 }
 
@@ -62,7 +58,7 @@ impl<'start> Context<'start> {
         let components = path
             .components()
             .rev()
-            .map(to_borrowed_component)
+            .map(CowComponent::borrowed)
             .collect::<Vec<_>>();
 
         #[cfg(not(feature = "no_racy_asserts"))]
@@ -156,7 +152,7 @@ impl<'start> Context<'start> {
                     match readlink_one(&file, Default::default(), symlink_count) {
                         Ok(destination) => {
                             self.components
-                                .extend(destination.components().rev().map(to_owned_component));
+                                .extend(destination.components().rev().map(CowComponent::owned));
                             self.dir_required |= path_requires_dir(&destination);
                             return Ok(());
                         }
@@ -200,25 +196,25 @@ impl<'start> Context<'start> {
     fn symlink(&mut self, one: &OsStr, symlink_count: &mut u8) -> io::Result<()> {
         let destination = readlink_one(&self.base, one, symlink_count)?;
         self.components
-            .extend(destination.components().rev().map(to_owned_component));
+            .extend(destination.components().rev().map(CowComponent::owned));
         self.dir_required |= path_requires_dir(&destination);
         Ok(())
     }
 }
 
-/// Internal implementation of `open_manually`, exposing some additional
+/// Internal implementation of manual `open`, exposing some additional
 /// parameters.
 ///
 /// Callers can request the canonical path by passing `Some` to
-/// `canonical_path`. If the complete canonical path is processed, even if
-/// `open_manually` returns an `Err`, it will be stored in the provided
-/// `&mut PathBuf`. If an error occurs before the complete canonical path is
-/// processed, the provided `&mut PathBuf` is cleared to empty.
+/// `canonical_path`. If the complete canonical path is processed, it will be
+/// stored in the provided `&mut PathBuf`, even if the actual open fails. If
+/// a failure occurs before the complete canonical path is processed, the
+/// provided `&mut PathBuf` is cleared to empty.
 ///
 /// A note on lifetimes: `path` and `canonical_path` here don't strictly
 /// need `'start`, but using them makes it easier to store them in the
 /// `Context` struct.
-pub(super) fn open_manually_impl<'start>(
+pub(super) fn internal_open<'start>(
     start: MaybeOwnedFile<'start>,
     path: &'start Path,
     options: &OpenOptions,
@@ -243,14 +239,14 @@ pub(super) fn open_manually_impl<'start>(
     }
 
     #[cfg(not(feature = "no_racy_asserts"))]
-    check_open_manually_impl(&ctx, path, options);
+    check_internal_open(&ctx, path, options);
 
     ctx.canonical_path.complete();
     Ok(ctx.base)
 }
 
-/// Implement `stat` in a similar manner as `open_manually`.
-pub(crate) fn stat_manually<'start>(
+/// Implement manual `stat` in a similar manner as manual `open`.
+pub(crate) fn stat<'start>(
     start: &fs::File,
     path: &'start Path,
     follow: FollowSymlinks,
@@ -309,7 +305,7 @@ fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
 }
 
 #[cfg(not(feature = "no_racy_asserts"))]
-fn check_open_manually_impl(ctx: &Context, path: &Path, options: &OpenOptions) {
+fn check_internal_open(ctx: &Context, path: &Path, options: &OpenOptions) {
     match open_unchecked(
         &ctx.start_clone,
         ctx.canonical_path.debug.as_ref(),

@@ -5,12 +5,12 @@
 //! [LWN article]: https://lwn.net/Articles/796868/
 //! [`openat2` documentation]: https://man7.org/linux/man-pages/man2/openat2.2.html
 //!
-//! On older Linux, fall back to `open_manually`.
+//! On older Linux, fall back to `manually::open`.
 
 use super::super::super::fs::compute_oflags;
 #[cfg(not(feature = "no_racy_asserts"))]
 use crate::fs::is_same_file;
-use crate::fs::{errors, open_manually, OpenOptions};
+use crate::fs::{errors, manually, OpenOptions};
 use std::{
     ffi::CString,
     fs, io,
@@ -46,7 +46,7 @@ pub(crate) fn open_impl(
     // If that returned `ENOSYS`, use a fallback strategy.
     if let Err(e) = &result {
         if let Some(libc::ENOSYS) = e.raw_os_error() {
-            return open_manually(start, path, options);
+            return manually::open(start, path, options);
         }
     }
 
@@ -133,7 +133,7 @@ fn other_error(errno: i32) -> io::Result<fs::File> {
 
 #[cfg(not(feature = "no_racy_asserts"))]
 fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::File) {
-    let check = open_manually(
+    let check = manually::open(
         start,
         path,
         options
@@ -142,9 +142,9 @@ fn check_open(start: &fs::File, path: &Path, options: &OpenOptions, file: &fs::F
             .create_new(false)
             .truncate(false),
     )
-    .expect("open_manually failed when open_openat2 succeeded");
+    .expect("manually::open failed when open_openat2 succeeded");
     assert!(
-        is_same_file(file, &check).expect("open_manually should be able to stat the result"),
-        "open_manually should open the same inode as open_openat2"
+        is_same_file(file, &check).expect("manually::open should be able to stat the result"),
+        "manually::open should open the same inode as open_openat2"
     );
 }

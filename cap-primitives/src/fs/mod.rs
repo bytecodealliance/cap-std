@@ -1,10 +1,7 @@
 //! Filesystem utilities.
 
-mod canonical_path;
 mod canonicalize;
-mod canonicalize_manually;
 mod copy;
-mod cow_component;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
@@ -21,16 +18,12 @@ mod mkdir;
 mod mkdir_via_parent;
 mod open;
 mod open_dir;
-#[cfg(not(windows))] // not needed on windows
-mod open_entry_manually;
-mod open_manually;
 mod open_options;
 mod open_parent;
 mod open_unchecked_error;
 mod permissions;
 mod read_dir;
 mod readlink;
-mod readlink_one;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 mod readlink_via_parent;
 mod remove_dir_all;
@@ -49,21 +42,15 @@ mod unlink;
 mod unlink_via_parent;
 
 pub(crate) mod errors;
+pub(crate) mod manually;
 
-use canonical_path::CanonicalPath;
-use cow_component::{to_borrowed_component, to_owned_component, CowComponent};
 use maybe_owned_file::MaybeOwnedFile;
 use open_parent::open_parent;
-use readlink_one::readlink_one;
 
-pub(crate) use canonicalize_manually::*;
 #[cfg(not(feature = "no_racy_asserts"))]
 pub(crate) use get_path::*;
 pub(crate) use link_via_parent::*;
 pub(crate) use mkdir_via_parent::*;
-#[cfg(not(windows))] // not needed on windows
-pub(crate) use open_entry_manually::*;
-pub(crate) use open_manually::*;
 pub(crate) use open_unchecked_error::*;
 #[cfg(not(windows))] // doesn't work on windows; use a windows-specific impl
 pub(crate) use readlink_via_parent::*;

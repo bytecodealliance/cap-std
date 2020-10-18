@@ -1,7 +1,7 @@
 //! Path canonicalization using `/proc/self/fd`.
 
 use super::procfs::get_path_from_proc_self_fd;
-use crate::fs::{canonicalize_manually_and_follow, open_beneath, FollowSymlinks, OpenOptions};
+use crate::fs::{manually, open_beneath, FollowSymlinks, OpenOptions};
 use std::{
     fs, io,
     os::unix::fs::OpenOptionsExt,
@@ -30,10 +30,7 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
                 if let Ok(file_path) = get_path_from_proc_self_fd(&file) {
                     if let Ok(canonical_path) = file_path.strip_prefix(start_path) {
                         #[cfg(not(feature = "no_racy_asserts"))]
-                        assert_eq!(
-                            canonical_path,
-                            canonicalize_manually_and_follow(start, path).unwrap()
-                        );
+                        assert_eq!(canonical_path, manually::canonicalize(start, path).unwrap());
 
                         let mut path_buf = canonical_path.to_path_buf();
 
@@ -56,5 +53,5 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
     }
 
     // Use a fallback.
-    canonicalize_manually_and_follow(start, path)
+    manually::canonicalize(start, path)
 }

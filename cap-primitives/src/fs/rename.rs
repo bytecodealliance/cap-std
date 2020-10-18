@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 #[cfg(not(feature = "no_racy_asserts"))]
 use {
     crate::fs::{
-        append_dir_suffix, canonicalize_manually, map_result, path_requires_dir, rename_unchecked,
+        append_dir_suffix, manually, map_result, path_requires_dir, rename_unchecked,
         stat_unchecked, FollowSymlinks, Metadata,
     },
     std::path::PathBuf,
@@ -140,7 +140,7 @@ fn check_rename(
 
 #[cfg(not(feature = "no_racy_asserts"))]
 fn canonicalize_for_rename(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
-    let mut canon = canonicalize_manually(start, path, FollowSymlinks::No)?;
+    let mut canon = manually::canonicalize_with(start, path, FollowSymlinks::No)?;
 
     // Rename on paths ending in `.` or `/.` fails due to the directory already
     // being open. Ensure that this happens on the canonical paths too.

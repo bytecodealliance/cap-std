@@ -2,9 +2,7 @@
 
 use crate::fs::unlink_impl;
 #[cfg(not(feature = "no_racy_asserts"))]
-use crate::fs::{
-    canonicalize_manually, map_result, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata,
-};
+use crate::fs::{manually, map_result, stat_unchecked, unlink_unchecked, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
 /// Perform a `unlinkat`-like operation, ensuring that the resolution of the path
@@ -53,7 +51,11 @@ fn check_unlink(
         }
 
         (_, Err((_kind, _message)), _) => {
-            match map_result(&canonicalize_manually(start, path, FollowSymlinks::No)) {
+            match map_result(&manually::canonicalize_with(
+                start,
+                path,
+                FollowSymlinks::No,
+            )) {
                 Ok(canon) => match map_result(&unlink_unchecked(start, &canon)) {
                     Err((_unchecked_kind, _unchecked_message)) => {
                         /* TODO: Check error messages.
