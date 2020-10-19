@@ -570,9 +570,9 @@ impl Dir {
 
     /// Checks if `path` is a directory.
     ///
-    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to `Dir`
-    /// is a directory. This function will traverse symbolic links to query information about the
-    /// destination file. In case of broken symbolic links, this will return `false`.
+    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to
+    /// `Dir` is a directory. This function will traverse symbolic links to query information about
+    /// the destination file. In case of broken symbolic links, this will return `false`.
     ///
     /// [`std::path::Path::is_dir`]: https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir
     #[inline]

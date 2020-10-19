@@ -22,7 +22,8 @@ pub struct DirBuilder {
 }
 
 impl DirBuilder {
-    /// Creates a new set of options with default mode/security settings for all platforms and also non-recursive.
+    /// Creates a new set of options with default mode/security settings for all platforms and also
+    /// non-recursive.
     ///
     /// This corresponds to [`std::fs::DirBuilder::new`].
     ///

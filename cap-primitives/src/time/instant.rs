@@ -40,7 +40,8 @@ impl Instant {
         self.std.duration_since(earlier.std)
     }
 
-    /// Returns the amount of time elapsed from another instant to this one, or None if that instant is later than this one.
+    /// Returns the amount of time elapsed from another instant to this one, or None if that instant
+    /// is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::checked_duration_since`].
     ///
@@ -50,7 +51,8 @@ impl Instant {
         self.std.checked_duration_since(earlier.std)
     }
 
-    /// Returns the amount of time elapsed from another instant to this one, or zero duration if that instant is later than this one.
+    /// Returns the amount of time elapsed from another instant to this one, or zero duration if
+    /// that instant is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::saturating_duration_since`].
     ///
