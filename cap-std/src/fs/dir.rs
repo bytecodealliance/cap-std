@@ -1,7 +1,7 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
-    readlink, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
+    read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
     rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 #[cfg(target_os = "wasi")]
@@ -283,7 +283,7 @@ impl Dir {
     /// [`std::fs::read_link`]: https://doc.rust-lang.org/std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        readlink(&self.std_file, path.as_ref())
+        read_link(&self.std_file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.

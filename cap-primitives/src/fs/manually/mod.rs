@@ -7,12 +7,12 @@ mod cow_component;
 mod open;
 #[cfg(not(windows))]
 mod open_entry;
-mod readlink_one;
+mod read_link_one;
 
 use canonical_path::CanonicalPath;
 use cow_component::CowComponent;
 use open::internal_open;
-use readlink_one::readlink_one;
+use read_link_one::read_link_one;
 
 #[cfg(racy_asserts)]
 pub(super) use canonicalize::canonicalize_with;

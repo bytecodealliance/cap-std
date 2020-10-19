@@ -66,8 +66,8 @@ fn cvt(i: i32) -> io::Result<i32> {
 // library/std/src/sys/windows/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-/// *Unsandboxed* function similar to `readlink`, but which does not perform sandboxing.
-pub(crate) fn readlink_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+/// *Unsandboxed* function similar to `read_link`, but which does not perform sandboxing.
+pub(crate) fn read_link_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Open the link with no access mode, instead of generic read.
     // By default FILE_LIST_DIRECTORY is denied for the junction "C:\Documents and Settings", so
     // this is needed for a common case.
@@ -76,7 +76,7 @@ pub(crate) fn readlink_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf
     opts.custom_flags(c::FILE_FLAG_OPEN_REPARSE_POINT | c::FILE_FLAG_BACKUP_SEMANTICS);
     opts.follow(FollowSymlinks::No);
     let file = open(start, path, &opts)?;
-    readlink(&file)
+    read_link(&file)
 }
 
 fn reparse_point<'a>(
@@ -101,7 +101,7 @@ fn reparse_point<'a>(
     }
 }
 
-fn readlink(file: &fs::File) -> io::Result<PathBuf> {
+fn read_link(file: &fs::File) -> io::Result<PathBuf> {
     let mut space = [0u8; c::MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
     let (_bytes, buf) = reparse_point(file, &mut space)?;
     unsafe {

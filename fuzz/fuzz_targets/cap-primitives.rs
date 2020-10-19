@@ -99,7 +99,7 @@ impl Plan {
                     .ok();
                 }
                 Operation::Readlink(dirno, path) => {
-                    cap_primitives::fs::readlink(
+                    cap_primitives::fs::read_link(
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                     )

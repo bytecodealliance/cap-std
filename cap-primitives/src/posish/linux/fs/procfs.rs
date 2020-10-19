@@ -8,7 +8,7 @@
 
 use super::file_metadata;
 use crate::fs::{
-    errors, open, open_unchecked, readlink_unchecked, set_times_follow_unchecked, FollowSymlinks,
+    errors, open, open_unchecked, read_link_unchecked, set_times_follow_unchecked, FollowSymlinks,
     Metadata, OpenOptions, SystemTimeSpec,
 };
 use once_cell::sync::Lazy;
@@ -227,7 +227,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
 }
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
-    readlink_unchecked(proc_self_fd()?, &DecInt::from_fd(file), PathBuf::new())
+    read_link_unchecked(proc_self_fd()?, &DecInt::from_fd(file), PathBuf::new())
 }
 
 pub(crate) fn set_permissions_through_proc_self_fd(

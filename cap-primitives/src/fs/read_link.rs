@@ -1,9 +1,9 @@
-//! This defines `readlink`, the primary entrypoint to sandboxed symbolic link
+//! This defines `read_link`, the primary entrypoint to sandboxed symbolic link
 //! dereferencing.
 
-use crate::fs::{errors, readlink_impl};
+use crate::fs::{errors, read_link_impl};
 #[cfg(racy_asserts)]
-use crate::fs::{map_result, readlink_unchecked, stat, FollowSymlinks};
+use crate::fs::{map_result, read_link_unchecked, stat, FollowSymlinks};
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -13,15 +13,15 @@ use std::{
 /// never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
-pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
-    let result = readlink_impl(start, path);
+    let result = read_link_impl(start, path);
 
     #[cfg(racy_asserts)]
-    let unchecked = readlink_unchecked(start, path, PathBuf::new());
+    let unchecked = read_link_unchecked(start, path, PathBuf::new());
 
     #[cfg(racy_asserts)]
-    check_readlink(start, path, &result, &unchecked);
+    check_read_link(start, path, &result, &unchecked);
 
     // Don't allow reading symlinks to absolute paths. This isn't strictly
     // necessary to preserve the sandbox, since `open` will refuse to follow
@@ -39,7 +39,7 @@ pub fn readlink(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
 
 #[cfg(racy_asserts)]
 #[allow(clippy::enum_glob_use)]
-fn check_readlink(
+fn check_read_link(
     start: &fs::File,
     path: &Path,
     result: &io::Result<PathBuf>,
@@ -57,7 +57,7 @@ fn check_readlink(
                 Err((PermissionDenied, canon_message)) => {
                     assert_eq!(message, canon_message);
                 }
-                _ => panic!("readlink failed where canonicalize succeeded"),
+                _ => panic!("read_link failed where canonicalize succeeded"),
             }
         }
 
@@ -69,7 +69,7 @@ fn check_readlink(
         }
 
         other => panic!(
-            "unexpected result from readlink start='{:?}', path='{}':\n{:#?}",
+            "unexpected result from read_link start='{:?}', path='{}':\n{:#?}",
             start,
             path.display(),
             other,

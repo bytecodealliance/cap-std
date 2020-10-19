@@ -7,7 +7,7 @@ use async_std::os::wasi::{
 use async_std::{fs, io};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
-    readlink, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
+    read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
     rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use std::{
@@ -292,7 +292,7 @@ impl Dir {
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
         let file = unsafe { as_sync(&self.std_file) };
-        readlink(&file, path.as_ref())
+        read_link(&file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.

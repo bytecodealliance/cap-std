@@ -1,7 +1,7 @@
 //! Manual path resolution, one component at a time, with manual symlink
 //! resolution, in order to enforce sandboxing.
 
-use super::{readlink_one, CanonicalPath, CowComponent};
+use super::{read_link_one, CanonicalPath, CowComponent};
 use crate::fs::{
     dir_path_options, errors, open_unchecked, path_has_trailing_dot, path_requires_dir,
     stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
@@ -48,7 +48,7 @@ struct Context<'start> {
     /// if there was a trailing `.` component.
     trailing_dot: bool,
 
-    /// A `PathBuf` that we reuse for calling `readlink_one` to minimize
+    /// A `PathBuf` that we reuse for calling `read_link_one` to minimize
     /// allocations.
     reuse: PathBuf,
 
@@ -221,7 +221,7 @@ impl<'start> Context<'start> {
                 // symlink, follow it.
                 #[cfg(target_os = "linux")]
                 if should_emulate_o_path(&use_options) {
-                    match readlink_one(
+                    match read_link_one(
                         &file,
                         Default::default(),
                         symlink_count,
@@ -289,7 +289,8 @@ impl<'start> Context<'start> {
 
     /// Dereference one symlink level.
     fn symlink(&mut self, one: &OsStr, symlink_count: &mut u8) -> io::Result<()> {
-        let destination = readlink_one(&self.base, one, symlink_count, mem::take(&mut self.reuse))?;
+        let destination =
+            read_link_one(&self.base, one, symlink_count, mem::take(&mut self.reuse))?;
         self.dir_required |= self.components.is_empty() && path_requires_dir(&destination);
         self.trailing_dot |= path_has_trailing_dot(&destination);
         self.components
