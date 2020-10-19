@@ -15,8 +15,8 @@
 </div>
 
 The `cap-directories` crate provides utilities for accessing standard
-directories via the [`directories`] crate, but which provide [`Dir`]s instead of
+directories via the [`directories-next`] crate, but which provide [`Dir`]s instead of
 `Path`s.
 
-[`directories`]: https://crates.io/crates/directories
+[`directories-next`]: https://crates.io/crates/directories-next
 [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html

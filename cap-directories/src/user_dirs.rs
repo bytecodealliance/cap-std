@@ -5,35 +5,35 @@ use std::io;
 /// `UserDirs` provides paths of user-facing standard directories, following the
 /// conventions of the operating system the library is running on.
 ///
-/// This corresponds to [`directories::UserDirs`], except that the functions open the
+/// This corresponds to [`directories_next::UserDirs`], except that the functions open the
 /// directories and returns `Dir`s instead of returning `Path`s.
 ///
-/// Unlike `directories::UserDirs`, the `*_dir` functions return `Dir`s rather than
+/// Unlike `directories_next::UserDirs`, the `*_dir` functions return `Dir`s rather than
 /// `Path`s, because absolute paths don't interoperate well with the capability model.
 ///
-/// [`directories::UserDirs`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html
+/// [`directories_next::UserDirs`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html
 #[derive(Clone)]
 pub struct UserDirs {
-    inner: directories::UserDirs,
+    inner: directories_next::UserDirs,
 }
 
 impl UserDirs {
     /// Creates a `UserDirs` struct which holds the paths to user-facing directories for audio,
     /// font, video, etc. data on the system.
     ///
-    /// This corresponds to [`directories::UserDirs::new`].
+    /// This corresponds to [`directories_next::UserDirs::new`].
     ///
-    /// [`directories::UserDirs::new`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.new
+    /// [`directories_next::UserDirs::new`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.new
     pub fn new() -> Option<Self> {
-        let inner = directories::UserDirs::new()?;
+        let inner = directories_next::UserDirs::new()?;
         Some(Self { inner })
     }
 
     /// Returns the user's home directory.
     ///
-    /// This corresponds to [`directories::UserDirs::home_dir`].
+    /// This corresponds to [`directories_next::UserDirs::home_dir`].
     ///
-    /// [`directories::UserDirs::home_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.home_dir
+    /// [`directories_next::UserDirs::home_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.home_dir
     ///
     /// # Safety
     ///
@@ -46,9 +46,9 @@ impl UserDirs {
 
     /// Returns the user's audio directory.
     ///
-    /// This corresponds to [`directories::UserDirs::audio_dir`].
+    /// This corresponds to [`directories_next::UserDirs::audio_dir`].
     ///
-    /// [`directories::UserDirs::audio_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.audio_dir
+    /// [`directories_next::UserDirs::audio_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.audio_dir
     ///
     /// # Safety
     ///
@@ -61,9 +61,9 @@ impl UserDirs {
 
     /// Returns the user's desktop directory.
     ///
-    /// This corresponds to [`directories::UserDirs::desktop_dir`].
+    /// This corresponds to [`directories_next::UserDirs::desktop_dir`].
     ///
-    /// [`directories::UserDirs::desktop_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.desktop_dir
+    /// [`directories_next::UserDirs::desktop_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.desktop_dir
     ///
     /// # Safety
     ///
@@ -76,9 +76,9 @@ impl UserDirs {
 
     /// Returns the user's document directory.
     ///
-    /// This corresponds to [`directories::UserDirs::document_dir`].
+    /// This corresponds to [`directories_next::UserDirs::document_dir`].
     ///
-    /// [`directories::UserDirs::document_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.document_dir
+    /// [`directories_next::UserDirs::document_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.document_dir
     ///
     /// # Safety
     ///
@@ -91,9 +91,9 @@ impl UserDirs {
 
     /// Returns the user's download directory.
     ///
-    /// This corresponds to [`directories::UserDirs::download_dir`].
+    /// This corresponds to [`directories_next::UserDirs::download_dir`].
     ///
-    /// [`directories::UserDirs::download_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.download_dir
+    /// [`directories_next::UserDirs::download_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.download_dir
     ///
     /// # Safety
     ///
@@ -106,9 +106,9 @@ impl UserDirs {
 
     /// Returns the user's font directory.
     ///
-    /// This corresponds to [`directories::UserDirs::font_dir`].
+    /// This corresponds to [`directories_next::UserDirs::font_dir`].
     ///
-    /// [`directories::UserDirs::font_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.font_dir
+    /// [`directories_next::UserDirs::font_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.font_dir
     ///
     /// # Safety
     ///
@@ -121,9 +121,9 @@ impl UserDirs {
 
     /// Returns the user's picture directory.
     ///
-    /// This corresponds to [`directories::UserDirs::picture_dir`].
+    /// This corresponds to [`directories_next::UserDirs::picture_dir`].
     ///
-    /// [`directories::UserDirs::picture_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.picture_dir
+    /// [`directories_next::UserDirs::picture_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.picture_dir
     ///
     /// # Safety
     ///
@@ -136,9 +136,9 @@ impl UserDirs {
 
     /// Returns the user's public directory.
     ///
-    /// This corresponds to [`directories::UserDirs::public_dir`].
+    /// This corresponds to [`directories_next::UserDirs::public_dir`].
     ///
-    /// [`directories::UserDirs::public_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.public_dir
+    /// [`directories_next::UserDirs::public_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.public_dir
     ///
     /// # Safety
     ///
@@ -151,9 +151,9 @@ impl UserDirs {
 
     /// Returns the user's template directory.
     ///
-    /// This corresponds to [`directories::UserDirs::template_dir`].
+    /// This corresponds to [`directories_next::UserDirs::template_dir`].
     ///
-    /// [`directories::UserDirs::template_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.template_dir
+    /// [`directories_next::UserDirs::template_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.template_dir
     ///
     /// # Safety
     ///
@@ -166,9 +166,9 @@ impl UserDirs {
 
     /// Returns the user's video directory.
     ///
-    /// This corresponds to [`directories::UserDirs::video_dir`].
+    /// This corresponds to [`directories_next::UserDirs::video_dir`].
     ///
-    /// [`directories::UserDirs::video_dir`]: https://docs.rs/directories/latest/directories/struct.UserDirs.html#method.video_dir
+    /// [`directories_next::UserDirs::video_dir`]: https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.video_dir
     ///
     /// # Safety
     ///

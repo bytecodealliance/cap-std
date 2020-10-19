@@ -38,7 +38,7 @@ develops libraries to make it easy to write capability-oriented code, including:
 [`cap-rand`]: https://github.com/sunfishcode/cap-std/blob/main/cap-rand/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`async-std`]: https://docs.rs/async-std/
-[standard application directories]: https://docs.rs/directories/
+[standard application directories]: https://docs.rs/directories-next/
 [temporary directories]: https://docs.rs/tempfile/
 [random number generators]: https://docs.rs/rand/
 

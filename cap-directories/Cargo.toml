@@ -15,7 +15,7 @@ readme = "README.md"
 
 [dependencies]
 cap-std = { path = "../cap-std", version = "^0.4.1-alpha.0"}
-directories = "3.0.1"
+directories-next = "1.0.2"
 
 [target.'cfg(not(windows))'.dependencies]
 libc = "0.2.78"
