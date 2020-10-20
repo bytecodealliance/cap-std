@@ -1,14 +1,6 @@
 use super::{get_path::concatenate_or_return_absolute, open_options_to_std};
-use crate::fs::{FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
-use std::{
-    ffi::OsString,
-    fs, io,
-    os::windows::{
-        ffi::{OsStrExt, OsStringExt},
-        fs::MetadataExt,
-    },
-    path::{Path, PathBuf},
-};
+use crate::fs::{append_dir_suffix, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
+use std::{fs, io, os::windows::fs::MetadataExt, path::Path};
 use winapi::{
     shared::winerror,
     um::{winbase, winnt::FILE_ATTRIBUTE_DIRECTORY},
@@ -26,9 +18,7 @@ pub(crate) fn open_unchecked(
     // If we're expected to open this as a directory, append a trailing separator
     // so that we fail if it's not a directory.
     if options.dir_required {
-        let mut wide = full_path.into_os_string().encode_wide().collect::<Vec<_>>();
-        wide.push('\\' as u16);
-        full_path = PathBuf::from(OsString::from_wide(&wide));
+        full_path = append_dir_suffix(full_path);
     }
 
     let (opts, manually_trunc) = open_options_to_std(options);
