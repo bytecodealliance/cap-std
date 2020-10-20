@@ -42,12 +42,13 @@ pub(crate) fn path_has_trailing_dot(path: &Path) -> bool {
         && path.components().next_back() != Some(Component::CurDir)
 }
 
-/// Append a trailing `/`. This can be used to require that the given `path`
+/// Append a trailing `\\`. This can be used to require that the given `path`
 /// names a directory.
-#[cfg(racy_asserts)]
 pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
-    let mut wide: Vec<u16> = path.as_os_str().encode_wide().collect();
-    wide.push('/' as u16);
+    let mut wide: Vec<u16> = path.into_os_string().encode_wide().collect();
+    if !wide.ends_with(&['\\' as u16]) {
+        wide.push('\\' as u16);
+    }
     OsString::from_wide(&wide).into()
 }
 
@@ -93,9 +94,16 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
 pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+    // Append a trailing separator so that we fail if it's not a directory.
+    let path = append_dir_suffix(path.to_path_buf());
+
+    // Set `FILE_FLAG_BACKUP_SEMANTICS` so that we can open directories. Unset
+    // `FILE_SHARE_DELETE` so that directories can't be renamed or deleted
+    // underneath us, since we use paths to implement many directory operations.
     fs::OpenOptions::new()
         .read(true)
         .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .share_mode(winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE)
         .open(&path)
 }
 

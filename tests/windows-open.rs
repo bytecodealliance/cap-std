@@ -16,7 +16,7 @@ fn windows_open_one() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("aaa"));
 
-    let dir = tmpdir.open_dir("aaa");
+    let dir = check!(tmpdir.open_dir("aaa"));
 
     // Attempts to remove or rename the open directory should fail.
     tmpdir.remove_dir("aaa").unwrap_err();
@@ -35,7 +35,7 @@ fn windows_open_multiple() {
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all("aaa/bbb"));
 
-    let dir = tmpdir.open_dir("aaa/bbb");
+    let dir = check!(tmpdir.open_dir("aaa/bbb"));
 
     // Attempts to remove or rename any component of the open directory should fail.
     tmpdir.remove_dir("aaa/bbb").unwrap_err();
@@ -91,4 +91,26 @@ fn windows_open_tricky() {
     check!(tmpdir.remove_dir("uuu/xxx/www"));
     check!(tmpdir.remove_dir("uuu/xxx"));
     check!(tmpdir.remove_dir("uuu"));
+}
+
+/// Like `windows_open_one` but uses `open_ambient_dir` instead of `open_dir`.
+#[test]
+#[cfg(windows)]
+fn windows_open_ambient() {
+    let ambient_dir = tempfile::tempdir().unwrap();
+
+    let tmpdir = check!(unsafe { cap_std::fs::Dir::open_ambient_dir(ambient_dir.path()) });
+    check!(tmpdir.create_dir("aaa"));
+
+    let dir = check!(unsafe { cap_std::fs::Dir::open_ambient_dir(ambient_dir.path().join("aaa")) });
+
+    // Attempts to remove or rename the open directory should fail.
+    tmpdir.remove_dir("aaa").unwrap_err();
+    tmpdir.rename("aaa", &tmpdir, "zzz").unwrap_err();
+
+    drop(dir);
+
+    // Now that we've droped the handle, the same operations should succeed.
+    check!(tmpdir.rename("aaa", &tmpdir, "xxx"));
+    check!(tmpdir.remove_dir("xxx"));
 }
