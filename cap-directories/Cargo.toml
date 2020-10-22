@@ -9,7 +9,7 @@ authors = [
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["app_dirs", "path", "folder", "xdg", "basedir"]
 categories = ["filesystem"]
-repository = "https://github.com/sunfishcode/cap-std"
+repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 readme = "README.md"
 

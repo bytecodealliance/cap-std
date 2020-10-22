@@ -23,10 +23,10 @@
 
 #![deny(missing_docs)]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.svg"
+    html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]
 #![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/sunfishcode/cap-std/main/media/cap-std.ico"
+    html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
 pub use rand::{distributions, seq, AsByteSliceMut, CryptoRng, Error, Rng, RngCore, SeedableRng};

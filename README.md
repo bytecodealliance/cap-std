@@ -5,10 +5,12 @@
     <strong>Capability-oriented version of the Rust standard library</strong>
   </p>
 
+  <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
+
   <p>
-    <a href="https://github.com/sunfishcode/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/cap-std/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
-    <a href="https://cirrus-ci.com/github/sunfishcode/cap-std"><img src="https://api.cirrus-ci.com/github/sunfishcode/cap-std.svg" alt="Cirrus CI Status" /></a>
-    <a href="https://travis-ci.com/sunfishcode/cap-std"><img src="https://travis-ci.com/sunfishcode/cap-std.svg?branch=main" alt="Travis CI Status" /></a>
+    <a href="https://github.com/bytecodealliance/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/bytecodealliance/cap-std/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
+    <a href="https://cirrus-ci.com/github/bytecodealliance/cap-std"><img src="https://api.cirrus-ci.com/github/bytecodealliance/cap-std.svg" alt="Cirrus CI Status" /></a>
+    <a href="https://travis-ci.com/bytecodealliance/cap-std"><img src="https://travis-ci.com/bytecodealliance/cap-std.svg?branch=main" alt="Travis CI Status" /></a>
   </p>
 </div>
 
@@ -29,13 +31,13 @@ develops libraries to make it easy to write capability-oriented code, including:
    [random number generators]
 
 [`std`]: https://doc.rust-lang.org/std/
-[`cap-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-std/README.md
-[`cap-async-std`]: https://github.com/sunfishcode/cap-std/blob/main/cap-async-std/README.md
-[`cap-directories`]: https://github.com/sunfishcode/cap-std/blob/main/cap-directories/README.md
-[`cap-tempfile`]: https://github.com/sunfishcode/cap-std/blob/main/cap-tempfile/README.md
-[`cap-dir-ext`]: https://github.com/sunfishcode/cap-std/blob/main/cap-dir-ext/README.md
-[`cap-time-ext`]: https://github.com/sunfishcode/cap-std/blob/main/cap-time-ext/README.md
-[`cap-rand`]: https://github.com/sunfishcode/cap-std/blob/main/cap-rand/README.md
+[`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
+[`cap-async-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-async-std/README.md
+[`cap-directories`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-directories/README.md
+[`cap-tempfile`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-tempfile/README.md
+[`cap-dir-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-dir-ext/README.md
+[`cap-time-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-time-ext/README.md
+[`cap-rand`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-rand/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`async-std`]: https://docs.rs/async-std/
 [standard application directories]: https://docs.rs/directories-next/
@@ -100,7 +102,7 @@ See the [`kv-cli` example] for a simple example of a program using `cap-director
 and `cap-std` APIs.
 
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
-[`kv-cli` example]: https://github.com/sunfishcode/cap-std/blob/main/examples/kv-cli.rs
+[`kv-cli` example]: https://github.com/bytecodealliance/cap-std/blob/main/examples/kv-cli.rs
 
 ## What can I use `cap-std` for?
 

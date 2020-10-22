@@ -20,7 +20,7 @@ fuzzer which in a critical path may result in data loss.
 
 For more details on our fuzzer, see [fuzz/README.md].
 
-[fuzz/README.md]: https://github.com/sunfishcode/cap-std/blob/main/fuzz/README.md
+[fuzz/README.md]: https://github.com/bytecodealliance/cap-std/blob/main/fuzz/README.md
 
 ## Benchmarking
 
