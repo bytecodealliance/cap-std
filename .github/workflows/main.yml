@@ -133,7 +133,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, beta, ubuntu-16.04, ubuntu-20.04, windows-2016]
+        build: [stable, windows, macos, beta, ubuntu-16.04, ubuntu-20.04, windows-2016, aarch64-ubuntu, freebsd]
         include:
           - build: stable
             os: ubuntu-latest
@@ -164,6 +164,14 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64 -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: freebsd
+            os: ubuntu-latest
+            rust: stable
+            target: x86_64-unknown-freebsd
+            gcc_package: gcc-x86_64-freebsd
+            gcc: x86_64-freebsd-gcc
+            qemu: qemu-x86_64 -L /usr/x86_64-freebsd
+            qemu_target: x86_64-freebsd-user
 
     steps:
     - uses: actions/checkout@v1
