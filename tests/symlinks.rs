@@ -3,10 +3,14 @@ mod sys_common;
 
 use cap_dir_ext::DirExt;
 use cap_std::fs::Dir;
-use sys_common::io::tmpdir;
+use sys_common::{io::tmpdir, symlink_supported};
 
 #[test]
 fn basic_symlinks() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
 
     check!(tmpdir.create("file"));
@@ -56,6 +60,10 @@ fn symlink_absolute() {
 
 #[test]
 fn readlink_absolute() {
+    if !symlink_supported() {
+        return;
+    }
+
     let dir = tempfile::tempdir().unwrap();
 
     #[cfg(not(windows))]
