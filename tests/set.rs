@@ -4,7 +4,10 @@
 mod sys_common;
 
 use std::{io, path::Path};
-use sys_common::io::{tmpdir, TempDir};
+use sys_common::{
+    io::{tmpdir, TempDir},
+    symlink_supported,
+};
 
 #[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
@@ -33,6 +36,10 @@ fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
 
 #[test]
 fn basic_perms() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
     check!(tmpdir.create_dir("dir"));
@@ -68,6 +75,10 @@ fn basic_perms() {
 
 #[test]
 fn symlink_perms() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
     check!(tmpdir.create_dir("dir"));
