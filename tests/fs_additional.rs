@@ -11,7 +11,10 @@ use std::{
     path::Path,
     str,
 };
-use sys_common::io::{tmpdir, TempDir};
+use sys_common::{
+    io::{tmpdir, TempDir},
+    symlink_supported,
+};
 
 #[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
@@ -212,6 +215,10 @@ fn file_test_directoryinfo_readdir() {
 
 #[test]
 fn follow_dotdot_symlink() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all("a/b"));
     check!(symlink_dir("..", &tmpdir, "a/b/c"));
@@ -234,6 +241,10 @@ fn follow_dotdot_symlink() {
 
 #[test]
 fn follow_file_symlink() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
 
     check!(tmpdir.create("file"));
@@ -414,6 +425,10 @@ fn symlink_hard_link_ambient() {
     #[cfg(windows)]
     use std::os::windows::fs::symlink_file;
 
+    if !symlink_supported() {
+        return;
+    }
+
     let dir = tempfile::tempdir().unwrap();
 
     check!(std::fs::File::create(dir.path().join("file")));
@@ -469,6 +484,10 @@ fn symlink_hard_link_ambient() {
 /// symbolic links.
 #[test]
 fn symlink_hard_link() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
 
     check!(tmpdir.create("file"));
