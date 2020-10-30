@@ -3,10 +3,14 @@
 #[macro_use]
 mod sys_common;
 
-use sys_common::io::tmpdir;
+use sys_common::{io::tmpdir, symlink_supported};
 
 #[test]
 fn windows_symlinks() {
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
 
     check!(tmpdir.create("file"));
@@ -38,6 +42,10 @@ fn windows_symlinks_ambient() {
         fs,
         os::windows::fs::{symlink_dir, symlink_file},
     };
+
+    if !symlink_supported() {
+        return;
+    }
 
     let dir = tempfile::tempdir().unwrap();
 
