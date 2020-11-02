@@ -46,8 +46,13 @@ impl Dir {
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
+    ///
+    /// # Safety
+    ///
+    /// `std::fs::File` is not sandboxed and may access any path that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std_file(std_file: fs::File) -> Self {
+    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
     }
 
@@ -82,19 +87,24 @@ impl Dir {
     }
 
     #[cfg(not(target_os = "wasi"))]
+    #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        open(&self.std_file, path, options).map(File::from_std)
+        let dir = open(&self.std_file, path, options)?;
+        Ok(unsafe { File::from_std(dir) })
     }
 
     #[cfg(target_os = "wasi")]
+    #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        options.open_at(&self.std_file, path).map(File::from_std)
+        let dir = options.open_at(&self.std_file, path)?;
+        Ok(unsafe { File::from_std(dir) })
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        open_dir(&self.std_file, path.as_ref()).map(Self::from_std_file)
+        let dir = open_dir(&self.std_file, path.as_ref())?;
+        Ok(unsafe { Self::from_std_file(dir) })
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -543,7 +553,8 @@ impl Dir {
     /// `Dir` instance.
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_std_file(self.std_file.try_clone()?))
+        let dir = self.std_file.try_clone()?;
+        Ok(unsafe { Self::from_std_file(dir) })
     }
 
     /// Returns `true` if the path points at an existing entity.
@@ -589,7 +600,8 @@ impl Dir {
     /// process has access to.
     #[inline]
     pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        open_ambient_dir(path.as_ref()).map(Self::from_std_file)
+        let dir = open_ambient_dir(path.as_ref())?;
+        Ok(Self::from_std_file(dir))
     }
 }
 

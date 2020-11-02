@@ -36,8 +36,12 @@ pub struct File {
 
 impl File {
     /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    ///
+    /// # Safety
+    ///
+    /// `std::fs::File` is not sandboxed and may access any path that the host
     #[inline]
-    pub fn from_std(std: fs::File) -> Self {
+    pub unsafe fn from_std(std: fs::File) -> Self {
         Self { std }
     }
 
@@ -108,7 +112,8 @@ impl File {
     /// [`std::fs::File::try_clone`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_std(self.std.try_clone()?))
+        let file = self.std.try_clone()?;
+        Ok(unsafe { Self::from_std(file) })
     }
 
     /// Changes the permissions on the underlying file.

@@ -24,8 +24,13 @@ pub struct UnixListener {
 
 impl UnixListener {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixListener`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::os::unix::net::UnixListener` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixListener) -> Self {
+    pub unsafe fn from_std(std: unix::net::UnixListener) -> Self {
         Self { std }
     }
 
@@ -39,7 +44,7 @@ impl UnixListener {
         self.std
             .accept()
             .await
-            .map(|(unix_stream, addr)| (UnixStream::from_std(unix_stream), addr))
+            .map(|(unix_stream, addr)| (unsafe { UnixStream::from_std(unix_stream) }, addr))
     }
 
     // async_std doesn't have `try_clone`.
@@ -65,7 +70,8 @@ impl UnixListener {
     /// [`async_std::os::unix::net::UnixListener::incoming`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_std(self.std.incoming())
+        let incoming = self.std.incoming();
+        unsafe { Incoming::from_std(incoming) }
     }
 }
 

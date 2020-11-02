@@ -30,8 +30,13 @@ pub struct File {
 
 impl File {
     /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::fs::File` is not sandboxed and may access any path that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: fs::File) -> Self {
+    pub unsafe fn from_std(std: fs::File) -> Self {
         Self::from_cap_std(crate::fs::File::from_std(std))
     }
 

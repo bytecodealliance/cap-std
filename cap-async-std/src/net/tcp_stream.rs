@@ -27,8 +27,13 @@ pub struct TcpStream {
 
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `async_std::net::TcpStream`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::net::TcpStream` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: net::TcpStream) -> Self {
+    pub unsafe fn from_std(std: net::TcpStream) -> Self {
         Self { std }
     }
 

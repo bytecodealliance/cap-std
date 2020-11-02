@@ -4,16 +4,16 @@ use async_std::os::wasi::{
     fs::OpenOptionsExt,
     io::{AsRawFd, IntoRawFd},
 };
-use async_std::{fs, io};
+use async_std::{
+    fs, io,
+    path::{Component, Path, PathBuf},
+};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
     read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
     rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
-use std::{
-    fmt,
-    path::{Component, Path, PathBuf},
-};
+use std::fmt;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -46,8 +46,13 @@ impl Dir {
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::fs::File` is not sandboxed and may access any path that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std_file(std_file: fs::File) -> Self {
+    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
     }
 
@@ -84,21 +89,22 @@ impl Dir {
 
     #[cfg(not(target_os = "wasi"))]
     fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        open(file, path, options).map(|f| File::from_std(f.into()))
+        let file = open(file, path.as_ref(), options)?.into();
+        Ok(unsafe { File::from_std(file) })
     }
 
     #[cfg(target_os = "wasi")]
     fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        options
-            .open_at(&self.std_file, path)
-            .map(|f| File::from_std(f.into()))
+        let file = options.open_at(&self.std_file, path)?.into();
+        Ok(unsafe { File::from_std(file) })
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         let file = unsafe { as_sync(&self.std_file) };
-        open_dir(&file, path.as_ref()).map(|file| Self::from_std_file(file.into()))
+        let dir = open_dir(&file, path.as_ref().as_ref())?.into();
+        Ok(unsafe { Self::from_std_file(dir) })
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -144,7 +150,7 @@ impl Dir {
 
     fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        create_dir(&file, path, dir_options)
+        create_dir(&file, path.as_ref(), dir_options)
     }
 
     fn _create_dir_all(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
@@ -198,7 +204,7 @@ impl Dir {
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
         let file = unsafe { as_sync(&self.std_file) };
-        canonicalize(&file, path.as_ref())
+        canonicalize(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
     /// Copies the contents of one file to another. This function will also copy the permission
@@ -217,7 +223,12 @@ impl Dir {
     ) -> io::Result<u64> {
         let from_file = unsafe { as_sync(&self.std_file) };
         let to_file = unsafe { as_sync(&to_dir.std_file) };
-        copy(&from_file, from.as_ref(), &to_file, to.as_ref())
+        copy(
+            &from_file,
+            from.as_ref().as_ref(),
+            &to_file,
+            to.as_ref().as_ref(),
+        )
     }
 
     /// Creates a new hard link on a filesystem.
@@ -235,7 +246,12 @@ impl Dir {
     ) -> io::Result<()> {
         let src_file = unsafe { as_sync(&self.std_file) };
         let dst_file = unsafe { as_sync(&dst_dir.std_file) };
-        hard_link(&src_file, src.as_ref(), &dst_file, dst.as_ref())
+        hard_link(
+            &src_file,
+            src.as_ref().as_ref(),
+            &dst_file,
+            dst.as_ref().as_ref(),
+        )
     }
 
     /// Given a path, query the file system to get information about a file, directory, etc.
@@ -247,7 +263,7 @@ impl Dir {
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         let file = unsafe { as_sync(&self.std_file) };
-        stat(&file, path.as_ref(), FollowSymlinks::Yes)
+        stat(&file, path.as_ref().as_ref(), FollowSymlinks::Yes)
     }
 
     /// Returns an iterator over the entries within `self`.
@@ -265,7 +281,7 @@ impl Dir {
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
         let file = unsafe { as_sync(&self.std_file) };
-        read_dir(&file, path.as_ref()).map(|inner| ReadDir { inner })
+        read_dir(&file, path.as_ref().as_ref()).map(|inner| ReadDir { inner })
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -292,7 +308,7 @@ impl Dir {
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
         let file = unsafe { as_sync(&self.std_file) };
-        read_link(&file, path.as_ref())
+        read_link(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
     /// Read the entire contents of a file into a string.
@@ -318,7 +334,7 @@ impl Dir {
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        remove_dir(&file, path.as_ref())
+        remove_dir(&file, path.as_ref().as_ref())
     }
 
     /// Removes a directory at this path, after removing all its contents. Use carefully!
@@ -330,7 +346,7 @@ impl Dir {
     #[inline]
     pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        remove_dir_all(&file, path.as_ref())
+        remove_dir_all(&file, path.as_ref().as_ref())
     }
 
     /// Remove the directory referenced by `self` and consume `self`.
@@ -365,7 +381,7 @@ impl Dir {
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        remove_file(&file, path.as_ref())
+        remove_file(&file, path.as_ref().as_ref())
     }
 
     /// Rename a file or directory to a new name, replacing the original file if to already exists.
@@ -383,19 +399,24 @@ impl Dir {
     ) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
         let to_file = unsafe { as_sync(&to_dir.std_file) };
-        rename(&file, from.as_ref(), &to_file, to.as_ref())
+        rename(
+            &file,
+            from.as_ref().as_ref(),
+            &to_file,
+            to.as_ref().as_ref(),
+        )
     }
 
     /// Changes the permissions found on a file or a directory.
     ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
+    /// This corresponds to [`async_std::fs::set_permissions`], but only accesses paths
     /// relative to `self`. Also, on some platforms, this function may fail if the
     /// file or directory cannot be opened for reading or writing first.
     ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    /// [`async_std::fs::set_permissions`]: https://docs.rs/async-std/current/async_std/fs/fn.set_permissions.html
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        set_permissions(&file, path.as_ref(), perm)
+        set_permissions(&file, path.as_ref().as_ref(), perm)
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -407,7 +428,7 @@ impl Dir {
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         let file = unsafe { as_sync(&self.std_file) };
-        stat(&file, path.as_ref(), FollowSymlinks::No)
+        stat(&file, path.as_ref().as_ref(), FollowSymlinks::No)
     }
 
     /// Write a slice as the entire contents of a file.
@@ -437,7 +458,7 @@ impl Dir {
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        symlink(src.as_ref(), &file, dst.as_ref())
+        symlink(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
     /// Creates a new file symbolic link on a filesystem.
@@ -450,7 +471,7 @@ impl Dir {
     #[inline]
     pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        symlink_file(src.as_ref(), &file, dst.as_ref())
+        symlink_file(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
     /// Creates a new directory symlink on a filesystem.
@@ -463,7 +484,7 @@ impl Dir {
     #[inline]
     pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
-        symlink_dir(src.as_ref(), &file, dst.as_ref())
+        symlink_dir(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -611,7 +632,7 @@ impl Dir {
     /// process has access to.
     #[inline]
     pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        open_ambient_dir(path.as_ref()).map(|f| Self::from_std_file(f.into()))
+        open_ambient_dir(path.as_ref().as_ref()).map(|f| Self::from_std_file(f.into()))
     }
 }
 

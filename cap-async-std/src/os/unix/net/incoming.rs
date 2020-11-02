@@ -19,8 +19,13 @@ pub struct Incoming<'a> {
 
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::Incoming`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::net::Incoming` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::Incoming<'a>) -> Self {
+    pub unsafe fn from_std(std: unix::net::Incoming<'a>) -> Self {
         Self { std }
     }
 }
@@ -30,8 +35,12 @@ impl<'a> Stream for Incoming<'a> {
 
     #[inline]
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        Stream::poll_next(Pin::new(&mut self.std), cx)
-            .map(|poll| poll.map(|result| result.map(UnixStream::from_std)))
+        Stream::poll_next(Pin::new(&mut self.std), cx).map(|poll| {
+            poll.map(|result| {
+                let unix_stream = result?;
+                Ok(unsafe { UnixStream::from_std(unix_stream) })
+            })
+        })
     }
 
     #[inline]

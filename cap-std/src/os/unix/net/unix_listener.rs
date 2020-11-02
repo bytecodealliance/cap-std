@@ -24,8 +24,13 @@ pub struct UnixListener {
 
 impl UnixListener {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixListener`.
+    ///
+    /// # Safety
+    ///
+    /// `std::os::unix::net::UnixListener` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixListener) -> Self {
+    pub unsafe fn from_std(std: unix::net::UnixListener) -> Self {
         Self { std }
     }
 
@@ -38,7 +43,7 @@ impl UnixListener {
     pub fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
         self.std
             .accept()
-            .map(|(unix_stream, addr)| (UnixStream::from_std(unix_stream), addr))
+            .map(|(unix_stream, addr)| (unsafe { UnixStream::from_std(unix_stream) }, addr))
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -48,7 +53,8 @@ impl UnixListener {
     /// [`std::os::unix::net::UnixListener::try_clone`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_std(self.std.try_clone()?))
+        let unix_listener = self.std.try_clone()?;
+        Ok(unsafe { Self::from_std(unix_listener) })
     }
 
     /// Returns the local socket address of this listener.
@@ -88,7 +94,8 @@ impl UnixListener {
     /// [`std::os::unix::net::UnixListener::incoming`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_std(self.std.incoming())
+        let incoming = self.std.incoming();
+        unsafe { Incoming::from_std(incoming) }
     }
 }
 
@@ -119,7 +126,8 @@ impl<'a> IntoIterator for &'a UnixListener {
 
     #[inline]
     fn into_iter(self) -> Incoming<'a> {
-        Incoming::from_std(self.std.into_iter())
+        let incoming = self.std.into_iter();
+        unsafe { Incoming::from_std(incoming) }
     }
 }
 

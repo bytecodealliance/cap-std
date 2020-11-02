@@ -28,8 +28,13 @@ pub struct TcpStream {
 
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `std::net::TcpStream`.
+    ///
+    /// # Safety
+    ///
+    /// `std::net::TcpStream` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: net::TcpStream) -> Self {
+    pub unsafe fn from_std(std: net::TcpStream) -> Self {
         Self { std }
     }
 
@@ -60,7 +65,8 @@ impl TcpStream {
     /// [`std::net::TcpStream::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_std(self.std.try_clone()?))
+        let tcp_stream = self.std.try_clone()?;
+        Ok(unsafe { Self::from_std(tcp_stream) })
     }
 
     /// Sets the read timeout to the timeout specified.
