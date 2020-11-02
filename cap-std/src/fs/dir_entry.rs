@@ -30,19 +30,22 @@ impl DirEntry {
     /// Open the file for reading.
     #[inline]
     pub fn open(&self) -> io::Result<File> {
-        self.inner.open().map(File::from_std)
+        let file = self.inner.open()?;
+        Ok(unsafe { File::from_std(file) })
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
-        self.inner.open_with(options).map(File::from_std)
+        let file = self.inner.open_with(options)?;
+        Ok(unsafe { File::from_std(file) })
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
-        self.inner.open_dir().map(Dir::from_std_file)
+        let dir = self.inner.open_dir()?;
+        Ok(unsafe { Dir::from_std_file(dir) })
     }
 
     /// Removes the file from its filesystem.

@@ -31,21 +31,22 @@ impl DirEntry {
     /// Open the file for reading.
     #[inline]
     pub fn open(&self) -> io::Result<File> {
-        self.inner.open().map(|f| File::from_std(f.into()))
+        let file = self.inner.open()?.into();
+        Ok(unsafe { File::from_std(file) })
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
-        self.inner
-            .open_with(options)
-            .map(|f| File::from_std(f.into()))
+        let file = self.inner.open_with(options)?.into();
+        Ok(unsafe { File::from_std(file) })
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
-        self.inner.open_dir().map(|f| Dir::from_std_file(f.into()))
+        let file = self.inner.open_dir()?.into();
+        Ok(unsafe { Dir::from_std_file(file) })
     }
 
     /// Removes the file from its filesystem.

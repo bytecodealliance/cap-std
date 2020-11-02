@@ -26,8 +26,13 @@ pub struct UnixStream {
 
 impl UnixStream {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixStream`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::os::unix::net::UnixStream` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixStream) -> Self {
+    pub unsafe fn from_std(std: unix::net::UnixStream) -> Self {
         Self { std }
     }
 
@@ -40,7 +45,8 @@ impl UnixStream {
     /// [`async_std::os::unix::net::UnixStream::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixStream::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
+        unix::net::UnixStream::pair()
+            .map(|(a, b)| unsafe { (Self::from_std(a), Self::from_std(b)) })
     }
 
     // async_std doesn't have `try_clone`.

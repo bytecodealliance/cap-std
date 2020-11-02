@@ -315,22 +315,22 @@ impl DirExt for cap_async_std::fs::Dir {
     #[cfg(not(windows))]
     #[inline]
     fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.symlink(src, dst)
+        self.symlink(src.as_ref(), dst.as_ref())
     }
 
     #[cfg(not(windows))]
     #[inline]
     fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        self.symlink(src, dst)
+        self.symlink(src.as_ref(), dst.as_ref())
     }
 
     #[cfg(windows)]
     #[inline]
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         if self.metadata(src.as_ref())?.is_dir() {
-            self.symlink_dir(src, dst)
+            self.symlink_dir(src.as_ref(), dst.as_ref())
         } else {
-            self.symlink_file(src, dst)
+            self.symlink_file(src.as_ref(), dst.as_ref())
         }
     }
 

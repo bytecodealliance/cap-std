@@ -28,8 +28,13 @@ pub struct UnixDatagram {
 
 impl UnixDatagram {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixDatagram`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::os::unix::net::UnixDatagram` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixDatagram) -> Self {
+    pub unsafe fn from_std(std: unix::net::UnixDatagram) -> Self {
         Self { std }
     }
 
@@ -42,7 +47,8 @@ impl UnixDatagram {
     /// [`async_std::os::unix::net::UnixDatagram::unbound`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.unbound
     #[inline]
     pub fn unbound() -> io::Result<Self> {
-        unix::net::UnixDatagram::unbound().map(Self::from_std)
+        let unix_datagram = unix::net::UnixDatagram::unbound()?;
+        Ok(unsafe { Self::from_std(unix_datagram) })
     }
 
     /// Creates an unnamed pair of connected sockets.
@@ -54,7 +60,8 @@ impl UnixDatagram {
     /// [`async_std::os::unix::net::UnixDatagram::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixDatagram::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
+        unix::net::UnixDatagram::pair()
+            .map(|(a, b)| unsafe { (Self::from_std(a), Self::from_std(b)) })
     }
 
     // async_std doesn't have `try_clone`.

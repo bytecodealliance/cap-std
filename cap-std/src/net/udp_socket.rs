@@ -26,8 +26,13 @@ pub struct UdpSocket {
 
 impl UdpSocket {
     /// Constructs a new instance of `Self` from the given `std::net::UdpSocket`.
+    ///
+    /// # Safety
+    ///
+    /// `std::net::UdpSocket` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: net::UdpSocket) -> Self {
+    pub unsafe fn from_std(std: net::UdpSocket) -> Self {
         Self { std }
     }
 
@@ -78,7 +83,8 @@ impl UdpSocket {
     /// [`std::net::UdpSocket::try_clone`]: https://doc.rust-lang.org/std/net/struct.UdpSocket.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        Ok(Self::from_std(self.std.try_clone()?))
+        let udp_socket = self.std.try_clone()?;
+        Ok(unsafe { Self::from_std(udp_socket) })
     }
 
     /// Sets the read timeout to the timeout specified.

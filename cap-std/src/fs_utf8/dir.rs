@@ -31,8 +31,13 @@ impl Dir {
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
+    ///
+    /// # Safety
+    ///
+    /// `std::fs::File` is not sandboxed and may access any path that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std_file(std_file: fs::File) -> Self {
+    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
         Self::from_cap_std(crate::fs::Dir::from_std_file(std_file))
     }
 

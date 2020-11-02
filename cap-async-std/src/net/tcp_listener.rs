@@ -22,8 +22,13 @@ pub struct TcpListener {
 
 impl TcpListener {
     /// Constructs a new instance of `Self` from the given `async_std::net::TcpListener`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::net::TcpListener` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: net::TcpListener) -> Self {
+    pub unsafe fn from_std(std: net::TcpListener) -> Self {
         Self { std }
     }
 
@@ -49,7 +54,7 @@ impl TcpListener {
         self.std
             .accept()
             .await
-            .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream), addr))
+            .map(|(tcp_stream, addr)| (unsafe { TcpStream::from_std(tcp_stream) }, addr))
     }
 
     /// Returns an iterator over the connections being received on this listener.
@@ -59,7 +64,8 @@ impl TcpListener {
     /// [`async_std::net::TcpListener::incoming`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
-        Incoming::from_std(self.std.incoming())
+        let incoming = self.std.incoming();
+        unsafe { Incoming::from_std(incoming) }
     }
 
     // async_std doesn't have `TcpListener::set_ttl`.

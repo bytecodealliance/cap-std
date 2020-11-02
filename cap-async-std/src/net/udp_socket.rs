@@ -26,8 +26,13 @@ pub struct UdpSocket {
 
 impl UdpSocket {
     /// Constructs a new instance of `Self` from the given `async_std::net::UdpSocket`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::net::UdpSocket` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: net::UdpSocket) -> Self {
+    pub unsafe fn from_std(std: net::UdpSocket) -> Self {
         Self { std }
     }
 

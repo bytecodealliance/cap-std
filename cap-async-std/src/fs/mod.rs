@@ -14,10 +14,10 @@
 //! This combined with a lack of absolute paths provides a natural
 //! capability-oriented interface.
 //!
-//! This crate uses the existing `std::path::Path` rather than having its own
-//! path type, however while `std::path::Path` is mostly just a pure datatype,
-//! it includes aliases for several `std::fs` functions. To preserve the
-//! capability-oriented interface, avoid using `std::path::Path`'s
+//! This crate uses the existing `async_std::path::Path` rather than having its own
+//! path type, however while `async_std::path::Path` is mostly just a pure datatype,
+//! it includes aliases for several `async_std::fs` functions. To preserve the
+//! capability-oriented interface, avoid using `async_std::path::Path`'s
 //! `canonicalize`, `read_link`, `read_dir`, `metadata`, and `symlink_metadata`
 //! functions.
 //!

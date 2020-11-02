@@ -20,7 +20,7 @@ impl Catalog {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr).await {
-                Ok(tcp_listener) => return Ok(TcpListener::from_std(tcp_listener)),
+                Ok(tcp_listener) => return Ok(unsafe { TcpListener::from_std(tcp_listener) }),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -39,7 +39,7 @@ impl Catalog {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpStream::connect(addr).await {
-                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream)),
+                Ok(tcp_stream) => return Ok(unsafe { TcpStream::from_std(tcp_stream) }),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -59,7 +59,7 @@ impl Catalog {
         for addr in addrs {
             self.cap.check_addr(&addr)?;
             match net::UdpSocket::bind(addr).await {
-                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket)),
+                Ok(udp_socket) => return Ok(unsafe { UdpSocket::from_std(udp_socket) }),
                 Err(e) => last_err = Some(e),
             }
         }

@@ -32,7 +32,7 @@ pub use read_dir::*;
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
-fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
+fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]
@@ -50,7 +50,7 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
     Ok(path.into())
 }
 
-fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<String> {
+fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<String> {
     // For now, for WASI use the same logic as other OS's, but
     // in the future, the idea is we could avoid this.
     let osstr = path.as_ref().as_os_str();

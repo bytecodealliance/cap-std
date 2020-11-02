@@ -13,8 +13,13 @@ pub struct Incoming<'a> {
 
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::Incoming`.
+    ///
+    /// # Safety
+    ///
+    /// `std::net::Incoming` is not sandboxed and may access any address that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::Incoming<'a>) -> Self {
+    pub unsafe fn from_std(std: unix::net::Incoming<'a>) -> Self {
         Self { std }
     }
 }
@@ -24,9 +29,10 @@ impl<'a> Iterator for Incoming<'a> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.std
-            .next()
-            .map(|result| result.map(UnixStream::from_std))
+        self.std.next().map(|result| {
+            let unix_stream = result?;
+            Ok(unsafe { UnixStream::from_std(unix_stream) })
+        })
     }
 
     #[inline]

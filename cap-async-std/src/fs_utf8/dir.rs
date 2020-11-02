@@ -32,8 +32,13 @@ impl Dir {
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
+    ///
+    /// # Safety
+    ///
+    /// `async_std::fs::File` is not sandboxed and may access any path that the host
+    /// process has access to.
     #[inline]
-    pub fn from_std_file(std_file: fs::File) -> Self {
+    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
         Self::from_cap_std(crate::fs::Dir::from_std_file(std_file))
     }
 
@@ -322,11 +327,11 @@ impl Dir {
 
     /// Changes the permissions found on a file or a directory.
     ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
+    /// This corresponds to [`async_std::fs::set_permissions`], but only accesses paths
     /// relative to `self`. Also, on some platforms, this function may fail if the
     /// file or directory cannot be opened for reading or writing first.
     ///
-    /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    /// [`async_std::fs::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/fn.set_permissions.html
     pub fn set_permissions<P: AsRef<str>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         let path = from_utf8(path)?;
         self.cap_std.set_permissions(path, perm)

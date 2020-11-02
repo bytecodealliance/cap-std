@@ -27,8 +27,13 @@ pub struct UnixStream {
 
 impl UnixStream {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixStream`.
+    ///
+    /// # Safety
+    ///
+    /// `std::os::unix::net::UnixStream` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixStream) -> Self {
+    pub unsafe fn from_std(std: unix::net::UnixStream) -> Self {
         Self { std }
     }
 
@@ -41,7 +46,8 @@ impl UnixStream {
     /// [`std::os::unix::net::UnixStream::pair`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixStream::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
+        unix::net::UnixStream::pair()
+            .map(|(a, b)| unsafe { (Self::from_std(a), Self::from_std(b)) })
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -51,7 +57,8 @@ impl UnixStream {
     /// [`std::os::unix::net::UnixStream::try_clone`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
-        self.std.try_clone().map(Self::from_std)
+        let unix_stream = self.std.try_clone()?;
+        Ok(unsafe { Self::from_std(unix_stream) })
     }
 
     /// Returns the socket address of the local half of this connection.
