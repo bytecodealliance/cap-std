@@ -103,18 +103,19 @@ impl<'start> Context<'start> {
         self.components.is_empty() && !self.trailing_dot
     }
 
-    fn check_access(&self, component: Component) -> io::Result<()> {
+    fn check_dot_access(&self) -> io::Result<()> {
         // Manually check that we have permissions to search `self.base` to
-        // search for `..` in it, since we don't actually open `..`.
+        // search for `.` in it, since we otherwise resolve `.` and `..`
+        // ourselves by just manipulating the `dirs` stack.
         #[cfg(not(windows))]
         {
-            // Use `faccess` with `AT_EACCESS`. `AT_EACCCES` is not often the
+            // Use `faccess` with `AT_EACCESS`. `AT_EACCESS` is not often the
             // right tool for the job; in POSIX, it's better to ask for errno
-            // than to ask for permission. But we use `check_access` to check
-            // access for opening `.` and `..` in situations where we already
-            // have open handles to them, and now we're accessing them through
-            // different paths, and we need to check whether these paths allow
-            // us access.
+            // than to ask for permission. But we use `check_dot_access` to
+            // check access for opening `.` and `..` in situations where we
+            // already have open handles to them, and now we're accessing them
+            // through different paths, and we need to check whether these paths
+            // allow us access.
             //
             // Android and Emscripten lack `AT_EACCESS`.
             // https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp
@@ -123,15 +124,23 @@ impl<'start> Context<'start> {
             #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
             let at_flags = posish::fs::AtFlags::EACCESS;
 
+            // Always use `CurDir`, even though this code is used to check
+            // permissions for both `.` and `..`, because in both cases we
+            // already know we can access the referenced directory, and we
+            // just need to check for the ability to search for `.` or `..`
+            // within `self.base`, which should always be the same. And
+            // using `.` means we avoid asking the OS to access a `..` path
+            // for us.
             posish::fs::accessat(
                 &*self.base,
-                component.as_os_str(),
+                Component::CurDir.as_os_str(),
                 posish::fs::Access::EXEC_OK,
                 at_flags,
             )
         }
         #[cfg(windows)]
-        crate::fs::open_dir_unchecked(&self.base, component.as_os_str().as_ref()).map(|_| ())
+        crate::fs::open_dir_unchecked(&self.base, Component::CurDir.as_os_str().as_ref())
+            .map(|_| ())
     }
 
     /// Handle a "." path component.
@@ -150,7 +159,7 @@ impl<'start> Context<'start> {
         }
 
         // Check that we have permission to look up `.`.
-        self.check_access(Component::CurDir)?;
+        self.check_dot_access()?;
 
         // Otherwise do nothing.
         Ok(())
@@ -174,7 +183,7 @@ impl<'start> Context<'start> {
         match self.dirs.pop() {
             Some(dir) => {
                 // Check that we have permission to look up `..`.
-                self.check_access(Component::ParentDir)?;
+                self.check_dot_access()?;
 
                 // Looks good.
                 self.base = dir;
@@ -252,7 +261,7 @@ impl<'start> Context<'start> {
                 // If Rust's `Path` stripped a trailing `.`, check that we have
                 // access to `.`.
                 if self.trailing_dot {
-                    self.check_access(Component::CurDir)?;
+                    self.check_dot_access()?;
                 }
 
                 Ok(())
