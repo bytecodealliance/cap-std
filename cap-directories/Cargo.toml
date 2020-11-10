@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^0.5.1-alpha.0"}
+cap-std = { path = "../cap-std", version = "^0.6.0"}
 directories-next = "2.0.0"
 
 [target.'cfg(not(windows))'.dependencies]
