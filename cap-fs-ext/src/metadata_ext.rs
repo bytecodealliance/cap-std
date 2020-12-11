@@ -28,33 +28,29 @@ pub trait MetadataExt {
 }
 
 #[cfg(all(windows, feature = "windows_by_handle"))]
-use std::os::windows::fs::MetadataExt;
+use std::os::windows::fs::MetadataExt as _WindowsByHandle;
 
 #[cfg(all(windows, not(feature = "windows_by_handle")))]
 use cap_primitives::fs::_WindowsByHandle;
 
-#[cfg(all(
-    windows,
-    any(feature = "std", feature = "async_std"),
-    feature = "windows_by_handle"
-))]
+#[cfg(all(windows, feature = "windows_by_handle"))]
 impl MetadataExt for std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        self.volume_serial_number()
+        _WindowsByHandle::volume_serial_number(self)
             .expect("`dev` depends on a Metadata constructed from a `File`")
             .into()
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        self.file_index()
+        _WindowsByHandle::file_index(self)
             .expect("`ino` depends on a Metadata constructed from a `File`")
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        self.number_of_links()
+        _WindowsByHandle::number_of_links(self)
             .expect("`nlink` depends on a Metadata constructed from a `File`")
             .into()
     }
@@ -64,7 +60,7 @@ impl MetadataExt for std::fs::Metadata {
 impl MetadataExt for cap_std::fs::Metadata {
     fn dev(&self) -> u64 {
         unsafe {
-            self.volume_serial_number()
+            _WindowsByHandle::volume_serial_number(self)
                 .expect(
                     "`dev` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
                 )
@@ -75,7 +71,7 @@ impl MetadataExt for cap_std::fs::Metadata {
     #[inline]
     fn ino(&self) -> u64 {
         unsafe {
-            self.file_index().expect(
+            _WindowsByHandle::file_index(self).expect(
                 "`ino` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
             )
         }
@@ -84,7 +80,7 @@ impl MetadataExt for cap_std::fs::Metadata {
     #[inline]
     fn nlink(&self) -> u64 {
         unsafe {
-            self.number_of_links()
+            _WindowsByHandle::number_of_links(self)
                 .expect(
                     "`nlink` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
                 )
