@@ -7,7 +7,7 @@ use cap_fs_ext::MetadataExt;
 use sys_common::io::tmpdir;
 
 #[test]
-fn test_cap_fs_ext() {
+fn test_metadata_ext() {
     let tmpdir = tmpdir();
     let a = check!(tmpdir.create("a"));
     let b = check!(tmpdir.create("b"));

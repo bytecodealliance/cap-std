@@ -1,5 +1,5 @@
 use crate::{
-    fs::{FileType, MetadataExt, Permissions},
+    fs::{FileType, FileTypeExt, MetadataExt, Permissions},
     time::SystemTime,
 };
 use std::{fs, io};
@@ -32,7 +32,8 @@ impl Metadata {
     pub fn from_file(file: &fs::File) -> io::Result<Self> {
         let std = file.metadata()?;
         let ext = MetadataExt::from(file, &std)?;
-        Ok(Self::from_parts(std, ext))
+        let file_type = FileTypeExt::from(file, &std)?;
+        Ok(Self::from_parts(std, ext, file_type))
     }
 
     /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
@@ -44,15 +45,16 @@ impl Metadata {
     #[inline]
     pub fn from_just_metadata(std: fs::Metadata) -> Self {
         let ext = MetadataExt::from_just_metadata(&std);
-        Self::from_parts(std, ext)
+        let file_type = FileTypeExt::from_just_metadata(&std);
+        Self::from_parts(std, ext, file_type)
     }
 
     #[inline]
-    fn from_parts(std: fs::Metadata, ext: MetadataExt) -> Self {
+    fn from_parts(std: fs::Metadata, ext: MetadataExt, file_type: FileType) -> Self {
         // TODO: Initialize `created` on Linux with `std.created().ok()` once we
         // make use of `statx`.
         Self {
-            file_type: FileType::from_std(std.file_type()),
+            file_type,
             len: std.len(),
             permissions: Permissions::from_std(std.permissions()),
             modified: std.modified().ok().map(SystemTime::from_std),
