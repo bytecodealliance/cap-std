@@ -33,7 +33,11 @@ use std::os::windows::fs::MetadataExt;
 #[cfg(all(windows, not(feature = "windows_by_handle")))]
 use cap_primitives::fs::_WindowsByHandle;
 
-#[cfg(all(windows, feature = "std", feature = "windows_by_handle"))]
+#[cfg(all(
+    windows,
+    any(feature = "std", feature = "async_std"),
+    feature = "windows_by_handle"
+))]
 impl MetadataExt for std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
@@ -56,7 +60,7 @@ impl MetadataExt for std::fs::Metadata {
     }
 }
 
-#[cfg(all(windows, feature = "std"))]
+#[cfg(all(windows, any(feature = "std", feature = "async_std")))]
 impl MetadataExt for cap_std::fs::Metadata {
     fn dev(&self) -> u64 {
         unsafe {
@@ -89,7 +93,7 @@ impl MetadataExt for cap_std::fs::Metadata {
     }
 }
 
-#[cfg(all(not(windows), feature = "std"))]
+#[cfg(all(not(windows), any(feature = "std", feature = "async_std")))]
 impl MetadataExt for cap_std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
@@ -106,40 +110,3 @@ impl MetadataExt for cap_std::fs::Metadata {
         std::os::unix::fs::MetadataExt::nlink(self)
     }
 }
-
-#[cfg(all(windows, feature = "async_std"))]
-impl MetadataExt for cap_async_std::fs::Metadata {
-    #[inline]
-    fn dev(&self) -> u64 {
-        unsafe {
-            self.volume_serial_number()
-                .expect(
-                    "`dev` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-                )
-                .into()
-        }
-    }
-
-    #[inline]
-    fn ino(&self) -> u64 {
-        unsafe {
-            self.file_index().expect(
-                "`ino` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-            )
-        }
-    }
-
-    #[inline]
-    fn nlink(&self) -> u64 {
-        unsafe {
-            self.number_of_links()
-                .expect(
-                    "`nlink` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-                )
-                .into()
-        }
-    }
-}
-
-#[cfg(all(not(windows), feature = "async_std"))]
-impl MetadataExt for cap_async_std::fs::Metadata {}
