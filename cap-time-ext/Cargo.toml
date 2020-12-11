@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-primitives = { path = "../cap-primitives", version = "^0.7.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.7.1-alpha.0"}
 cap-std = { path = "../cap-std", optional = true, version = "^0.7.0"}
 
 [target.'cfg(not(windows))'.dependencies]
