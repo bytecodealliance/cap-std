@@ -9,9 +9,11 @@
 )]
 
 mod dir_ext;
+mod metadata_ext;
 mod open_options_follow_ext;
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 pub use dir_ext::DirExtUtf8;
 pub use dir_ext::{DirExt, SystemTimeSpec};
+pub use metadata_ext::MetadataExt;
 pub use open_options_follow_ext::{FollowSymlinks, OpenOptionsFollowExt};

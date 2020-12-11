@@ -1,7 +1,7 @@
 #[macro_use]
 mod sys_common;
 
-use cap_dir_ext::DirExt;
+use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
 use sys_common::{io::tmpdir, symlink_supported};
 

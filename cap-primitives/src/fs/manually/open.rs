@@ -430,7 +430,7 @@ pub(crate) fn stat<'start>(
 
     // If the path ended in `.` or `..`, we already have it open, so just do
     // `.metadata()` on it.
-    ctx.base.metadata().map(Metadata::from_std)
+    Metadata::from_file(&*ctx.base)
 }
 
 /// Test whether the given options imply that we should treat an open file as

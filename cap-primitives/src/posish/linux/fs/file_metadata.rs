@@ -13,8 +13,8 @@ pub(super) fn file_metadata(file: &fs::File) -> io::Result<Metadata> {
     static FSTAT_PATH_BADF: AtomicBool = AtomicBool::new(false);
 
     if !FSTAT_PATH_BADF.load(Relaxed) {
-        match file.metadata() {
-            Ok(metadata) => return Ok(Metadata::from_std(metadata)),
+        match Metadata::from_file(file) {
+            Ok(metadata) => return Ok(metadata),
             Err(e) => match e.raw_os_error() {
                 // Before Linux 3.6, `fstat` with `O_PATH` returned `EBADF`.
                 Some(libc::EBADF) => FSTAT_PATH_BADF.store(true, Relaxed),

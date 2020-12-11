@@ -13,5 +13,5 @@ pub(crate) fn stat_unchecked(
         FollowSymlinks::Yes => fs::metadata(full_path),
         FollowSymlinks::No => fs::symlink_metadata(full_path),
     }
-    .map(Metadata::from_std)
+    .map(Metadata::from_just_metadata)
 }

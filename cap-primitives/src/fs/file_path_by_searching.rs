@@ -16,7 +16,7 @@ pub(crate) fn file_path_by_searching(file: &fs::File) -> Option<PathBuf> {
     'next_component: loop {
         // Open `..`.
         let mut iter = read_dir_unchecked(&base, Component::ParentDir.as_os_str().as_ref()).ok()?;
-        let metadata = Metadata::from_std(base.metadata().ok()?);
+        let metadata = Metadata::from_file(&*base).ok()?;
 
         // Search the children until we find one with matching metadata, and
         // then record its name.
