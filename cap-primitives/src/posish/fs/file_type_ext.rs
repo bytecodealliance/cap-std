@@ -14,6 +14,7 @@ impl FileTypeExt {
     /// Constructs a new instance of `FileType` from the given `std::fs::File` and
     /// `std::fs::FileType`.
     #[inline]
+    #[allow(clippy::unnecessary_wraps)]
     pub(crate) fn from(_file: &fs::File, metadata: &fs::Metadata) -> io::Result<FileType> {
         // On Posish-style platforms, the `Metadata` has everything we need.
         Ok(Self::from_just_metadata(metadata))

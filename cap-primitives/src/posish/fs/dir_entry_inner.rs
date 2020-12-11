@@ -43,6 +43,7 @@ impl DirEntryInner {
     }
 
     #[inline]
+    #[allow(clippy::unnecessary_wraps)]
     pub(crate) fn file_type(&self) -> io::Result<FileType> {
         Ok(match self.posish.file_type() {
             posish::fs::FileType::Directory => FileType::dir(),

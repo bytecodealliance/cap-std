@@ -45,6 +45,7 @@ impl Permissions {
 
     #[cfg(unix)]
     #[inline]
+    #[allow(clippy::unnecessary_wraps)]
     fn _into_std(self, _file: &fs::File) -> io::Result<fs::Permissions> {
         use std::os::unix::fs::PermissionsExt;
         Ok(fs::Permissions::from_mode(self.ext.mode()))
