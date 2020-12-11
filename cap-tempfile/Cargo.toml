@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^0.7.1-alpha.0"}
+cap-std = { path = "../cap-std", version = "^0.8.0"}
 uuid = { version = "0.8.1", features = ["v4"] }
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
