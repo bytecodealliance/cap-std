@@ -1,7 +1,6 @@
 //! The `FileType` struct.
 
 use crate::fs::FileTypeExt;
-use std::fs;
 
 /// `FileType`'s inner state.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -33,20 +32,6 @@ enum Inner {
 pub struct FileType(Inner);
 
 impl FileType {
-    /// Constructs a new instance of `Self` from the given `std::fs::FileType`.
-    #[inline]
-    pub(crate) fn from_std(std: fs::FileType) -> Self {
-        if std.is_dir() {
-            Self::dir()
-        } else if std.is_file() {
-            Self::file()
-        } else if let Some(ext) = FileTypeExt::from_std(std) {
-            Self::ext(ext)
-        } else {
-            Self::unknown()
-        }
-    }
-
     /// Creates a `FileType` for which `is_dir()` returns `true`.
     #[inline]
     pub const fn dir() -> Self {
@@ -163,4 +148,20 @@ impl std::os::windows::fs::FileTypeExt for FileType {
     fn is_symlink_file(&self) -> bool {
         self.0 == Inner::Ext(FileTypeExt::symlink_file())
     }
+}
+
+/// Extension trait to allow `is_block_device` etc. to be exposed by
+/// the `cap-fs-ext` crate.
+///
+/// # Safety
+///
+/// This is hidden from the main API since this functionality isn't present in `std`.
+/// Use `cap_fs_ext::FileTypeExt` instead of calling this directly.
+#[cfg(windows)]
+#[doc(hidden)]
+pub trait _WindowsFileTypeExt {
+    unsafe fn is_block_device(&self) -> bool;
+    unsafe fn is_char_device(&self) -> bool;
+    unsafe fn is_fifo(&self) -> bool;
+    unsafe fn is_socket(&self) -> bool;
 }

@@ -1,5 +1,5 @@
 use crate::fs::FileType;
-use std::fs;
+use std::{fs, io};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub(crate) enum FileTypeExt {
@@ -11,23 +11,42 @@ pub(crate) enum FileTypeExt {
 }
 
 impl FileTypeExt {
+    /// Constructs a new instance of `FileType` from the given `std::fs::File` and
+    /// `std::fs::FileType`.
+    #[inline]
+    pub(crate) fn from(_file: &fs::File, metadata: &fs::Metadata) -> io::Result<FileType> {
+        // On Posish-style platforms, the `Metadata` has everything we need.
+        Ok(Self::from_just_metadata(metadata))
+    }
+
+    /// Constructs a new instance of `FileType` from the given `std::fs::Metadata`.
+    #[inline]
+    pub(crate) fn from_just_metadata(metadata: &fs::Metadata) -> FileType {
+        let std = metadata.file_type();
+        Self::from_std(std)
+    }
+
     /// Constructs a new instance of `Self` from the given `std::fs::FileType`.
     #[inline]
-    pub(crate) fn from_std(std: fs::FileType) -> Option<Self> {
+    pub(crate) fn from_std(std: fs::FileType) -> FileType {
         use std::os::unix::fs::FileTypeExt;
-        Some(if std.is_symlink() {
-            Self::Symlink
+        if std.is_file() {
+            FileType::file()
+        } else if std.is_dir() {
+            FileType::dir()
+        } else if std.is_symlink() {
+            FileType::ext(Self::Symlink)
         } else if std.is_block_device() {
-            Self::BlockDevice
+            FileType::ext(Self::BlockDevice)
         } else if std.is_char_device() {
-            Self::CharDevice
+            FileType::ext(Self::CharDevice)
         } else if std.is_fifo() {
-            Self::Fifo
+            FileType::ext(Self::Fifo)
         } else if std.is_socket() {
-            Self::Socket
+            FileType::ext(Self::Socket)
         } else {
-            return None;
-        })
+            FileType::unknown()
+        }
     }
 
     /// Constructs a new instance of `FileType` from the given `libc::mode_t`.

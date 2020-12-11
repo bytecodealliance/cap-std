@@ -1,4 +1,10 @@
-/// Extension trait for `Dir`.
+#[cfg(all(windows, feature = "windows_by_handle"))]
+use std::os::windows::fs::MetadataExt as _WindowsByHandle;
+
+#[cfg(all(windows, not(feature = "windows_by_handle")))]
+use cap_primitives::fs::_WindowsByHandle;
+
+/// Extension trait for `Metadata`.
 pub trait MetadataExt {
     /// Returns the ID of the device containing the file.
     ///
@@ -27,11 +33,23 @@ pub trait MetadataExt {
     fn nlink(&self) -> u64;
 }
 
-#[cfg(all(windows, feature = "windows_by_handle"))]
-use std::os::windows::fs::MetadataExt as _WindowsByHandle;
+#[cfg(not(windows))]
+impl MetadataExt for std::fs::Metadata {
+    #[inline]
+    fn dev(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::dev(self)
+    }
 
-#[cfg(all(windows, not(feature = "windows_by_handle")))]
-use cap_primitives::fs::_WindowsByHandle;
+    #[inline]
+    fn ino(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::ino(self)
+    }
+
+    #[inline]
+    fn nlink(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::nlink(self)
+    }
+}
 
 #[cfg(all(windows, feature = "windows_by_handle"))]
 impl MetadataExt for std::fs::Metadata {
@@ -56,8 +74,26 @@ impl MetadataExt for std::fs::Metadata {
     }
 }
 
+#[cfg(all(not(windows), any(feature = "std", feature = "async_std")))]
+impl MetadataExt for cap_primitives::fs::Metadata {
+    #[inline]
+    fn dev(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::dev(self)
+    }
+
+    #[inline]
+    fn ino(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::ino(self)
+    }
+
+    #[inline]
+    fn nlink(&self) -> u64 {
+        std::os::unix::fs::MetadataExt::nlink(self)
+    }
+}
+
 #[cfg(all(windows, any(feature = "std", feature = "async_std")))]
-impl MetadataExt for cap_std::fs::Metadata {
+impl MetadataExt for cap_primitives::fs::Metadata {
     fn dev(&self) -> u64 {
         unsafe {
             _WindowsByHandle::volume_serial_number(self)
@@ -81,23 +117,5 @@ impl MetadataExt for cap_std::fs::Metadata {
                 .expect("`nlink` depends on a Metadata constructed from an open `File`")
                 .into()
         }
-    }
-}
-
-#[cfg(all(not(windows), any(feature = "std", feature = "async_std")))]
-impl MetadataExt for cap_std::fs::Metadata {
-    #[inline]
-    fn dev(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::dev(self)
-    }
-
-    #[inline]
-    fn ino(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::ino(self)
-    }
-
-    #[inline]
-    fn nlink(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::nlink(self)
     }
 }
