@@ -110,7 +110,7 @@ impl File {
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    Metadata::from_std(metadata)
+    Metadata::from_just_metadata(metadata)
 }
 
 #[cfg(target_os = "wasi")]

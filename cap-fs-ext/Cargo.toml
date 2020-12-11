@@ -1,7 +1,7 @@
 [package]
-name = "cap-dir-ext"
+name = "cap-fs-ext"
 version = "0.6.1-alpha.0"
-description = "Extension traits for `Dir`"
+description = "Extension traits for `Dir`, `File`, etc."
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",
@@ -24,6 +24,8 @@ default = ["std"]
 fs_utf8 = ["arf-strings"]
 std = ["cap-std"]
 async_std = ["cap-async-std"]
+nightly = ["windows_by_handle"]
+windows_by_handle = [] # https://github.com/rust-lang/rust/issues/63010
 
 [badges]
 maintenance = { status = "actively-developed" }

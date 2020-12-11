@@ -18,7 +18,7 @@ publish = false
 async-std = { version = "1.6.5", features = ["attributes"] }
 anyhow = "1.0.32"
 cap-async-std = { path = "cap-async-std", version = "^0.6.1-alpha.0"}
-cap-dir-ext = { path = "cap-dir-ext", version = "^0.6.1-alpha.0"}
+cap-fs-ext = { path = "cap-fs-ext", version = "^0.6.1-alpha.0"}
 cap-directories = { path = "cap-directories", version = "^0.6.1-alpha.0"}
 cap-std = { path = "cap-std", version = "^0.6.1-alpha.0"}
 cap-tempfile = { path = "cap-tempfile", version = "^0.6.1-alpha.0"}
@@ -39,7 +39,7 @@ winx = "0.20.0"
 # "nightly" is required when building with Rust nightly, and it enables
 # support for `FileTypeExt`, `MetadataExt`, and full `OpenOptionsExt`.
 default = []
-nightly = ["cap-std/nightly", "cap-async-std/nightly"]
+nightly = ["cap-std/nightly", "cap-async-std/nightly", "cap-fs-ext/nightly"]
 fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
 
 [badges]
@@ -48,7 +48,7 @@ maintenance = { status = "actively-developed" }
 [workspace]
 members = [
   "cap-async-std",
-  "cap-dir-ext",
+  "cap-fs-ext",
   "cap-directories",
   "cap-primitives",
   "cap-rand",

@@ -27,9 +27,28 @@ pub struct Metadata {
 
 #[allow(clippy::len_without_is_empty)]
 impl Metadata {
-    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given `std::fs::File`.
     #[inline]
-    pub fn from_std(std: fs::Metadata) -> Self {
+    pub fn from_file(file: &fs::File) -> io::Result<Self> {
+        let std = file.metadata()?;
+        let ext = MetadataExt::from(file, &std)?;
+        Ok(Self::from_parts(std, ext))
+    }
+
+    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    ///
+    /// As with the comments in [`std::fs::Metadata::volume_serial_number`] and
+    /// nearby functions, some fields of the resulting metadata will be `None`.
+    ///
+    /// [`std::fs::Metadata::volume_serial_number`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.volume_serial_number
+    #[inline]
+    pub fn from_just_metadata(std: fs::Metadata) -> Self {
+        let ext = MetadataExt::from_just_metadata(&std);
+        Self::from_parts(std, ext)
+    }
+
+    #[inline]
+    fn from_parts(std: fs::Metadata, ext: MetadataExt) -> Self {
         // TODO: Initialize `created` on Linux with `std.created().ok()` once we
         // make use of `statx`.
         Self {
@@ -59,7 +78,7 @@ impl Metadata {
             )))]
             created: None,
 
-            ext: MetadataExt::from_std(std),
+            ext,
         }
     }
 
@@ -370,4 +389,19 @@ impl std::os::windows::fs::MetadataExt for Metadata {
     fn file_index(&self) -> Option<u64> {
         self.ext.file_index()
     }
+}
+
+/// Extension trait to allow `volume_serial_number` etc. to be exposed by
+/// the `cap-fs-ext` crate.
+///
+/// # Safety
+///
+/// This is hidden from the main API since this functionality isn't present in `std`.
+/// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
+#[cfg(all(windows, not(feature = "windows_by_handle")))]
+#[doc(hidden)]
+pub trait _WindowsByHandle {
+    unsafe fn volume_serial_number(&self) -> Option<u32>;
+    unsafe fn number_of_links(&self) -> Option<u32>;
+    unsafe fn file_index(&self) -> Option<u64>;
 }

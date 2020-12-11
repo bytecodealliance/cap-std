@@ -57,7 +57,7 @@ impl ReadDirInner {
     }
 
     pub(super) fn self_metadata(&self) -> io::Result<Metadata> {
-        unsafe { self.to_std_file().metadata().map(Metadata::from_std) }
+        unsafe { Metadata::from_file(&self.to_std_file()) }
     }
 
     pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {

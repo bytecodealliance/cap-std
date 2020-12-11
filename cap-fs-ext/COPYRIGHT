@@ -1,19 +1,19 @@
 Short version for non-lawyers:
 
-`cap-dir-ext` is triple-licensed under Apache 2.0 with the LLVM Exception,
+`cap-fs-ext` is triple-licensed under Apache 2.0 with the LLVM Exception,
 Apache 2.0, and MIT terms.
 
 
 Longer version:
 
-Copyrights in the `cap-dir-ext` project are retained by their contributors.
-No copyright assignment is required to contribute to the `cap-dir-ext`
+Copyrights in the `cap-fs-ext` project are retained by their contributors.
+No copyright assignment is required to contribute to the `cap-fs-ext`
 project.
 
 Some files include code derived from Rust's `libstd`; see the comments in
 the code for details.
 
-Except as otherwise noted (below and/or in individual files), `cap-dir-ext`
+Except as otherwise noted (below and/or in individual files), `cap-fs-ext`
 is licensed under:
 
  - the Apache License, Version 2.0, with the LLVM Exception

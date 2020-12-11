@@ -254,6 +254,17 @@ impl Dir {
         stat(&self.std_file, path.as_ref(), FollowSymlinks::Yes)
     }
 
+    /// Queries metadata about the underlying directory.
+    ///
+    /// This is similar to [`std::fs::File::metadata`], but for `Dir` rather
+    /// than for `File`.
+    ///
+    /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/stable/std/fs/struct.File.html#method.metadata
+    #[inline]
+    pub fn dir_metadata(&self) -> io::Result<Metadata> {
+        Metadata::from_file(&self.std_file)
+    }
+
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {

@@ -1,6 +1,6 @@
 #![allow(clippy::useless_conversion)]
 
-use std::fs;
+use std::{fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -9,18 +9,64 @@ pub(crate) struct MetadataExt {
     last_access_time: u64,
     last_write_time: u64,
     file_size: u64,
-    #[cfg(feature = "windows_by_handle")]
     volume_serial_number: Option<u32>,
-    #[cfg(feature = "windows_by_handle")]
     number_of_links: Option<u32>,
-    #[cfg(feature = "windows_by_handle")]
     file_index: Option<u64>,
 }
 
 impl MetadataExt {
-    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given `std::fs::File` and
+    /// `std::fs::Metadata`.
     #[inline]
-    pub(crate) fn from_std(std: fs::Metadata) -> Self {
+    pub(crate) fn from(file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
+        #[cfg(feature = "windows_by_handle")]
+        let (volume_serial_number, number_of_links, file_index) = {
+            use std::os::windows::fs::MetadataExt;
+            (
+                std.volume_serial_number(),
+                std.number_of_links(),
+                std.file_index(),
+            )
+        };
+
+        #[cfg(not(feature = "windows_by_handle"))]
+        let (volume_serial_number, number_of_links, file_index) = {
+            let fileinfo = winx::file::get_fileinfo(file)?;
+            (
+                Some(fileinfo.dwVolumeSerialNumber),
+                Some(fileinfo.nNumberOfLinks),
+                Some(
+                    (u64::from(fileinfo.nFileIndexHigh) << 32) | u64::from(fileinfo.nFileIndexLow),
+                ),
+            )
+        };
+
+        Ok(Self::from_parts(
+            std,
+            volume_serial_number,
+            number_of_links,
+            file_index,
+        ))
+    }
+
+    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    ///
+    /// As with the comments in [`std::fs::Metadata::volume_serial_number`] and
+    /// nearby functions, some fields of the resulting metadata will be `None`.
+    ///
+    /// [`std::fs::Metadata::volume_serial_number`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.volume_serial_number
+    #[inline]
+    pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
+        Self::from_parts(std, None, None, None)
+    }
+
+    #[inline]
+    fn from_parts(
+        std: &fs::Metadata,
+        volume_serial_number: Option<u32>,
+        number_of_links: Option<u32>,
+        file_index: Option<u64>,
+    ) -> Self {
         use std::os::windows::fs::MetadataExt;
         Self {
             file_attributes: std.file_attributes(),
@@ -28,12 +74,9 @@ impl MetadataExt {
             last_access_time: std.last_access_time(),
             last_write_time: std.last_write_time(),
             file_size: std.file_size(),
-            #[cfg(feature = "windows_by_handle")]
-            volume_serial_number: std.volume_serial_number(),
-            #[cfg(feature = "windows_by_handle")]
-            number_of_links: std.number_of_links(),
-            #[cfg(feature = "windows_by_handle")]
-            file_index: std.file_index(),
+            volume_serial_number,
+            number_of_links,
+            file_index,
         }
     }
 
@@ -105,5 +148,24 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
     #[inline]
     fn file_index(&self) -> Option<u64> {
         self.file_index
+    }
+}
+
+#[cfg(all(windows, not(feature = "windows_by_handle")))]
+#[doc(hidden)]
+impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
+    #[inline]
+    unsafe fn volume_serial_number(&self) -> Option<u32> {
+        self.ext.volume_serial_number
+    }
+
+    #[inline]
+    unsafe fn number_of_links(&self) -> Option<u32> {
+        self.ext.number_of_links
+    }
+
+    #[inline]
+    unsafe fn file_index(&self) -> Option<u64> {
+        self.ext.file_index
     }
 }

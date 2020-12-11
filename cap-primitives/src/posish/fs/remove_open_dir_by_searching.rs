@@ -5,7 +5,7 @@ use std::{fs, io, path::Component};
 /// its `..`. This requires search permission in `..`, but that's usually
 /// available.
 pub(crate) fn remove_open_dir_by_searching(dir: fs::File) -> io::Result<()> {
-    let metadata = Metadata::from_std(dir.metadata()?);
+    let metadata = Metadata::from_file(&dir)?;
     let mut iter = read_dir_unchecked(&dir, Component::ParentDir.as_os_str().as_ref())?;
     while let Some(child) = iter.next() {
         let child = child?;

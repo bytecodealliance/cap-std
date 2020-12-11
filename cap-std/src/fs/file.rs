@@ -101,7 +101,7 @@ impl File {
     /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        self.std.metadata().map(metadata_from_std)
+        metadata_from(&self.std)
     }
 
     /// Creates a new `File` instance that shares the same underlying file handle as the existing
@@ -130,14 +130,14 @@ impl File {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    Metadata::from_std(metadata)
+fn metadata_from(file: &fs::File) -> io::Result<Metadata> {
+    Metadata::from_file(file)
 }
 
 #[cfg(target_os = "wasi")]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    metadata
+fn metadata_from(file: &fs::File) -> io::Result<Metadata> {
+    file.metadata()
 }
 
 #[cfg(not(target_os = "wasi"))]

@@ -7,7 +7,7 @@ use crate::{
 use posish::fs::LibcStat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use posish::fs::{makedev, LibcStatx};
-use std::{convert::TryFrom, fs};
+use std::{convert::TryFrom, fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -32,7 +32,14 @@ pub(crate) struct MetadataExt {
 impl MetadataExt {
     /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
     #[inline]
-    pub(crate) fn from_std(std: fs::Metadata) -> Self {
+    pub(crate) fn from(_file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
+        // On Posish-style platforms, the `Metadata` has everything we need.
+        Ok(Self::from_just_metadata(std))
+    }
+
+    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    #[inline]
+    pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;
         Self {
             dev: std.dev(),
