@@ -38,20 +38,20 @@ impl MetadataExt for std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
         _WindowsByHandle::volume_serial_number(self)
-            .expect("`dev` depends on a Metadata constructed from a `File`")
+            .expect("`dev` depends on a Metadata constructed from an open `File`")
             .into()
     }
 
     #[inline]
     fn ino(&self) -> u64 {
         _WindowsByHandle::file_index(self)
-            .expect("`ino` depends on a Metadata constructed from a `File`")
+            .expect("`ino` depends on a Metadata constructed from an open `File`")
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
         _WindowsByHandle::number_of_links(self)
-            .expect("`nlink` depends on a Metadata constructed from a `File`")
+            .expect("`nlink` depends on a Metadata constructed from an open `File`")
             .into()
     }
 }
@@ -61,9 +61,7 @@ impl MetadataExt for cap_std::fs::Metadata {
     fn dev(&self) -> u64 {
         unsafe {
             _WindowsByHandle::volume_serial_number(self)
-                .expect(
-                    "`dev` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-                )
+                .expect("`dev` depends on a Metadata constructed from an open `File`")
                 .into()
         }
     }
@@ -71,9 +69,8 @@ impl MetadataExt for cap_std::fs::Metadata {
     #[inline]
     fn ino(&self) -> u64 {
         unsafe {
-            _WindowsByHandle::file_index(self).expect(
-                "`ino` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-            )
+            _WindowsByHandle::file_index(self)
+                .expect("`ino` depends on a Metadata constructed from an open `File`")
         }
     }
 
@@ -81,9 +78,7 @@ impl MetadataExt for cap_std::fs::Metadata {
     fn nlink(&self) -> u64 {
         unsafe {
             _WindowsByHandle::number_of_links(self)
-                .expect(
-                    "`nlink` depends on a Metadata constructed from a `File`, and not a `DirEntry`",
-                )
+                .expect("`nlink` depends on a Metadata constructed from an open `File`")
                 .into()
         }
     }
