@@ -14,6 +14,9 @@ edition = "2018"
 readme = "README.md"
 publish = false
 
+[build-dependencies]
+rustc_version = "0.3.0"
+
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
 anyhow = "1.0.35"
@@ -36,10 +39,8 @@ winapi = "0.3.9"
 winx = "0.21.0"
 
 [features]
-# "nightly" is required when building with Rust nightly, and it enables
-# support for `FileTypeExt`, `MetadataExt`, and full `OpenOptionsExt`.
 default = []
-nightly = ["cap-std/nightly", "cap-async-std/nightly", "cap-fs-ext/nightly"]
+nightly = []
 fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
 
 [badges]
