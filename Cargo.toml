@@ -15,8 +15,8 @@ readme = "README.md"
 publish = false
 
 [dev-dependencies]
-async-std = { version = "1.6.5", features = ["attributes"] }
-anyhow = "1.0.32"
+async-std = { version = "1.8.0", features = ["attributes"] }
+anyhow = "1.0.35"
 cap-async-std = { path = "cap-async-std", version = "^0.6.1-alpha.0"}
 cap-fs-ext = { path = "cap-fs-ext", version = "^0.6.1-alpha.0"}
 cap-directories = { path = "cap-directories", version = "^0.6.1-alpha.0"}
@@ -26,14 +26,14 @@ rand = "0.7.3"
 tempfile = "3.1.0"
 
 [target.'cfg(not(windows))'.dev-dependencies]
-libc = "0.2.80"
+libc = "0.2.81"
 
 [target.'cfg(windows)'.dev-dependencies]
 # nt_version uses internal Windows APIs, however we're only using it
 # for testing here.
 nt_version = "0.1.3"
 winapi = "0.3.9"
-winx = "0.20.0"
+winx = "0.21.0"
 
 [features]
 # "nightly" is required when building with Rust nightly, and it enables
