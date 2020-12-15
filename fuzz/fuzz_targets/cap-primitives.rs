@@ -25,6 +25,8 @@ enum PathToken {
 enum Operation {
     Create(usize, usize, usize),
     Open(usize, usize, OpenOptions, usize),
+    OpenDir(usize, usize, usize),
+    OpenDirNofollow(usize, usize, usize),
     Stat(usize, usize, FollowSymlinks),
     Mkdir(usize, usize, DirOptions),
     Canonicalize(usize, usize),
@@ -62,6 +64,22 @@ impl Plan {
                         &files[*dirno % files.len()],
                         &paths[*path % paths.len()],
                         options,
+                    ) {
+                        files[*fileno % files.len()] = file;
+                    }
+                }
+                Operation::OpenDir(dirno, path, fileno) => {
+                    if let Ok(file) = cap_primitives::fs::open_dir(
+                        &files[*dirno % files.len()],
+                        &paths[*path % paths.len()],
+                    ) {
+                        files[*fileno % files.len()] = file;
+                    }
+                }
+                Operation::OpenDirNofollow(dirno, path, fileno) => {
+                    if let Ok(file) = cap_primitives::fs::open_dir_nofollow(
+                        &files[*dirno % files.len()],
+                        &paths[*path % paths.len()],
                     ) {
                         files[*fileno % files.len()] = file;
                     }

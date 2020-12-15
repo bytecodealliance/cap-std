@@ -25,6 +25,7 @@ pub struct OpenOptions {
     pub(crate) create: bool,
     pub(crate) create_new: bool,
     pub(crate) dir_required: bool,
+    pub(crate) readdir_required: bool,
     pub(crate) follow: FollowSymlinks,
 
     #[cfg(any(unix, windows, target_os = "vxworks"))]
@@ -48,6 +49,7 @@ impl OpenOptions {
             create: false,
             create_new: false,
             dir_required: false,
+            readdir_required: false,
             follow: FollowSymlinks::Yes,
 
             #[cfg(any(unix, windows, target_os = "vxworks"))]
@@ -132,6 +134,13 @@ impl OpenOptions {
     #[inline]
     pub(crate) fn dir_required(&mut self, dir_required: bool) -> &mut Self {
         self.dir_required = dir_required;
+        self
+    }
+
+    /// Sets the option to request the ability to read directory entries.
+    #[inline]
+    pub(crate) fn readdir_required(&mut self, readdir_required: bool) -> &mut Self {
+        self.readdir_required = readdir_required;
         self
     }
 

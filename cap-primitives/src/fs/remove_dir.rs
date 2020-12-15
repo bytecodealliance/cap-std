@@ -79,10 +79,16 @@ fn check_remove_dir(
                         assert_eq!(message, unchecked_message);
                         */
                     }
-                    _ => panic!(
-                        "unsandboxed remove_dir success on start={:?} path={:?}; expected {:?}: {}",
-                        start, path, kind, message
-                    ),
+                    _ => {
+                        // TODO: Checking in the case it does end with ".".
+                        if !path.to_string_lossy().ends_with(".") {
+                            panic!(
+                                "unsandboxed remove_dir success on start={:?} path={:?}; expected \
+                                 {:?}: {}",
+                                start, path, kind, message
+                            );
+                        }
+                    }
                 },
                 Err((_canon_kind, _canon_message)) => {
                     /* TODO: Check error messages.

@@ -113,14 +113,29 @@ fn trailing_slash() {
 
     #[cfg(not(windows))]
     {
+        error!(tmpdir.open("file/../file"), "Not a directory");
+        error!(tmpdir.open("file/.."), "Not a directory");
+        error!(tmpdir.open("file/."), "Not a directory");
+        error!(tmpdir.open("file/../file/"), "Not a directory");
         error!(tmpdir.open("file/"), "Not a directory");
+        error!(tmpdir.open_dir("file/../file/"), "Not a directory");
+        error!(tmpdir.open_dir("file/../file"), "Not a directory");
+        error!(tmpdir.open_dir("file/.."), "Not a directory");
+        error!(tmpdir.open_dir("file/."), "Not a directory");
         error!(tmpdir.open_dir("file/"), "Not a directory");
     }
 
     #[cfg(windows)]
     {
+        assert!(check!(check!(tmpdir.open("file/../file")).metadata()).is_file());
+        assert!(check!(check!(tmpdir.open_dir("file/..")).dir_metadata()).is_dir());
+        assert!(check!(check!(tmpdir.open("file/.")).metadata()).is_file());
+        error!(tmpdir.open("file/../file/"), 123);
         error!(tmpdir.open("file/"), 123);
-        error!(tmpdir.open_dir("file/"), 123);
+        error!(tmpdir.open_dir("file/../file/"), 123);
+        assert!(tmpdir.open_dir("file/../file").is_err());
+        assert!(tmpdir.open_dir("file/.").is_err());
+        assert!(tmpdir.open_dir("file/").is_err());
     }
 }
 
@@ -130,21 +145,31 @@ fn trailing_slash_in_dir() {
     check!(tmpdir.create_dir("dir"));
     check!(tmpdir.create("dir/file"));
 
-    check!(tmpdir.open_dir("dir"));
-    check!(tmpdir.open_dir("dir/"));
-    check!(tmpdir.open_dir("dir/."));
-    check!(tmpdir.open("dir/file"));
-
     #[cfg(not(windows))]
     {
+        error!(tmpdir.open("dir/file/../file"), "Not a directory");
+        error!(tmpdir.open("dir/file/.."), "Not a directory");
+        error!(tmpdir.open("dir/file/."), "Not a directory");
+        error!(tmpdir.open("dir/file/../file/"), "Not a directory");
         error!(tmpdir.open("dir/file/"), "Not a directory");
+        error!(tmpdir.open_dir("dir/file/../file/"), "Not a directory");
+        error!(tmpdir.open_dir("dir/file/../file"), "Not a directory");
+        error!(tmpdir.open_dir("dir/file/.."), "Not a directory");
+        error!(tmpdir.open_dir("dir/file/."), "Not a directory");
         error!(tmpdir.open_dir("dir/file/"), "Not a directory");
     }
 
     #[cfg(windows)]
     {
+        assert!(check!(check!(tmpdir.open("dir/file/../file")).metadata()).is_file());
+        assert!(check!(check!(tmpdir.open_dir("dir/file/..")).dir_metadata()).is_dir());
+        assert!(check!(check!(tmpdir.open("dir/file/.")).metadata()).is_file());
+        error!(tmpdir.open("dir/file/../file/"), 123);
         error!(tmpdir.open("dir/file/"), 123);
-        error!(tmpdir.open_dir("dir/file/"), 123);
+        error!(tmpdir.open_dir("dir/file/../file/"), 123);
+        assert!(tmpdir.open_dir("dir/file/../file").is_err());
+        assert!(tmpdir.open_dir("dir/file/.").is_err());
+        assert!(tmpdir.open_dir("dir/file/").is_err());
     }
 }
 
@@ -229,14 +254,78 @@ fn follow_dotdot_symlink() {
     check!(tmpdir.open_dir("a/b/c"));
     assert!(check!(tmpdir.metadata("a/b/c")).is_dir());
 
-    check!(tmpdir.open_dir("a/b/d"));
-    assert!(check!(tmpdir.metadata("a/b/d")).is_dir());
+    #[cfg(windows)]
+    {
+        error!(tmpdir.open_dir("a/b/d"), 123);
+        error!(tmpdir.metadata("a/b/d"), 123);
 
-    assert!(tmpdir.open_dir("a/b/e").is_err());
-    assert!(tmpdir.metadata("a/b/e").is_err());
+        error!(tmpdir.open_dir("a/b/e"), 123);
+        error!(tmpdir.metadata("a/b/e"), 123);
 
-    assert!(tmpdir.open_dir("a/b/f").is_err());
-    assert!(tmpdir.metadata("a/b/f").is_err());
+        error!(tmpdir.open_dir("a/b/f"), 123);
+        error!(tmpdir.metadata("a/b/f"), 123);
+    }
+
+    #[cfg(not(windows))]
+    {
+        check!(tmpdir.open_dir("a/b/d"));
+        assert!(check!(tmpdir.metadata("a/b/d")).is_dir());
+
+        assert!(tmpdir.open_dir("a/b/e").is_err());
+        assert!(tmpdir.metadata("a/b/e").is_err());
+
+        assert!(tmpdir.open_dir("a/b/f").is_err());
+        assert!(tmpdir.metadata("a/b/f").is_err());
+    }
+}
+
+#[test]
+fn follow_dotdot_symlink_ambient() {
+    use cap_std::fs::Dir;
+    #[cfg(unix)]
+    use std::os::unix::fs::symlink as symlink_dir;
+    #[cfg(windows)]
+    use std::os::windows::fs::symlink_dir;
+
+    if !symlink_supported() {
+        return;
+    }
+
+    let dir = tempfile::tempdir().unwrap();
+    check!(std::fs::create_dir_all(dir.path().join("a/b")));
+    check!(symlink_dir("..", dir.path().join("a/b/c")));
+    check!(symlink_dir("../..", dir.path().join("a/b/d")));
+    check!(symlink_dir("../../..", dir.path().join("a/b/e")));
+    check!(symlink_dir("../../../..", dir.path().join("a/b/f")));
+
+    unsafe {
+        check!(Dir::open_ambient_dir(dir.path().join("a/b/c")));
+        assert!(check!(std::fs::metadata(dir.path().join("a/b/c"))).is_dir());
+
+        #[cfg(windows)]
+        {
+            error!(Dir::open_ambient_dir(dir.path().join("a/b/d")), 123);
+            error!(std::fs::metadata(dir.path().join("a/b/d")), 123);
+
+            error!(Dir::open_ambient_dir(dir.path().join("a/b/e")), 123);
+            error!(std::fs::metadata(dir.path().join("a/b/e")), 123);
+
+            error!(Dir::open_ambient_dir(dir.path().join("a/b/f")), 123);
+            error!(std::fs::metadata(dir.path().join("a/b/f")), 123);
+        }
+
+        #[cfg(not(windows))]
+        {
+            check!(Dir::open_ambient_dir(dir.path().join("a/b/d")));
+            assert!(check!(std::fs::metadata(dir.path().join("a/b/d"))).is_dir());
+
+            check!(Dir::open_ambient_dir(dir.path().join("a/b/e")));
+            assert!(check!(std::fs::metadata(dir.path().join("a/b/e"))).is_dir());
+
+            check!(Dir::open_ambient_dir(dir.path().join("a/b/f")));
+            assert!(check!(std::fs::metadata(dir.path().join("a/b/f"))).is_dir());
+        }
+    }
 }
 
 #[test]
@@ -250,14 +339,24 @@ fn follow_file_symlink() {
     check!(tmpdir.create("file"));
 
     check!(symlink_file("file", &tmpdir, "link"));
-    check!(symlink_file("file/", &tmpdir, "link_slash"));
+    check!(symlink_dir("file/", &tmpdir, "link_slash"));
     check!(symlink_file("file/.", &tmpdir, "link_slashdot"));
-    check!(symlink_file("file/..", &tmpdir, "link_slashdotdot"));
+    check!(symlink_dir("file/..", &tmpdir, "link_slashdotdot"));
 
     check!(tmpdir.open("link"));
     assert!(tmpdir.open("link_slash").is_err());
-    assert!(tmpdir.open("link_slashdot").is_err());
-    assert!(tmpdir.open("link_slashdotdot").is_err());
+
+    #[cfg(windows)]
+    {
+        error!(tmpdir.open("link_slashdot"), 123);
+        error!(tmpdir.open_dir("link_slashdotdot"), 123);
+    }
+    #[cfg(not(windows))]
+    {
+        assert!(tmpdir.open("link_slash").is_err());
+        assert!(tmpdir.open("link_slashdot").is_err());
+        assert!(tmpdir.open_dir("link_slashdotdot").is_err());
+    }
 }
 
 #[cfg(unix)]
@@ -351,6 +450,64 @@ fn check_dot_access_ambient() {
         assert!(fs::metadata(dir.path().join("dir/..//")).is_ok());
         assert!(fs::metadata(dir.path().join("dir/../.")).is_ok());
         assert!(fs::metadata(dir.path().join("dir/..//.")).is_ok());
+    }
+}
+
+// Windows allows one to open "file/." and "file/.." and similar, however it
+// doesn't allow "file/" or similar.
+#[cfg(windows)]
+#[test]
+fn file_with_trailing_slashdot() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create("file"));
+    check!(tmpdir.open("file"));
+    check!(tmpdir.open("file\\."));
+    check!(tmpdir.open("file/."));
+    check!(tmpdir.open("file\\.\\."));
+    check!(tmpdir.open("file/./."));
+    assert!(tmpdir.open("file\\").is_err());
+    assert!(tmpdir.open("file/").is_err());
+    assert!(tmpdir.open("file\\.\\").is_err());
+    assert!(tmpdir.open("file/./").is_err());
+    check!(tmpdir.open_dir("file\\.."));
+    check!(tmpdir.open_dir("file/.."));
+    check!(tmpdir.open_dir("file\\.\\.."));
+    check!(tmpdir.open_dir("file/./.."));
+    check!(tmpdir.open_dir("file\\..\\."));
+    check!(tmpdir.open_dir("file/../."));
+    check!(tmpdir.open_dir("file\\..\\"));
+    check!(tmpdir.open_dir("file/../"));
+    assert!(tmpdir.open_dir("file\\...").is_err());
+    assert!(tmpdir.open_dir("file/...").is_err());
+}
+
+/// This is just to confirm that Windows really does allow one to open "file/." and
+/// "file/..", and similar, however it doesn't allow "file/" or similar.
+#[cfg(windows)]
+#[test]
+fn file_with_trailing_slashdot_ambient() {
+    use cap_std::fs::Dir;
+    let dir = tempfile::tempdir().unwrap();
+    check!(std::fs::File::create(dir.path().join("file")));
+    check!(std::fs::File::open(dir.path().join("file")));
+    check!(std::fs::File::open(dir.path().join("file\\.")));
+    check!(std::fs::File::open(dir.path().join("file/.")));
+    check!(std::fs::File::open(dir.path().join("file\\.\\.")));
+    check!(std::fs::File::open(dir.path().join("file/./.")));
+    assert!(std::fs::File::open(dir.path().join("file\\")).is_err());
+    assert!(std::fs::File::open(dir.path().join("file/")).is_err());
+    assert!(std::fs::File::open(dir.path().join("file\\.\\")).is_err());
+    assert!(std::fs::File::open(dir.path().join("file/./")).is_err());
+    unsafe {
+        check!(Dir::open_ambient_dir(dir.path().join("file/..")));
+        check!(Dir::open_ambient_dir(dir.path().join("file\\.\\..")));
+        check!(Dir::open_ambient_dir(dir.path().join("file/./..")));
+        check!(Dir::open_ambient_dir(dir.path().join("file\\..\\.")));
+        check!(Dir::open_ambient_dir(dir.path().join("file/../.")));
+        check!(Dir::open_ambient_dir(dir.path().join("file\\..\\")));
+        check!(Dir::open_ambient_dir(dir.path().join("file/../")));
+        assert!(Dir::open_ambient_dir(dir.path().join("file\\...")).is_err());
+        assert!(Dir::open_ambient_dir(dir.path().join("file/...")).is_err());
     }
 }
 
@@ -542,4 +699,17 @@ fn symlink_hard_link() {
     assert!(check!(tmpdir.symlink_metadata("hard_link"))
         .file_type()
         .is_symlink());
+}
+
+#[test]
+fn readdir_with_trailing_slashdot() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("dir"));
+    check!(tmpdir.create("dir/red"));
+    check!(tmpdir.create("dir/green"));
+    check!(tmpdir.create("dir/blue"));
+
+    assert_eq!(check!(tmpdir.read_dir("dir")).count(), 3);
+    assert_eq!(check!(tmpdir.read_dir("dir/")).count(), 3);
+    assert_eq!(check!(tmpdir.read_dir("dir/.")).count(), 3);
 }

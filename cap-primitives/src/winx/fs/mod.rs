@@ -42,7 +42,6 @@ pub(crate) use crate::fs::{
     via_parent::symlink_dir as symlink_dir_impl,
     via_parent::symlink_file as symlink_file_impl,
     via_parent::remove_file as remove_file_impl,
-    dir_options as dir_path_options,
 };
 
 pub(crate) use copy::*;

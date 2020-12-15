@@ -1,12 +1,14 @@
 //! This defines `rename`, the primary entrypoint to sandboxed renaming.
 
+#[cfg(all(racy_asserts, not(windows)))]
+use crate::fs::append_dir_suffix;
 use crate::fs::rename_impl;
 use std::{fs, io, path::Path};
 #[cfg(racy_asserts)]
 use {
     crate::fs::{
-        append_dir_suffix, manually, map_result, path_requires_dir, rename_unchecked,
-        stat_unchecked, FollowSymlinks, Metadata,
+        manually, map_result, path_requires_dir, rename_unchecked, stat_unchecked, FollowSymlinks,
+        Metadata,
     },
     std::path::PathBuf,
 };
@@ -144,6 +146,7 @@ fn canonicalize_for_rename(start: &fs::File, path: &Path) -> io::Result<PathBuf>
 
     // Rename on paths ending in `.` or `/.` fails due to the directory already
     // being open. Ensure that this happens on the canonical paths too.
+    #[cfg(not(windows))]
     if path_requires_dir(path) {
         canon = append_dir_suffix(path.to_path_buf());
 

@@ -61,31 +61,36 @@ fn check_create_dir(
             assert_same_file_metadata!(&metadata_before, &metadata_after);
         }
 
-        (_, Err((kind, message)), _) => match map_result(&canonicalize(start, path)) {
-            Ok(canon) => match map_result(&create_dir_unchecked(start, &canon, options)) {
-                Err((unchecked_kind, unchecked_message)) => {
-                    assert_eq!(
-                        kind,
-                        unchecked_kind,
-                        "unexpected error kind from create_dir start='{:?}', \
-                         path='{}':\nstat_before={:#?}\nresult={:#?}\nstat_after={:#?}",
-                        start,
-                        path.display(),
-                        stat_before,
-                        result,
-                        stat_after
-                    );
-                    assert_eq!(message, unchecked_message);
+        (_, Err((kind, message)), _) => {
+            // TODO: Checking in the case it does end with ".".
+            if !path.to_string_lossy().ends_with(".") {
+                match map_result(&canonicalize(start, path)) {
+                    Ok(canon) => match map_result(&create_dir_unchecked(start, &canon, options)) {
+                        Err((unchecked_kind, unchecked_message)) => {
+                            assert_eq!(
+                                kind,
+                                unchecked_kind,
+                                "unexpected error kind from create_dir start='{:?}', \
+                                 path='{}':\nstat_before={:#?}\nresult={:#?}\nstat_after={:#?}",
+                                start,
+                                path.display(),
+                                stat_before,
+                                result,
+                                stat_after
+                            );
+                            assert_eq!(message, unchecked_message);
+                        }
+                        _ => panic!("unsandboxed create_dir success"),
+                    },
+                    Err((_canon_kind, _canon_message)) => {
+                        /* TODO: Check error messages
+                        assert_eq!(kind, canon_kind);
+                        assert_eq!(message, canon_message);
+                        */
+                    }
                 }
-                _ => panic!("unsandboxed create_dir success"),
-            },
-            Err((_canon_kind, _canon_message)) => {
-                /* TODO: Check error messages
-                assert_eq!(kind, canon_kind);
-                assert_eq!(message, canon_message);
-                */
             }
-        },
+        }
 
         other => panic!(
             "inconsistent create_dir checks: start='{:?}' path='{}':\n{:#?}",

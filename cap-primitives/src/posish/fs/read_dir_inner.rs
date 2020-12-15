@@ -1,6 +1,6 @@
 use crate::fs::{
     open_dir_for_reading, open_dir_for_reading_unchecked, open_entry_impl, read_dir_unchecked,
-    remove_dir_unchecked, remove_file_unchecked, stat_unchecked, target_uses_o_path, DirEntryInner,
+    remove_dir_unchecked, remove_file_unchecked, stat_unchecked, target_o_path, DirEntryInner,
     FollowSymlinks, Metadata, OpenOptions, ReadDir,
 };
 use posish::fs::Dir;
@@ -36,7 +36,7 @@ impl ReadDirInner {
     }
 
     pub(crate) fn read_base_dir(start: &fs::File) -> io::Result<Self> {
-        if target_uses_o_path() {
+        if !target_o_path().is_empty() {
             // On platforms that use `O_PATH`, open ".".
             Ok(Self {
                 posish: Arc::new(Dir::from(open_dir_for_reading_unchecked(
