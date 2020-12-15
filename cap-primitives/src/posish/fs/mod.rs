@@ -55,7 +55,6 @@ pub(crate) use crate::fs::{
     manually::stat as stat_impl,
     manually::canonicalize as canonicalize_impl,
     via_parent::set_times_nofollow as set_times_nofollow_impl,
-    dir_options as dir_path_options,
 };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 #[cfg(any(test, racy_asserts))]

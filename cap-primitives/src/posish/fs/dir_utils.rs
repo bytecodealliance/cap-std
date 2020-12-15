@@ -4,12 +4,7 @@ use posish::fs::OFlags;
 use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
-use std::{
-    ffi::OsStr,
-    fs, io,
-    ops::Deref,
-    path::{Component, Path},
-};
+use std::{ffi::OsStr, fs, io, ops::Deref, path::Path};
 #[cfg(racy_asserts)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
 
@@ -39,7 +34,17 @@ pub(crate) fn path_has_trailing_dot(path: &Path) -> bool {
             break;
         }
     }
-    bytes.ends_with(b"/.") && path.components().next_back() != Some(Component::CurDir)
+
+    bytes.ends_with(b"/.") || bytes == b"."
+}
+
+/// Rust's `Path` implicitly strips trailing `/`s, however they aren't
+/// redundant in one case: at the end of a path they are the final path
+/// component, which has different path lookup behavior.
+pub(crate) fn path_has_trailing_slash(path: &Path) -> bool {
+    let bytes = path.as_os_str().as_bytes();
+
+    bytes.ends_with(b"/")
 }
 
 /// Append a trailing `/`. This can be used to require that the given `path`
@@ -65,19 +70,17 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
 
 /// Return an `OpenOptions` for opening directories.
 pub(crate) fn dir_options() -> OpenOptions {
-    let flags = target_o_path();
-
-    OpenOptions::new()
-        .read(true)
-        .dir_required(true)
-        .custom_flags(flags.bits())
-        .clone()
+    OpenOptions::new().read(true).dir_required(true).clone()
 }
 
 /// Like `dir_options`, but additionally request the ability to read the
 /// directory entries.
 pub(crate) fn readdir_options() -> OpenOptions {
-    OpenOptions::new().read(true).dir_required(true).clone()
+    OpenOptions::new()
+        .read(true)
+        .dir_required(true)
+        .readdir_required(true)
+        .clone()
 }
 
 /// Return an `OpenOptions` for canonicalizing paths.
@@ -103,7 +106,9 @@ pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> 
         .open(&path)
 }
 
-const fn target_o_path() -> OFlags {
+/// Use `O_PATH` on platforms which have it, or none otherwise.
+#[inline]
+pub(crate) const fn target_o_path() -> OFlags {
     #[cfg(any(
         target_os = "android",
         target_os = "emscripten",
@@ -126,11 +131,6 @@ const fn target_o_path() -> OFlags {
     {
         OFlags::empty()
     }
-}
-
-/// Use `O_PATH` on platforms which have it, or none otherwise.
-pub(crate) const fn target_uses_o_path() -> bool {
-    !target_o_path().is_empty()
 }
 
 #[cfg(racy_asserts)]
@@ -168,14 +168,43 @@ fn test_path_requires_dir() {
 
 #[test]
 fn test_path_has_trailing_dot() {
-    assert!(!path_has_trailing_dot(Path::new(".")));
+    assert!(!path_has_trailing_dot(Path::new("foo")));
+    assert!(!path_has_trailing_dot(Path::new("foo.")));
+
+    assert!(!path_has_trailing_dot(Path::new("/./foo")));
+    assert!(!path_has_trailing_dot(Path::new("..")));
+    assert!(!path_has_trailing_dot(Path::new("/..")));
+
     assert!(!path_has_trailing_dot(Path::new("/")));
     assert!(!path_has_trailing_dot(Path::new("//")));
-    assert!(path_has_trailing_dot(Path::new("/./.")));
-    assert!(!path_has_trailing_dot(Path::new("foo/")));
     assert!(!path_has_trailing_dot(Path::new("foo//")));
+    assert!(!path_has_trailing_dot(Path::new("foo/")));
+
+    assert!(path_has_trailing_dot(Path::new(".")));
+
+    assert!(path_has_trailing_dot(Path::new("/./.")));
     assert!(path_has_trailing_dot(Path::new("foo//.")));
     assert!(path_has_trailing_dot(Path::new("foo/./.")));
     assert!(path_has_trailing_dot(Path::new("foo/./")));
     assert!(path_has_trailing_dot(Path::new("foo/.//")));
+}
+
+#[test]
+fn test_path_has_trailing_slash() {
+    assert!(path_has_trailing_slash(Path::new("/")));
+    assert!(path_has_trailing_slash(Path::new("//")));
+    assert!(path_has_trailing_slash(Path::new("foo//")));
+    assert!(path_has_trailing_slash(Path::new("foo/")));
+    assert!(path_has_trailing_slash(Path::new("foo/./")));
+    assert!(path_has_trailing_slash(Path::new("foo/.//")));
+
+    assert!(!path_has_trailing_slash(Path::new("foo")));
+    assert!(!path_has_trailing_slash(Path::new("foo.")));
+    assert!(!path_has_trailing_slash(Path::new("/./foo")));
+    assert!(!path_has_trailing_slash(Path::new("..")));
+    assert!(!path_has_trailing_slash(Path::new("/..")));
+    assert!(!path_has_trailing_slash(Path::new(".")));
+    assert!(!path_has_trailing_slash(Path::new("/./.")));
+    assert!(!path_has_trailing_slash(Path::new("foo//.")));
+    assert!(!path_has_trailing_slash(Path::new("foo/./.")));
 }

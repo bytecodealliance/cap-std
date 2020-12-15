@@ -1,4 +1,4 @@
-use crate::fs::{FollowSymlinks, OpenOptions};
+use crate::fs::{target_o_path, FollowSymlinks, OpenOptions};
 use posish::fs::OFlags;
 use std::io;
 
@@ -11,6 +11,12 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     }
     if options.dir_required {
         oflags |= OFlags::DIRECTORY;
+
+        // If the target has `O_PATH` and we don't need to read the directory
+        // entries, use it.
+        if !options.readdir_required {
+            oflags |= target_o_path();
+        }
     }
     // Use `RWMODE` here instead of `ACCMODE` so that we preserve the `O_PATH` flag.
     oflags |=

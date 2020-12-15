@@ -3,7 +3,6 @@ use std::{borrow::Cow, ffi::OsStr, path::Component};
 /// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
 /// we don't support absolute paths, and `Normal` has a `Cow` instead of a plain
 /// `OsStr` reference, so it can optionally own its own string.
-#[derive(Debug)]
 pub(super) enum CowComponent<'borrow> {
     PrefixOrRootDir,
     CurDir,
@@ -29,6 +28,15 @@ impl<'borrow> CowComponent<'borrow> {
             Component::CurDir => Self::CurDir,
             Component::ParentDir => Self::ParentDir,
             Component::Normal(os_str) => Self::Normal(os_str.to_os_string().into()),
+        }
+    }
+
+    /// Test whether `self` is `Component::Normal`.
+    #[cfg(windows)]
+    pub(super) fn is_normal(&self) -> bool {
+        match self {
+            CowComponent::Normal(_) => true,
+            _ => false,
         }
     }
 }

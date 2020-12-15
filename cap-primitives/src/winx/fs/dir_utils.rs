@@ -1,4 +1,4 @@
-use crate::fs::OpenOptions;
+use crate::fs::{errors, OpenOptions};
 use std::{
     ffi::OsString,
     fs, io,
@@ -7,7 +7,7 @@ use std::{
         ffi::{OsStrExt, OsStringExt},
         fs::OpenOptionsExt,
     },
-    path::{Component, Path, PathBuf},
+    path::{Path, PathBuf},
 };
 use winapi::um::winnt;
 use winx::file::Flags;
@@ -23,33 +23,28 @@ pub(crate) fn path_requires_dir(path: &Path) -> bool {
         || wide.ends_with(&['\\' as u16, '.' as _])
 }
 
-/// Rust's `Path` implicitly strips trailing `.` components, however they aren't
-/// redundant in one case: at the end of a path they are the final path
-/// component, which has different path lookup behavior.
-pub(crate) fn path_has_trailing_dot(path: &Path) -> bool {
-    let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
-
-    let mut units = &wide[..];
-    while let Some((last, rest)) = units.split_last() {
-        if *last == '/' as u16 || *last == '\\' as u16 {
-            units = rest;
-        } else {
-            break;
-        }
-    }
-
-    (units.ends_with(&['/' as u16, '.' as _]) || units.ends_with(&['\\' as u16, '.' as _]))
-        && path.components().next_back() != Some(Component::CurDir)
+/// Windows treats `foo/.` as equivalent to `foo` even if `foo` does not
+/// exist or is not a directory. So we don't do the special trailing-dot
+/// handling that we do on Posix-ish platforms.
+pub(crate) fn path_has_trailing_dot(_path: &Path) -> bool {
+    false
 }
 
-/// Append a trailing `\\`. This can be used to require that the given `path`
-/// names a directory.
-pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
-    let mut wide: Vec<u16> = path.into_os_string().encode_wide().collect();
-    if !wide.ends_with(&['\\' as u16]) {
-        wide.push('\\' as u16);
-    }
-    OsString::from_wide(&wide).into()
+/// For the purposes of emulating Windows symlink resolution, we sometimes
+/// need to know whether a path really does end in a trailing dot though.
+pub(crate) fn path_really_has_trailing_dot(path: &Path) -> bool {
+    let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+
+    wide.ends_with(&['/' as u16, '.' as u16]) || wide.ends_with(&['\\' as u16, '.' as u16])
+}
+
+/// Rust's `Path` implicitly strips trailing `/`s, however they aren't
+/// redundant in one case: at the end of a path they are the final path
+/// component, which has different path lookup behavior.
+pub(crate) fn path_has_trailing_slash(path: &Path) -> bool {
+    let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+
+    wide.ends_with(&['/' as u16]) || wide.ends_with(&['\\' as u16])
 }
 
 /// Strip trailing `/`s, unless this reduces `path` to `/` itself. This is
@@ -81,8 +76,7 @@ pub(crate) fn dir_options() -> OpenOptions {
 /// Like `dir_options`, but additionally request the ability to read the
 /// directory entries.
 pub(crate) fn readdir_options() -> OpenOptions {
-    // Windows doesn't appear to make this distinction.
-    dir_options()
+    dir_options().readdir_required(true).clone()
 }
 
 /// Return an `OpenOptions` for canonicalizing paths.
@@ -101,17 +95,25 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
 pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
-    // Append a trailing separator so that we fail if it's not a directory.
-    let path = append_dir_suffix(path.to_path_buf());
-
     // Set `FILE_FLAG_BACKUP_SEMANTICS` so that we can open directories. Unset
     // `FILE_SHARE_DELETE` so that directories can't be renamed or deleted
     // underneath us, since we use paths to implement many directory operations.
-    fs::OpenOptions::new()
+    let dir = fs::OpenOptions::new()
         .read(true)
         .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
         .share_mode(winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE)
-        .open(&path)
+        .open(&path)?;
+
+    // Require a directory. It may seem possible to eliminate this `metadata()`
+    // call by appending a slash to the path before opening it so that the OS
+    // requires a directory for us, however on Windows in some circumstances
+    // this leads to "The filename, directory name, or volume label syntax is
+    // incorrect." errors.
+    if !dir.metadata()?.is_dir() {
+        return Err(errors::is_not_directory());
+    }
+
+    Ok(dir)
 }
 
 #[test]
@@ -159,25 +161,39 @@ fn test_path_requires_dir() {
 }
 
 #[test]
-fn test_path_has_trailing_dot() {
-    assert!(!path_has_trailing_dot(Path::new(".")));
-    assert!(!path_has_trailing_dot(Path::new("/")));
-    assert!(!path_has_trailing_dot(Path::new("//")));
-    assert!(path_has_trailing_dot(Path::new("/./.")));
-    assert!(!path_has_trailing_dot(Path::new("foo/")));
-    assert!(!path_has_trailing_dot(Path::new("foo//")));
-    assert!(path_has_trailing_dot(Path::new("foo//.")));
-    assert!(path_has_trailing_dot(Path::new("foo/./.")));
-    assert!(path_has_trailing_dot(Path::new("foo/./")));
-    assert!(path_has_trailing_dot(Path::new("foo/.//")));
+fn test_path_has_trailing_slash() {
+    assert!(path_has_trailing_slash(Path::new("/")));
+    assert!(path_has_trailing_slash(Path::new("//")));
+    assert!(path_has_trailing_slash(Path::new("foo/")));
+    assert!(path_has_trailing_slash(Path::new("foo//")));
+    assert!(path_has_trailing_slash(Path::new("foo/./")));
+    assert!(path_has_trailing_slash(Path::new("foo/.//")));
 
-    assert!(!path_has_trailing_dot(Path::new("\\")));
-    assert!(!path_has_trailing_dot(Path::new("\\\\")));
-    assert!(path_has_trailing_dot(Path::new("\\.\\.")));
-    assert!(!path_has_trailing_dot(Path::new("foo\\")));
-    assert!(!path_has_trailing_dot(Path::new("foo\\\\")));
-    assert!(path_has_trailing_dot(Path::new("foo\\\\.")));
-    assert!(path_has_trailing_dot(Path::new("foo\\.\\.")));
-    assert!(path_has_trailing_dot(Path::new("foo\\.\\")));
-    assert!(path_has_trailing_dot(Path::new("foo\\.\\\\")));
+    assert!(path_has_trailing_slash(Path::new("\\")));
+    assert!(path_has_trailing_slash(Path::new("\\\\")));
+    assert!(path_has_trailing_slash(Path::new("foo\\")));
+    assert!(path_has_trailing_slash(Path::new("foo\\\\")));
+    assert!(path_has_trailing_slash(Path::new("foo\\.\\")));
+    assert!(path_has_trailing_slash(Path::new("foo\\.\\\\")));
+
+    assert!(!path_has_trailing_slash(Path::new("foo")));
+    assert!(!path_has_trailing_slash(Path::new("foo.")));
+
+    assert!(!path_has_trailing_slash(Path::new("/./foo")));
+    assert!(!path_has_trailing_slash(Path::new("..")));
+    assert!(!path_has_trailing_slash(Path::new("/..")));
+
+    assert!(!path_has_trailing_slash(Path::new("\\.\\foo")));
+    assert!(!path_has_trailing_slash(Path::new("..")));
+    assert!(!path_has_trailing_slash(Path::new("\\..")));
+
+    assert!(!path_has_trailing_slash(Path::new("/./.")));
+    assert!(!path_has_trailing_slash(Path::new("foo//.")));
+    assert!(!path_has_trailing_slash(Path::new("foo/./.")));
+
+    assert!(!path_has_trailing_slash(Path::new(".")));
+
+    assert!(!path_has_trailing_slash(Path::new("\\.\\.")));
+    assert!(!path_has_trailing_slash(Path::new("foo\\\\.")));
+    assert!(!path_has_trailing_slash(Path::new("foo\\.\\.")));
 }
