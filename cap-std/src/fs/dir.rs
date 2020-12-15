@@ -259,7 +259,7 @@ impl Dir {
     /// This is similar to [`std::fs::File::metadata`], but for `Dir` rather
     /// than for `File`.
     ///
-    /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/stable/std/fs/struct.File.html#method.metadata
+    /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub fn dir_metadata(&self) -> io::Result<Metadata> {
         Metadata::from_file(&self.std_file)

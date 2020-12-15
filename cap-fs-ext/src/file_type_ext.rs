@@ -9,7 +9,7 @@ pub trait FileTypeExt {
     /// [`std::os::unix::fs::FileTypeExt::is_block_device`], except that it's
     /// supported on Windows platforms as well.
     ///
-    /// [`std::os::unix::fs::FileTypeExt::is_block_device`]: https://doc.rust-lang.org/stable/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_block_device
+    /// [`std::os::unix::fs::FileTypeExt::is_block_device`]: https://doc.rust-lang.org/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_block_device
     fn is_block_device(&self) -> bool;
 
     /// Returns `true` if this file type is a char device.
@@ -18,7 +18,7 @@ pub trait FileTypeExt {
     /// [`std::os::unix::fs::FileTypeExt::is_char_device`], except that it's
     /// supported on Windows platforms as well.
     ///
-    /// [`std::os::unix::fs::FileTypeExt::is_char_device`]: https://doc.rust-lang.org/stable/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_char_device
+    /// [`std::os::unix::fs::FileTypeExt::is_char_device`]: https://doc.rust-lang.org/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_char_device
     fn is_char_device(&self) -> bool;
 
     /// Returns `true` if this file type is a fifo.
@@ -27,7 +27,7 @@ pub trait FileTypeExt {
     /// [`std::os::unix::fs::FileTypeExt::is_fifo`], except that it's supported
     /// on Windows platforms as well.
     ///
-    /// [`std::os::unix::fs::FileTypeExt::is_fifo`]: https://doc.rust-lang.org/stable/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_fifo
+    /// [`std::os::unix::fs::FileTypeExt::is_fifo`]: https://doc.rust-lang.org/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_fifo
     fn is_fifo(&self) -> bool;
 
     /// Returns `true` if this file type is a socket.
@@ -36,7 +36,7 @@ pub trait FileTypeExt {
     /// [`std::os::unix::fs::FileTypeExt::is_socket`], except that it's
     /// supported on Windows platforms as well.
     ///
-    /// [`std::os::unix::fs::FileTypeExt::is_socket`]: https://doc.rust-lang.org/stable/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_socket
+    /// [`std::os::unix::fs::FileTypeExt::is_socket`]: https://doc.rust-lang.org/std/os/unix/fs/trait.FileTypeExt.html#tymethod.is_socket
     fn is_socket(&self) -> bool;
 }
 
