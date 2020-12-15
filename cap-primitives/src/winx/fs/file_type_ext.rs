@@ -5,9 +5,9 @@ use std::{fs, io, os::windows::io::AsRawHandle};
 pub(crate) enum FileTypeExt {
     CharacterDevice,
     Fifo,
-    #[cfg(feature = "windows_file_type_ext")]
+    #[cfg(windows_file_type_ext)]
     SymlinkFile,
-    #[cfg(feature = "windows_file_type_ext")]
+    #[cfg(windows_file_type_ext)]
     SymlinkDir,
     SymlinkUnknown,
 }
@@ -51,7 +51,7 @@ impl FileTypeExt {
             return FileType::dir();
         }
 
-        #[cfg(feature = "windows_file_type_ext")]
+        #[cfg(windows_file_type_ext)]
         {
             use std::os::windows::fs::FileTypeExt;
             if std.is_symlink_file() {
@@ -70,14 +70,14 @@ impl FileTypeExt {
     }
 
     /// Creates a `FileType` for which `is_symlink_file()` returns `true`.
-    #[cfg(feature = "windows_file_type_ext")]
+    #[cfg(windows_file_type_ext)]
     #[inline]
     pub(crate) const fn symlink_file() -> Self {
         Self::SymlinkFile
     }
 
     /// Creates a `FileType` for which `is_symlink_dir()` returns `true`.
-    #[cfg(feature = "windows_file_type_ext")]
+    #[cfg(windows_file_type_ext)]
     #[inline]
     pub(crate) const fn symlink_dir() -> Self {
         Self::SymlinkDir
@@ -86,7 +86,7 @@ impl FileTypeExt {
     #[inline]
     pub(crate) fn is_symlink(&self) -> bool {
         match self {
-            #[cfg(feature = "windows_file_type_ext")]
+            #[cfg(windows_file_type_ext)]
             Self::SymlinkFile | Self::SymlinkDir => true,
             Self::SymlinkUnknown => true,
             _ => false,

@@ -137,7 +137,7 @@ impl std::os::vxworks::fs::FileTypeExt for FileType {
     }
 }
 
-#[cfg(all(windows, feature = "windows_file_type_ext"))]
+#[cfg(all(windows, windows_file_type_ext))]
 impl std::os::windows::fs::FileTypeExt for FileType {
     #[inline]
     fn is_symlink_dir(&self) -> bool {

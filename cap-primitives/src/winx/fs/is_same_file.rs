@@ -2,7 +2,7 @@ use crate::fs::Metadata;
 use std::{fs, io};
 
 /// Determine if `a` and `b` refer to the same inode on the same device.
-#[cfg(feature = "windows_by_handle")]
+#[cfg(windows_by_handle)]
 #[allow(dead_code)]
 pub(crate) fn is_same_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
     let a_metadata = Metadata::from_std(a.metadata()?);
@@ -11,7 +11,7 @@ pub(crate) fn is_same_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
 }
 
 /// Determine if `a` and `b` are metadata for the same inode on the same device.
-#[cfg(feature = "windows_by_handle")]
+#[cfg(windows_by_handle)]
 #[allow(dead_code)]
 pub(crate) fn is_same_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bool> {
     use std::os::windows::fs::MetadataExt;
@@ -23,12 +23,12 @@ pub(crate) fn is_same_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bo
 /// This is similar to `is_same_file`, but is conservative, and doesn't depend
 /// on nightly-only features.
 pub(crate) fn is_different_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
-    #[cfg(feature = "windows_by_handle")]
+    #[cfg(windows_by_handle)]
     {
         is_same_file(a, b).map(|same| !same)
     }
 
-    #[cfg(not(feature = "windows_by_handle"))]
+    #[cfg(not(windows_by_handle))]
     {
         let a_metadata = Metadata::from_std(a.metadata()?);
         let b_metadata = Metadata::from_std(b.metadata()?);
@@ -41,12 +41,12 @@ pub(crate) fn is_different_file(a: &fs::File, b: &fs::File) -> io::Result<bool> 
 /// This is similar to `is_same_file_metadata`, but is conservative, and doesn't depend
 /// on nightly-only features.
 pub(crate) fn is_different_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bool> {
-    #[cfg(feature = "windows_by_handle")]
+    #[cfg(windows_by_handle)]
     {
         is_same_file_metadata(a, b).map(|same| !same)
     }
 
-    #[cfg(not(feature = "windows_by_handle"))]
+    #[cfg(not(windows_by_handle))]
     {
         // Conservatively just compare creation times.
         Ok(a.created()? != b.created()?)

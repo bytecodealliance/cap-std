@@ -1,10 +1,7 @@
 //! Extension traits for `Dir`
 
 #![deny(missing_docs)]
-#![cfg_attr(
-    all(windows, feature = "windows_by_handle"),
-    feature(windows_by_handle)
-)]
+#![cfg_attr(all(windows, windows_by_handle), feature(windows_by_handle))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]

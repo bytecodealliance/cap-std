@@ -1,7 +1,7 @@
 use crate::fs::{
     read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat, FollowSymlinks,
 };
-#[cfg(feature = "windows_file_type_ext")]
+#[cfg(windows_file_type_ext)]
 use std::os::windows::fs::FileTypeExt;
 use std::{
     fs, io,
@@ -28,7 +28,7 @@ pub(crate) fn remove_open_dir_all_impl(dir: fs::File) -> io::Result<()> {
     remove_open_dir(dir)
 }
 
-#[cfg(feature = "windows_file_type_ext")]
+#[cfg(windows_file_type_ext)]
 fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
     // Code derived from `remove_dir_all_recursive` in Rust's
     // library/std/src/sys/windows/fs.rs at revision
@@ -49,7 +49,7 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(feature = "windows_file_type_ext"))]
+#[cfg(not(windows_file_type_ext))]
 fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
     for child in read_dir_unchecked(start, path)? {
         let child = child?;
