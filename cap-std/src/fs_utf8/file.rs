@@ -1,7 +1,7 @@
-#[cfg(feature = "with_options")]
+#[cfg(with_options)]
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
-#[cfg(feature = "read_initializer")]
+#[cfg(read_initializer)]
 use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
@@ -62,7 +62,7 @@ impl File {
     ///
     /// [`std::fs::File::with_options`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.with_options
     #[inline]
-    #[cfg(feature = "with_options")]
+    #[cfg(with_options)]
     pub fn with_options() -> OpenOptions {
         crate::fs::File::with_options()
     }
@@ -205,13 +205,13 @@ impl Read for File {
         self.cap_std.read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         self.cap_std.is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         self.cap_std.initializer()
@@ -244,13 +244,13 @@ impl Read for &File {
         (&mut &self.cap_std).read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.cap_std).is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         (&mut &self.cap_std).initializer()
@@ -278,13 +278,13 @@ impl Write for File {
         self.cap_std.write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         self.cap_std.is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         self.cap_std.write_all_vectored(bufs)
@@ -312,13 +312,13 @@ impl Write for &File {
         (&mut &self.cap_std).write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         (&mut &self.cap_std).is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         (&mut &self.cap_std).write_all_vectored(bufs)
@@ -331,13 +331,13 @@ impl Seek for File {
         self.cap_std.seek(pos)
     }
 
-    #[cfg(feature = "seek_convenience")]
+    #[cfg(seek_convenience)]
     #[inline]
     fn stream_len(&mut self) -> io::Result<u64> {
         self.cap_std.stream_len()
     }
 
-    #[cfg(feature = "seek_convenience")]
+    #[cfg(seek_convenience)]
     #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         self.cap_std.stream_position()
@@ -350,13 +350,13 @@ impl Seek for &File {
         (&mut &self.cap_std).seek(pos)
     }
 
-    #[cfg(feature = "seek_convenience")]
+    #[cfg(seek_convenience)]
     #[inline]
     fn stream_len(&mut self) -> io::Result<u64> {
         (&mut &self.cap_std).stream_len()
     }
 
-    #[cfg(feature = "seek_convenience")]
+    #[cfg(seek_convenience)]
     #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         (&mut &self.cap_std).stream_position()

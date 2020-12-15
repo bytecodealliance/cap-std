@@ -1,7 +1,7 @@
-#[cfg(all(windows, feature = "windows_by_handle"))]
+#[cfg(all(windows, windows_by_handle))]
 use std::os::windows::fs::MetadataExt as _WindowsByHandle;
 
-#[cfg(all(windows, not(feature = "windows_by_handle")))]
+#[cfg(all(windows, not(windows_by_handle)))]
 use cap_primitives::fs::_WindowsByHandle;
 
 /// Extension trait for `Metadata`.
@@ -51,7 +51,7 @@ impl MetadataExt for std::fs::Metadata {
     }
 }
 
-#[cfg(all(windows, feature = "windows_by_handle"))]
+#[cfg(all(windows, windows_by_handle))]
 impl MetadataExt for std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {

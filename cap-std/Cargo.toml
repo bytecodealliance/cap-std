@@ -22,16 +22,4 @@ maintenance = { status = "actively-developed" }
 
 [features]
 default = []
-can_vector = [] # https://github.com/rust-lang/rust/issues/69941
 fs_utf8 = ["arf-strings"]
-nightly = [
-    "with_options",
-    "can_vector",
-    "read_initializer",
-    "write_all_vectored",
-    "seek_convenience",
-]
-read_initializer = [] # https://github.com/rust-lang/rust/issues/42788
-seek_convenience = [] # https://github.com/rust-lang/rust/issues/59359
-with_options = [] # https://github.com/rust-lang/rust/issues/65439
-write_all_vectored = [] # https://github.com/rust-lang/rust/issues/70436

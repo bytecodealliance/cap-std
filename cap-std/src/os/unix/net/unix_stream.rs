@@ -1,5 +1,5 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
-#[cfg(feature = "read_initializer")]
+#[cfg(read_initializer)]
 use std::io::Initializer;
 use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
@@ -199,13 +199,13 @@ impl Read for UnixStream {
         self.std.read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         self.std.initializer()
@@ -238,13 +238,13 @@ impl Read for &UnixStream {
         (&mut &self.std).read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         (&mut &self.std).initializer()
@@ -272,13 +272,13 @@ impl Write for UnixStream {
         self.std.write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         self.std.is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         self.std.write_all_vectored(bufs)
@@ -306,13 +306,13 @@ impl Write for &UnixStream {
         (&mut &self.std).write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         (&mut &self.std).is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         (&mut &self.std).write_all_vectored(bufs)

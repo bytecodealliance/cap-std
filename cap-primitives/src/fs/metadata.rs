@@ -165,7 +165,7 @@ impl Metadata {
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
-    #[cfg(any(not(windows), feature = "windows_by_handle"))]
+    #[cfg(any(not(windows), windows_by_handle))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }
@@ -350,7 +350,7 @@ impl std::os::vxworks::fs::MetadataExt for Metadata {
     }
 }
 
-#[cfg(all(windows, feature = "windows_by_handle"))]
+#[cfg(all(windows, windows_by_handle))]
 impl std::os::windows::fs::MetadataExt for Metadata {
     #[inline]
     fn file_attributes(&self) -> u32 {
@@ -400,7 +400,7 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 ///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
-#[cfg(all(windows, not(feature = "windows_by_handle")))]
+#[cfg(all(windows, not(windows_by_handle)))]
 #[doc(hidden)]
 pub trait _WindowsByHandle {
     unsafe fn volume_serial_number(&self) -> Option<u32>;

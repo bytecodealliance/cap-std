@@ -40,7 +40,6 @@ winx = "0.21.0"
 
 [features]
 default = []
-nightly = []
 fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
 
 [badges]

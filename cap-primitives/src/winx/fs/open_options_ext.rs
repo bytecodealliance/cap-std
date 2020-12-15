@@ -1,6 +1,4 @@
-#[cfg(feature = "windows_security_qos_flags")]
-use winapi::um::winbase;
-use winapi::um::winnt;
+use winapi::um::{winbase, winnt};
 
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
@@ -44,15 +42,8 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptionsExt {
         self
     }
 
-    /// Re-enable this once https://github.com/rust-lang/rust/pull/74074 is in stable.
-    #[cfg(feature = "windows_security_qos_flags")]
     fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
         self.security_qos_flags = flags | winbase::SECURITY_SQOS_PRESENT;
         self
-    }
-
-    #[cfg(not(feature = "windows_security_qos_flags"))]
-    fn security_qos_flags(&mut self, _flags: u32) -> &mut std::fs::OpenOptions {
-        panic!("OpenOptionsExt::security_qos_flags requires the \"nightly\" feature")
     }
 }

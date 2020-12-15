@@ -19,7 +19,7 @@ impl MetadataExt {
     /// `std::fs::Metadata`.
     #[inline]
     pub(crate) fn from(file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
-        #[cfg(feature = "windows_by_handle")]
+        #[cfg(windows_by_handle)]
         let (volume_serial_number, number_of_links, file_index) = {
             use std::os::windows::fs::MetadataExt;
             (
@@ -29,7 +29,7 @@ impl MetadataExt {
             )
         };
 
-        #[cfg(not(feature = "windows_by_handle"))]
+        #[cfg(not(windows_by_handle))]
         let (volume_serial_number, number_of_links, file_index) = {
             let fileinfo = winx::file::get_fileinfo(file)?;
             (
@@ -81,7 +81,7 @@ impl MetadataExt {
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
-    #[cfg(feature = "windows_by_handle")]
+    #[cfg(windows_by_handle)]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         // From [MSDN]:
         // The identifier (low and high parts) and the volume serial number
@@ -108,7 +108,7 @@ impl MetadataExt {
     }
 }
 
-#[cfg(feature = "windows_by_handle")]
+#[cfg(windows_by_handle)]
 impl std::os::windows::fs::MetadataExt for MetadataExt {
     #[inline]
     fn file_attributes(&self) -> u32 {
@@ -151,7 +151,7 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
     }
 }
 
-#[cfg(all(windows, not(feature = "windows_by_handle")))]
+#[cfg(all(windows, not(windows_by_handle)))]
 #[doc(hidden)]
 impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
     #[inline]

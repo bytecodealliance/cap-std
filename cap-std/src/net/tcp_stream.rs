@@ -1,5 +1,5 @@
 use crate::net::{Shutdown, SocketAddr};
-#[cfg(feature = "read_initializer")]
+#[cfg(read_initializer)]
 use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
@@ -255,13 +255,13 @@ impl Read for TcpStream {
         self.std.read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         self.std.initializer()
@@ -294,13 +294,13 @@ impl Read for &TcpStream {
         (&mut &self.std).read_to_string(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
     }
 
-    #[cfg(feature = "read_initializer")]
+    #[cfg(read_initializer)]
     #[inline]
     unsafe fn initializer(&self) -> Initializer {
         (&mut &self.std).initializer()
@@ -328,13 +328,13 @@ impl Write for TcpStream {
         self.std.write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         self.std.is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         self.std.write_all_vectored(bufs)
@@ -362,13 +362,13 @@ impl Write for &TcpStream {
         (&mut &self.std).write_all(buf)
     }
 
-    #[cfg(feature = "can_vector")]
+    #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
         (&mut &self.std).is_write_vectored()
     }
 
-    #[cfg(feature = "write_all_vectored")]
+    #[cfg(write_all_vectored)]
     #[inline]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice]) -> io::Result<()> {
         (&mut &self.std).write_all_vectored(bufs)

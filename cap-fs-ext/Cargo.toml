@@ -24,8 +24,6 @@ default = ["std"]
 fs_utf8 = ["arf-strings"]
 std = ["cap-std"]
 async_std = ["cap-async-std"]
-nightly = ["windows_by_handle"]
-windows_by_handle = [] # https://github.com/rust-lang/rust/issues/63010
 
 [badges]
 maintenance = { status = "actively-developed" }

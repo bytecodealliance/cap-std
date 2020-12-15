@@ -93,7 +93,7 @@ impl DirEntry {
         self.inner.file_name()
     }
 
-    #[cfg(any(not(windows), feature = "windows_by_handle"))]
+    #[cfg(any(not(windows), windows_by_handle))]
     #[cfg_attr(windows, allow(dead_code))]
     #[inline]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
