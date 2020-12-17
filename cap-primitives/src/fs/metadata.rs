@@ -141,7 +141,12 @@ impl Metadata {
     /// [`std::fs::Metadata::modified`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.modified
     #[inline]
     pub fn modified(&self) -> io::Result<SystemTime> {
-        self.modified.ok_or_else(Self::not_available)
+        self.modified.ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                "modified time metadata not available on this platform",
+            )
+        })
     }
 
     /// Returns the last access time of this metadata.
@@ -151,7 +156,12 @@ impl Metadata {
     /// [`std::fs::Metadata::accessed`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.accessed
     #[inline]
     pub fn accessed(&self) -> io::Result<SystemTime> {
-        self.accessed.ok_or_else(Self::not_available)
+        self.accessed.ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                "accessed time metadata not available on this platform",
+            )
+        })
     }
 
     /// Returns the creation time listed in this metadata.
@@ -161,18 +171,18 @@ impl Metadata {
     /// [`std::fs::Metadata::created`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.created
     #[inline]
     pub fn created(&self) -> io::Result<SystemTime> {
-        self.created.ok_or_else(Self::not_available)
+        self.created.ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                "created time metadata not available on this platform",
+            )
+        })
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
     #[cfg(any(not(windows), windows_by_handle))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
-    }
-
-    #[cold]
-    fn not_available() -> io::Error {
-        io::Error::new(io::ErrorKind::Other, "not available on this platform")
     }
 
     /// `MetadataExt` requires nightly to be implemented, but we sometimes
