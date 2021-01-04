@@ -4,6 +4,9 @@ mod create_dir_unchecked;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
+#[cfg(not(target_os = "linux"))]
+#[cfg(any(test, racy_asserts))]
+mod file_path;
 mod file_type_ext;
 mod hard_link_unchecked;
 mod is_read_write_impl;
@@ -54,9 +57,12 @@ pub(crate) use crate::fs::{
     via_parent::set_times_nofollow as set_times_nofollow_impl,
     dir_options as dir_path_options,
 };
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(test, racy_asserts))]
+pub(super) use file_path::file_path_by_ttyname_or_seaching;
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
 #[cfg(any(test, racy_asserts))]
-pub(crate) use crate::fs::file_path_by_searching as file_path;
+pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
 #[cfg(not(target_os = "linux"))]
 pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
 
@@ -106,3 +112,23 @@ pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked}
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;
 
 pub(super) use oflags::*;
+
+/// Test that `file_path` works on a tty path.
+#[test]
+fn tty_path() {
+    for path in &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"] {
+        // Not all host configurations have these, so only test them if we can
+        // open and canonicalize them.
+        if let Ok(file) = std::fs::File::open(path) {
+            if let Ok(canonical) = std::fs::canonicalize(path) {
+                assert_eq!(
+                    file_path(&file)
+                        .as_ref()
+                        .map(std::fs::canonicalize)
+                        .map(Result::unwrap),
+                    Some(canonical)
+                );
+            }
+        }
+    }
+}

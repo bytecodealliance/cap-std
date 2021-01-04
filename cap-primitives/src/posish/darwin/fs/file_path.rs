@@ -2,6 +2,7 @@
 //! library/std/src/sys/unix/fs.rs at revision
 //! 108e90ca78f052c0c1c49c42a22c85620be19712.
 
+use crate::posish::fs::file_path_by_ttyname_or_seaching;
 use posish::fs::getpath;
 use std::{fs, os::unix::ffi::OsStringExt, path::PathBuf};
 
@@ -12,9 +13,12 @@ pub(crate) fn file_path(file: &fs::File) -> Option<PathBuf> {
     // alternatives. If a better method is invented, it should be used
     // instead.
     let mut buf = vec![0; libc::PATH_MAX as usize];
-    getpath(file, &mut buf).ok()?;
-    let l = buf.iter().position(|&c| c == 0).unwrap();
-    buf.truncate(l as usize);
-    buf.shrink_to_fit();
-    Some(PathBuf::from(std::ffi::OsString::from_vec(buf)))
+    if let Ok(()) = getpath(file, &mut buf) {
+        let l = buf.iter().position(|&c| c == 0).unwrap();
+        buf.truncate(l as usize);
+        buf.shrink_to_fit();
+        return Some(PathBuf::from(std::ffi::OsString::from_vec(buf)));
+    }
+
+    file_path_by_ttyname_or_seaching(file)
 }
