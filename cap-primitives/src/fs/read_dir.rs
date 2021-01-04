@@ -11,6 +11,15 @@ pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     })
 }
 
+/// Like `read_dir` but operates on the base directory itself, rather than
+/// on a path based on it.
+#[inline]
+pub fn read_base_dir(start: &fs::File) -> io::Result<ReadDir> {
+    Ok(ReadDir {
+        inner: ReadDirInner::read_base_dir(start)?,
+    })
+}
+
 /// Like `read_dir`, but doesn't perform sandboxing.
 #[inline]
 pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<ReadDir> {

@@ -15,6 +15,10 @@ impl ReadDirInner {
         Self::new_unchecked(&dir, Component::CurDir.as_os_str().as_ref())
     }
 
+    pub(crate) fn read_base_dir(start: &fs::File) -> io::Result<Self> {
+        Self::new_unchecked(&start, Component::CurDir.as_os_str().as_ref())
+    }
+
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
         let full_path = concatenate_or_return_absolute(start, path)?;
         Ok(Self {

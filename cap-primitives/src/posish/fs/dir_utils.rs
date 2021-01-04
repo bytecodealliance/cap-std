@@ -65,6 +65,18 @@ pub(crate) fn strip_dir_suffix(path: &Path) -> impl Deref<Target = Path> + '_ {
 
 /// Return an `OpenOptions` for opening directories.
 pub(crate) fn dir_options() -> OpenOptions {
+    let flags = target_o_path();
+
+    OpenOptions::new()
+        .read(true)
+        .dir_required(true)
+        .custom_flags(flags.bits())
+        .clone()
+}
+
+/// Like `dir_options`, but additionally request the ability to read the
+/// directory entries.
+pub(crate) fn readdir_options() -> OpenOptions {
     OpenOptions::new().read(true).dir_required(true).clone()
 }
 
@@ -81,10 +93,38 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
 pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+    // This is for `std::fs`, so we don't have `dir_required`, so set
+    // `O_DIRECTORY` manually.
+    let flags = OFlags::DIRECTORY | target_o_path();
+
     fs::OpenOptions::new()
         .read(true)
-        .custom_flags(OFlags::DIRECTORY.bits())
+        .custom_flags(flags.bits())
         .open(&path)
+}
+
+const fn target_o_path() -> OFlags {
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "redox",))]
+    {
+        OFlags::PATH
+    }
+
+    #[cfg(any(
+        target_os = "netbsd",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "dragonfly"
+    ))]
+    {
+        OFlags::empty()
+    }
+}
+
+/// Use `O_PATH` on platforms which have it, or none otherwise.
+pub(crate) const fn target_uses_o_path() -> bool {
+    !target_o_path().is_empty()
 }
 
 #[cfg(racy_asserts)]

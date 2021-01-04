@@ -3,7 +3,7 @@
 
 #[allow(unused_imports)]
 use crate::fs::open_unchecked;
-use crate::fs::{dir_options, dir_path_options, open, open_ambient_dir_impl};
+use crate::fs::{dir_options, dir_path_options, open, open_ambient_dir_impl, readdir_options};
 use std::{fs, io, path::Path};
 
 /// Open a directory by performing an `openat`-like operation,
@@ -14,11 +14,29 @@ pub fn open_dir(start: &fs::File, path: &Path) -> io::Result<fs::File> {
     open(start, path, &dir_options())
 }
 
+/// Like `open_dir`, but additionally request the ability to read the directory
+/// entries.
+#[inline]
+pub fn open_dir_for_reading(start: &fs::File, path: &Path) -> io::Result<fs::File> {
+    open(start, path, &readdir_options())
+}
+
 /// Open a directory by performing an unsandboxed `openat`-like operation.
 #[inline]
 #[allow(dead_code)]
 pub(crate) fn open_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<fs::File> {
     open_unchecked(start, path, &dir_options()).map_err(Into::into)
+}
+
+/// Like `open_dir_unchecked`, but additionally request the ability to read the
+/// directory entries.
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn open_dir_for_reading_unchecked(
+    start: &fs::File,
+    path: &Path,
+) -> io::Result<fs::File> {
+    open_unchecked(start, path, &readdir_options()).map_err(Into::into)
 }
 
 /// Open a directory named by a bare path, using the host process' ambient

@@ -1,9 +1,11 @@
 use crate::fs::{
-    open_dir, open_dir_unchecked, open_entry_impl, read_dir_unchecked, remove_dir_unchecked,
-    remove_file_unchecked, stat_unchecked, DirEntryInner, FollowSymlinks, Metadata, OpenOptions,
-    ReadDir,
+    open_dir_for_reading, open_dir_for_reading_unchecked, open_entry_impl, read_dir_unchecked,
+    remove_dir_unchecked, remove_file_unchecked, stat_unchecked, target_uses_o_path, DirEntryInner,
+    FollowSymlinks, Metadata, OpenOptions, ReadDir,
 };
 use posish::fs::Dir;
+#[cfg(not(target_os = "wasi"))]
+use posish::io::dup;
 #[cfg(unix)]
 use std::os::unix::{
     ffi::OsStrExt,
@@ -29,12 +31,31 @@ pub(crate) struct ReadDirInner {
 impl ReadDirInner {
     pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
         Ok(Self {
-            posish: Arc::new(Dir::from(open_dir(start, path)?)?),
+            posish: Arc::new(Dir::from(open_dir_for_reading(start, path)?)?),
         })
     }
 
+    pub(crate) fn read_base_dir(start: &fs::File) -> io::Result<Self> {
+        if target_uses_o_path() {
+            // On platforms that use `O_PATH`, open ".".
+            Ok(Self {
+                posish: Arc::new(Dir::from(open_dir_for_reading_unchecked(
+                    start,
+                    Component::CurDir.as_ref(),
+                )?)?),
+            })
+        } else {
+            // On platforms that lack `O_PATH`, we have a full file descriptor,
+            // so just `dup` it (because we use `fdopendir` which assumes
+            // ownership_).
+            Ok(Self {
+                posish: Arc::new(Dir::from(dup(start)?)?),
+            })
+        }
+    }
+
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let dir = open_dir_unchecked(start, path)?;
+        let dir = open_dir_for_reading_unchecked(start, path)?;
         Ok(Self {
             posish: Arc::new(Dir::from(dir)?),
         })

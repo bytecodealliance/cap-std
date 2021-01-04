@@ -78,6 +78,13 @@ pub(crate) fn dir_options() -> OpenOptions {
         .clone()
 }
 
+/// Like `dir_options`, but additionally request the ability to read the
+/// directory entries.
+pub(crate) fn readdir_options() -> OpenOptions {
+    // Windows doesn't appear to make this distinction.
+    dir_options()
+}
+
 /// Return an `OpenOptions` for canonicalizing paths.
 pub(crate) fn canonicalize_options() -> OpenOptions {
     OpenOptions::new()
