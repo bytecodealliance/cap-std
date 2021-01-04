@@ -7,8 +7,8 @@
 
   <p>
     <a href="https://github.com/bytecodealliance/cap-std/actions?query=workflow%3ACI"><img src="https://github.com/bytecodealliance/cap-std/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
-    <a href="https://crates.io/crates/cap-permissions"><img src="https://img.shields.io/crates/v/cap-permissions.svg" alt="crates.io page" /></a>
-    <a href="https://docs.rs/cap-permissions"><img src="https://docs.rs/cap-permissions/badge.svg" alt="docs.rs docs" /></a>
+    <a href="https://crates.io/crates/cap-primitives"><img src="https://img.shields.io/crates/v/cap-primitives.svg" alt="crates.io page" /></a>
+    <a href="https://docs.rs/cap-primitives"><img src="https://docs.rs/cap-primitives/badge.svg" alt="docs.rs docs" /></a>
   </p>
 </div>
 
