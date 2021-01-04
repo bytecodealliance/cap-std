@@ -19,7 +19,7 @@ ipnet = "2.3.0"
 fs-set-times = "0.2.2"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.5.3"
+posish = "0.5.4"
 libc = "0.2.81"
 
 [target.'cfg(target_os = "linux")'.dependencies]
