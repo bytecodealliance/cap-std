@@ -6,12 +6,12 @@ use async_std::os::wasi::{
 };
 use async_std::{
     fs, io,
-    path::{Component, Path, PathBuf},
+    path::{Path, PathBuf},
 };
 use cap_primitives::fs::{
-    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
-    read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
-    rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use std::fmt;
 #[cfg(unix)]
@@ -269,7 +269,8 @@ impl Dir {
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {
-        self.read_dir(Component::CurDir)
+        let file = unsafe { as_sync(&self.std_file) };
+        read_base_dir(&file).map(|inner| ReadDir { inner })
     }
 
     /// Returns an iterator over the entries within a directory.

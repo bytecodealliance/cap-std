@@ -1,8 +1,8 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use cap_primitives::fs::{
-    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_dir,
-    read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir, remove_open_dir_all,
-    rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{
@@ -12,7 +12,7 @@ use std::os::wasi::{
 use std::{
     fmt, fs,
     io::{self, Read, Write},
-    path::{Component, Path, PathBuf},
+    path::{Path, PathBuf},
 };
 #[cfg(unix)]
 use {
@@ -268,7 +268,7 @@ impl Dir {
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {
-        self.read_dir(Component::CurDir)
+        read_base_dir(&self.std_file).map(|inner| ReadDir { inner })
     }
 
     /// Returns an iterator over the entries within a directory.
