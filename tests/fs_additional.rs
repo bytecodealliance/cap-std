@@ -415,6 +415,7 @@ fn dir_searchable_unreadable() {
 }
 
 /// Test opening a directory with no permissions.
+#[cfg(unix)]
 #[test]
 fn dir_unsearchable_unreadable() {
     use cap_std::fs::DirBuilder;
