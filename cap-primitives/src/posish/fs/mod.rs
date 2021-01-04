@@ -116,18 +116,24 @@ pub(super) use oflags::*;
 /// Test that `file_path` works on a tty path.
 #[test]
 fn tty_path() {
+    #[cfg(unix)]
+    use std::os::unix::fs::FileTypeExt;
+
     for path in &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"] {
         // Not all host configurations have these, so only test them if we can
-        // open and canonicalize them.
+        // open and canonicalize them, and if they're not FIFOs, which some
+        // OS's use for stdin/stdout/stderr.
         if let Ok(file) = std::fs::File::open(path) {
-            if let Ok(canonical) = std::fs::canonicalize(path) {
-                assert_eq!(
-                    file_path(&file)
-                        .as_ref()
-                        .map(std::fs::canonicalize)
-                        .map(Result::unwrap),
-                    Some(canonical)
-                );
+            if !file.metadata().unwrap().file_type().is_fifo() {
+                if let Ok(canonical) = std::fs::canonicalize(path) {
+                    assert_eq!(
+                        file_path(&file)
+                            .as_ref()
+                            .map(std::fs::canonicalize)
+                            .map(Result::unwrap),
+                        Some(canonical)
+                    );
+                }
             }
         }
     }
