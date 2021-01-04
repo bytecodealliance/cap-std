@@ -427,7 +427,11 @@ fn dir_unsearchable_unreadable() {
     check!(tmpdir.create_dir_with("dir", &options));
 
     // Platforms with `O_PATH` can open a directory with no permissions.
-    if cfg!(any(target_os = "linux", target_os = "android", target_os = "redox")) {
+    if cfg!(any(
+        target_os = "linux",
+        target_os = "android",
+        target_os = "redox"
+    )) {
         check!(tmpdir.open_dir("dir"));
     } else {
         assert!(tmpdir.open_dir("dir").is_err());
