@@ -104,18 +104,24 @@ pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> 
 }
 
 const fn target_o_path() -> OFlags {
-    #[cfg(any(target_os = "linux", target_os = "android", target_os = "redox",))]
+    #[cfg(any(
+        target_os = "android",
+        target_os = "emscripten",
+        target_os = "fuchsia",
+        target_os = "linux",
+        target_os = "redox",
+    ))]
     {
         OFlags::PATH
     }
 
     #[cfg(any(
-        target_os = "netbsd",
-        target_os = "macos",
-        target_os = "ios",
+        target_os = "dragonfly",
         target_os = "freebsd",
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "netbsd",
         target_os = "openbsd",
-        target_os = "dragonfly"
     ))]
     {
         OFlags::empty()
