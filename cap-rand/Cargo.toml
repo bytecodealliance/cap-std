@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-rand = "0.7.3"
+rand = "0.8.1"
 
 [features]
 default = []
