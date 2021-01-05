@@ -27,7 +27,7 @@ use std::{
 const PROC_ROOT_INO: u64 = 1;
 
 /// The filesystem magic number for procfs.
-/// https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION
+/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
 ///
 /// This is defined in the `libc` crate for linux-gnu but not for
 /// linux-musl, so we define it ourselves.
