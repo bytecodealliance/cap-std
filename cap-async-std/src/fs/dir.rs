@@ -414,7 +414,7 @@ impl Dir {
     /// relative to `self`. Also, on some platforms, this function may fail if the
     /// file or directory cannot be opened for reading or writing first.
     ///
-    /// [`async_std::fs::set_permissions`]: https://docs.rs/async-std/current/async_std/fs/fn.set_permissions.html
+    /// [`async_std::fs::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/fn.set_permissions.html
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         let file = unsafe { as_sync(&self.std_file) };
         set_permissions(&file, path.as_ref().as_ref(), perm)

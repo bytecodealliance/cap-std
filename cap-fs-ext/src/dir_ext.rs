@@ -20,21 +20,21 @@ pub trait DirExt {
     ///
     /// This corresponds to [`filetime::set_file_atime`].
     ///
-    /// [`filetime::set_file_atime`]: https://docs.rs/filetime/current/filetime/fn.set_file_atime.html
+    /// [`filetime::set_file_atime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_atime.html
     fn set_atime<P: AsRef<Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last modification time for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_mtime`].
     ///
-    /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/current/filetime/fn.set_file_mtime.html
+    /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_mtime.html
     fn set_mtime<P: AsRef<Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last access and modification times for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_times`].
     ///
-    /// [`filetime::set_file_times`]: https://docs.rs/filetime/current/filetime/fn.set_file_times.html
+    /// [`filetime::set_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_file_times.html
     fn set_times<P: AsRef<Path>>(
         &self,
         path: P,
@@ -47,7 +47,7 @@ pub trait DirExt {
     ///
     /// This corresponds to [`filetime::set_symlink_file_times`].
     ///
-    /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/current/filetime/fn.set_symlink_file_times.html
+    /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_symlink_file_times.html
     fn set_symlink_times<P: AsRef<Path>>(
         &self,
         path: P,
@@ -90,21 +90,21 @@ pub trait DirExtUtf8 {
     ///
     /// This corresponds to [`filetime::set_file_atime`].
     ///
-    /// [`filetime::set_file_atime`]: https://docs.rs/filetime/current/filetime/fn.set_file_atime.html
+    /// [`filetime::set_file_atime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_atime.html
     fn set_atime<P: AsRef<str>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last modification time for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_mtime`].
     ///
-    /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/current/filetime/fn.set_file_mtime.html
+    /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_mtime.html
     fn set_mtime<P: AsRef<str>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last access and modification times for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_times`].
     ///
-    /// [`filetime::set_file_times`]: https://docs.rs/filetime/current/filetime/fn.set_file_times.html
+    /// [`filetime::set_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_file_times.html
     fn set_times<P: AsRef<str>>(
         &self,
         path: P,
@@ -117,7 +117,7 @@ pub trait DirExtUtf8 {
     ///
     /// This corresponds to [`filetime::set_symlink_file_times`].
     ///
-    /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/current/filetime/fn.set_symlink_file_times.html
+    /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_symlink_file_times.html
     fn set_symlink_times<P: AsRef<str>>(
         &self,
         path: P,

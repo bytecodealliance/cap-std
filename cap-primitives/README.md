@@ -23,5 +23,5 @@ The networking module, `net`, is not yet usable.
 
 [`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-async-std/README.md
-[`cap_primitives::fs`]: https://docs.rs/cap-primitives/current/cap_primitives/fs/index.html
-[`cap_primitives::time`]: https://docs.rs/cap-primitives/current/cap_primitives/time/index.html
+[`cap_primitives::fs`]: https://docs.rs/cap-primitives/latest/cap_primitives/fs/index.html
+[`cap_primitives::time`]: https://docs.rs/cap-primitives/latest/cap_primitives/time/index.html

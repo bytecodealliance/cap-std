@@ -17,7 +17,7 @@
 //! capability-oriented interface, avoid using `rand::SeedableRng`'s
 //! `from_entropy` function on any of the types that implement that trait.
 
-//! [`rand`]: https://docs.rs/rand/current/rand/index.html
+//! [`rand`]: https://docs.rs/rand/latest/rand/index.html
 //! [`OsRng`]: rngs/struct.OsRng.html
 //! [`CapRng`]: rngs/struct.CapRng.html
 
@@ -35,7 +35,7 @@ pub use rand::{distributions, seq, AsByteSliceMut, CryptoRng, Error, Rng, RngCor
 ///
 /// This corresponds to [`rand::prelude`].
 ///
-/// [`rand::prelude`]: https://docs.rs/rand/current/rand/prelude/index.html
+/// [`rand::prelude`]: https://docs.rs/rand/latest/rand/prelude/index.html
 pub mod prelude {
     #[cfg(feature = "small_rng")]
     pub use crate::rngs::SmallRng;
@@ -52,7 +52,7 @@ pub mod prelude {
 ///
 /// This corresponds to [`rand::rngs`].
 ///
-/// [`rand::rngs`]: https://docs.rs/rand/current/rand/rngs/
+/// [`rand::rngs`]: https://docs.rs/rand/latest/rand/rngs/
 pub mod rngs {
     pub use rand::rngs::{adapter, mock, StdRng};
 
@@ -65,7 +65,7 @@ pub mod rngs {
     /// `Default` it has an unsafe `default` function since accessing the
     /// operating system requires ambient authority.
     ///
-    /// [`OsRng`]: https://docs.rs/rand/current/rand/rngs/struct.OsRng.html
+    /// [`OsRng`]: https://docs.rs/rand/latest/rand/rngs/struct.OsRng.html
     #[derive(Clone, Copy, Debug)]
     pub struct OsRng(());
 
@@ -108,7 +108,7 @@ pub mod rngs {
     /// This corresponds to [`rand::rngs::ThreadRng`], except that it isn't tied
     /// to thread-local memory.
     ///
-    /// [`rand::rngs::ThreadRng`]: https://docs.rs/rand/current/rand/rngs/struct.ThreadRng.html
+    /// [`rand::rngs::ThreadRng`]: https://docs.rs/rand/latest/rand/rngs/struct.ThreadRng.html
     #[derive(Clone, Copy, Debug)]
     pub struct CapRng {
         pub(super) inner: rand::rngs::ThreadRng,
@@ -152,7 +152,7 @@ pub mod rngs {
 ///
 /// This corresponds to [`rand::thread_rng`].
 ///
-/// [`rand::thread_rng`]: https://docs.rs/rand/current/rand/fn.thread_rng.html
+/// [`rand::thread_rng`]: https://docs.rs/rand/latest/rand/fn.thread_rng.html
 ///
 /// # Safety
 ///
@@ -169,7 +169,7 @@ pub unsafe fn thread_rng() -> rngs::CapRng {
 ///
 /// This corresponds to [`rand::random`].
 ///
-/// [`rand::random`]: https://docs.rs/rand/current/rand/fn.random.html
+/// [`rand::random`]: https://docs.rs/rand/latest/rand/fn.random.html
 ///
 /// # Safety
 ///
