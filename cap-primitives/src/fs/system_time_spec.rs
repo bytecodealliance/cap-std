@@ -19,9 +19,9 @@ impl SystemTimeSpec {
     #[inline]
     pub fn from_std(std: fs_set_times::SystemTimeSpec) -> Self {
         match std {
-            fs_set_times::SystemTimeSpec::SymbolicNow => SystemTimeSpec::SymbolicNow,
+            fs_set_times::SystemTimeSpec::SymbolicNow => Self::SymbolicNow,
             fs_set_times::SystemTimeSpec::Absolute(time) => {
-                SystemTimeSpec::Absolute(SystemTime::from_std(time))
+                Self::Absolute(SystemTime::from_std(time))
             }
         }
     }
@@ -30,10 +30,8 @@ impl SystemTimeSpec {
     #[inline]
     pub const fn into_std(self) -> fs_set_times::SystemTimeSpec {
         match self {
-            SystemTimeSpec::SymbolicNow => fs_set_times::SystemTimeSpec::SymbolicNow,
-            SystemTimeSpec::Absolute(time) => {
-                fs_set_times::SystemTimeSpec::Absolute(time.into_std())
-            }
+            Self::SymbolicNow => fs_set_times::SystemTimeSpec::SymbolicNow,
+            Self::Absolute(time) => fs_set_times::SystemTimeSpec::Absolute(time.into_std()),
         }
     }
 }

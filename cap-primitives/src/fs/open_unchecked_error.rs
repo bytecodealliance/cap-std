@@ -21,9 +21,7 @@ impl OpenUncheckedError {
     #[allow(dead_code)]
     pub(crate) fn kind(&self) -> io::ErrorKind {
         match self {
-            OpenUncheckedError::Other(err)
-            | OpenUncheckedError::Symlink(err, _)
-            | OpenUncheckedError::NotFound(err) => err.kind(),
+            Self::Other(err) | Self::Symlink(err, _) | Self::NotFound(err) => err.kind(),
         }
     }
 }
