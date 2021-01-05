@@ -29,7 +29,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
-pub use rand::{distributions, seq, AsByteSliceMut, CryptoRng, Error, Rng, RngCore, SeedableRng};
+pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, SeedableRng};
 
 /// Convenience re-export of common members.
 ///
@@ -109,7 +109,7 @@ pub mod rngs {
     /// to thread-local memory.
     ///
     /// [`rand::rngs::ThreadRng`]: https://docs.rs/rand/latest/rand/rngs/struct.ThreadRng.html
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Debug)]
     pub struct CapRng {
         pub(super) inner: rand::rngs::ThreadRng,
     }
