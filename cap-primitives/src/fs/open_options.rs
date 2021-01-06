@@ -238,8 +238,11 @@ impl arbitrary::Arbitrary for OpenOptions {
             .write(write)
             .create(<bool as Arbitrary>::arbitrary(u)?)
             .append(<bool as Arbitrary>::arbitrary(u)?)
-            .create_new(<bool as Arbitrary>::arbitrary(u)?)
             .truncate(<bool as Arbitrary>::arbitrary(u)?)
+            .create(<bool as Arbitrary>::arbitrary(u)?)
+            .create_new(<bool as Arbitrary>::arbitrary(u)?)
+            .dir_required(<bool as Arbitrary>::arbitrary(u)?)
+            .readdir_required(<bool as Arbitrary>::arbitrary(u)?)
             .follow(<FollowSymlinks as Arbitrary>::arbitrary(u)?)
             .clone())
     }
