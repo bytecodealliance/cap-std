@@ -1,24 +1,11 @@
 //! This module consists of helper types and functions for dealing
 //! with setting the file times.
 
-use crate::fs::{open, set_times_nofollow, FollowSymlinks, OpenOptions, SystemTimeSpec};
+use crate::fs::{open, OpenOptions, SystemTimeSpec};
 use fs_set_times::SetTimes;
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
-    start: &fs::File,
-    path: &Path,
-    atime: Option<SystemTimeSpec>,
-    mtime: Option<SystemTimeSpec>,
-    follow: FollowSymlinks,
-) -> io::Result<()> {
-    match follow {
-        FollowSymlinks::Yes => set_times_follow(start, path, atime, mtime),
-        FollowSymlinks::No => set_times_nofollow(start, path, atime, mtime),
-    }
-}
-
-fn set_times_follow(
     start: &fs::File,
     path: &Path,
     atime: Option<SystemTimeSpec>,
