@@ -16,8 +16,14 @@ fn main() {
             "shrink_to",                 // https://github.com/rust-lang/rust/issues/56431
             "pattern",                   // https://github.com/rust-lang/rust/issues/27721
             "clamp",                     // https://github.com/rust-lang/rust/issues/44095
+            "extend_one",                // https://github.com/rust-lang/rust/issues/72631
+            "toowned_clone_into",        // https://github.com/rust-lang/rust/issues/41263
         ] {
             println!("cargo:rustc-cfg={}", feature);
         }
     }
+
+    // Don't rerun this on changes other than build.rs, as we only depend on
+    // the rustc version.
+    println!("cargo:rerun-if-changed=build.rs");
 }
