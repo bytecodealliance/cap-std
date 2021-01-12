@@ -9,20 +9,20 @@ use posish::io::dup;
 #[cfg(unix)]
 use std::os::unix::{
     ffi::OsStrExt,
-    io::{AsRawFd, FromRawFd},
+    io::{AsRawFd, RawFd},
 };
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{
     ffi::OsStrExt,
-    io::{AsRawFd, FromRawFd},
+    io::{AsRawFd, RawFd},
 };
 use std::{
     ffi::OsStr,
     fmt, fs, io,
-    mem::ManuallyDrop,
     path::{Component, Path},
     sync::Arc,
 };
+use unsafe_io::AsUnsafeFile;
 
 pub(crate) struct ReadDirInner {
     posish: Arc<Dir>,
@@ -62,34 +62,27 @@ impl ReadDirInner {
     }
 
     pub(super) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
-        unsafe { open_entry_impl(&self.to_std_file(), file_name, options) }
+        open_entry_impl(&self.as_file(), file_name, options)
     }
 
     pub(super) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
-        unsafe { stat_unchecked(&self.to_std_file(), file_name.as_ref(), FollowSymlinks::No) }
+        stat_unchecked(&self.as_file(), file_name.as_ref(), FollowSymlinks::No)
     }
 
     pub(super) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
-        unsafe { remove_file_unchecked(&self.to_std_file(), file_name.as_ref()) }
+        remove_file_unchecked(&self.as_file(), file_name.as_ref())
     }
 
     pub(super) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
-        unsafe { remove_dir_unchecked(&self.to_std_file(), file_name.as_ref()) }
+        remove_dir_unchecked(&self.as_file(), file_name.as_ref())
     }
 
     pub(super) fn self_metadata(&self) -> io::Result<Metadata> {
-        unsafe { Metadata::from_file(&self.to_std_file()) }
+        Metadata::from_file(&self.as_file())
     }
 
     pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {
-        unsafe { read_dir_unchecked(&self.to_std_file(), file_name.as_ref()) }
-    }
-
-    /// # Safety
-    ///
-    /// The resulting `fs::File` shouldn't outlive `self`.
-    unsafe fn to_std_file(&self) -> ManuallyDrop<fs::File> {
-        ManuallyDrop::<fs::File>::new(fs::File::from_raw_fd(self.posish.as_raw_fd()))
+        read_dir_unchecked(&self.as_file(), file_name.as_ref())
     }
 }
 
@@ -113,6 +106,13 @@ impl Iterator for ReadDirInner {
                 }));
             }
         }
+    }
+}
+
+impl AsRawFd for ReadDirInner {
+    #[inline]
+    fn as_raw_fd(&self) -> RawFd {
+        self.posish.as_raw_fd()
     }
 }
 

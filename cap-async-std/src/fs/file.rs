@@ -1,4 +1,4 @@
-use crate::fs::{as_sync, Metadata, Permissions};
+use crate::fs::{Metadata, Permissions};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -12,6 +12,7 @@ use async_std::{
 };
 use cap_primitives::fs::is_read_write;
 use std::{fmt, pin::Pin};
+use unsafe_io::AsUnsafeFile;
 
 /// A reference to an open file on a filesystem.
 ///
@@ -100,7 +101,7 @@ impl File {
     /// [`async_std::fs::File::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        let sync = unsafe { as_sync(&self.std) };
+        let sync = self.std.as_file();
         self.std
             .set_permissions(permissions_into_std(&sync, perm)?)
             .await
@@ -331,7 +332,7 @@ impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
-        let file = unsafe { as_sync(&self.std) };
+        let file = self.std.as_file();
         #[cfg(not(windows))]
         b.field("fd", &file.as_raw_fd());
         #[cfg(windows)]
