@@ -17,6 +17,7 @@ readme = "README.md"
 arbitrary = { version = "0.4.7", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
 fs-set-times = "0.2.3"
+unsafe-io = "0.0.1"
 
 [target.'cfg(not(windows))'.dependencies]
 posish = "0.5.4"

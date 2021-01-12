@@ -1,4 +1,4 @@
-use crate::fs::{as_sync, into_sync, DirBuilder, File, Metadata, OpenOptions, ReadDir};
+use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::{
     fs::OpenOptionsExt,
@@ -14,6 +14,7 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use std::fmt;
+use unsafe_io::{AsUnsafeFile, IntoUnsafeFile};
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -83,7 +84,7 @@ impl Dir {
     /// [`async_std::fs::OpenOptions::open`]: https://docs.rs/async-std/latest/async_std/fs/struct.OpenOptions.html#method.open
     #[inline]
     pub fn open_with<P: AsRef<Path>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         Self::_open_with(&file, path.as_ref(), options)
     }
 
@@ -102,7 +103,7 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         let dir = open_dir(&file, path.as_ref().as_ref())?.into();
         Ok(unsafe { Self::from_std_file(dir) })
     }
@@ -149,7 +150,7 @@ impl Dir {
     }
 
     fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         create_dir(&file, path.as_ref(), dir_options)
     }
 
@@ -203,7 +204,7 @@ impl Dir {
     /// [`async_std::fs::canonicalize`]: https://docs.rs/async-std/latest/async_std/fs/fn.canonicalize.html
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         canonicalize(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
@@ -221,8 +222,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        let from_file = unsafe { as_sync(&self.std_file) };
-        let to_file = unsafe { as_sync(&to_dir.std_file) };
+        let from_file = self.std_file.as_file();
+        let to_file = to_dir.std_file.as_file();
         copy(
             &from_file,
             from.as_ref().as_ref(),
@@ -244,8 +245,8 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src_file = unsafe { as_sync(&self.std_file) };
-        let dst_file = unsafe { as_sync(&dst_dir.std_file) };
+        let src_file = self.std_file.as_file();
+        let dst_file = dst_dir.std_file.as_file();
         hard_link(
             &src_file,
             src.as_ref().as_ref(),
@@ -262,14 +263,14 @@ impl Dir {
     /// [`async_std::fs::metadata`]: https://docs.rs/async-std/latest/async_std/fs/fn.metadata.html
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         stat(&file, path.as_ref().as_ref(), FollowSymlinks::Yes)
     }
 
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         read_base_dir(&file).map(|inner| ReadDir { inner })
     }
 
@@ -281,7 +282,7 @@ impl Dir {
     /// [`async_std::fs::read_dir`]: https://docs.rs/async-std/latest/async_std/fs/fn.read_dir.html
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         read_dir(&file, path.as_ref().as_ref()).map(|inner| ReadDir { inner })
     }
 
@@ -308,7 +309,7 @@ impl Dir {
     /// [`async_std::fs::read_link`]: https://docs.rs/async-std/latest/async_std/fs/fn.read_link.html
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         read_link(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
@@ -334,7 +335,7 @@ impl Dir {
     /// [`async_std::fs::remove_dir`]: https://docs.rs/async-std/latest/async_std/fs/fn.remove_dir.html
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         remove_dir(&file, path.as_ref().as_ref())
     }
 
@@ -346,7 +347,7 @@ impl Dir {
     /// [`async_std::fs::remove_dir_all`]: https://docs.rs/async-std/latest/async_std/fs/fn.remove_dir_all.html
     #[inline]
     pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         remove_dir_all(&file, path.as_ref().as_ref())
     }
 
@@ -357,7 +358,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
-        let file = into_sync(self.std_file);
+        let file = self.std_file.into_file();
         remove_open_dir(file)
     }
 
@@ -369,7 +370,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
-        let file = into_sync(self.std_file);
+        let file = self.std_file.into_file();
         remove_open_dir_all(file)
     }
 
@@ -381,7 +382,7 @@ impl Dir {
     /// [`async_std::fs::remove_file`]: https://docs.rs/async-std/latest/async_std/fs/fn.remove_file.html
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         remove_file(&file, path.as_ref().as_ref())
     }
 
@@ -398,8 +399,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
-        let to_file = unsafe { as_sync(&to_dir.std_file) };
+        let file = self.std_file.as_file();
+        let to_file = to_dir.std_file.as_file();
         rename(
             &file,
             from.as_ref().as_ref(),
@@ -416,7 +417,7 @@ impl Dir {
     ///
     /// [`async_std::fs::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/fn.set_permissions.html
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         set_permissions(&file, path.as_ref().as_ref(), perm)
     }
 
@@ -428,7 +429,7 @@ impl Dir {
     /// [`async_std::fs::symlink_metadata`]: https://docs.rs/async-std/latest/async_std/fs/fn.symlink_metadata.html
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         stat(&file, path.as_ref().as_ref(), FollowSymlinks::No)
     }
 
@@ -458,7 +459,7 @@ impl Dir {
     #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         symlink(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
@@ -471,7 +472,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         symlink_file(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
@@ -484,7 +485,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = unsafe { as_sync(&self.std_file) };
+        let file = self.std_file.as_file();
         symlink_dir(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
