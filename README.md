@@ -81,6 +81,14 @@ This allows application logic to configure its own access, without changing the
 behavior of the whole host process, setting up a separate host process, or
 requiring external configuration.
 
+For a more complete example of cap-std in action, see [this port] of
+tide-naive-static-files, a simple static-file Web server, to use cap-std
+to access the static files. [The diff] shows the kinds of changes needed to
+use this API.
+
+[port tide-native-static-files]: https://github.com/sunfishcode/tide-naive-static-files/
+[The diff]: https://github.com/eignnx/tide-naive-static-files/compare/master...sunfishcode:main
+
 [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
 
 ## How do I obtain a [`Dir`]?
