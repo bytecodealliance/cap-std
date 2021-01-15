@@ -15,9 +15,5 @@
 This crate provides a capability-based version of [`async-std`]. See the
 [toplevel README.md] for more information about capability-based security.
 
-At the moment, `cap-async-std` is a very rudimentary translation of [`cap-std`] to
-`async-std`. It hasn't yet been optimized to make effective use of `async`.
-
 [`async-std`]: https://crates.io/crates/async-std
-[`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
 [toplevel README.md]: https://github.com/bytecodealliance/cap-std/blob/main/README.md

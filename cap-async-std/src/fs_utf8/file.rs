@@ -115,15 +115,14 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient<P: AsRef<str>>(
+    pub async fn open_ambient<P: AsRef<str>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
         let path = from_utf8(path)?;
-        Ok(Self::from_cap_std(crate::fs::File::open_ambient(
-            path,
-            ambient_authority,
-        )?))
+        crate::fs::File::open_ambient(path, ambient_authority)
+            .await
+            .map(Self::from_cap_std)
     }
 
     /// Constructs a new instance of `Self` with the options specified by
@@ -135,17 +134,15 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient_with<P: AsRef<str>>(
+    pub async fn open_ambient_with<P: AsRef<str>>(
         path: P,
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
         let path = from_utf8(path)?;
-        Ok(Self::from_cap_std(crate::fs::File::open_ambient_with(
-            path,
-            options,
-            ambient_authority,
-        )?))
+        crate::fs::File::open_ambient_with(path, options, ambient_authority)
+            .await
+            .map(Self::from_cap_std)
     }
 }
 

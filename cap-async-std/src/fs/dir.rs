@@ -5,6 +5,7 @@ use async_std::os::wasi::{
     io::{AsRawFd, IntoRawFd},
 };
 use async_std::path::{Path, PathBuf};
+use async_std::task::spawn_blocking;
 use async_std::{fs, io};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
@@ -42,6 +43,7 @@ use {
 /// since absolute paths don't interoperate well with the capability model.
 ///
 /// [functions in `async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/index.html#functions
+#[derive(Clone)]
 pub struct Dir {
     std_file: fs::File,
 }
@@ -73,8 +75,8 @@ impl Dir {
     /// This corresponds to [`async_std::fs::File::open`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn open<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
-        self.open_with(path, OpenOptions::new().read(true))
+    pub async fn open<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+        self.open_with(path, OpenOptions::new().read(true)).await
     }
 
     /// Opens a file at `path` with the options specified by `options`.
@@ -84,28 +86,51 @@ impl Dir {
     /// Instead of being a method on `OpenOptions`, this is a method on `Dir`,
     /// and it only accesses paths relative to `self`.
     #[inline]
-    pub fn open_with<P: AsRef<Path>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        Self::_open_with(&file, path.as_ref(), options)
+    pub async fn open_with<P: AsRef<Path>>(
+        &self,
+        path: P,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
+        self._open_with(path.as_ref(), options).await
     }
 
     #[cfg(not(target_os = "wasi"))]
-    fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
-        let file = open(file, path.as_ref(), options)?.into();
+    async fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
+        let path = path.to_path_buf();
+        let clone = self.clone();
+        let options = options.clone();
+        let file = spawn_blocking(move || {
+            open(
+                &*clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                &options,
+            )
+        })
+        .await?
+        .into();
         Ok(File::from_std(file, ambient_authority()))
     }
 
     #[cfg(target_os = "wasi")]
-    fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
+    async fn _open_with(
+        file: &std::fs::File,
+        path: &Path,
+        options: &OpenOptions,
+    ) -> io::Result<File> {
         let file = options.open_at(&self.std_file, path)?.into();
         Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Attempts to open a directory.
     #[inline]
-    pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        let dir = open_dir(&file, path.as_ref().as_ref())?.into();
+    pub async fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        let dir = spawn_blocking(move || {
+            open_dir(&clone.as_filelike_view::<std::fs::File>(), path.as_ref())
+        })
+        .await?
+        .into();
         Ok(Self::from_std_file(dir, ambient_authority()))
     }
 
@@ -113,6 +138,8 @@ impl Dir {
     ///
     /// This corresponds to [`async_std::fs::create_dir`], but only accesses
     /// paths relative to `self`.
+    ///
+    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self._create_dir_one(path.as_ref(), &DirOptions::new())
@@ -123,6 +150,8 @@ impl Dir {
     ///
     /// This corresponds to [`async_std::fs::create_dir_all`], but only
     /// accesses paths relative to `self`.
+    ///
+    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self._create_dir_all(path.as_ref(), &DirOptions::new())
@@ -132,6 +161,8 @@ impl Dir {
     /// builder.
     ///
     /// This corresponds to [`async_std::fs::DirBuilder::create`].
+    ///
+    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
     #[inline]
     pub fn create_dir_with<P: AsRef<Path>>(
         &self,
@@ -146,9 +177,13 @@ impl Dir {
         }
     }
 
+    #[inline]
     fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        create_dir(&file, path.as_ref(), dir_options)
+        create_dir(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref(),
+            dir_options,
+        )
     }
 
     fn _create_dir_all(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
@@ -159,7 +194,7 @@ impl Dir {
         match self._create_dir_one(path, dir_options) {
             Ok(()) => return Ok(()),
             Err(ref e) if e.kind() == io::ErrorKind::NotFound => {}
-            Err(_) if self.is_dir(path) => return Ok(()),
+            Err(_) if self.is_dir_blocking(path) => return Ok(()),
             Err(e) => return Err(e),
         }
         match path.parent() {
@@ -173,7 +208,7 @@ impl Dir {
         }
         match self._create_dir_one(path, dir_options) {
             Ok(()) => Ok(()),
-            Err(_) if self.is_dir(path) => Ok(()),
+            Err(_) if self.is_dir_blocking(path) => Ok(()),
             Err(e) => Err(e),
         }
     }
@@ -183,11 +218,12 @@ impl Dir {
     /// This corresponds to [`async_std::fs::File::create`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn create<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
+    pub async fn create<P: AsRef<Path>>(&self, path: P) -> io::Result<File> {
         self.open_with(
             path,
             OpenOptions::new().write(true).create(true).truncate(true),
         )
+        .await
     }
 
     /// Returns the canonical form of a path with all intermediate components
@@ -197,9 +233,14 @@ impl Dir {
     /// returning an absolute path, returns a path relative to the
     /// directory represented by `self`.
     #[inline]
-    pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        canonicalize(&file, path.as_ref().as_ref()).map(PathBuf::from)
+    pub async fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            canonicalize(&clone.as_filelike_view::<std::fs::File>(), path.as_ref())
+        })
+        .await
+        .map(PathBuf::from)
     }
 
     /// Copies the contents of one file to another. This function will also
@@ -215,14 +256,19 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        let from_file = self.std_file.as_filelike_view::<std::fs::File>();
-        let to_file = to_dir.std_file.as_filelike_view::<std::fs::File>();
-        copy(
-            &from_file,
-            from.as_ref().as_ref(),
-            &to_file,
-            to.as_ref().as_ref(),
-        )
+        let from = from.as_ref().to_path_buf();
+        let to = to.as_ref().to_path_buf();
+        let from_clone = self.clone();
+        let to_clone = to_dir.clone();
+        spawn_blocking(move || {
+            copy(
+                &from_clone.as_filelike_view::<std::fs::File>(),
+                from.as_ref(),
+                &to_clone.as_filelike_view::<std::fs::File>(),
+                to.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Creates a new hard link on a filesystem.
@@ -230,20 +276,25 @@ impl Dir {
     /// This corresponds to [`async_std::fs::hard_link`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(
+    pub async fn hard_link<P: AsRef<Path>, Q: AsRef<Path>>(
         &self,
         src: P,
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src_file = self.std_file.as_filelike_view::<std::fs::File>();
-        let dst_file = dst_dir.std_file.as_filelike_view::<std::fs::File>();
-        hard_link(
-            &src_file,
-            src.as_ref().as_ref(),
-            &dst_file,
-            dst.as_ref().as_ref(),
-        )
+        let dst = dst.as_ref().to_path_buf();
+        let src = src.as_ref().to_path_buf();
+        let src_clone = self.clone();
+        let dst_clone = dst_dir.clone();
+        spawn_blocking(move || {
+            hard_link(
+                &src_clone.as_filelike_view::<std::fs::File>(),
+                src.as_ref(),
+                &dst_clone.as_filelike_view::<std::fs::File>(),
+                dst.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Given a path, query the file system to get information about a file,
@@ -252,16 +303,37 @@ impl Dir {
     /// This corresponds to [`async_std::fs::metadata`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        stat(&file, path.as_ref().as_ref(), FollowSymlinks::Yes)
+    pub async fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            stat(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                FollowSymlinks::Yes,
+            )
+        })
+        .await
+    }
+
+    /// TODO: Remove this once `create_dir` and friends are async.
+    #[inline]
+    fn metadata_blocking<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+        let path = path.as_ref().to_path_buf();
+        stat(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref(),
+            FollowSymlinks::Yes,
+        )
     }
 
     /// Returns an iterator over the entries within `self`.
     #[inline]
-    pub fn entries(&self) -> io::Result<ReadDir> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        read_base_dir(&file).map(|inner| ReadDir { inner })
+    pub async fn entries(&self) -> io::Result<ReadDir> {
+        let clone = self.clone();
+        spawn_blocking(move || read_base_dir(&clone.as_filelike_view::<std::fs::File>()))
+            .await
+            .map(|inner| ReadDir { inner })
     }
 
     /// Returns an iterator over the entries within a directory.
@@ -269,9 +341,12 @@ impl Dir {
     /// This corresponds to [`async_std::fs::read_dir`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        read_dir(&file, path.as_ref().as_ref()).map(|inner| ReadDir { inner })
+    pub async fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || read_dir(&clone.as_filelike_view::<std::fs::File>(), path.as_ref()))
+            .await
+            .map(|inner| ReadDir { inner })
     }
 
     /// Read the entire contents of a file into a bytes vector.
@@ -281,8 +356,8 @@ impl Dir {
     #[inline]
     pub async fn read<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
         use async_std::prelude::*;
-        let mut file = self.open(path)?;
-        let mut bytes = Vec::with_capacity(initial_buffer_size(&file));
+        let mut file = self.open(path).await?;
+        let mut bytes = Vec::with_capacity(initial_buffer_size(&file).await);
         file.read_to_end(&mut bytes).await?;
         Ok(bytes)
     }
@@ -292,9 +367,12 @@ impl Dir {
     /// This corresponds to [`async_std::fs::read_link`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        read_link(&file, path.as_ref().as_ref()).map(PathBuf::from)
+    pub async fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || read_link(&clone.as_filelike_view::<std::fs::File>(), path.as_ref()))
+            .await
+            .map(PathBuf::from)
     }
 
     /// Read the entire contents of a file into a string.
@@ -305,7 +383,7 @@ impl Dir {
     pub async fn read_to_string<P: AsRef<Path>>(&self, path: P) -> io::Result<String> {
         use async_std::prelude::*;
         let mut s = String::new();
-        self.open(path)?.read_to_string(&mut s).await?;
+        self.open(path).await?.read_to_string(&mut s).await?;
         Ok(s)
     }
 
@@ -314,9 +392,13 @@ impl Dir {
     /// This corresponds to [`async_std::fs::remove_dir`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        remove_dir(&file, path.as_ref().as_ref())
+    pub async fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            remove_dir(&clone.as_filelike_view::<std::fs::File>(), path.as_ref())
+        })
+        .await
     }
 
     /// Removes a directory at this path, after removing all its contents. Use
@@ -326,8 +408,12 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        remove_dir_all(&file, path.as_ref().as_ref())
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            remove_dir_all(&clone.as_filelike_view::<std::fs::File>(), path.as_ref())
+        })
+        .await
     }
 
     /// Remove the directory referenced by `self` and consume `self`.
@@ -336,8 +422,9 @@ impl Dir {
     /// as much as possible, removal is not guaranteed to be atomic with
     /// respect to a concurrent rename of the directory.
     #[inline]
-    pub fn remove_open_dir(self) -> io::Result<()> {
-        remove_open_dir(std::fs::File::from_into_filelike(self.std_file))
+    pub async fn remove_open_dir(self) -> io::Result<()> {
+        let file = std::fs::File::from_into_filelike(self.std_file);
+        spawn_blocking(move || remove_open_dir(file)).await
     }
 
     /// Removes the directory referenced by `self`, after removing all its
@@ -347,8 +434,9 @@ impl Dir {
     /// as much as possible, removal is not guaranteed to be atomic with
     /// respect to a concurrent rename of the directory.
     #[inline]
-    pub fn remove_open_dir_all(self) -> io::Result<()> {
-        remove_open_dir_all(std::fs::File::from_into_filelike(self.std_file))
+    pub async fn remove_open_dir_all(self) -> io::Result<()> {
+        let file = std::fs::File::from_into_filelike(self.std_file);
+        spawn_blocking(move || remove_open_dir_all(file)).await
     }
 
     /// Removes a file from a filesystem.
@@ -356,9 +444,13 @@ impl Dir {
     /// This corresponds to [`async_std::fs::remove_file`], but only accesses
     /// paths relative to `self`.
     #[inline]
-    pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        remove_file(&file, path.as_ref().as_ref())
+    pub async fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            remove_file(&clone.as_filelike_view::<std::fs::File>(), path.as_ref())
+        })
+        .await
     }
 
     /// Rename a file or directory to a new name, replacing the original file
@@ -367,20 +459,25 @@ impl Dir {
     /// This corresponds to [`async_std::fs::rename`], but only accesses paths
     /// relative to `self`.
     #[inline]
-    pub fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
+    pub async fn rename<P: AsRef<Path>, Q: AsRef<Path>>(
         &self,
         from: P,
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        let to_file = to_dir.std_file.as_filelike_view::<std::fs::File>();
-        rename(
-            &file,
-            from.as_ref().as_ref(),
-            &to_file,
-            to.as_ref().as_ref(),
-        )
+        let from = from.as_ref().to_path_buf();
+        let to = to.as_ref().to_path_buf();
+        let clone = self.clone();
+        let to_clone = to_dir.clone();
+        spawn_blocking(move || {
+            rename(
+                &clone.as_filelike_view::<std::fs::File>(),
+                from.as_ref(),
+                &to_clone.as_filelike_view::<std::fs::File>(),
+                to.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Changes the permissions found on a file or a directory.
@@ -389,9 +486,21 @@ impl Dir {
     /// accesses paths relative to `self`. Also, on some platforms, this
     /// function may fail if the file or directory cannot be opened for
     /// reading or writing first.
-    pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        set_permissions(&file, path.as_ref().as_ref(), perm)
+    pub async fn set_permissions<P: AsRef<Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            set_permissions(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                perm,
+            )
+        })
+        .await
     }
 
     /// Query the metadata about a file without following symlinks.
@@ -399,9 +508,17 @@ impl Dir {
     /// This corresponds to [`async_std::fs::symlink_metadata`], but only
     /// accesses paths relative to `self`.
     #[inline]
-    pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        stat(&file, path.as_ref().as_ref(), FollowSymlinks::No)
+    pub async fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            stat(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                FollowSymlinks::No,
+            )
+        })
+        .await
     }
 
     /// Write a slice as the entire contents of a file.
@@ -415,7 +532,7 @@ impl Dir {
         contents: C,
     ) -> io::Result<()> {
         use async_std::prelude::*;
-        let mut file = self.create(path)?;
+        let mut file = self.create(path).await?;
         file.write_all(contents.as_ref()).await
     }
 
@@ -427,9 +544,18 @@ impl Dir {
     /// [`async_std::os::unix::fs::symlink`]: https://docs.rs/async-std/latest/async_std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
-    pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        symlink(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
+    pub async fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
+        let src = src.as_ref().to_path_buf();
+        let dst = dst.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            symlink(
+                src.as_ref(),
+                &clone.as_filelike_view::<std::fs::File>(),
+                dst.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Creates a new file symbolic link on a filesystem.
@@ -440,9 +566,22 @@ impl Dir {
     /// [`async_std::os::windows::fs::symlink_file`]: https://docs.rs/async-std/latest/async_std/os/windows/fs/fn.symlink_file.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        symlink_file(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
+    pub async fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
+        let src = src.as_ref().to_path_buf();
+        let dst = dst.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            symlink_file(
+                src.as_ref(),
+                &clone.as_filelike_view::<std::fs::File>(),
+                dst.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Creates a new directory symlink on a filesystem.
@@ -453,9 +592,22 @@ impl Dir {
     /// [`async_std::os::windows::fs::symlink_dir`]: https://docs.rs/async-std/latest/async_std/os/windows/fs/fn.symlink_dir.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_filelike_view::<std::fs::File>();
-        symlink_dir(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
+    pub async fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
+        let src = src.as_ref().to_path_buf();
+        let dst = dst.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            symlink_dir(
+                src.as_ref(),
+                &clone.as_filelike_view::<std::fs::File>(),
+                dst.as_ref(),
+            )
+        })
+        .await
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
@@ -468,7 +620,7 @@ impl Dir {
     /// [`async_std::os::unix::net::UnixListener::bind`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.bind
     #[cfg(unix)]
     #[inline]
-    pub fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
+    pub async fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
         todo!(
             "Dir::bind_unix_listener({:?}, {})",
             self.std_file,
@@ -486,7 +638,7 @@ impl Dir {
     /// [`async_std::os::unix::net::UnixStream::connect`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.connect
     #[cfg(unix)]
     #[inline]
-    pub fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
+    pub async fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
         todo!(
             "Dir::connect_unix_stream({:?}, {})",
             self.std_file,
@@ -504,7 +656,7 @@ impl Dir {
     /// [`async_std::os::unix::net::UnixDatagram::bind`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.bind
     #[cfg(unix)]
     #[inline]
-    pub fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
+    pub async fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
         todo!(
             "Dir::bind_unix_datagram({:?}, {})",
             self.std_file,
@@ -523,7 +675,7 @@ impl Dir {
     /// [`async_std::os::unix::net::UnixDatagram::connect`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.connect
     #[cfg(unix)]
     #[inline]
-    pub fn connect_unix_datagram<P: AsRef<Path>>(
+    pub async fn connect_unix_datagram<P: AsRef<Path>>(
         &self,
         _unix_datagram: &UnixDatagram,
         path: P,
@@ -546,7 +698,7 @@ impl Dir {
     /// [`async_std::os::unix::net::UnixDatagram::send_to`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.send_to
     #[cfg(unix)]
     #[inline]
-    pub fn send_to_unix_datagram_addr<P: AsRef<Path>>(
+    pub async fn send_to_unix_datagram_addr<P: AsRef<Path>>(
         &self,
         _unix_datagram: &UnixDatagram,
         buf: &[u8],
@@ -567,8 +719,8 @@ impl Dir {
     /// This corresponds to [`async_std::path::Path::exists`], but only
     /// accesses paths relative to `self`.
     #[inline]
-    pub fn exists<P: AsRef<Path>>(&self, path: P) -> bool {
-        self.metadata(path).is_ok()
+    pub async fn exists<P: AsRef<Path>>(&self, path: P) -> bool {
+        self.metadata(path).await.is_ok()
     }
 
     /// Returns `true` if the path exists on disk and is pointing at a regular
@@ -577,8 +729,11 @@ impl Dir {
     /// This corresponds to [`async_std::path::Path::is_file`], but only
     /// accesses paths relative to `self`.
     #[inline]
-    pub fn is_file<P: AsRef<Path>>(&self, path: P) -> bool {
-        self.metadata(path).map(|m| m.is_file()).unwrap_or(false)
+    pub async fn is_file<P: AsRef<Path>>(&self, path: P) -> bool {
+        self.metadata(path)
+            .await
+            .map(|m| m.is_file())
+            .unwrap_or(false)
     }
 
     /// Checks if `path` is a directory.
@@ -588,8 +743,19 @@ impl Dir {
     /// symbolic links to query information about the destination file. In case
     /// of broken symbolic links, this will return `false`.
     #[inline]
-    pub fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
-        self.metadata(path).map(|m| m.is_dir()).unwrap_or(false)
+    pub async fn is_dir<P: AsRef<Path>>(&self, path: P) -> bool {
+        self.metadata(path)
+            .await
+            .map(|m| m.is_dir())
+            .unwrap_or(false)
+    }
+
+    /// TODO: Remove this once `create_dir` and friends are async.
+    #[inline]
+    fn is_dir_blocking<P: AsRef<Path>>(&self, path: P) -> bool {
+        self.metadata_blocking(path)
+            .map(|m| m.is_dir())
+            .unwrap_or(false)
     }
 
     /// Constructs a new instance of `Self` by opening the given path as a
@@ -600,11 +766,13 @@ impl Dir {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient_dir<P: AsRef<Path>>(
+    pub async fn open_ambient_dir<P: AsRef<Path>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        open_ambient_dir(path.as_ref().as_ref(), ambient_authority)
+        let path = path.as_ref().to_path_buf();
+        spawn_blocking(move || open_ambient_dir(path.as_ref(), ambient_authority))
+            .await
             .map(|f| Self::from_std_file(f.into(), ambient_authority))
     }
 }
@@ -731,7 +899,7 @@ unsafe impl OwnsRaw for Dir {}
 ///
 /// Derived from the function of the same name in Rust's library/std/src/fs.rs
 /// at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
-fn initial_buffer_size(file: &File) -> usize {
+async fn initial_buffer_size(file: &File) -> usize {
     // Allocate one extra byte so the buffer doesn't need to grow before the
     // final `read` call at the end of the file. Don't worry about `usize`
     // overflow because reading will fail regardless in that case.

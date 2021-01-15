@@ -5,7 +5,7 @@ use async_std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use async_std::task::{Context, Poll};
+use async_std::task::{spawn_blocking, Context, Poll};
 use cap_primitives::fs::{is_file_read_write, open_ambient};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::AsFilelike;
@@ -34,6 +34,7 @@ use {
 /// [`Dir`]: crate::fs::Dir
 /// [`Dir::open`]: crate::fs::Dir::open
 /// [`Dir::create`]: crate::fs::Dir::create
+#[derive(Clone)]
 pub struct File {
     pub(crate) std: fs::File,
 }
@@ -115,15 +116,19 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient<P: AsRef<Path>>(
+    pub async fn open_ambient<P: AsRef<Path>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        open_ambient(
-            path.as_ref(),
-            &OpenOptions::new().read(true),
-            ambient_authority,
-        )
+        let path = path.as_ref().to_path_buf();
+        spawn_blocking(move || {
+            open_ambient(
+                path.as_ref(),
+                &OpenOptions::new().read(true),
+                ambient_authority,
+            )
+        })
+        .await
         .map(|f| Self::from_std(f.into(), ambient_authority))
     }
 
@@ -136,12 +141,15 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient_with<P: AsRef<Path>>(
+    pub async fn open_ambient_with<P: AsRef<Path>>(
         path: P,
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        open_ambient(path.as_ref(), options, ambient_authority)
+        let path = path.as_ref().to_path_buf();
+        let options = options.clone();
+        spawn_blocking(move || open_ambient(path.as_ref(), &options, ambient_authority))
+            .await
             .map(|f| Self::from_std(f.into(), ambient_authority))
     }
 }
