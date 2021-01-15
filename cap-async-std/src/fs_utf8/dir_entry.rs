@@ -19,6 +19,8 @@ use std::{fmt, io};
 /// Note that there is no `from_std` method, as `async_std::fs::DirEntry`
 /// doesn't provide a way to construct a `DirEntry` without opening directories
 /// by ambient paths.
+///
+/// TODO: async
 pub struct DirEntry {
     cap_std: crate::fs::DirEntry,
 }

@@ -28,6 +28,7 @@ use {
 ///
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::connect_tcp_stream`]: struct.Pool.html#method.connect_tcp_stream
+#[derive(Clone)]
 pub struct TcpStream {
     std: net::TcpStream,
 }
