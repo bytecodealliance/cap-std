@@ -1,6 +1,6 @@
 [package]
 name = "cap-std-workspace"
-version = "0.9.1-alpha.0"
+version = "0.10.0"
 description = "Capability-oriented version of the Rust standard library"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
