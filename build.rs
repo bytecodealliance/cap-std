@@ -18,6 +18,7 @@ fn main() {
             "clamp",                     // https://github.com/rust-lang/rust/issues/44095
             "extend_one",                // https://github.com/rust-lang/rust/issues/72631
             "toowned_clone_into",        // https://github.com/rust-lang/rust/issues/41263
+            "unix_socket_peek",          // https://github.com/rust-lang/rust/issues/76923
         ] {
             println!("cargo:rustc-cfg={}", feature);
         }
