@@ -1,12 +1,8 @@
 use crate::fs::{open_unchecked, OpenOptions};
+use maybe_owned::MaybeOwned;
 use std::{fmt, fs, io, mem, ops::Deref, path::Component};
 #[cfg(racy_asserts)]
 use {crate::fs::file_path, std::path::PathBuf};
-
-enum Inner<'borrow> {
-    Owned(fs::File),
-    Borrowed(&'borrow fs::File),
-}
 
 /// Several places in the code need to be able to handle either owned or
 /// borrowed `std::fs::File`s. Cloning a `File` to let them always have an owned
@@ -20,7 +16,7 @@ enum Inner<'borrow> {
 /// And, this type has the special `descend_to`, which just does an assignment,
 /// but also some useful assertion checks.
 pub(super) struct MaybeOwnedFile<'borrow> {
-    inner: Inner<'borrow>,
+    inner: MaybeOwned<'borrow, fs::File>,
 
     #[cfg(racy_asserts)]
     path: Option<PathBuf>,
@@ -33,7 +29,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         let path = file_path(file);
 
         Self {
-            inner: Inner::Borrowed(file),
+            inner: MaybeOwned::Borrowed(file),
 
             #[cfg(racy_asserts)]
             path,
@@ -46,7 +42,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
         let path = file_path(&file);
 
         Self {
-            inner: Inner::Owned(file),
+            inner: MaybeOwned::Owned(file),
 
             #[cfg(racy_asserts)]
             path,
@@ -57,7 +53,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     #[allow(dead_code)]
     pub(super) fn borrowed_noassert(file: &'borrow fs::File) -> Self {
         Self {
-            inner: Inner::Borrowed(file),
+            inner: MaybeOwned::Borrowed(file),
 
             #[cfg(racy_asserts)]
             path: None,
@@ -68,7 +64,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     #[allow(dead_code)]
     pub(super) fn owned_noassert(file: fs::File) -> Self {
         Self {
-            inner: Inner::Owned(file),
+            inner: MaybeOwned::Owned(file),
 
             #[cfg(racy_asserts)]
             path: None,
@@ -107,8 +103,8 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     /// borrowed `File` to an owned one.
     pub(super) fn into_file(self, options: &OpenOptions) -> io::Result<fs::File> {
         match self.inner {
-            Inner::Owned(file) => Ok(file),
-            Inner::Borrowed(file) => {
+            MaybeOwned::Owned(file) => Ok(file),
+            MaybeOwned::Borrowed(file) => {
                 // The only situation in which we'd be asked to produce an owned
                 // `File` is when there's a need to open "." within a directory
                 // to obtain a new handle.
@@ -121,8 +117,8 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     #[cfg_attr(windows, allow(dead_code))]
     pub(super) fn unwrap_owned(self) -> fs::File {
         match self.inner {
-            Inner::Owned(file) => file,
-            Inner::Borrowed(_) => panic!("expected owned file"),
+            MaybeOwned::Owned(file) => file,
+            MaybeOwned::Borrowed(_) => panic!("expected owned file"),
         }
     }
 }
@@ -130,11 +126,9 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
 impl<'borrow> Deref for MaybeOwnedFile<'borrow> {
     type Target = fs::File;
 
+    #[inline]
     fn deref(&self) -> &Self::Target {
-        match &self.inner {
-            Inner::Owned(f) => f,
-            Inner::Borrowed(f) => f,
-        }
+        self.inner.as_ref()
     }
 }
 
