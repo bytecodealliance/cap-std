@@ -1,8 +1,7 @@
 #[macro_use]
 mod sys_common;
 
-use cap_fs_ext::Reopen;
-use cap_std::fs::OpenOptions;
+use cap_fs_ext::{OpenOptions, Reopen};
 use std::io::{Read, Write};
 use sys_common::io::tmpdir;
 

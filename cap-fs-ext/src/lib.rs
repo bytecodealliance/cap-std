@@ -22,3 +22,6 @@ pub use file_type_ext::FileTypeExt;
 pub use metadata_ext::MetadataExt;
 pub use open_options_follow_ext::{FollowSymlinks, OpenOptionsFollowExt};
 pub use reopen::Reopen;
+
+/// Re-export this to allow it to be used with `Reuse`.
+pub use cap_primitives::fs::OpenOptions;
