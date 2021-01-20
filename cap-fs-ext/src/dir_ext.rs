@@ -163,12 +163,12 @@ pub trait DirExtUtf8 {
 impl DirExt for cap_std::fs::Dir {
     #[inline]
     fn set_atime<P: AsRef<Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), Some(atime), None)
+        set_times(&self.as_file_view(), path.as_ref(), Some(atime), None)
     }
 
     #[inline]
     fn set_mtime<P: AsRef<Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), None, Some(mtime))
+        set_times(&self.as_file_view(), path.as_ref(), None, Some(mtime))
     }
 
     #[inline]
@@ -178,7 +178,7 @@ impl DirExt for cap_std::fs::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), atime, mtime)
+        set_times(&self.as_file_view(), path.as_ref(), atime, mtime)
     }
 
     #[inline]
@@ -188,13 +188,13 @@ impl DirExt for cap_std::fs::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        set_times_nofollow(&self.as_file(), path.as_ref(), atime, mtime)
+        set_times_nofollow(&self.as_file_view(), path.as_ref(), atime, mtime)
     }
 
     #[cfg(not(windows))]
     #[inline]
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[cfg(not(windows))]
@@ -222,18 +222,18 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_file(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink_file(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[cfg(windows)]
     #[inline]
     fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_dir(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink_dir(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[inline]
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        match open_dir_nofollow(&self.as_file(), path.as_ref()) {
+        match open_dir_nofollow(&self.as_file_view(), path.as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file) }),
             Err(e) => Err(e),
         }
@@ -244,12 +244,12 @@ impl DirExt for cap_std::fs::Dir {
 impl DirExt for cap_async_std::fs::Dir {
     #[inline]
     fn set_atime<P: AsRef<Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), Some(atime), None)
+        set_times(&self.as_file_view(), path.as_ref(), Some(atime), None)
     }
 
     #[inline]
     fn set_mtime<P: AsRef<Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), None, Some(mtime))
+        set_times(&self.as_file_view(), path.as_ref(), None, Some(mtime))
     }
 
     #[inline]
@@ -259,7 +259,7 @@ impl DirExt for cap_async_std::fs::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        set_times(&self.as_file(), path.as_ref(), atime, mtime)
+        set_times(&self.as_file_view(), path.as_ref(), atime, mtime)
     }
 
     #[inline]
@@ -269,13 +269,13 @@ impl DirExt for cap_async_std::fs::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        set_times_nofollow(&self.as_file(), path.as_ref(), atime, mtime)
+        set_times_nofollow(&self.as_file_view(), path.as_ref(), atime, mtime)
     }
 
     #[cfg(not(windows))]
     #[inline]
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[cfg(not(windows))]
@@ -303,18 +303,18 @@ impl DirExt for cap_async_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_file(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink_file(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[cfg(windows)]
     #[inline]
     fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_dir(src.as_ref(), &self.as_file(), dst.as_ref())
+        symlink_dir(src.as_ref(), &self.as_file_view(), dst.as_ref())
     }
 
     #[inline]
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        match open_dir_nofollow(&self.as_file(), path.as_ref()) {
+        match open_dir_nofollow(&self.as_file_view(), path.as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }
@@ -326,13 +326,13 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[inline]
     fn set_atime<P: AsRef<str>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, Some(atime), None)
+        set_times(&self.as_file_view(), &path, Some(atime), None)
     }
 
     #[inline]
     fn set_mtime<P: AsRef<str>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, None, Some(mtime))
+        set_times(&self.as_file_view(), &path, None, Some(mtime))
     }
 
     #[inline]
@@ -343,7 +343,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, atime, mtime)
+        set_times(&self.as_file_view(), &path, atime, mtime)
     }
 
     #[inline]
@@ -354,7 +354,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times_nofollow(&self.as_file(), &path, atime, mtime)
+        set_times_nofollow(&self.as_file_view(), &path, atime, mtime)
     }
 
     #[cfg(not(windows))]
@@ -399,7 +399,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[inline]
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
-        match open_dir_nofollow(&self.as_file(), path.as_ref().as_ref()) {
+        match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }
@@ -411,13 +411,13 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[inline]
     fn set_atime<P: AsRef<str>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, Some(atime), None)
+        set_times(&self.as_file_view(), &path, Some(atime), None)
     }
 
     #[inline]
     fn set_mtime<P: AsRef<str>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, None, Some(mtime))
+        set_times(&self.as_file_view(), &path, None, Some(mtime))
     }
 
     #[inline]
@@ -428,7 +428,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times(&self.as_file(), &path, atime, mtime)
+        set_times(&self.as_file_view(), &path, atime, mtime)
     }
 
     #[inline]
@@ -439,7 +439,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
         let path = from_utf8(path)?;
-        set_times_nofollow(&self.as_file(), &path, atime, mtime)
+        set_times_nofollow(&self.as_file_view(), &path, atime, mtime)
     }
 
     #[cfg(not(windows))]
@@ -447,7 +447,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
         let src = from_utf8(src)?;
         let dst = from_utf8(dst)?;
-        symlink(&src, &self.as_file(), &dst)
+        symlink(&src, &self.as_file_view(), &dst)
     }
 
     #[cfg(not(windows))]
@@ -477,7 +477,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     fn symlink_file<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
         let src = from_utf8(src)?;
         let dst = from_utf8(dst)?;
-        symlink_file(&src, &self.as_file(), &dst)
+        symlink_file(&src, &self.as_file_view(), &dst)
     }
 
     #[cfg(windows)]
@@ -485,12 +485,12 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     fn symlink_dir<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
         let src = from_utf8(src)?;
         let dst = from_utf8(dst)?;
-        symlink_dir(&src, &self.as_file(), &dst)
+        symlink_dir(&src, &self.as_file_view(), &dst)
     }
 
     #[inline]
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
-        match open_dir_nofollow(&self.as_file(), path.as_ref().as_ref()) {
+        match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }

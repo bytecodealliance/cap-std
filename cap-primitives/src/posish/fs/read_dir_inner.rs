@@ -62,27 +62,27 @@ impl ReadDirInner {
     }
 
     pub(super) fn open(&self, file_name: &OsStr, options: &OpenOptions) -> io::Result<fs::File> {
-        open_entry_impl(&self.as_file(), file_name, options)
+        open_entry_impl(&self.as_file_view(), file_name, options)
     }
 
     pub(super) fn metadata(&self, file_name: &OsStr) -> io::Result<Metadata> {
-        stat_unchecked(&self.as_file(), file_name.as_ref(), FollowSymlinks::No)
+        stat_unchecked(&self.as_file_view(), file_name.as_ref(), FollowSymlinks::No)
     }
 
     pub(super) fn remove_file(&self, file_name: &OsStr) -> io::Result<()> {
-        remove_file_unchecked(&self.as_file(), file_name.as_ref())
+        remove_file_unchecked(&self.as_file_view(), file_name.as_ref())
     }
 
     pub(super) fn remove_dir(&self, file_name: &OsStr) -> io::Result<()> {
-        remove_dir_unchecked(&self.as_file(), file_name.as_ref())
+        remove_dir_unchecked(&self.as_file_view(), file_name.as_ref())
     }
 
     pub(super) fn self_metadata(&self) -> io::Result<Metadata> {
-        Metadata::from_file(&self.as_file())
+        Metadata::from_file(&self.as_file_view())
     }
 
     pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {
-        read_dir_unchecked(&self.as_file(), file_name.as_ref())
+        read_dir_unchecked(&self.as_file_view(), file_name.as_ref())
     }
 }
 
