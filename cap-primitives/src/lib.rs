@@ -15,7 +15,7 @@
 #[cfg(not(windows))]
 mod posish;
 #[cfg(windows)]
-mod winx;
+mod windows;
 
 pub mod fs;
 pub mod net;

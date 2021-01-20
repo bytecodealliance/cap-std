@@ -51,7 +51,7 @@ pub(crate) use open_unchecked_error::*;
 #[cfg(not(windows))]
 pub(crate) use super::posish::fs::*;
 #[cfg(windows)]
-pub(crate) use super::winx::fs::*;
+pub(crate) use super::windows::fs::*;
 
 pub use canonicalize::*;
 pub use copy::*;
