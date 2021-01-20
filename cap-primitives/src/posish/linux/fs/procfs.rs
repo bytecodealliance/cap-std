@@ -6,7 +6,6 @@
 //! is mounted, with actual `procfs`, and without any additional mount points on
 //! top of the paths we open.
 
-use super::file_metadata;
 use crate::fs::{
     errors, open, open_unchecked, read_link_unchecked, set_times_follow_unchecked, FollowSymlinks,
     Metadata, OpenOptions, SystemTimeSpec,
@@ -31,9 +30,9 @@ const PROC_ROOT_INO: u64 = 1;
 ///
 /// This is defined in the `libc` crate for linux-gnu but not for
 /// linux-musl, so we define it ourselves.
-#[cfg(not(target_env = "musl"))]
+#[cfg(not(any(target_env = "musl", target_os = "android")))]
 const PROC_SUPER_MAGIC: libc::__fsword_t = 0x0000_9fa0;
-#[cfg(target_env = "musl")]
+#[cfg(any(target_env = "musl", target_os = "android"))]
 const PROC_SUPER_MAGIC: libc::c_ulong = 0x0000_9fa0;
 
 // Identify a subdirectory of "/proc", to determine which anomalies to
@@ -55,7 +54,7 @@ fn check_proc_dir(
     // Check the filesystem magic.
     check_procfs(dir)?;
 
-    let dir_metadata = file_metadata(dir)?;
+    let dir_metadata = Metadata::from_file(dir)?;
 
     // We use `O_DIRECTORY`, so open should fail if we don't get a directory.
     assert!(dir_metadata.is_dir());
@@ -182,11 +181,13 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
     #[allow(clippy::useless_conversion)]
     static PROC_SELF_FD: Lazy<io::Result<fs::File>> = Lazy::new(|| {
         // When libc does have this constant, check that our copy has the same value.
-        #[cfg(not(target_env = "musl"))]
+        #[cfg(not(any(target_env = "musl", target_os = "android")))]
         assert_eq!(
             PROC_SUPER_MAGIC,
             libc::__fsword_t::from(libc::PROC_SUPER_MAGIC)
         );
+        #[cfg(target_os = "android")]
+        assert_eq!(PROC_SUPER_MAGIC as libc::c_long, libc::PROC_SUPER_MAGIC);
 
         // Open "/proc". Here and below, use `read(true)` even though we don't need
         // read permissions, because Rust's libstd requires an access mode, and

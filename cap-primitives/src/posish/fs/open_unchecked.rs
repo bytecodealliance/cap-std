@@ -1,5 +1,5 @@
 use super::compute_oflags;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::ensure_cloexec;
 use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
 use posish::fs::{openat, Mode};
@@ -18,7 +18,7 @@ pub(crate) fn open_unchecked(
 
     let err = match openat(start, path, oflags, mode) {
         Ok(file) => {
-            #[cfg(target_os = "linux")]
+            #[cfg(any(target_os = "android", target_os = "linux"))]
             ensure_cloexec(&file).map_err(OpenUncheckedError::Other)?;
 
             return Ok(file);

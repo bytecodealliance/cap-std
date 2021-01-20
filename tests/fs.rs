@@ -1382,7 +1382,7 @@ fn metadata_access_times() {
         check!(b.created());
     }
 
-    if cfg!(target_os = "linux") {
+    if cfg!(any(target_os = "android", target_os = "linux")) {
         // Not always available
         match (a.created(), b.created()) {
             (Ok(t1), Ok(t2)) => assert!(t1 <= t2),

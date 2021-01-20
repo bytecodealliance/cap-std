@@ -10,7 +10,7 @@ mod create_dir;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
-#[cfg(not(any(target_os = "linux", windows)))]
+#[cfg(not(any(target_os = "android", target_os = "linux", windows)))]
 mod file_path_by_searching;
 mod file_type;
 mod follow_symlinks;
@@ -43,7 +43,7 @@ pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
 
-#[cfg(not(any(target_os = "linux", windows)))]
+#[cfg(not(any(target_os = "android", target_os = "linux", windows)))]
 pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
 

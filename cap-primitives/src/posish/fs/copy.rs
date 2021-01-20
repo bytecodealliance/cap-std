@@ -70,7 +70,7 @@ pub(crate) fn copy_impl(
     io::copy(&mut reader, &mut writer)
 }
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) fn copy_impl(
     from_start: &fs::File,
     from_path: &Path,

@@ -4,7 +4,7 @@ mod create_dir_unchecked;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "android", target_os = "linux")))]
 mod file_path;
 mod file_type_ext;
 mod hard_link_unchecked;
@@ -24,9 +24,9 @@ mod remove_file_unchecked;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
 mod reopen_impl;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "android", target_os = "linux")))]
 mod set_permissions_impl;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "android", target_os = "linux")))]
 mod set_times_impl;
 mod stat_unchecked;
 mod symlink_unchecked;
@@ -43,9 +43,9 @@ pub(crate) mod errors;
 // upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) use crate::posish::darwin::fs::*;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) use crate::posish::linux::fs::*;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "android", target_os = "linux")))]
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     manually::open_entry as open_entry_impl,
@@ -56,9 +56,14 @@ pub(crate) use crate::fs::{
 };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(super) use file_path::file_path_by_ttyname_or_seaching;
-#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "macos",
+    target_os = "ios"
+)))]
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "android", target_os = "linux")))]
 pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
 
 #[rustfmt::skip]
