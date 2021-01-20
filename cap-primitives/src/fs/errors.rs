@@ -3,7 +3,7 @@ use std::io;
 #[cfg(not(windows))]
 pub(crate) use crate::posish::fs::errors::*;
 #[cfg(windows)]
-pub(crate) use crate::winx::fs::errors::*;
+pub(crate) use crate::windows::fs::errors::*;
 
 #[cold]
 pub(crate) fn escape_attempt() -> io::Error {
