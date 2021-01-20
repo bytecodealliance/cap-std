@@ -40,7 +40,7 @@ impl OpenOptions {
     /// [`std::fs::OpenOptions::new`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.new
     #[allow(clippy::new_without_default)]
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             read: false,
             write: false,

@@ -77,7 +77,7 @@ pub mod rngs {
         /// This function is unsafe because it makes use of ambient authority to
         /// access the platform entropy source, which doesn't uphold the invariant
         /// of the rest of the API. It is otherwise safe to use.
-        pub unsafe fn default() -> Self {
+        pub const unsafe fn default() -> Self {
             Self(())
         }
     }

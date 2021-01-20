@@ -5,7 +5,7 @@ pub(crate) struct OpenOptionsExt {
 }
 
 impl OpenOptionsExt {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             mode: 0o666,
             custom_flags: 0,

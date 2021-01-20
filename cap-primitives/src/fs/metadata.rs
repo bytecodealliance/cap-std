@@ -90,7 +90,7 @@ impl Metadata {
     ///
     /// [`std::fs::Metadata::file_type`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.file_type
     #[inline]
-    pub fn file_type(&self) -> FileType {
+    pub const fn file_type(&self) -> FileType {
         self.file_type
     }
 
@@ -120,7 +120,7 @@ impl Metadata {
     ///
     /// [`std::fs::Metadata::len`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.len
     #[inline]
-    pub fn len(&self) -> u64 {
+    pub const fn len(&self) -> u64 {
         self.len
     }
 
@@ -181,7 +181,7 @@ impl Metadata {
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
     #[cfg(any(not(windows), windows_by_handle))]
-    pub(crate) fn is_same_file(&self, other: &Self) -> bool {
+    pub(crate) const fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }
 

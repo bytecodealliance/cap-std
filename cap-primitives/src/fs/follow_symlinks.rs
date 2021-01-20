@@ -21,7 +21,7 @@ impl FollowSymlinks {
     /// Convert a bool where true means "follow" and false means "don't follow"
     /// to a `FollowSymlinks`.
     #[inline]
-    pub fn follow(follow: bool) -> Self {
+    pub const fn follow(follow: bool) -> Self {
         if follow {
             Self::Yes
         } else {

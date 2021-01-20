@@ -16,7 +16,7 @@ impl MonotonicClock {
     ///
     /// This is unsafe because access to clocks is an ambient authority.
     #[inline]
-    pub unsafe fn new() -> Self {
+    pub const unsafe fn new() -> Self {
         Self(())
     }
 

@@ -10,7 +10,7 @@ pub(crate) struct OpenOptionsExt {
 }
 
 impl OpenOptionsExt {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             access_mode: None,
             share_mode: winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE | winnt::FILE_SHARE_DELETE,

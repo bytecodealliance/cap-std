@@ -65,7 +65,7 @@ impl Permissions {
     ///
     /// [`std::fs::Permissions::readonly`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html#method.readonly
     #[inline]
-    pub fn readonly(&self) -> bool {
+    pub const fn readonly(&self) -> bool {
         self.readonly
     }
 

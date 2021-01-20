@@ -52,7 +52,7 @@ impl FileTypeExt {
 
     /// Constructs a new instance of `FileType` from the given `libc::mode_t`.
     #[inline]
-    pub(crate) fn from_libc(mode: libc::mode_t) -> FileType {
+    pub(crate) const fn from_libc(mode: libc::mode_t) -> FileType {
         match mode & libc::S_IFMT {
             libc::S_IFREG => FileType::file(),
             libc::S_IFDIR => FileType::dir(),

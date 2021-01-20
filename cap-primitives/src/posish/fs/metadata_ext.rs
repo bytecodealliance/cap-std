@@ -176,7 +176,7 @@ impl MetadataExt {
     }
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
-    pub(crate) fn is_same_file(&self, other: &Self) -> bool {
+    pub(crate) const fn is_same_file(&self, other: &Self) -> bool {
         self.dev == other.dev && self.ino == other.ino
     }
 }
