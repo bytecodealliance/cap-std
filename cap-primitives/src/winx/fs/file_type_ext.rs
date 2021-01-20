@@ -1,5 +1,5 @@
 use crate::fs::FileType;
-use std::{fs, io, os::windows::io::AsRawHandle};
+use std::{fs, io};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub(crate) enum FileTypeExt {
@@ -23,7 +23,7 @@ impl FileTypeExt {
         }
 
         // Use the open file to check for one of the exotic file types.
-        let file_type = unsafe { winx::file::get_file_type(file.as_raw_handle())? };
+        let file_type = winapi_util::file::typ(file)?;
         if file_type.is_char() {
             return Ok(FileType::ext(FileTypeExt::CharacterDevice));
         }
