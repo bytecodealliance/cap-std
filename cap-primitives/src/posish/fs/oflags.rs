@@ -12,9 +12,10 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     if options.dir_required {
         oflags |= OFlags::DIRECTORY;
 
-        // If the target has `O_PATH` and we don't need to read the directory
-        // entries, use it.
-        if !options.readdir_required {
+        // If the target has `O_PATH`, we don't need to read the directory
+        // entries, and we're not requesting write access (which need to
+        // fail on a directory), use it.
+        if !options.readdir_required && !options.write && !options.append {
             oflags |= target_o_path();
         }
     }

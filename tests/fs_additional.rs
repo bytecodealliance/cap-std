@@ -713,3 +713,42 @@ fn readdir_with_trailing_slashdot() {
     assert_eq!(check!(tmpdir.read_dir("dir/")).count(), 3);
     assert_eq!(check!(tmpdir.read_dir("dir/.")).count(), 3);
 }
+
+#[test]
+fn readdir_write() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("dir"));
+    assert!(tmpdir
+        .open_with("dir", OpenOptions::new().write(true))
+        .is_err());
+    assert!(tmpdir
+        .open_with("dir", OpenOptions::new().append(true))
+        .is_err());
+    assert!(tmpdir
+        .open_with("dir/", OpenOptions::new().write(true))
+        .is_err());
+    assert!(tmpdir
+        .open_with("dir/", OpenOptions::new().append(true))
+        .is_err());
+
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        assert!(tmpdir
+            .open_with(
+                "dir",
+                OpenOptions::new()
+                    .write(true)
+                    .custom_flags(libc::O_DIRECTORY)
+            )
+            .is_err());
+        assert!(tmpdir
+            .open_with(
+                "dir",
+                OpenOptions::new()
+                    .append(true)
+                    .custom_flags(libc::O_DIRECTORY)
+            )
+            .is_err());
+    }
+}
