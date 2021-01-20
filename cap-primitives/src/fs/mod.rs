@@ -10,7 +10,6 @@ mod create_dir;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
-#[cfg(any(test, racy_asserts))]
 #[cfg(not(any(target_os = "linux", windows)))]
 mod file_path_by_searching;
 mod file_type;
@@ -31,6 +30,7 @@ mod remove_dir_all;
 mod remove_file;
 mod remove_open_dir;
 mod rename;
+mod reopen;
 mod set_permissions;
 mod set_times;
 mod stat;
@@ -43,7 +43,6 @@ pub(crate) mod via_parent;
 
 use maybe_owned_file::MaybeOwnedFile;
 
-#[cfg(any(test, racy_asserts))]
 #[cfg(not(any(target_os = "linux", windows)))]
 pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
@@ -75,6 +74,7 @@ pub use remove_dir_all::*;
 pub use remove_file::*;
 pub use remove_open_dir::*;
 pub use rename::*;
+pub use reopen::reopen;
 pub use set_permissions::*;
 pub use set_times::*;
 pub use stat::*;

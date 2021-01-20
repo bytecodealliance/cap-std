@@ -21,6 +21,7 @@ pub(crate) fn is_same_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bo
 ///
 /// This is similar to `is_same_file`, but is conservative, and doesn't depend
 /// on nightly-only features.
+#[allow(dead_code)]
 pub(crate) fn is_different_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
     is_same_file(a, b).map(|same| !same)
 }
@@ -29,6 +30,7 @@ pub(crate) fn is_different_file(a: &fs::File, b: &fs::File) -> io::Result<bool> 
 ///
 /// This is similar to `is_same_file_metadata`, but is conservative, and doesn't depend
 /// on nightly-only features.
+#[allow(dead_code)]
 pub(crate) fn is_different_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bool> {
     is_same_file_metadata(a, b).map(|same| !same)
 }

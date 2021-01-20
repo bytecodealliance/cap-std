@@ -5,13 +5,11 @@ mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
 #[cfg(not(target_os = "linux"))]
-#[cfg(any(test, racy_asserts))]
 mod file_path;
 mod file_type_ext;
 mod hard_link_unchecked;
 mod is_read_write_impl;
 mod is_root_dir;
-#[cfg(racy_asserts)]
 mod is_same_file;
 mod metadata_ext;
 mod oflags;
@@ -25,6 +23,7 @@ mod remove_dir_unchecked;
 mod remove_file_unchecked;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
+mod reopen_impl;
 #[cfg(not(target_os = "linux"))]
 mod set_permissions_impl;
 #[cfg(not(target_os = "linux"))]
@@ -43,7 +42,6 @@ pub(crate) mod errors;
 // for `cap-std`'s style of sandboxing. For more information, see the bug filed
 // upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-#[cfg(any(test, racy_asserts))]
 pub(crate) use crate::posish::darwin::fs::*;
 #[cfg(target_os = "linux")]
 pub(crate) use crate::posish::linux::fs::*;
@@ -57,10 +55,8 @@ pub(crate) use crate::fs::{
     via_parent::set_times_nofollow as set_times_nofollow_impl,
 };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-#[cfg(any(test, racy_asserts))]
 pub(super) use file_path::file_path_by_ttyname_or_seaching;
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "ios")))]
-#[cfg(any(test, racy_asserts))]
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
 #[cfg(not(target_os = "linux"))]
 pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
@@ -88,7 +84,6 @@ pub(crate) use file_type_ext::*;
 pub(crate) use hard_link_unchecked::*;
 pub(crate) use is_read_write_impl::*;
 pub(crate) use is_root_dir::*;
-#[cfg(racy_asserts)]
 pub(crate) use is_same_file::*;
 pub(crate) use metadata_ext::*;
 pub(crate) use open_options_ext::*;
@@ -101,6 +96,7 @@ pub(crate) use remove_dir_unchecked::*;
 pub(crate) use remove_file_unchecked::*;
 pub(crate) use remove_open_dir_by_searching::*;
 pub(crate) use rename_unchecked::*;
+pub(crate) use reopen_impl::reopen_impl;
 pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 #[allow(unused_imports)]
