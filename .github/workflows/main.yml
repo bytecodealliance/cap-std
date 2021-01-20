@@ -107,6 +107,10 @@ jobs:
         i686-pc-windows-gnu
         x86_64-fuchsia
         wasm32-unknown-emscripten
+        riscv64gc-unknown-linux-gnu
+        arm-unknown-linux-gnueabihf
+        aarch64-linux-android
+        aarch64-pc-windows-msvc
     - run: cargo check --workspace --all-targets --all-features --release -vv
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-gnux32
@@ -117,6 +121,10 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-unknown-linux-musl
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-apple-darwin
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=riscv64gc-unknown-linux-gnu
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=arm-unknown-linux-gnueabihf
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-linux-android
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-pc-windows-msvc
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
