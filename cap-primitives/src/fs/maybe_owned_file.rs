@@ -24,7 +24,7 @@ pub(super) struct MaybeOwnedFile<'borrow> {
 
 impl<'borrow> MaybeOwnedFile<'borrow> {
     /// Constructs a new `MaybeOwnedFile` which is not owned.
-    pub(super) const fn borrowed(file: &'borrow fs::File) -> Self {
+    pub(super) fn borrowed(file: &'borrow fs::File) -> Self {
         #[cfg(racy_asserts)]
         let path = file_path(file);
 
@@ -37,7 +37,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     }
 
     /// Constructs a new `MaybeOwnedFile` which is owned.
-    pub(super) const fn owned(file: fs::File) -> Self {
+    pub(super) fn owned(file: fs::File) -> Self {
         #[cfg(racy_asserts)]
         let path = file_path(&file);
 
