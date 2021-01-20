@@ -29,6 +29,7 @@ pub trait Reopen {
 }
 
 impl Reopen for std::fs::File {
+    #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         reopen(self, options)
     }
@@ -36,6 +37,7 @@ impl Reopen for std::fs::File {
 
 #[cfg(feature = "std")]
 impl Reopen for cap_std::fs::File {
+    #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&AsUnsafeFile::as_file_view(self), options)?;
         Ok(unsafe { Self::from_std(file) })
@@ -44,6 +46,7 @@ impl Reopen for cap_std::fs::File {
 
 #[cfg(all(feature = "std", feature = "fs_utf8"))]
 impl Reopen for cap_std::fs_utf8::File {
+    #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
         Ok(unsafe { Self::from_std(file) })
@@ -52,6 +55,7 @@ impl Reopen for cap_std::fs_utf8::File {
 
 #[cfg(feature = "async_std")]
 impl Reopen for cap_async_std::fs::File {
+    #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
         Ok(unsafe {
@@ -64,6 +68,7 @@ impl Reopen for cap_async_std::fs::File {
 
 #[cfg(all(feature = "async_std", feature = "fs_utf8"))]
 impl Reopen for cap_async_std::fs_utf8::File {
+    #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
         Ok(unsafe {

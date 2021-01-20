@@ -397,6 +397,7 @@ impl Dir {
     /// file or directory cannot be opened for reading or writing first.
     ///
     /// [`std::fs::set_permissions`]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+    #[inline]
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         set_permissions(&self.std_file, path.as_ref(), perm)
     }
