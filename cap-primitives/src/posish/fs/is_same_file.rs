@@ -1,7 +1,7 @@
 use crate::fs::Metadata;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
-#[cfg(wasi)]
+#[cfg(target_os = "wasi")]
 use std::os::wasi::fs::MetadataExt;
 use std::{fs, io};
 
