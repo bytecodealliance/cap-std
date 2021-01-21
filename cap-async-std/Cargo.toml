@@ -19,9 +19,9 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 cap-primitives = { path = "../cap-primitives", version = "^0.10.1-alpha.0"}
 unsafe-io = "0.2.0"
 
-[badges]
-maintenance = { status = "actively-developed" }
-
 [features]
 default = []
 fs_utf8 = ["arf-strings"]
+
+[badges]
+maintenance = { status = "actively-developed" }

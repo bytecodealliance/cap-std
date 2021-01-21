@@ -54,15 +54,22 @@ impl Reopen for cap_std::fs_utf8::File {
 }
 
 #[cfg(feature = "async_std")]
+impl Reopen for async_std::fs::File {
+    #[inline]
+    fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
+        let file = reopen(&self.as_file_view(), options)?;
+        let unsafe_file = file.into_unsafe_file();
+        Ok(unsafe { async_std::fs::File::from_unsafe_file(unsafe_file) })
+    }
+}
+
+#[cfg(feature = "async_std")]
 impl Reopen for cap_async_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        Ok(unsafe {
-            Self::from_std(async_std::fs::File::from_unsafe_file(
-                file.into_unsafe_file(),
-            ))
-        })
+        let unsafe_file = file.into_unsafe_file();
+        Ok(unsafe { Self::from_std(async_std::fs::File::from_unsafe_file(unsafe_file)) })
     }
 }
 
@@ -71,10 +78,7 @@ impl Reopen for cap_async_std::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        Ok(unsafe {
-            Self::from_std(async_std::fs::File::from_unsafe_file(
-                file.into_unsafe_file(),
-            ))
-        })
+        let unsafe_file = file.into_unsafe_file();
+        Ok(unsafe { Self::from_std(async_std::fs::File::from_unsafe_file(unsafe_file)) })
     }
 }

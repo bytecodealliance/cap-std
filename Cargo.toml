@@ -40,7 +40,14 @@ winx = "0.22.0"
 
 [features]
 default = []
-fs_utf8 = ["cap-std/fs_utf8", "cap-async-std/fs_utf8"]
+fs_utf8 = [
+    "cap-std/fs_utf8",
+    "cap-fs-ext/fs_utf8",
+]
+async_std_fs_utf8 = [
+    "cap-async-std/fs_utf8",
+    "cap-fs-ext/async_std_fs_utf8"
+]
 
 [badges]
 maintenance = { status = "actively-developed" }
