@@ -23,9 +23,10 @@ unsafe-io = "0.2.0"
 
 [features]
 default = ["std"]
-fs_utf8 = ["arf-strings", "cap-std/fs_utf8", "cap-async-std/fs_utf8"]
+fs_utf8 = ["arf-strings", "cap-std/fs_utf8"]
 std = ["cap-std"]
 async_std = ["cap-async-std", "async-std"]
+async_std_fs_utf8 = ["cap-async-std/fs_utf8"]
 
 [badges]
 maintenance = { status = "actively-developed" }
