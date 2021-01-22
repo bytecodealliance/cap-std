@@ -75,7 +75,7 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
     let h = f.as_raw_handle();
 
     unsafe {
-        let mut data = [0u8; winapi::um::winnt::MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
+        let mut data = [0_u8; winapi::um::winnt::MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
         let db = data.as_mut_ptr() as *mut REPARSE_MOUNTPOINT_DATA_BUFFER;
         let buf = &mut (*db).ReparseTarget as *mut winapi::um::winnt::WCHAR;
         let mut i = 0;

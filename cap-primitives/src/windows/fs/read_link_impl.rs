@@ -102,7 +102,7 @@ fn reparse_point<'a>(
 }
 
 fn read_link(file: &fs::File) -> io::Result<PathBuf> {
-    let mut space = [0u8; c::MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+    let mut space = [0_u8; c::MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
     let (_bytes, buf) = reparse_point(file, &mut space)?;
     unsafe {
         let (path_buffer, subst_off, subst_len, relative) = match buf.ReparseTag {
