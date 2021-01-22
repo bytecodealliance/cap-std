@@ -149,7 +149,7 @@ impl fmt::Debug for TempDir {
 ///
 /// This corresponds to [`tempfile::tempdir`].
 ///
-/// [`tempfile::tempdir`]: https://docs.rs/tempfile/3.1.0/tempfile/fn.tempdir.html
+/// [`tempfile::tempdir`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir.html
 ///
 /// # Safety
 ///
@@ -164,7 +164,7 @@ pub unsafe fn tempdir() -> io::Result<TempDir> {
 ///
 /// This corresponds to [`tempfile::tempdir_in`].
 ///
-/// [`tempfile::tempdir`]: https://docs.rs/tempfile/3.1.0/tempfile/fn.tempdir_in.html
+/// [`tempfile::tempdir_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir_in.html
 pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
     TempDir::new_in(dir)
 }
