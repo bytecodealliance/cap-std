@@ -21,7 +21,7 @@ fs-set-times = "0.2.3"
 unsafe-io = "0.2.0"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.5.4"
+posish = "0.5.9"
 libc = "0.2.81"
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]

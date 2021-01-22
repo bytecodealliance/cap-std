@@ -1,6 +1,6 @@
 //! Re-open a `fs::File` to produce an independent handle.
 
-use crate::fs::{is_read_write, is_same_file, reopen_impl, OpenOptions};
+use crate::fs::{is_file_read_write, is_same_file, reopen_impl, OpenOptions};
 use std::{fs, io};
 
 /// Re-open an `fs::File` to produce an independent handle.
@@ -11,7 +11,7 @@ use std::{fs, io};
 /// cannot be reopened.
 #[inline]
 pub fn reopen(file: &fs::File, options: &OpenOptions) -> io::Result<fs::File> {
-    let (read, write) = is_read_write(file)?;
+    let (read, write) = is_file_read_write(file)?;
 
     // Don't grant more rights than the original file had. And don't allow
     // it to create a file.

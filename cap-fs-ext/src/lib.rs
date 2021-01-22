@@ -11,7 +11,7 @@
 
 mod dir_ext;
 mod file_type_ext;
-mod is_read_write;
+mod is_file_read_write;
 mod metadata_ext;
 mod open_options_follow_ext;
 mod reopen;
@@ -20,7 +20,7 @@ mod reopen;
 pub use dir_ext::DirExtUtf8;
 pub use dir_ext::{DirExt, SystemTimeSpec};
 pub use file_type_ext::FileTypeExt;
-pub use is_read_write::IsReadWrite;
+pub use is_file_read_write::IsFileReadWrite;
 pub use metadata_ext::MetadataExt;
 pub use open_options_follow_ext::{FollowSymlinks, OpenOptionsFollowExt};
 pub use reopen::Reopen;
