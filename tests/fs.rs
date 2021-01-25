@@ -1395,3 +1395,61 @@ fn metadata_access_times() {
         }
     }
 }
+
+/// Test creating hard links to symlinks.
+#[test]
+fn symlink_hard_link() {
+    let tmpdir = tmpdir();
+    if !got_symlink_permission(&tmpdir) {
+        return;
+    }
+
+    // Create "file", a file.
+    check!(tmpdir.create("file"));
+
+    // Create "symlink", a symlink to "file".
+    check!(symlink_file("file", &tmpdir, "symlink"));
+
+    // Create "hard_link", a hard link to "symlink".
+    check!(tmpdir.hard_link("symlink", &tmpdir, "hard_link"));
+
+    // "hard_link" should appear as a symlink.
+    assert!(check!(tmpdir.symlink_metadata("hard_link"))
+        .file_type()
+        .is_symlink());
+
+    // We sould be able to open "file" via any of the above names.
+    let _ = check!(tmpdir.open("file"));
+    assert!(tmpdir.open("file.renamed").is_err());
+    let _ = check!(tmpdir.open("symlink"));
+    let _ = check!(tmpdir.open("hard_link"));
+
+    // Rename "file" to "file.renamed".
+    check!(tmpdir.rename("file", &tmpdir, "file.renamed"));
+
+    // Now, the symlink and the hard link should be dangling.
+    assert!(tmpdir.open("file").is_err());
+    let _ = check!(tmpdir.open("file.renamed"));
+    assert!(tmpdir.open("symlink").is_err());
+    assert!(tmpdir.open("hard_link").is_err());
+
+    // The symlink and the hard link should both still point to "file".
+    assert!(tmpdir.read_link("file").is_err());
+    assert!(tmpdir.read_link("file.renamed").is_err());
+    assert_eq!(check!(tmpdir.read_link("symlink")), Path::new("file"));
+    assert_eq!(check!(tmpdir.read_link("hard_link")), Path::new("file"));
+
+    // Remove "file.renamed".
+    check!(tmpdir.remove_file("file.renamed"));
+
+    // Now, we can't open the file by any name.
+    assert!(tmpdir.open("file").is_err());
+    assert!(tmpdir.open("file.renamed").is_err());
+    assert!(tmpdir.open("symlink").is_err());
+    assert!(tmpdir.open("hard_link").is_err());
+
+    // "hard_link" should still appear as a symlink.
+    assert!(check!(tmpdir.symlink_metadata("hard_link"))
+        .file_type()
+        .is_symlink());
+}
