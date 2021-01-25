@@ -14,7 +14,7 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use std::fmt;
-use unsafe_io::{AsUnsafeFile, IntoUnsafeFile};
+use unsafe_io::{AsUnsafeFile, FromUnsafeFile};
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -358,8 +358,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
-        let file = self.std_file.into_file();
-        remove_open_dir(file)
+        remove_open_dir(std::fs::File::from_filelike(self.std_file))
     }
 
     /// Removes the directory referenced by `self`, after removing all its contents, and
@@ -370,8 +369,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
-        let file = self.std_file.into_file();
-        remove_open_dir_all(file)
+        remove_open_dir_all(std::fs::File::from_filelike(self.std_file))
     }
 
     /// Removes a file from a filesystem.

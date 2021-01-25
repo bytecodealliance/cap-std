@@ -3,7 +3,7 @@ use std::io;
 #[cfg(any(feature = "std", feature = "async_std"))]
 use unsafe_io::AsUnsafeFile;
 #[cfg(feature = "async_std")]
-use unsafe_io::{FromUnsafeFile, IntoUnsafeFile};
+use unsafe_io::FromUnsafeFile;
 
 /// A trait for the `reopen` function.
 pub trait Reopen {
@@ -58,8 +58,7 @@ impl Reopen for async_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        let unsafe_file = file.into_unsafe_file();
-        Ok(unsafe { async_std::fs::File::from_unsafe_file(unsafe_file) })
+        Ok(async_std::fs::File::from_filelike(file))
     }
 }
 
@@ -68,8 +67,8 @@ impl Reopen for cap_async_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        let unsafe_file = file.into_unsafe_file();
-        Ok(unsafe { Self::from_std(async_std::fs::File::from_unsafe_file(unsafe_file)) })
+        let std = async_std::fs::File::from_filelike(file);
+        Ok(unsafe { Self::from_std(std) })
     }
 }
 
@@ -78,7 +77,7 @@ impl Reopen for cap_async_std::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        let unsafe_file = file.into_unsafe_file();
-        Ok(unsafe { Self::from_std(async_std::fs::File::from_unsafe_file(unsafe_file)) })
+        let std = async_std::fs::File::from_filelike(file);
+        Ok(unsafe { Self::from_std(std) })
     }
 }
