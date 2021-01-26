@@ -48,7 +48,7 @@ pub(crate) fn open_unchecked(
                     // them as a distinct error.
                     if metadata.file_type().is_symlink() {
                         return Err(OpenUncheckedError::Symlink(
-                            io::Error::new(io::ErrorKind::Other, "symlink encountered"),
+                            io::Error::from_raw_os_error(winerror::ERROR_STOPPED_ON_SYMLINK as i32),
                             if metadata.file_attributes() & FILE_ATTRIBUTE_DIRECTORY
                                 == FILE_ATTRIBUTE_DIRECTORY
                             {
