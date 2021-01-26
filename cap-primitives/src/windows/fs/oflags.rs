@@ -9,7 +9,7 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
     let mut trunc = opts.truncate;
     let mut manually_trunc = false;
 
-    let custom_flags = match opts.follow {
+    let mut custom_flags = match opts.follow {
         FollowSymlinks::Yes => opts.ext.custom_flags,
         FollowSymlinks::No => {
             if trunc && !opts.create_new && !opts.append && opts.write {
@@ -21,6 +21,9 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
             opts.ext.custom_flags | Flags::FILE_FLAG_OPEN_REPARSE_POINT.bits()
         }
     };
+    if opts.maybe_dir {
+        custom_flags |= Flags::FILE_FLAG_BACKUP_SEMANTICS.bits();
+    }
     let mut std_opts = fs::OpenOptions::new();
     std_opts
         .read(opts.read)

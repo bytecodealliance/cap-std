@@ -25,6 +25,7 @@ pub struct OpenOptions {
     pub(crate) create: bool,
     pub(crate) create_new: bool,
     pub(crate) dir_required: bool,
+    pub(crate) maybe_dir: bool,
     pub(crate) readdir_required: bool,
     pub(crate) follow: FollowSymlinks,
 
@@ -49,6 +50,7 @@ impl OpenOptions {
             create: false,
             create_new: false,
             dir_required: false,
+            maybe_dir: false,
             readdir_required: false,
             follow: FollowSymlinks::Yes,
 
@@ -137,6 +139,13 @@ impl OpenOptions {
         self
     }
 
+    /// Sets the option to disable an error if the opened object is a directory.
+    #[inline]
+    pub(crate) fn maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
+        self.maybe_dir = maybe_dir;
+        self
+    }
+
     /// Sets the option to request the ability to read directory entries.
     #[inline]
     pub(crate) fn readdir_required(&mut self, readdir_required: bool) -> &mut Self {
@@ -154,6 +163,18 @@ impl OpenOptions {
     #[inline]
     pub unsafe fn _cap_fs_ext_follow(&mut self, follow: FollowSymlinks) -> &mut Self {
         self.follow(follow)
+    }
+
+    /// Wrapper to allow `maybe_dir` to be exposed by the `cap-fs-ext` crate.
+    ///
+    /// # Safety
+    ///
+    /// This is hidden from the main API since this functionality isn't present in `std`.
+    /// Use `cap_fs_ext::OpenOptionsMaybeDirExt` instead of calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub unsafe fn _cap_fs_ext_maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
+        self.maybe_dir(maybe_dir)
     }
 }
 
@@ -249,6 +270,7 @@ impl arbitrary::Arbitrary for OpenOptions {
             .create(<bool as Arbitrary>::arbitrary(u)?)
             .create_new(<bool as Arbitrary>::arbitrary(u)?)
             .dir_required(<bool as Arbitrary>::arbitrary(u)?)
+            .maybe_dir(<bool as Arbitrary>::arbitrary(u)?)
             .readdir_required(<bool as Arbitrary>::arbitrary(u)?)
             .follow(<FollowSymlinks as Arbitrary>::arbitrary(u)?)
             .clone())
