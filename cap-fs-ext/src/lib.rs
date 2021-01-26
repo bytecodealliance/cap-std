@@ -14,6 +14,7 @@ mod file_type_ext;
 mod is_file_read_write;
 mod metadata_ext;
 mod open_options_follow_ext;
+mod open_options_maybe_dir_ext;
 mod reopen;
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
@@ -22,8 +23,9 @@ pub use dir_ext::{DirExt, SystemTimeSpec};
 pub use file_type_ext::FileTypeExt;
 pub use is_file_read_write::IsFileReadWrite;
 pub use metadata_ext::MetadataExt;
-pub use open_options_follow_ext::{FollowSymlinks, OpenOptionsFollowExt};
+pub use open_options_follow_ext::OpenOptionsFollowExt;
+pub use open_options_maybe_dir_ext::OpenOptionsMaybeDirExt;
 pub use reopen::Reopen;
 
 /// Re-export this to allow it to be used with `Reuse`.
-pub use cap_primitives::fs::OpenOptions;
+pub use cap_primitives::fs::{FollowSymlinks, OpenOptions};

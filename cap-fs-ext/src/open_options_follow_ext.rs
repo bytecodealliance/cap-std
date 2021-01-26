@@ -1,4 +1,4 @@
-pub use cap_primitives::fs::FollowSymlinks;
+use crate::FollowSymlinks;
 
 /// Extension trait for `cap_primitives::fs::OpenOptions` which adds
 /// `follow`, a function for controlling whether a symlink in the last

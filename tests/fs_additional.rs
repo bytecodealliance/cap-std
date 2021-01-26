@@ -752,3 +752,22 @@ fn readdir_write() {
             .is_err());
     }
 }
+
+#[test]
+fn maybe_dir() {
+    use cap_fs_ext::OpenOptionsMaybeDirExt;
+
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("dir"));
+
+    // Opening directories works on non-Windows platforms.
+    #[cfg(not(windows))]
+    check!(tmpdir.open("dir"));
+
+    // Opening directories fails on Windows.
+    #[cfg(windows)]
+    assert!(tmpdir.open("dir").is_err());
+
+    // Opening directories works on all platforms with `maybe_dir`.
+    check!(tmpdir.open_with("dir", OpenOptions::new().read(true).maybe_dir(true)));
+}
