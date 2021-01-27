@@ -10,14 +10,14 @@ mod set_times_impl;
 mod stat_impl;
 
 pub(crate) use crate::fs::via_parent::set_times_nofollow as set_times_nofollow_impl;
-pub(crate) use canonicalize_impl::*;
-pub(crate) use ensure_cloexec::*;
-pub(crate) use file_path::*;
-pub(crate) use open_entry_impl::*;
-pub(crate) use open_impl::*;
-pub(crate) use set_permissions_impl::*;
-pub(crate) use set_times_impl::*;
-pub(crate) use stat_impl::*;
+pub(crate) use canonicalize_impl::canonicalize_impl;
+pub(crate) use ensure_cloexec::ensure_cloexec;
+pub(crate) use file_path::file_path;
+pub(crate) use open_entry_impl::open_entry_impl;
+pub(crate) use open_impl::{open_beneath, open_impl};
+pub(crate) use set_permissions_impl::set_permissions_impl;
+pub(crate) use set_times_impl::set_times_impl;
+pub(crate) use stat_impl::stat_impl;
 
 use file_metadata::file_metadata;
 

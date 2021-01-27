@@ -13,8 +13,8 @@ use std::io;
 mod project_dirs;
 mod user_dirs;
 
-pub use project_dirs::*;
-pub use user_dirs::*;
+pub use project_dirs::ProjectDirs;
+pub use user_dirs::UserDirs;
 
 #[cfg(not(windows))]
 pub(crate) fn not_found() -> io::Error {

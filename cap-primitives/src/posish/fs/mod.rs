@@ -1,5 +1,5 @@
 mod c_str;
-mod copy;
+mod copy_impl;
 mod create_dir_unchecked;
 mod dir_entry_inner;
 mod dir_options_ext;
@@ -80,30 +80,30 @@ pub(crate) use crate::fs::{
 
 #[allow(unused_imports)]
 pub(crate) use c_str::c_str;
-pub(crate) use copy::*;
-pub(crate) use create_dir_unchecked::*;
-pub(crate) use dir_entry_inner::*;
-pub(crate) use dir_options_ext::*;
+pub(crate) use copy_impl::copy_impl;
+pub(crate) use create_dir_unchecked::create_dir_unchecked;
+pub(crate) use dir_entry_inner::DirEntryInner;
+pub(crate) use dir_options_ext::DirOptionsExt;
 pub(crate) use dir_utils::*;
-pub(crate) use file_type_ext::*;
-pub(crate) use hard_link_unchecked::*;
-pub(crate) use is_file_read_write_impl::*;
-pub(crate) use is_root_dir::*;
-pub(crate) use is_same_file::*;
-pub(crate) use metadata_ext::*;
-pub(crate) use open_options_ext::*;
-pub(crate) use open_unchecked::*;
-pub(crate) use permissions_ext::*;
-pub(crate) use read_dir_inner::*;
-pub(crate) use read_link_unchecked::*;
-pub(crate) use remove_dir_all_impl::*;
-pub(crate) use remove_dir_unchecked::*;
-pub(crate) use remove_file_unchecked::*;
-pub(crate) use remove_open_dir_by_searching::*;
-pub(crate) use rename_unchecked::*;
+pub(crate) use file_type_ext::FileTypeExt;
+pub(crate) use hard_link_unchecked::hard_link_unchecked;
+pub(crate) use is_file_read_write_impl::is_file_read_write_impl;
+pub(crate) use is_root_dir::is_root_dir;
+pub(crate) use is_same_file::is_same_file;
+pub(crate) use metadata_ext::MetadataExt;
+pub(crate) use open_options_ext::OpenOptionsExt;
+pub(crate) use open_unchecked::open_unchecked;
+pub(crate) use permissions_ext::PermissionsExt;
+pub(crate) use read_dir_inner::ReadDirInner;
+pub(crate) use read_link_unchecked::read_link_unchecked;
+pub(crate) use remove_dir_all_impl::{remove_dir_all_impl, remove_open_dir_all_impl};
+pub(crate) use remove_dir_unchecked::remove_dir_unchecked;
+pub(crate) use remove_file_unchecked::remove_file_unchecked;
+pub(crate) use remove_open_dir_by_searching::remove_open_dir_by_searching;
+pub(crate) use rename_unchecked::rename_unchecked;
 pub(crate) use reopen_impl::reopen_impl;
-pub(crate) use stat_unchecked::*;
-pub(crate) use symlink_unchecked::*;
+pub(crate) use stat_unchecked::stat_unchecked;
+pub(crate) use symlink_unchecked::symlink_unchecked;
 #[allow(unused_imports)]
 pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked};
 

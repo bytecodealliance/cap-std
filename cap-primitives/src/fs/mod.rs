@@ -52,34 +52,43 @@ pub(crate) use super::posish::fs::*;
 #[cfg(windows)]
 pub(crate) use super::windows::fs::*;
 
-pub use canonicalize::*;
-pub use copy::*;
-pub use create_dir::*;
-pub use dir_builder::*;
-pub use dir_entry::*;
-pub use dir_options::*;
-pub use file_type::*;
-pub use follow_symlinks::*;
-pub use hard_link::*;
+pub(crate) use read_dir::read_dir_unchecked;
+
+pub use canonicalize::canonicalize;
+pub use copy::copy;
+pub use create_dir::create_dir;
+pub use dir_builder::DirBuilder;
+pub use dir_entry::DirEntry;
+pub use dir_options::DirOptions;
+pub use file_type::FileType;
+#[cfg(windows)]
+pub use file_type::_WindowsFileTypeExt;
+pub use follow_symlinks::FollowSymlinks;
+pub use hard_link::hard_link;
 pub use is_file_read_write::is_file_read_write;
-pub use metadata::*;
-pub use open::*;
+pub use metadata::Metadata;
+#[cfg(windows)]
+pub use metadata::_WindowsByHandle;
+pub use open::open;
 pub use open_dir::*;
-pub use open_options::*;
-pub use permissions::*;
-pub use read_dir::*;
-pub use read_link::*;
-pub use remove_dir::*;
-pub use remove_dir_all::*;
-pub use remove_file::*;
-pub use remove_open_dir::*;
-pub use rename::*;
+pub use open_options::OpenOptions;
+pub use permissions::Permissions;
+pub use read_dir::{read_base_dir, read_dir, ReadDir};
+pub use read_link::read_link;
+pub use remove_dir::remove_dir;
+pub use remove_dir_all::remove_dir_all;
+pub use remove_file::remove_file;
+pub use remove_open_dir::{remove_open_dir, remove_open_dir_all};
+pub use rename::rename;
 pub use reopen::reopen;
-pub use set_permissions::*;
-pub use set_times::*;
-pub use stat::*;
-pub use symlink::*;
-pub use system_time_spec::*;
+pub use set_permissions::set_permissions;
+pub use set_times::{set_times, set_times_nofollow};
+pub use stat::stat;
+#[cfg(not(windows))]
+pub use symlink::symlink;
+#[cfg(windows)]
+pub use symlink::{symlink_dir, symlink_file};
+pub use system_time_spec::SystemTimeSpec;
 
 #[cfg(racy_asserts)]
 fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::ErrorKind, String)> {

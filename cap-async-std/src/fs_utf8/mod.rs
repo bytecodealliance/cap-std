@@ -24,10 +24,10 @@ mod dir_entry;
 mod file;
 mod read_dir;
 
-pub use dir::*;
-pub use dir_entry::*;
-pub use file::*;
-pub use read_dir::*;
+pub use dir::Dir;
+pub use dir_entry::DirEntry;
+pub use file::File;
+pub use read_dir::ReadDir;
 
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
