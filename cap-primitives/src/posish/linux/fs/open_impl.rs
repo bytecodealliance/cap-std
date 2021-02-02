@@ -85,12 +85,24 @@ pub(crate) fn open_beneath(
                 Err(err) => match err.raw_os_error() {
                     Some(libc::EAGAIN) => continue,
                     Some(libc::EXDEV) => return Err(errors::escape_attempt()),
+
+                    // `EPERM` is used by some `seccomp` sandboxes to indicate
+                    // that `openat2` is unimplemented:
+                    // <https://github.com/systemd/systemd/blob/e2357b1c8a87b610066b8b2a59517bcfb20b832e/src/shared/seccomp-util.c#L2066>
+                    //
+                    // However, `EPERM` may also indicate a failed `O_NOATIME`
+                    // or a file seal prevented the operation, and it's complex
+                    // to detect those cases, so exit the loop and use the
+                    // fallback.
+                    Some(libc::EPERM) => break,
+
+                    // `ENOSYS` means `openat2` is permanently unavailable;
+                    // mark it so and exit the loop.
                     Some(libc::ENOSYS) => {
-                        // `openat2` is permanently unavailable; mark it so and
-                        // exit the loop.
                         INVALID.store(true, Relaxed);
                         break;
                     }
+
                     _ => return Err(err),
                 },
             }
