@@ -81,6 +81,18 @@ pub trait DirExt {
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
+
+    /// Removes a file or symlink from a filesystem.
+    ///
+    /// Removal of symlinks has different behavior under Windows - if a symlink points
+    /// to a directory, it cannot be removed with the remove_file operation. This
+    /// method will remove files and all sy mlinks
+    ///
+    /// This corresponds to [`std::fs::remove_file`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
 /// `fs_utf8` version of `DirExt`.
@@ -157,6 +169,18 @@ pub trait DirExtUtf8 {
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
+
+    /// Removes a file or symlink from a filesystem.
+    ///
+    /// Removal of symlinks has different behavior under Windows - if a symlink points
+    /// to a directory, it cannot be removed with the remove_file operation. This
+    /// method will remove files and all sy mlinks
+    ///
+    /// This corresponds to [`std::fs::remove_file`], but only accesses paths
+    /// relative to `self`.
+    ///
+    /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
 #[cfg(feature = "std")]
@@ -238,6 +262,24 @@ impl DirExt for cap_std::fs::Dir {
             Err(e) => Err(e),
         }
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        match self.remove_file(path.as_ref()) {
+            Ok(()) => Ok(()),
+            Err(e) => match self.remove_dir(path.as_ref()) {
+                Ok(()) => Ok(()),
+                Err(_) => Err(e),
+            },
+        }
+    }
 }
 
 #[cfg(feature = "async_std")]
@@ -317,6 +359,24 @@ impl DirExt for cap_async_std::fs::Dir {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
+        }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        match self.remove_file(path.as_ref()) {
+            Ok(()) => Ok(()),
+            Err(e) => match self.remove_dir(path.as_ref()) {
+                Ok(()) => Ok(()),
+                Err(_) => Err(e),
+            },
         }
     }
 }
@@ -402,6 +462,24 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
+        }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        match self.remove_file(path.as_ref()) {
+            Ok(()) => Ok(()),
+            Err(e) => match self.remove_dir(path.as_ref()) {
+                Ok(()) => Ok(()),
+                Err(_) => Err(e),
+            },
         }
     }
 }
@@ -493,6 +571,24 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
+        }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        match self.remove_file(path.as_ref()) {
+            Ok(()) => Ok(()),
+            Err(e) => match self.remove_dir(path.as_ref()) {
+                Ok(()) => Ok(()),
+                Err(_) => Err(e),
+            },
         }
     }
 }
