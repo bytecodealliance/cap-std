@@ -180,7 +180,7 @@ pub trait DirExtUtf8 {
     /// relative to `self`.
     ///
     /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
-    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 
 #[cfg(feature = "std")]
@@ -467,13 +467,13 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         self.remove_file(path.as_ref())
     }
 
     #[cfg(windows)]
     #[inline]
-    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         match self.remove_file(path.as_ref()) {
             Ok(()) => Ok(()),
             Err(e) => match self.remove_dir(path.as_ref()) {
