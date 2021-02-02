@@ -96,7 +96,7 @@ impl FileTypeExt {
 
 #[cfg(windows)]
 #[doc(hidden)]
-impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
+unsafe impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
     #[inline]
     unsafe fn is_block_device(&self) -> bool {
         false

@@ -99,6 +99,15 @@ impl DirEntryExt for DirEntry {
     }
 }
 
+#[cfg(windows)]
+#[doc(hidden)]
+unsafe impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
+    #[inline]
+    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+        cap_primitives::fs::_WindowsDirEntryExt::full_metadata(&self.inner)
+    }
+}
+
 impl fmt::Debug for DirEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)

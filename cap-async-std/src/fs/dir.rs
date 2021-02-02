@@ -296,7 +296,7 @@ impl Dir {
     pub async fn read<P: AsRef<Path>>(&self, path: P) -> io::Result<Vec<u8>> {
         use async_std::prelude::*;
         let mut file = self.open(path)?;
-        let mut bytes = Vec::with_capacity(initial_buffer_size(&file).await);
+        let mut bytes = Vec::with_capacity(initial_buffer_size(&file));
         file.read_to_end(&mut bytes).await?;
         Ok(bytes)
     }
@@ -690,14 +690,11 @@ impl IntoRawHandle for Dir {
 ///
 /// Derived from the function of the same name in Rust's library/std/src/fs.rs
 /// at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
-async fn initial_buffer_size(file: &File) -> usize {
+fn initial_buffer_size(file: &File) -> usize {
     // Allocate one extra byte so the buffer doesn't need to grow before the
     // final `read` call at the end of the file. Don't worry about `usize`
     // overflow because reading will fail regardless in that case.
-    file.metadata()
-        .await
-        .map(|m| m.len() as usize + 1)
-        .unwrap_or(0)
+    file.metadata().map(|m| m.len() as usize + 1).unwrap_or(0)
 }
 
 impl fmt::Debug for Dir {

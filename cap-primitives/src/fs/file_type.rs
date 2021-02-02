@@ -159,7 +159,7 @@ impl std::os::windows::fs::FileTypeExt for FileType {
 /// Use `cap_fs_ext::FileTypeExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
-pub trait _WindowsFileTypeExt {
+pub unsafe trait _WindowsFileTypeExt {
     unsafe fn is_block_device(&self) -> bool;
     unsafe fn is_char_device(&self) -> bool;
     unsafe fn is_fifo(&self) -> bool;

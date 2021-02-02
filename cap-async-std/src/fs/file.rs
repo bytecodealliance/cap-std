@@ -88,8 +88,9 @@ impl File {
     ///
     /// [`async_std::fs::File::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.metadata
     #[inline]
-    pub async fn metadata(&self) -> io::Result<Metadata> {
-        self.std.metadata().await.map(metadata_from_std)
+    pub fn metadata(&self) -> io::Result<Metadata> {
+        let sync = self.std.as_file_view();
+        metadata_from(&*sync)
     }
 
     // async_std doesn't have `try_clone`.
@@ -110,14 +111,14 @@ impl File {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    Metadata::from_just_metadata(metadata)
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    Metadata::from_file(file)
 }
 
 #[cfg(target_os = "wasi")]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    metadata
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    file.metadata()
 }
 
 #[cfg(not(target_os = "wasi"))]

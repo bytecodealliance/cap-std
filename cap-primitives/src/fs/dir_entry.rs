@@ -67,7 +67,15 @@ impl DirEntry {
     ///
     /// This corresponds to [`std::fs::DirEntry::metadata`].
     ///
+    /// # Platform-specific behavior
+    ///
+    /// On Windows, this produces a `Metadata` object which does not contain
+    /// the optional values returned by [`MetadataExt`]. Use
+    /// `cap_fs_ext::DirEntryExt::full_metadata` to obtain a `Metadata` with
+    /// the values filled in.
+    ///
     /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
+    /// [`MetadataExt`]: std::os::windows::fs::MetadataExt
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         self.inner.metadata()
@@ -114,4 +122,17 @@ impl fmt::Debug for DirEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
+}
+
+/// Extension trait to allow `full_metadata` etc. to be exposed by
+/// the `cap-fs-ext` crate.
+///
+/// # Safety
+///
+/// This is hidden from the main API since this functionality isn't present in `std`.
+/// Use `cap_fs_ext::DirEntryExt` instead of calling this directly.
+#[cfg(windows)]
+#[doc(hidden)]
+pub unsafe trait _WindowsDirEntryExt {
+    unsafe fn full_metadata(&self) -> io::Result<Metadata>;
 }

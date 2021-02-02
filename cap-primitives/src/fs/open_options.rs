@@ -191,13 +191,6 @@ impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
         self.ext.custom_flags(flags);
         self
     }
-
-    #[cfg(open_options_ext_as_flags)]
-    fn as_flags(&self) -> io::Result<libc::c_int> {
-        Ok(crate::posish::fs::oflags::get_access_mode(self)
-            | crate::posish::fs::oflags::get_creation_mode(self)
-            | self.custom_flags)
-    }
 }
 
 #[cfg(target_os = "vxworks")]

@@ -1,7 +1,4 @@
-#[cfg(all(windows, windows_by_handle))]
-use std::os::windows::fs::MetadataExt as _WindowsByHandle;
-
-#[cfg(all(windows, not(windows_by_handle)))]
+#[cfg(windows)]
 use cap_primitives::fs::_WindowsByHandle;
 
 /// Extension trait for `Metadata`.
@@ -55,20 +52,20 @@ impl MetadataExt for std::fs::Metadata {
 impl MetadataExt for std::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        _WindowsByHandle::volume_serial_number(self)
+        std::os::windows::fs::MetadataExt::volume_serial_number(self)
             .expect("`dev` depends on a Metadata constructed from an open `File`")
             .into()
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        _WindowsByHandle::file_index(self)
+        std::os::windows::fs::MetadataExt::file_index(self)
             .expect("`ino` depends on a Metadata constructed from an open `File`")
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        _WindowsByHandle::number_of_links(self)
+        std::os::windows::fs::MetadataExt::number_of_links(self)
             .expect("`nlink` depends on a Metadata constructed from an open `File`")
             .into()
     }

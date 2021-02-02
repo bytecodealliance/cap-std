@@ -72,8 +72,8 @@ impl DirEntry {
     ///
     /// [`async_std::fs::DirEntry::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.DirEntry.html#method.metadata
     #[inline]
-    pub async fn metadata(&self) -> io::Result<Metadata> {
-        self.cap_std.metadata().await
+    pub fn metadata(&self) -> io::Result<Metadata> {
+        self.cap_std.metadata()
     }
 
     /// Returns the file type for the file that this entry points at.
@@ -103,6 +103,15 @@ impl DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {
         self.cap_std.ino()
+    }
+}
+
+#[cfg(windows)]
+#[doc(hidden)]
+unsafe impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
+    #[inline]
+    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+        self.cap_std.full_metadata()
     }
 }
 

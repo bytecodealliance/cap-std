@@ -29,6 +29,7 @@
 #![cfg_attr(can_vector, feature(can_vector))]
 #![cfg_attr(read_initializer, feature(read_initializer))]
 #![cfg_attr(seek_convenience, feature(seek_convenience))]
+#![cfg_attr(seek_stream_len, feature(seek_stream_len))]
 #![cfg_attr(with_options, feature(with_options))]
 #![cfg_attr(write_all_vectored, feature(write_all_vectored))]
 #![doc(
