@@ -181,7 +181,7 @@ impl Metadata {
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
     #[cfg(any(not(windows), windows_by_handle))]
-    pub(crate) const fn is_same_file(&self, other: &Self) -> bool {
+    pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }
 
@@ -410,9 +410,9 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 ///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
-#[cfg(all(windows, not(windows_by_handle)))]
+#[cfg(windows)]
 #[doc(hidden)]
-pub trait _WindowsByHandle {
+pub unsafe trait _WindowsByHandle {
     unsafe fn volume_serial_number(&self) -> Option<u32>;
     unsafe fn number_of_links(&self) -> Option<u32>;
     unsafe fn file_index(&self) -> Option<u64>;

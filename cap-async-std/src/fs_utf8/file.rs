@@ -92,8 +92,8 @@ impl File {
     ///
     /// [`async_std::fs::File::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.metadata
     #[inline]
-    pub async fn metadata(&self) -> io::Result<Metadata> {
-        self.cap_std.metadata().await
+    pub fn metadata(&self) -> io::Result<Metadata> {
+        self.cap_std.metadata()
     }
 
     // async_std doesn't have `try_clone`.

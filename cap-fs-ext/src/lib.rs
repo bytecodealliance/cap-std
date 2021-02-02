@@ -9,6 +9,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
+mod dir_entry_ext;
 mod dir_ext;
 mod file_type_ext;
 mod is_file_read_write;
@@ -17,6 +18,7 @@ mod open_options_follow_ext;
 mod open_options_maybe_dir_ext;
 mod reopen;
 
+pub use dir_entry_ext::DirEntryExt;
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 pub use dir_ext::DirExtUtf8;
 pub use dir_ext::{DirExt, SystemTimeSpec};
@@ -27,5 +29,5 @@ pub use open_options_follow_ext::OpenOptionsFollowExt;
 pub use open_options_maybe_dir_ext::OpenOptionsMaybeDirExt;
 pub use reopen::Reopen;
 
-/// Re-export this to allow it to be used with `Reuse`.
-pub use cap_primitives::fs::{FollowSymlinks, OpenOptions};
+/// Re-export these to allow them to be used with `Reuse`.
+pub use cap_primitives::fs::{FollowSymlinks, Metadata, OpenOptions};

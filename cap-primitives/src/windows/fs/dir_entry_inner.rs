@@ -41,6 +41,16 @@ impl DirEntryInner {
     }
 
     #[inline]
+    pub(crate) fn full_metadata(&self) -> io::Result<Metadata> {
+        // If we can open the file, we can get a more complete Metadata which
+        // includes file_index, volume_serial_number, and number_of_links.
+        match self.open(OpenOptions::new().read(true).follow(FollowSymlinks::No)) {
+            Ok(opened) => Metadata::from_file(&opened),
+            Err(_) => self.metadata(),
+        }
+    }
+
+    #[inline]
     pub(crate) fn remove_file(&self) -> io::Result<()> {
         fs::remove_file(self.std.path())
     }
@@ -86,5 +96,14 @@ impl fmt::Debug for DirEntryInner {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DirEntry").field(&self.file_name()).finish()
+    }
+}
+
+#[cfg(windows)]
+#[doc(hidden)]
+unsafe impl crate::fs::_WindowsDirEntryExt for crate::fs::DirEntry {
+    #[inline]
+    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+        DirEntryInner::full_metadata(&self.inner)
     }
 }

@@ -12,6 +12,7 @@ pub(crate) fn is_same_file(a: &fs::File, b: &fs::File) -> io::Result<bool> {
 
 /// Determine if `a` and `b` are metadata for the same inode on the same device.
 #[cfg(windows_by_handle)]
+#[allow(dead_code)]
 pub(crate) fn is_same_file_metadata(a: &Metadata, b: &Metadata) -> io::Result<bool> {
     use std::os::windows::fs::MetadataExt;
     Ok(a.volume_serial_number() == b.volume_serial_number() && a.file_index() == b.file_index())

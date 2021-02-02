@@ -59,6 +59,8 @@ pub use copy::copy;
 pub use create_dir::create_dir;
 pub use dir_builder::DirBuilder;
 pub use dir_entry::DirEntry;
+#[cfg(windows)]
+pub use dir_entry::_WindowsDirEntryExt;
 pub use dir_options::DirOptions;
 pub use file_type::FileType;
 #[cfg(windows)]

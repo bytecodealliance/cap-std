@@ -18,28 +18,39 @@ impl MetadataExt {
     /// Constructs a new instance of `Self` from the given `std::fs::File` and
     /// `std::fs::Metadata`.
     #[inline]
+    #[allow(unused_variables)]
     pub(crate) fn from(file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
+        let (mut volume_serial_number, mut number_of_links, mut file_index) = (None, None, None);
+
         #[cfg(windows_by_handle)]
-        let (volume_serial_number, number_of_links, file_index) = {
+        {
             use std::os::windows::fs::MetadataExt;
-            (
-                std.volume_serial_number(),
-                std.number_of_links(),
-                std.file_index(),
-            )
-        };
+            if let Some(some) = std.volume_serial_number() {
+                volume_serial_number = Some(some);
+            }
+            if let Some(some) = std.number_of_links() {
+                number_of_links = Some(some);
+            }
+            if let Some(some) = std.file_index() {
+                file_index = Some(some);
+            }
+        }
 
         #[cfg(not(windows_by_handle))]
-        let (volume_serial_number, number_of_links, file_index) = {
+        if volume_serial_number.is_none() || number_of_links.is_none() || file_index.is_none() {
             let fileinfo = winx::file::get_fileinfo(file)?;
-            (
-                Some(fileinfo.dwVolumeSerialNumber),
-                Some(fileinfo.nNumberOfLinks),
-                Some(
+            if volume_serial_number.is_none() {
+                volume_serial_number = Some(fileinfo.dwVolumeSerialNumber);
+            }
+            if number_of_links.is_none() {
+                number_of_links = Some(fileinfo.nNumberOfLinks);
+            }
+            if file_index.is_none() {
+                file_index = Some(
                     (u64::from(fileinfo.nFileIndexHigh) << 32) | u64::from(fileinfo.nFileIndexLow),
-                ),
-            )
-        };
+                );
+            }
+        }
 
         Ok(Self::from_parts(
             std,
@@ -150,9 +161,9 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
     }
 }
 
-#[cfg(all(windows, not(windows_by_handle)))]
+#[cfg(windows)]
 #[doc(hidden)]
-impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
+unsafe impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
     #[inline]
     unsafe fn volume_serial_number(&self) -> Option<u32> {
         self.ext.volume_serial_number
