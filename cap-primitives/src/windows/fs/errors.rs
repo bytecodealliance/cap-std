@@ -8,12 +8,12 @@ pub(crate) fn no_such_file_or_directory() -> io::Error {
 
 #[cold]
 pub(crate) fn is_directory() -> io::Error {
-    io::Error::new(io::ErrorKind::Other, "expected non-directory")
+    io::Error::from_raw_os_error(winerror::ERROR_DIRECTORY_NOT_SUPPORTED as i32)
 }
 
 #[cold]
 pub(crate) fn is_not_directory() -> io::Error {
-    io::Error::new(io::ErrorKind::Other, "expected directory")
+    io::Error::from_raw_os_error(winerror::ERROR_DIRECTORY as i32)
 }
 
 #[cold]
