@@ -86,12 +86,10 @@ pub trait DirExt {
     ///
     /// Removal of symlinks has different behavior under Windows - if a symlink points
     /// to a directory, it cannot be removed with the remove_file operation. This
-    /// method will remove files and all sy mlinks
+    /// method will remove files and all symlinks.
     ///
-    /// This corresponds to [`std::fs::remove_file`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
+    /// On Windows, if a file or symlink does not exist at this path, but an empty directory does
+    /// exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
@@ -174,12 +172,10 @@ pub trait DirExtUtf8 {
     ///
     /// Removal of symlinks has different behavior under Windows - if a symlink points
     /// to a directory, it cannot be removed with the remove_file operation. This
-    /// method will remove files and all sy mlinks
+    /// method will remove files and all symlinks.
     ///
-    /// This corresponds to [`std::fs::remove_file`], but only accesses paths
-    /// relative to `self`.
-    ///
-    /// [`std::fs::remove_file`]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
+    /// On Windows, ff a file or symlink does not exist at this path, but an empty directory does
+    /// exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 
