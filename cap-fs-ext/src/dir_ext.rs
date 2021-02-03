@@ -81,6 +81,16 @@ pub trait DirExt {
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
+
+    /// Removes a file or symlink from a filesystem.
+    ///
+    /// Removal of symlinks has different behavior under Windows - if a symlink points
+    /// to a directory, it cannot be removed with the remove_file operation. This
+    /// method will remove files and all symlinks.
+    ///
+    /// On Windows, if a file or symlink does not exist at this path, but an empty directory does
+    /// exist, this function will remove the directory.
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
 /// `fs_utf8` version of `DirExt`.
@@ -157,6 +167,16 @@ pub trait DirExtUtf8 {
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
+
+    /// Removes a file or symlink from a filesystem.
+    ///
+    /// Removal of symlinks has different behavior under Windows - if a symlink points
+    /// to a directory, it cannot be removed with the remove_file operation. This
+    /// method will remove files and all symlinks.
+    ///
+    /// On Windows, ff a file or symlink does not exist at this path, but an empty directory does
+    /// exist, this function will remove the directory.
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 
 #[cfg(feature = "std")]
@@ -238,6 +258,19 @@ impl DirExt for cap_std::fs::Dir {
             Err(e) => Err(e),
         }
     }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
+    }
 }
 
 #[cfg(feature = "async_std")]
@@ -318,6 +351,19 @@ impl DirExt for cap_async_std::fs::Dir {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -403,6 +449,19 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -494,6 +553,19 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
             Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
             Err(e) => Err(e),
         }
+    }
+
+    #[cfg(not(windows))]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+    }
+
+    #[cfg(windows)]
+    #[inline]
+    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
