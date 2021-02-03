@@ -268,13 +268,8 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        match self.remove_file(path.as_ref()) {
-            Ok(()) => Ok(()),
-            Err(e) => match self.remove_dir(path.as_ref()) {
-                Ok(()) => Ok(()),
-                Err(_) => Err(e),
-            },
-        }
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -367,13 +362,8 @@ impl DirExt for cap_async_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        match self.remove_file(path.as_ref()) {
-            Ok(()) => Ok(()),
-            Err(e) => match self.remove_dir(path.as_ref()) {
-                Ok(()) => Ok(()),
-                Err(_) => Err(e),
-            },
-        }
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -470,13 +460,8 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
-        match self.remove_file(path.as_ref()) {
-            Ok(()) => Ok(()),
-            Err(e) => match self.remove_dir(path.as_ref()) {
-                Ok(()) => Ok(()),
-                Err(_) => Err(e),
-            },
-        }
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -579,13 +564,8 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
-        match self.remove_file(path.as_ref()) {
-            Ok(()) => Ok(()),
-            Err(e) => match self.remove_dir(path.as_ref()) {
-                Ok(()) => Ok(()),
-                Err(_) => Err(e),
-            },
-        }
+        self.remove_file(path.as_ref())
+            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
     }
 }
 
