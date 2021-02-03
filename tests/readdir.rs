@@ -1,6 +1,5 @@
 use cap_std::fs::{Dir, DirEntry};
-use std::collections::HashMap;
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 
 #[test]
 fn test_dir_entries() {
