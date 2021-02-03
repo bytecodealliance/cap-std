@@ -16,10 +16,9 @@
 //! from the operating system entropy source. To preserve the
 //! capability-oriented interface, avoid using `rand::SeedableRng`'s
 //! `from_entropy` function on any of the types that implement that trait.
-
-//! [`rand`]: https://docs.rs/rand/latest/rand/index.html
-//! [`OsRng`]: rngs/struct.OsRng.html
-//! [`CapRng`]: rngs/struct.CapRng.html
+//!
+//! [`OsRng`]: crate::rngs::OsRng
+//! [`CapRng`]: crate::rngs::CapRng
 
 #![deny(missing_docs)]
 #![doc(
@@ -34,8 +33,6 @@ pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, Seedabl
 /// Convenience re-export of common members.
 ///
 /// This corresponds to [`rand::prelude`].
-///
-/// [`rand::prelude`]: https://docs.rs/rand/latest/rand/prelude/index.html
 pub mod prelude {
     #[cfg(feature = "small_rng")]
     pub use crate::rngs::SmallRng;
@@ -51,8 +48,6 @@ pub mod prelude {
 /// Random number generators and adapters.
 ///
 /// This corresponds to [`rand::rngs`].
-///
-/// [`rand::rngs`]: https://docs.rs/rand/latest/rand/rngs/
 pub mod rngs {
     pub use rand::rngs::{adapter, mock, StdRng};
 
@@ -64,8 +59,6 @@ pub mod rngs {
     /// This corresponds to [`rand::rngs::OsRng`], except instead of implementing
     /// `Default` it has an unsafe `default` function since accessing the
     /// operating system requires ambient authority.
-    ///
-    /// [`OsRng`]: https://docs.rs/rand/latest/rand/rngs/struct.OsRng.html
     #[derive(Clone, Copy, Debug)]
     pub struct OsRng(());
 
@@ -107,8 +100,6 @@ pub mod rngs {
     ///
     /// This corresponds to [`rand::rngs::ThreadRng`], except that it isn't tied
     /// to thread-local memory.
-    ///
-    /// [`rand::rngs::ThreadRng`]: https://docs.rs/rand/latest/rand/rngs/struct.ThreadRng.html
     #[derive(Clone, Debug)]
     pub struct CapRng {
         pub(super) inner: rand::rngs::ThreadRng,
@@ -152,8 +143,6 @@ pub mod rngs {
 ///
 /// This corresponds to [`rand::thread_rng`].
 ///
-/// [`rand::thread_rng`]: https://docs.rs/rand/latest/rand/fn.thread_rng.html
-///
 /// # Safety
 ///
 /// This function is unsafe because it makes use of ambient authority to
@@ -168,8 +157,6 @@ pub unsafe fn thread_rng() -> rngs::CapRng {
 /// Generates a random value using the thread-local random number generator.
 ///
 /// This corresponds to [`rand::random`].
-///
-/// [`rand::random`]: https://docs.rs/rand/latest/rand/fn.random.html
 ///
 /// # Safety
 ///

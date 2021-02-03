@@ -10,7 +10,6 @@ use std::pin::Pin;
 ///
 /// This corresponds to [`async_std::net::Incoming`].
 ///
-/// [`async_std::net::Incoming`]: https://docs.rs/async-std/latest/async_std/net/struct.Incoming.html
 /// [`TcpListener`]: struct.TcpListener.html
 pub struct Incoming<'a> {
     std: net::Incoming<'a>,

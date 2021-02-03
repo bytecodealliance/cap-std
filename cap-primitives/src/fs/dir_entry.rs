@@ -20,8 +20,6 @@ use std::{ffi::OsString, fmt, fs, io};
 /// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
 /// ambient paths.
-///
-/// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry {
     pub(crate) inner: DirEntryInner,
 }
@@ -67,7 +65,14 @@ impl DirEntry {
     ///
     /// This corresponds to [`std::fs::DirEntry::metadata`].
     ///
-    /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
+    /// # Platform-specific behavior
+    ///
+    /// On Windows, this produces a `Metadata` object which does not contain
+    /// the optional values returned by [`MetadataExt`]. Use
+    /// `cap_fs_ext::DirEntryExt::full_metadata` to obtain a `Metadata` with
+    /// the values filled in.
+    ///
+    /// [`MetadataExt`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         self.inner.metadata()
@@ -76,8 +81,6 @@ impl DirEntry {
     /// Returns the file type for the file that this entry points at.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_type`].
-    ///
-    /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
         self.inner.file_type()
@@ -86,8 +89,6 @@ impl DirEntry {
     /// Returns the bare file name of this directory entry without any other leading path component.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_name`].
-    ///
-    /// [`std::fs::DirEntry::file_name`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_name
     #[inline]
     pub fn file_name(&self) -> OsString {
         self.inner.file_name()
@@ -114,4 +115,17 @@ impl fmt::Debug for DirEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
+}
+
+/// Extension trait to allow `full_metadata` etc. to be exposed by
+/// the `cap-fs-ext` crate.
+///
+/// # Safety
+///
+/// This is hidden from the main API since this functionality isn't present in `std`.
+/// Use `cap_fs_ext::DirEntryExt` instead of calling this directly.
+#[cfg(windows)]
+#[doc(hidden)]
+pub unsafe trait _WindowsDirEntryExt {
+    unsafe fn full_metadata(&self) -> io::Result<Metadata>;
 }

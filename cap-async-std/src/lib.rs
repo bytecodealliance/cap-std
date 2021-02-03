@@ -20,14 +20,12 @@
 //! On WASI, use of this library closely reflects the underlying system
 //! API, so it avoids compatibility layers.
 //!
-//! [`async_std`]: https://docs.rs/async-std/latest/async_std/
-//! [`Dir`]: fs/struct.Dir.html
-//! [`Catalog`]: net/struct.Catalog.html
+//! [`Dir`]: fs::Dir
+//! [`Catalog`]: net::Catalog
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 // async_std doesn't have "can_vector".
-// async_std doesn't have "read_initializer".
 // async_std doesn't have "seek_convenience".
 // async_std doesn't have "with_options".
 // async_std doesn't have "write_all_vectored".

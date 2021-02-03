@@ -22,10 +22,9 @@ use unsafe_io::AsUnsafeFile;
 /// a file, you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open`] or [`Dir::create`].
 ///
-/// [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
-/// [`Dir`]: struct.Dir.html
-/// [`Dir::open`]: struct.Dir.html#method.open
-/// [`Dir::create`]: struct.Dir.html#method.create
+/// [`Dir`]: crate::fs::Dir
+/// [`Dir::open`]: crate::fs::Dir::open
+/// [`Dir::create`]: crate::fs::Dir::create
 pub struct File {
     pub(crate) std: fs::File,
 }
@@ -53,8 +52,6 @@ impl File {
     /// Attempts to sync all OS-internal metadata to disk.
     ///
     /// This corresponds to [`async_std::fs::File::sync_all`].
-    ///
-    /// [`async_std::fs::File::sync_all`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.sync_all
     #[inline]
     pub async fn sync_all(&self) -> io::Result<()> {
         self.std.sync_all().await
@@ -64,8 +61,6 @@ impl File {
     /// file metadata to a filesystem.
     ///
     /// This corresponds to [`async_std::fs::File::sync_data`].
-    ///
-    /// [`async_std::fs::File::sync_data`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.sync_data
     #[inline]
     pub async fn sync_data(&self) -> io::Result<()> {
         self.std.sync_data().await
@@ -75,8 +70,6 @@ impl File {
     /// to become size.
     ///
     /// This corresponds to [`async_std::fs::File::set_len`].
-    ///
-    /// [`async_std::fs::File::set_len`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.set_len
     #[inline]
     pub async fn set_len(&self, size: u64) -> io::Result<()> {
         self.std.set_len(size).await
@@ -85,11 +78,10 @@ impl File {
     /// Queries metadata about the underlying file.
     ///
     /// This corresponds to [`async_std::fs::File::metadata`].
-    ///
-    /// [`async_std::fs::File::metadata`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.metadata
     #[inline]
-    pub async fn metadata(&self) -> io::Result<Metadata> {
-        self.std.metadata().await.map(metadata_from_std)
+    pub fn metadata(&self) -> io::Result<Metadata> {
+        let sync = self.std.as_file_view();
+        metadata_from(&*sync)
     }
 
     // async_std doesn't have `try_clone`.
@@ -97,8 +89,6 @@ impl File {
     /// Changes the permissions on the underlying file.
     ///
     /// This corresponds to [`async_std::fs::File::set_permissions`].
-    ///
-    /// [`async_std::fs::File::set_permissions`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
         let sync = self.std.as_file_view();
@@ -110,14 +100,14 @@ impl File {
 
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    Metadata::from_just_metadata(metadata)
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    Metadata::from_file(file)
 }
 
 #[cfg(target_os = "wasi")]
 #[inline]
-fn metadata_from_std(metadata: fs::Metadata) -> Metadata {
-    metadata
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    file.metadata()
 }
 
 #[cfg(not(target_os = "wasi"))]

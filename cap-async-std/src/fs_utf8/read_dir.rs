@@ -8,8 +8,6 @@ use std::{fmt, io};
 /// Note that there is no `from_std` method, as `async_std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
-///
-/// [`async_std::fs::ReadDir`]: https://docs.rs/async-std/latest/async_std/fs/struct.ReadDir.html
 pub struct ReadDir {
     cap_std: crate::fs::ReadDir,
 }

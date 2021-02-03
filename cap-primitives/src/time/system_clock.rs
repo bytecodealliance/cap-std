@@ -15,8 +15,6 @@ impl SystemClock {
     /// instances or learn about where in time a `SystemTime` lies.
     ///
     /// This corresponds to [`std::time::SystemTime::UNIX_EPOCH`].
-    ///
-    /// [`std::time::SystemTime::UNIX_EPOCH`]: https://doc.rust-lang.org/std/time/constant.UNIX_EPOCH.html
     pub const UNIX_EPOCH: SystemTime = SystemTime {
         std: time::SystemTime::UNIX_EPOCH,
     };
@@ -33,9 +31,7 @@ impl SystemClock {
 
     /// Returns an instant corresponding to "now".
     ///
-    /// This corresponds to [`SystemTime::now`].
-    ///
-    /// [`SystemTime::now`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.now
+    /// This corresponds to [`std::time::SystemTime::now`].
     #[inline]
     pub fn now(&self) -> SystemTime {
         SystemTime::from_std(time::SystemTime::now())
@@ -43,9 +39,7 @@ impl SystemClock {
 
     /// Returns the amount of time elapsed since this instant was created.
     ///
-    /// This corresponds to [`SystemTime::elapsed`].
-    ///
-    /// [`SystemTime::elapsed`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.elapsed
+    /// This corresponds to [`std::time::SystemTime::elapsed`].
     #[inline]
     pub fn elapsed(&self, system_time: SystemTime) -> Result<Duration, SystemTimeError> {
         system_time.std.elapsed()

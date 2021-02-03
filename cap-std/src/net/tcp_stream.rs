@@ -1,6 +1,4 @@
 use crate::net::{Shutdown, SocketAddr};
-#[cfg(read_initializer)]
-use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -19,7 +17,6 @@ use std::{
 /// you must first obtain a [`Catalog`] permitting the address, and then call
 /// [`Catalog::connect_tcp_stream`].
 ///
-/// [`std::net::TcpStream`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::connect_tcp_stream`]: struct.Catalog.html#method.connect_tcp_stream
 pub struct TcpStream {
@@ -41,8 +38,6 @@ impl TcpStream {
     /// Returns the local socket address of this listener.
     ///
     /// This corresponds to [`std::net::TcpStream::local_addr`].
-    ///
-    /// [`std::net::TcpStream::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -51,8 +46,6 @@ impl TcpStream {
     /// Shuts down the read, write, or both halves of this connection.
     ///
     /// This corresponds to [`std::net::TcpStream::shutdown`].
-    ///
-    /// [`std::net::TcpStream::shutdown`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
         self.std.shutdown(how)
@@ -61,8 +54,6 @@ impl TcpStream {
     /// Creates a new independently owned handle to the underlying socket.
     ///
     /// This corresponds to [`std::net::TcpStream::try_clone`].
-    ///
-    /// [`std::net::TcpStream::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let tcp_stream = self.std.try_clone()?;
@@ -72,8 +63,6 @@ impl TcpStream {
     /// Sets the read timeout to the timeout specified.
     ///
     /// This corresponds to [`std::net::TcpStream::set_read_timeout`].
-    ///
-    /// [`std::net::TcpStream::set_read_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_read_timeout
     #[inline]
     pub fn set_read_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
         self.std.set_read_timeout(dur)
@@ -82,8 +71,6 @@ impl TcpStream {
     /// Sets the write timeout to the timeout specified.
     ///
     /// This corresponds to [`std::net::TcpStream::set_write_timeout`].
-    ///
-    /// [`std::net::TcpStream::set_write_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_write_timeout
     #[inline]
     pub fn set_write_timeout(&self, dur: Option<Duration>) -> io::Result<()> {
         self.std.set_write_timeout(dur)
@@ -92,8 +79,6 @@ impl TcpStream {
     /// Returns the read timeout of this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::read_timeout`].
-    ///
-    /// [`std::net::TcpStream::read_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.read_timeout
     #[inline]
     pub fn read_timeout(&self) -> io::Result<Option<Duration>> {
         self.std.read_timeout()
@@ -102,8 +87,6 @@ impl TcpStream {
     /// Returns the write timeout of this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::write_timeout`].
-    ///
-    /// [`std::net::TcpStream::write_timeout`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.write_timeout
     #[inline]
     pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
         self.std.write_timeout()
@@ -113,8 +96,6 @@ impl TcpStream {
     /// removing that data from the queue.
     ///
     /// This corresponds to [`std::net::TcpStream::peek`].
-    ///
-    /// [`std::net::TcpStream::peek`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.peek
     #[inline]
     pub fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.peek(buf)
@@ -123,8 +104,6 @@ impl TcpStream {
     /// Sets the value of the `TCP_NODELAY` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::set_nodelay`].
-    ///
-    /// [`std::net::TcpStream::set_nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_nodelay
     #[inline]
     pub fn set_nodelay(&self, nodelay: bool) -> io::Result<()> {
         self.std.set_nodelay(nodelay)
@@ -133,8 +112,6 @@ impl TcpStream {
     /// Gets the value of the `TCP_NODELAY` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::nodelay`].
-    ///
-    /// [`std::net::TcpStream::nodelay`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.nodelay
     #[inline]
     pub fn nodelay(&self) -> io::Result<bool> {
         self.std.nodelay()
@@ -143,8 +120,6 @@ impl TcpStream {
     /// Sets the value for the `IP_TTL` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::set_ttl`].
-    ///
-    /// [`std::net::TcpStream::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.std.set_ttl(ttl)
@@ -153,8 +128,6 @@ impl TcpStream {
     /// Gets the value of the `IP_TTL` option for this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::ttl`].
-    ///
-    /// [`std::net::TcpStream::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
         self.std.ttl()
@@ -163,8 +136,6 @@ impl TcpStream {
     /// Gets the value of the `SO_ERROR` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpStream::take_error`].
-    ///
-    /// [`std::net::TcpStream::take_error`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.take_error
     #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.std.take_error()
@@ -173,8 +144,6 @@ impl TcpStream {
     /// Moves this TCP stream into or out of nonblocking mode.
     ///
     /// This corresponds to [`std::net::TcpStream::set_nonblocking`].
-    ///
-    /// [`std::net::TcpStream::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html#method.set_nonblocking
     #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
         self.std.set_nonblocking(nonblocking)
@@ -260,12 +229,6 @@ impl Read for TcpStream {
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        self.std.initializer()
-    }
 }
 
 impl Read for &TcpStream {
@@ -298,12 +261,6 @@ impl Read for &TcpStream {
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
-    }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        (&mut &self.std).initializer()
     }
 }
 

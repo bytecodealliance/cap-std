@@ -14,10 +14,9 @@ use std::{
 /// obtain a [`MonotonicClock`], and then call [`MonotonicClock::now`] or
 /// [`MonotonicClock::elapsed`] instead.
 ///
-/// [`std::time::Instant`]: https://doc.rust-lang.org/std/time/struct.Instant.html
-/// [`MonotonicClock`]: struct.MonotonicClock.html
-/// [`MonotonicClock::now`]: struct.MonotonicClock.html#method.now
-/// [`MonotonicClock::elapsed`]: struct.MonotonicClock.html#method.elapsed
+/// [`MonotonicClock`]: crate::time::MonotonicClock
+/// [`MonotonicClock::now`]: crate::time::MonotonicClock::now
+/// [`MonotonicClock::elapsed`]: crate::time::MonotonicClock::elapsed
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct Instant {
     pub(crate) std: time::Instant,
@@ -33,8 +32,6 @@ impl Instant {
     /// Returns the amount of time elapsed from another instant to this one.
     ///
     /// This corresponds to [`std::time::Instant::duration_since`].
-    ///
-    /// [`std::time::Instant::duration_since`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.duration_since
     #[inline]
     pub fn duration_since(&self, earlier: Self) -> Duration {
         self.std.duration_since(earlier.std)
@@ -44,8 +41,6 @@ impl Instant {
     /// is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::checked_duration_since`].
-    ///
-    /// [`std::time::Instant::checked_duration_since`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.checked_duration_since
     #[inline]
     pub fn checked_duration_since(&self, earlier: Self) -> Option<Duration> {
         self.std.checked_duration_since(earlier.std)
@@ -55,8 +50,6 @@ impl Instant {
     /// that instant is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::saturating_duration_since`].
-    ///
-    /// [`std::time::Instant::saturating_duration_since`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.saturating_duration_since
     #[inline]
     pub fn saturating_duration_since(&self, earlier: Self) -> Duration {
         self.std.saturating_duration_since(earlier.std)
@@ -67,8 +60,6 @@ impl Instant {
     /// otherwise.
     ///
     /// This corresponds to [`std::time::Instant::checked_add`].
-    ///
-    /// [`std::time::Instant::checked_add`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.checked_add
     #[inline]
     pub fn checked_add(&self, duration: Duration) -> Option<Self> {
         self.std.checked_add(duration).map(Self::from_std)
@@ -79,8 +70,6 @@ impl Instant {
     /// otherwise.
     ///
     /// This corresponds to [`std::time::Instant::checked_sub`].
-    ///
-    /// [`std::time::Instant::checked_sub`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.checked_sub
     #[inline]
     pub fn checked_sub(&self, duration: Duration) -> Option<Self> {
         self.std.checked_sub(duration).map(Self::from_std)

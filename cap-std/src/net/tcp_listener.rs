@@ -13,7 +13,6 @@ use std::{fmt, io, net};
 /// address, you must first obtain a [`Catalog`] permitting the address, and
 /// then call [`Catalog::bind_tcp_listener`].
 ///
-/// [`std::net::TcpListener`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::bind_tcp_listener`]: struct.Catalog.html#method.bind_tcp_listener
 pub struct TcpListener {
@@ -35,8 +34,6 @@ impl TcpListener {
     /// Returns the local socket address of this listener.
     ///
     /// This corresponds to [`std::net::TcpListener::local_addr`].
-    ///
-    /// [`std::net::TcpListener::local_addr`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -45,8 +42,6 @@ impl TcpListener {
     /// Creates a new independently owned handle to the underlying socket.
     ///
     /// This corresponds to [`std::net::TcpListener::try_clone`].
-    ///
-    /// [`std::net::TcpListener::try_clone`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let tcp_listener = self.std.try_clone()?;
@@ -56,8 +51,6 @@ impl TcpListener {
     /// Accept a new incoming connection from this listener.
     ///
     /// This corresponds to [`std::net::TcpListener::accept`].
-    ///
-    /// [`std::net::TcpListener::accept`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.accept
     #[inline]
     pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
         self.std
@@ -68,8 +61,6 @@ impl TcpListener {
     /// Returns an iterator over the connections being received on this listener.
     ///
     /// This corresponds to [`std::net::TcpListener::incoming`].
-    ///
-    /// [`std::net::TcpListener::incoming`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.incoming
     #[inline]
     pub fn incoming(&self) -> Incoming {
         let incoming = self.std.incoming();
@@ -79,8 +70,6 @@ impl TcpListener {
     /// Sets the value for the `IP_TTL` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpListener::set_ttl`].
-    ///
-    /// [`std::net::TcpListener::set_ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.std.set_ttl(ttl)
@@ -89,8 +78,6 @@ impl TcpListener {
     /// Gets the value of the `IP_TTL` option for this socket.
     ///
     /// This corresponds to [`std::net::TcpListener::ttl`].
-    ///
-    /// [`std::net::TcpListener::ttl`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
         self.std.ttl()
@@ -99,8 +86,6 @@ impl TcpListener {
     /// Gets the value of the `SO_ERROR` option on this socket.
     ///
     /// This corresponds to [`std::net::TcpListener::take_error`].
-    ///
-    /// [`std::net::TcpListener::take_error`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.take_error
     #[inline]
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.std.take_error()
@@ -109,8 +94,6 @@ impl TcpListener {
     /// Moves this TCP stream into or out of nonblocking mode.
     ///
     /// This corresponds to [`std::net::TcpListener::set_nonblocking`].
-    ///
-    /// [`std::net::TcpListener::set_nonblocking`]: https://doc.rust-lang.org/std/net/struct.TcpListener.html#method.set_nonblocking
     #[inline]
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
         self.std.set_nonblocking(nonblocking)

@@ -5,7 +5,6 @@ use std::{io, net};
 ///
 /// This corresponds to [`std::net::Incoming`].
 ///
-/// [`std::net::Incoming`]: https://doc.rust-lang.org/std/net/struct.Incoming.html
 /// [`TcpListener`]: struct.TcpListener.html
 pub struct Incoming<'a> {
     std: net::Incoming<'a>,

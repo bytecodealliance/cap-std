@@ -8,8 +8,6 @@ use std::{fmt, io};
 /// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
 /// provide a way to construct a `ReadDir` without opening directories by
 /// ambient paths.
-///
-/// [`std::fs::ReadDir`]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 pub struct ReadDir {
     cap_std: crate::fs::ReadDir,
 }

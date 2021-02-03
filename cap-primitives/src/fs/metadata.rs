@@ -8,8 +8,6 @@ use std::{fs, io};
 ///
 /// This corresponds to [`std::fs::Metadata`].
 ///
-/// [`std::fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
-///
 /// <details>
 /// We need to define our own version because the libstd `Metadata` doesn't have
 /// a public constructor that we can use.
@@ -87,8 +85,6 @@ impl Metadata {
     /// Returns the file type for this metadata.
     ///
     /// This corresponds to [`std::fs::Metadata::file_type`].
-    ///
-    /// [`std::fs::Metadata::file_type`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.file_type
     #[inline]
     pub const fn file_type(&self) -> FileType {
         self.file_type
@@ -97,8 +93,6 @@ impl Metadata {
     /// Returns `true` if this metadata is for a directory.
     ///
     /// This corresponds to [`std::fs::Metadata::is_dir`].
-    ///
-    /// [`std::fs::Metadata::is_dir`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.is_dir
     #[inline]
     pub fn is_dir(&self) -> bool {
         self.file_type.is_dir()
@@ -107,8 +101,6 @@ impl Metadata {
     /// Returns `true` if this metadata is for a regular file.
     ///
     /// This corresponds to [`std::fs::Metadata::is_file`].
-    ///
-    /// [`std::fs::Metadata::is_file`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.is_file
     #[inline]
     pub fn is_file(&self) -> bool {
         self.file_type.is_file()
@@ -117,8 +109,6 @@ impl Metadata {
     /// Returns the size of the file, in bytes, this metadata is for.
     ///
     /// This corresponds to [`std::fs::Metadata::len`].
-    ///
-    /// [`std::fs::Metadata::len`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.len
     #[inline]
     pub const fn len(&self) -> u64 {
         self.len
@@ -127,8 +117,6 @@ impl Metadata {
     /// Returns the permissions of the file this metadata is for.
     ///
     /// This corresponds to [`std::fs::Metadata::permissions`].
-    ///
-    /// [`std::fs::Metadata::permissions`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.permissions
     #[inline]
     pub fn permissions(&self) -> Permissions {
         self.permissions.clone()
@@ -137,8 +125,6 @@ impl Metadata {
     /// Returns the last modification time listed in this metadata.
     ///
     /// This corresponds to [`std::fs::Metadata::modified`].
-    ///
-    /// [`std::fs::Metadata::modified`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.modified
     #[inline]
     pub fn modified(&self) -> io::Result<SystemTime> {
         self.modified.ok_or_else(|| {
@@ -152,8 +138,6 @@ impl Metadata {
     /// Returns the last access time of this metadata.
     ///
     /// This corresponds to [`std::fs::Metadata::accessed`].
-    ///
-    /// [`std::fs::Metadata::accessed`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.accessed
     #[inline]
     pub fn accessed(&self) -> io::Result<SystemTime> {
         self.accessed.ok_or_else(|| {
@@ -167,8 +151,6 @@ impl Metadata {
     /// Returns the creation time listed in this metadata.
     ///
     /// This corresponds to [`std::fs::Metadata::created`].
-    ///
-    /// [`std::fs::Metadata::created`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html#method.created
     #[inline]
     pub fn created(&self) -> io::Result<SystemTime> {
         self.created.ok_or_else(|| {
@@ -181,7 +163,7 @@ impl Metadata {
 
     /// Determine if `self` and `other` refer to the same inode on the same device.
     #[cfg(any(not(windows), windows_by_handle))]
-    pub(crate) const fn is_same_file(&self, other: &Self) -> bool {
+    pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
     }
 
@@ -410,9 +392,9 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 ///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
-#[cfg(all(windows, not(windows_by_handle)))]
+#[cfg(windows)]
 #[doc(hidden)]
-pub trait _WindowsByHandle {
+pub unsafe trait _WindowsByHandle {
     unsafe fn volume_serial_number(&self) -> Option<u32>;
     unsafe fn number_of_links(&self) -> Option<u32>;
     unsafe fn file_index(&self) -> Option<u64>;
