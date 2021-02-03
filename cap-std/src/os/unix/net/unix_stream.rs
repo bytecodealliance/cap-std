@@ -1,6 +1,4 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
-#[cfg(read_initializer)]
-use std::io::Initializer;
 use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::{
@@ -204,12 +202,6 @@ impl Read for UnixStream {
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        self.std.initializer()
-    }
 }
 
 impl Read for &UnixStream {
@@ -242,12 +234,6 @@ impl Read for &UnixStream {
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
-    }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        (&mut &self.std).initializer()
     }
 }
 

@@ -2,8 +2,6 @@
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
 use cap_primitives::fs::is_file_read_write;
-#[cfg(read_initializer)]
-use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -231,12 +229,6 @@ impl Read for File {
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        self.std.initializer()
-    }
 }
 
 impl Read for &File {
@@ -269,12 +261,6 @@ impl Read for &File {
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
-    }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        (&mut &self.std).initializer()
     }
 }
 

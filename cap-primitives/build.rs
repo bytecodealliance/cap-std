@@ -8,7 +8,6 @@ fn main() {
             "clamp",              // https://github.com/rust-lang/rust/issues/44095
             "extend_one",         // https://github.com/rust-lang/rust/issues/72631
             "pattern",            // https://github.com/rust-lang/rust/issues/27721
-            "read_initializer",   // https://github.com/rust-lang/rust/issues/42788
             "seek_convenience",   // https://github.com/rust-lang/rust/issues/59359
             "seek_stream_len",    // https://github.com/rust-lang/rust/issues/59359
             "shrink_to",          // https://github.com/rust-lang/rust/issues/56431

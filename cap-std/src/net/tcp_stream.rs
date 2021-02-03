@@ -1,6 +1,4 @@
 use crate::net::{Shutdown, SocketAddr};
-#[cfg(read_initializer)]
-use std::io::Initializer;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
@@ -260,12 +258,6 @@ impl Read for TcpStream {
     fn is_read_vectored(&self) -> bool {
         self.std.is_read_vectored()
     }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        self.std.initializer()
-    }
 }
 
 impl Read for &TcpStream {
@@ -298,12 +290,6 @@ impl Read for &TcpStream {
     #[inline]
     fn is_read_vectored(&self) -> bool {
         (&mut &self.std).is_read_vectored()
-    }
-
-    #[cfg(read_initializer)]
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        (&mut &self.std).initializer()
     }
 }
 
