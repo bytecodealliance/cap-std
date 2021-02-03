@@ -28,7 +28,6 @@ develops libraries to make it easy to write capability-oriented code, including:
  - [`cap-rand`], which provides capability-oriented access to
    [random number generators]
 
-[`std`]: https://doc.rust-lang.org/std/
 [`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-async-std/README.md
 [`cap-directories`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-directories/README.md
