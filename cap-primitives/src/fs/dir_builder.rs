@@ -9,7 +9,6 @@ use std::fmt;
 /// creating directories requires a capability. Use [`Dir::create_dir_with`]
 /// instead.
 ///
-/// [`std::fs::DirBuilder`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html
 /// [`Dir::create_dir_with`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_dir_with
 ///
 /// <details>
@@ -26,8 +25,6 @@ impl DirBuilder {
     /// non-recursive.
     ///
     /// This corresponds to [`std::fs::DirBuilder::new`].
-    ///
-    /// [`std::fs::DirBuilder::new`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.new
     #[allow(clippy::new_without_default)]
     #[inline]
     pub const fn new() -> Self {
@@ -40,8 +37,6 @@ impl DirBuilder {
     /// Indicates that directories should be created recursively, creating all parent directories.
     ///
     /// This corresponds to [`std::fs::DirBuilder::recursive`].
-    ///
-    /// [`std::fs::DirBuilder::recursive`]: https://doc.rust-lang.org/std/fs/struct.DirBuilder.html#method.recursive
     #[inline]
     pub fn recursive(&mut self, recursive: bool) -> &mut Self {
         self.recursive = recursive;

@@ -22,9 +22,7 @@ impl MonotonicClock {
 
     /// Returns an instant corresponding to "now".
     ///
-    /// This corresponds to [`Instant::now`].
-    ///
-    /// [`Instant::now`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.now
+    /// This corresponds to [`std::time::Instant::now`].
     #[inline]
     pub fn now(&self) -> Instant {
         Instant::from_std(time::Instant::now())
@@ -32,9 +30,7 @@ impl MonotonicClock {
 
     /// Returns the amount of time elapsed since this instant was created.
     ///
-    /// This corresponds to [`Instant::elapsed`].
-    ///
-    /// [`Instant::elapsed`]: https://doc.rust-lang.org/std/time/struct.Instant.html#method.elapsed
+    /// This corresponds to [`std::time::Instant::elapsed`].
     #[inline]
     pub fn elapsed(&self, instant: Instant) -> Duration {
         instant.std.elapsed()

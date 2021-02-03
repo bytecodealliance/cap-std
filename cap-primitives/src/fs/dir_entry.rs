@@ -20,8 +20,6 @@ use std::{ffi::OsString, fmt, fs, io};
 /// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
 /// provide a way to construct a `DirEntry` without opening directories by
 /// ambient paths.
-///
-/// [`std::fs::DirEntry`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html
 pub struct DirEntry {
     pub(crate) inner: DirEntryInner,
 }
@@ -74,8 +72,7 @@ impl DirEntry {
     /// `cap_fs_ext::DirEntryExt::full_metadata` to obtain a `Metadata` with
     /// the values filled in.
     ///
-    /// [`std::fs::DirEntry::metadata`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.metadata
-    /// [`MetadataExt`]: std::os::windows::fs::MetadataExt
+    /// [`MetadataExt`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         self.inner.metadata()
@@ -84,8 +81,6 @@ impl DirEntry {
     /// Returns the file type for the file that this entry points at.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_type`].
-    ///
-    /// [`std::fs::DirEntry::file_type`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_type
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
         self.inner.file_type()
@@ -94,8 +89,6 @@ impl DirEntry {
     /// Returns the bare file name of this directory entry without any other leading path component.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_name`].
-    ///
-    /// [`std::fs::DirEntry::file_name`]: https://doc.rust-lang.org/std/fs/struct.DirEntry.html#method.file_name
     #[inline]
     pub fn file_name(&self) -> OsString {
         self.inner.file_name()

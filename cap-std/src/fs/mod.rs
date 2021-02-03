@@ -21,10 +21,7 @@
 //! `canonicalize`, `read_link`, `read_dir`, `metadata`, and `symlink_metadata`
 //! functions.
 //!
-//! [`std::fs`]: https://doc.rust-lang.org/std/fs/
 //! [`std::fs`'s free functions]: https://doc.rust-lang.org/std/fs/#functions
-//! [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
-//! [`Dir`]: struct.Dir.html
 
 mod dir;
 mod dir_entry;

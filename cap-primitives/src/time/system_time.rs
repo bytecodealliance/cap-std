@@ -23,11 +23,10 @@ use std::{
 /// [HFS](https://en.wikipedia.org/wiki/HFS_Plus), allowing debugging on other
 /// hardware.
 ///
-/// [`std::time::SystemTime`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html
-/// [`SystemClock`]: struct.SystemClock.html
-/// [`SystemClock::now`]: struct.SystemClock.html#method.now
-/// [`SystemClock::elapsed`]: struct.SystemClock.html#method.elapsed
-/// [`SystemClock::UNIX_EPOCH`]: struct.SystemClock.html#associatedconstant.UNIX_EPOCH
+/// [`SystemClock`]: crate::time::SystemClock
+/// [`SystemClock::now`]: crate::time::SystemClock::now
+/// [`SystemClock::elapsed`]: crate::time::SystemClock::elapsed
+/// [`SystemClock::UNIX_EPOCH`]: crate::time::SystemClock::UNIX_EPOCH
 /// [`filetime` crate]: https://crates.io/crates/filetime
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct SystemTime {
@@ -59,8 +58,6 @@ impl SystemTime {
     /// Returns the amount of time elapsed from another instant to this one.
     ///
     /// This corresponds to [`std::time::SystemTime::duration_since`].
-    ///
-    /// [`std::time::SystemTime::duration_since`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.duration_since
     #[inline]
     pub fn duration_since(&self, earlier: Self) -> Result<Duration, SystemTimeError> {
         self.std.duration_since(earlier.std)
@@ -71,8 +68,6 @@ impl SystemTime {
     /// otherwise.
     ///
     /// This corresponds to [`std::time::SystemTime::checked_add`].
-    ///
-    /// [`std::time::SystemTime::checked_add`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.checked_add
     #[inline]
     pub fn checked_add(&self, duration: Duration) -> Option<Self> {
         self.std.checked_add(duration).map(Self::from_std)
@@ -83,8 +78,6 @@ impl SystemTime {
     /// otherwise.
     ///
     /// This corresponds to [`std::time::SystemTime::checked_sub`].
-    ///
-    /// [`std::time::SystemTime::checked_sub`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#method.checked_sub
     #[inline]
     pub fn checked_sub(&self, duration: Duration) -> Option<Self> {
         self.std.checked_sub(duration).map(Self::from_std)

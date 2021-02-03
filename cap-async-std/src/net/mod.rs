@@ -8,7 +8,6 @@
 //! connect to, this crates has methods on [`Catalog`] which operate on addresses
 //! which must be present in the catalog.
 //!
-//! [`async_std::net`]: https://docs.rs/async-std/latest/async_std/net/
 //! [`Catalog`]: struct.Catalog.html
 
 mod catalog;

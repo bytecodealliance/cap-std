@@ -23,10 +23,9 @@ use std::{
 /// a file, you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open`] or [`Dir::create`].
 ///
-/// [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html
-/// [`Dir`]: struct.Dir.html
-/// [`Dir::open`]: struct.Dir.html#method.open
-/// [`Dir::create`]: struct.Dir.html#method.create
+/// [`Dir`]: crate::fs::Dir
+/// [`Dir::open`]: crate::fs::Dir::open
+/// [`Dir::create`]: crate::fs::Dir::create
 pub struct File {
     cap_std: crate::fs::File,
 }
@@ -57,8 +56,6 @@ impl File {
     /// Returns a new `OpenOptions` object.
     ///
     /// This corresponds to [`std::fs::File::with_options`].
-    ///
-    /// [`std::fs::File::with_options`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.with_options
     #[inline]
     #[cfg(with_options)]
     pub fn with_options() -> OpenOptions {
@@ -68,8 +65,6 @@ impl File {
     /// Attempts to sync all OS-internal metadata to disk.
     ///
     /// This corresponds to [`std::fs::File::sync_all`].
-    ///
-    /// [`std::fs::File::sync_all`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_all
     #[inline]
     pub fn sync_all(&self) -> io::Result<()> {
         self.cap_std.sync_all()
@@ -79,8 +74,6 @@ impl File {
     /// file metadata to a filesystem.
     ///
     /// This corresponds to [`std::fs::File::sync_data`].
-    ///
-    /// [`std::fs::File::sync_data`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.sync_data
     #[inline]
     pub fn sync_data(&self) -> io::Result<()> {
         self.cap_std.sync_data()
@@ -90,8 +83,6 @@ impl File {
     /// to become size.
     ///
     /// This corresponds to [`std::fs::File::set_len`].
-    ///
-    /// [`std::fs::File::set_len`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_len
     #[inline]
     pub fn set_len(&self, size: u64) -> io::Result<()> {
         self.cap_std.set_len(size)
@@ -100,8 +91,6 @@ impl File {
     /// Queries metadata about the underlying file.
     ///
     /// This corresponds to [`std::fs::File::metadata`].
-    ///
-    /// [`std::fs::File::metadata`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         self.cap_std.metadata()
@@ -111,8 +100,6 @@ impl File {
     /// `File` instance.
     ///
     /// This corresponds to [`std::fs::File::try_clone`].
-    ///
-    /// [`std::fs::File::try_clone`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.try_clone
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         Ok(Self::from_cap_std(self.cap_std.try_clone()?))
@@ -121,8 +108,6 @@ impl File {
     /// Changes the permissions on the underlying file.
     ///
     /// This corresponds to [`std::fs::File::set_permissions`].
-    ///
-    /// [`std::fs::File::set_permissions`]: https://doc.rust-lang.org/std/fs/struct.File.html#method.set_permissions
     #[inline]
     pub fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
         self.cap_std.set_permissions(perm)

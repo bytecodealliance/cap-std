@@ -6,8 +6,6 @@ use std::{fs, io};
 ///
 /// This corresponds to [`std::fs::Permissions`].
 ///
-/// [`std::fs::Permissions`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html
-///
 /// <details>
 /// We need to define our own version because the libstd `Permissions` doesn't have
 /// a public constructor that we can use.
@@ -61,9 +59,7 @@ impl Permissions {
 
     /// Returns `true` if these permissions describe a readonly (unwritable) file.
     ///
-    /// This corresponds to [`Permissions::readonly`].
-    ///
-    /// [`std::fs::Permissions::readonly`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html#method.readonly
+    /// This corresponds to [`std::fs::Permissions::readonly`].
     #[inline]
     pub const fn readonly(&self) -> bool {
         self.readonly
@@ -71,9 +67,7 @@ impl Permissions {
 
     /// Modifies the readonly flag for this set of permissions.
     ///
-    /// This corresponds to [`Permissions::set_readonly`].
-    ///
-    /// [`std::fs::Permissions::set_readonly`]: https://doc.rust-lang.org/std/fs/struct.Permissions.html#method.set_readonly
+    /// This corresponds to [`std::fs::Permissions::set_readonly`].
     #[inline]
     pub fn set_readonly(&mut self, readonly: bool) {
         self.readonly = readonly;

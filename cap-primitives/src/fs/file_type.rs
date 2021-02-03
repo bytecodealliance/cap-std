@@ -22,8 +22,6 @@ enum Inner {
 ///
 /// This corresponds to [`std::fs::FileType`].
 ///
-/// [`std::fs::FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
-///
 /// <details>
 /// We need to define our own version because the libstd `FileType` doesn't have
 /// a public constructor that we can use.
@@ -59,8 +57,6 @@ impl FileType {
     /// Tests whether this file type represents a directory.
     ///
     /// This corresponds to [`std::fs::FileType::is_dir`].
-    ///
-    /// [`std::fs::FileType::is_dir`]: https://doc.rust-lang.org/std/fs/struct.FileType.html#method.is_dir
     #[inline]
     pub fn is_dir(&self) -> bool {
         self.0 == Inner::Dir
@@ -69,8 +65,6 @@ impl FileType {
     /// Tests whether this file type represents a regular file.
     ///
     /// This corresponds to [`std::fs::FileType::is_file`].
-    ///
-    /// [`std::fs::FileType::is_file`]: https://doc.rust-lang.org/std/fs/struct.FileType.html#method.is_file
     #[inline]
     pub fn is_file(&self) -> bool {
         self.0 == Inner::File
@@ -79,8 +73,6 @@ impl FileType {
     /// Tests whether this file type represents a symbolic link.
     ///
     /// This corresponds to [`std::fs::FileType::is_symlink`].
-    ///
-    /// [`std::fs::FileType::is_symlink`]: https://doc.rust-lang.org/std/fs/struct.FileType.html#method.is_symlink
     #[inline]
     pub fn is_symlink(&self) -> bool {
         if let Inner::Ext(ext) = self.0 {

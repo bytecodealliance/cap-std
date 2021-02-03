@@ -18,7 +18,6 @@ use std::pin::Pin;
 /// you must first obtain a [`Catalog`] permitting the address, and then call
 /// [`Catalog::connect_tcp_stream`].
 ///
-/// [`async_std::net::TcpStream`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html
 /// [`Catalog`]: struct.Catalog.html
 /// [`Catalog::connect_tcp_stream`]: struct.Catalog.html#method.connect_tcp_stream
 pub struct TcpStream {
@@ -40,8 +39,6 @@ impl TcpStream {
     /// Returns the local socket address of this listener.
     ///
     /// This corresponds to [`async_std::net::TcpStream::local_addr`].
-    ///
-    /// [`async_std::net::TcpStream::local_addr`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.local_addr
     #[inline]
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.std.local_addr()
@@ -50,8 +47,6 @@ impl TcpStream {
     /// Shuts down the read, write, or both halves of this connection.
     ///
     /// This corresponds to [`async_std::net::TcpStream::shutdown`].
-    ///
-    /// [`async_std::net::TcpStream::shutdown`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.shutdown
     #[inline]
     pub fn shutdown(&self, how: Shutdown) -> io::Result<()> {
         self.std.shutdown(how)
@@ -71,8 +66,6 @@ impl TcpStream {
     /// removing that data from the queue.
     ///
     /// This corresponds to [`async_std::net::TcpStream::peek`].
-    ///
-    /// [`async_std::net::TcpStream::peek`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.peek
     #[inline]
     pub async fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         self.std.peek(buf).await
@@ -81,8 +74,6 @@ impl TcpStream {
     /// Sets the value of the `TCP_NODELAY` option on this socket.
     ///
     /// This corresponds to [`async_std::net::TcpStream::set_nodelay`].
-    ///
-    /// [`async_std::net::TcpStream::set_nodelay`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.set_nodelay
     #[inline]
     pub fn set_nodelay(&self, nodelay: bool) -> io::Result<()> {
         self.std.set_nodelay(nodelay)
@@ -91,8 +82,6 @@ impl TcpStream {
     /// Gets the value of the `TCP_NODELAY` option on this socket.
     ///
     /// This corresponds to [`async_std::net::TcpStream::nodelay`].
-    ///
-    /// [`async_std::net::TcpStream::nodelay`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.nodelay
     #[inline]
     pub fn nodelay(&self) -> io::Result<bool> {
         self.std.nodelay()
@@ -101,8 +90,6 @@ impl TcpStream {
     /// Sets the value for the `IP_TTL` option on this socket.
     ///
     /// This corresponds to [`async_std::net::TcpStream::set_ttl`].
-    ///
-    /// [`async_std::net::TcpStream::set_ttl`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.set_ttl
     #[inline]
     pub fn set_ttl(&self, ttl: u32) -> io::Result<()> {
         self.std.set_ttl(ttl)
@@ -111,8 +98,6 @@ impl TcpStream {
     /// Gets the value of the `IP_TTL` option for this socket.
     ///
     /// This corresponds to [`async_std::net::TcpStream::ttl`].
-    ///
-    /// [`async_std::net::TcpStream::ttl`]: https://docs.rs/async-std/latest/async_std/net/struct.TcpStream.html#method.ttl
     #[inline]
     pub fn ttl(&self) -> io::Result<u32> {
         self.std.ttl()

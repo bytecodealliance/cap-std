@@ -20,9 +20,8 @@
 //! On WASI, use of this library closely reflects the underlying system
 //! API, so it avoids compatibility layers.
 //!
-//! [`std`]: https://doc.rust-lang.org/std/
-//! [`Dir`]: fs/struct.Dir.html
-//! [`Catalog`]: net/struct.Catalog.html
+//! [`Dir`]: fs::Dir
+//! [`Catalog`]: net::Catalog
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]

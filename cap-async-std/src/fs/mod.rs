@@ -21,10 +21,7 @@
 //! `canonicalize`, `read_link`, `read_dir`, `metadata`, and `symlink_metadata`
 //! functions.
 //!
-//! [`async_std::fs`]: https://docs.rs/async-std/latest/async_std/fs/
 //! [`async_std::fs`'s free functions]: https://docs.rs/async-std/latest/async_std/fs/#functions
-//! [`async_std::fs::File`]: https://docs.rs/async-std/latest/async_std/fs/struct.File.html
-//! [`Dir`]: struct.Dir.html
 
 mod dir;
 mod dir_entry;
