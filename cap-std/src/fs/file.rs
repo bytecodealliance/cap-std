@@ -325,12 +325,6 @@ impl Seek for File {
 
     #[cfg(seek_convenience)]
     #[inline]
-    fn stream_len(&mut self) -> io::Result<u64> {
-        self.std.stream_len()
-    }
-
-    #[cfg(seek_convenience)]
-    #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         self.std.stream_position()
     }
@@ -340,12 +334,6 @@ impl Seek for &File {
     #[inline]
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
         (&mut &self.std).seek(pos)
-    }
-
-    #[cfg(seek_convenience)]
-    #[inline]
-    fn stream_len(&mut self) -> io::Result<u64> {
-        (&mut &self.std).stream_len()
     }
 
     #[cfg(seek_convenience)]

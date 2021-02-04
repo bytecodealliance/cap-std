@@ -268,8 +268,6 @@ impl Seek for File {
         Seek::poll_seek(Pin::new(&mut self.cap_std), cx, pos)
     }
 
-    // async_std doesn't have `stream_len`.
-
     // async_std doesn't have `stream_position`.
 }
 
@@ -278,8 +276,6 @@ impl Seek for &File {
     fn poll_seek(self: Pin<&mut Self>, cx: &mut Context, pos: SeekFrom) -> Poll<io::Result<u64>> {
         Seek::poll_seek(Pin::new(&mut &self.cap_std), cx, pos)
     }
-
-    // async_std doesn't have `stream_len`.
 
     // async_std doesn't have `stream_position`.
 }
