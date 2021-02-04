@@ -3,7 +3,8 @@ use crate::fs::{
     open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir,
     ReadDirInner,
 };
-use std::{ffi::OsString, fmt, fs, io};
+use std::{ffi::OsString, fmt, fs, io, os::windows::fs::OpenOptionsExt};
+use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
 
 pub(crate) struct DirEntryInner {
     std: fs::DirEntry,
