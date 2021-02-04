@@ -9,7 +9,6 @@ fn main() {
             "extend_one",         // https://github.com/rust-lang/rust/issues/72631
             "pattern",            // https://github.com/rust-lang/rust/issues/27721
             "seek_convenience",   // https://github.com/rust-lang/rust/issues/59359
-            "seek_stream_len",    // https://github.com/rust-lang/rust/issues/59359
             "shrink_to",          // https://github.com/rust-lang/rust/issues/56431
             "toowned_clone_into", // https://github.com/rust-lang/rust/issues/41263
             "try_reserve",        // https://github.com/rust-lang/rust/issues/56431
