@@ -87,9 +87,6 @@ pub trait DirExt {
     /// Removal of symlinks has different behavior under Windows - if a symlink
     /// points to a directory, it cannot be removed with the `remove_file`
     /// operation. This method will remove files and all symlinks.
-    ///
-    /// On Windows, if a file or symlink does not exist at this path, but an
-    /// empty directory does exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
@@ -173,9 +170,6 @@ pub trait DirExtUtf8 {
     /// Removal of symlinks has different behavior under Windows - if a symlink
     /// points to a directory, it cannot be removed with the remove_file
     /// operation. This method will remove files and all symlinks.
-    ///
-    /// On Windows, if a file or symlink does not exist at this path, but an
-    /// empty directory does exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 
@@ -268,8 +262,88 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        // This operation may race, because it checks the metadata before deleting
+        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
+        // not get it to work.
+        fn delete_symlink_to_dir(dir: &cap_std::fs::Dir, path: &Path) -> io::Result<()> {
+            use crate::{FollowSymlinks, OpenOptionsFollowExt};
+            use cap_std::fs::OpenOptions;
+            use std::os::windows::fs::OpenOptionsExt;
+            use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+
+            let mut opts = OpenOptions::new();
+            opts.read(true);
+            opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+            opts.follow(FollowSymlinks::No);
+            let file = dir.open_with(path, &opts)?;
+
+            let meta = file.metadata()?;
+            if meta.file_type().is_symlink() {
+                drop(file);
+                // Symlinks that point to directories use the remove_dir, not remove_file,
+                // operation on windows:
+                dir.remove_dir(path)?;
+                Ok(())
+            } else {
+                Err(io::Error::from_raw_os_error(
+                    winapi::shared::winerror::ERROR_DIRECTORY as i32,
+                ))
+            }
+        }
+
         self.remove_file(path.as_ref())
-            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
+            .or_else(|e| delete_symlink_to_dir(&self, path.as_ref()).map_err(|_| e))
+    }
+}
+
+#[cfg(all(test, feature = "std"))]
+mod std_remove_file_or_symlink_tests {
+    use super::DirExt;
+    use cap_tempfile::TempDir;
+    #[test]
+    fn remove_file() {
+        let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+        let file = tempdir.create("file").expect("create file to delete");
+        drop(file);
+        tempdir.remove_file_or_symlink("file").expect("delete file");
+        assert!(!tempdir.exists("file"), "deletion worked");
+    }
+    #[test]
+    fn remove_symlink_to_file() {
+        let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+        let target = tempdir.create("target").expect("create target file");
+        drop(target);
+        tempdir.symlink("target", "link").expect("create symlink");
+        assert!(tempdir.exists("link"), "link exists");
+        tempdir
+            .remove_file_or_symlink("link")
+            .expect("delete symlink");
+        assert!(!tempdir.exists("link"), "link deleted");
+        assert!(tempdir.exists("target"), "target not deleted");
+    }
+    #[test]
+    fn remove_symlink_to_dir() {
+        let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+        let target = tempdir.create_dir("target").expect("create target dir");
+        drop(target);
+        tempdir.symlink("target", "link").expect("create symlink");
+        assert!(tempdir.exists("link"), "link exists");
+        tempdir
+            .remove_file_or_symlink("link")
+            .expect("delete symlink");
+        assert!(!tempdir.exists("link"), "link deleted");
+        assert!(tempdir.exists("target"), "target not deleted");
+    }
+    #[test]
+    fn do_not_remove_dir() {
+        let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+        let subdir = tempdir.create_dir("subdir").expect("create dir");
+        drop(subdir);
+        assert!(tempdir.exists("subdir"), "subdir created");
+        tempdir
+            .remove_file_or_symlink("subdir")
+            .expect_err("should not delete empty directory");
+        assert!(tempdir.exists("subdir"), "subdir not deleted");
     }
 }
 
@@ -362,8 +436,37 @@ impl DirExt for cap_async_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
+        // This operation may race, because it checks the metadata before deleting
+        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
+        // not get it to work.
+        fn delete_symlink_to_dir(dir: &cap_std::fs::Dir, path: &str) -> io::Result<()> {
+            use crate::{FollowSymlinks, OpenOptionsFollowExt};
+            use cap_std::fs::OpenOptions;
+            use std::os::windows::fs::OpenOptionsExt;
+            use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+
+            let mut opts = OpenOptions::new();
+            opts.read(true);
+            opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+            opts.follow(FollowSymlinks::No);
+            let file = dir.open_with(path, &opts)?;
+
+            let meta = file.metadata()?;
+            if meta.file_type().is_symlink() {
+                drop(file);
+                // Symlinks that point to directories use the remove_dir, not remove_file,
+                // operation on windows:
+                dir.remove_dir(path)?;
+                Ok(())
+            } else {
+                Err(io::Error::from_raw_os_error(
+                    winapi::shared::winerror::ERROR_DIRECTORY as i32,
+                ))
+            }
+        }
+
         self.remove_file(path.as_ref())
-            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
+            .or_else(|e| delete_symlink_to_dir(&self, path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -460,8 +563,37 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        // This operation may race, because it checks the metadata before deleting
+        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
+        // not get it to work.
+        fn delete_symlink_to_dir(dir: &cap_std::fs_utf8::Dir, path: &str) -> io::Result<()> {
+            use crate::{FollowSymlinks, OpenOptionsFollowExt};
+            use cap_std::fs::OpenOptions;
+            use std::os::windows::fs::OpenOptionsExt;
+            use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+
+            let mut opts = OpenOptions::new();
+            opts.read(true);
+            opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+            opts.follow(FollowSymlinks::No);
+            let file = dir.open_with(path, &opts)?;
+
+            let meta = file.metadata()?;
+            if meta.file_type().is_symlink() {
+                drop(file);
+                // Symlinks that point to directories use the remove_dir, not remove_file,
+                // operation on windows:
+                dir.remove_dir(path)?;
+                Ok(())
+            } else {
+                Err(io::Error::from_raw_os_error(
+                    winapi::shared::winerror::ERROR_DIRECTORY as i32,
+                ))
+            }
+        }
+
         self.remove_file(path.as_ref())
-            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
+            .or_else(|e| delete_symlink_to_dir(&self, path.as_ref()).map_err(|_| e))
     }
 }
 
@@ -564,8 +696,37 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+        // This operation may race, because it checks the metadata before deleting
+        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
+        // not get it to work.
+        fn delete_symlink_to_dir(dir: &cap_std_async::fs_utf8::Dir, path: &str) -> io::Result<()> {
+            use crate::{FollowSymlinks, OpenOptionsFollowExt};
+            use cap_std::fs::OpenOptions;
+            use std::os::windows::fs::OpenOptionsExt;
+            use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+
+            let mut opts = OpenOptions::new();
+            opts.read(true);
+            opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+            opts.follow(FollowSymlinks::No);
+            let file = dir.open_with(path, &opts)?;
+
+            let meta = file.metadata()?;
+            if meta.file_type().is_symlink() {
+                drop(file);
+                // Symlinks that point to directories use the remove_dir, not remove_file,
+                // operation on windows:
+                dir.remove_dir(path)?;
+                Ok(())
+            } else {
+                Err(io::Error::from_raw_os_error(
+                    winapi::shared::winerror::ERROR_DIRECTORY as i32,
+                ))
+            }
+        }
+
         self.remove_file(path.as_ref())
-            .or_else(|e| self.remove_dir(path.as_ref()).map_err(|_| e))
+            .or_else(|e| delete_symlink_to_dir(&self, path.as_ref()).map_err(|_| e))
     }
 }
 
