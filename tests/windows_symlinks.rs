@@ -61,8 +61,8 @@ fn windows_symlinks_ambient() {
     assert!(fs::File::open(dir.path().join("file_symlink_dir")).is_err());
 
     // Windows 2016 doesn't issue errors here, so disable these tests. According to
-    // https://techthoughts.info/windows-version-numbers/#Windows_Server_Version_Releases
-    // https://stackoverflow.com/questions/53393150/c-how-to-detect-windows-server-2019
+    // <https://techthoughts.info/windows-version-numbers/#Windows_Server_Version_Releases>
+    // <https://stackoverflow.com/questions/53393150/c-how-to-detect-windows-server-2019>
     // the build numbers for Windows 2016 are up to 17134. Also it appears we need to
     // apply a mask to the version `nt_version` gives us. This is guesswork.
     let (_maj, _min, build) = nt_version::get();

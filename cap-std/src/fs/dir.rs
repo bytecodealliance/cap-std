@@ -41,7 +41,7 @@ pub struct Dir {
 }
 
 impl Dir {
-    /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
@@ -55,7 +55,7 @@ impl Dir {
         Self { std_file }
     }
 
-    /// Consumes `self` and returns a `std::fs::File`.
+    /// Consumes `self` and returns a [`std::fs::File`].
     #[inline]
     pub fn into_std_file(self) -> fs::File {
         self.std_file
