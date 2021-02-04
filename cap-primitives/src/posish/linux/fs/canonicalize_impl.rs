@@ -43,8 +43,8 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
 
                         let mut path_buf = canonical_path.to_path_buf();
 
-                        // Replace "" with ".", since "" as a relative path is interpreted as an
-                        // error.
+                        // Replace "" with ".", since "" as a relative path is
+                        // interpreted as an error.
                         if path_buf.as_os_str().is_empty() {
                             path_buf.push(Component::CurDir);
                         }

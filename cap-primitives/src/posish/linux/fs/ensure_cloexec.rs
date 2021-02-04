@@ -5,12 +5,12 @@ use std::{fs, io};
 // library/std/src/sys/unix/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-// Currently the standard library supports Linux 2.6.18 which did not
-// have the O_CLOEXEC flag (passed above). If we're running on an older
-// Linux kernel then the flag is just ignored by the OS. After we open
-// the first file, we check whether it has CLOEXEC set. If it doesn't,
-// we will explicitly ask for a CLOEXEC fd for every further file we
-// open, if it does, we will skip that step.
+// Currently the standard library supports Linux 2.6.18 which did not have the
+// `O_CLOEXEC` flag (passed above). If we're running on an older Linux kernel
+// then the flag is just ignored by the OS. After we open the first file, we
+// check whether it has CLOEXEC set. If it doesn't, we will explicitly ask for
+// a CLOEXEC fd for every further file we open, if it does, we will skip that
+// step.
 //
 // The CLOEXEC flag, however, is supported on versions of macOS/BSD/etc
 // that we support, so we only do this on Linux currently.

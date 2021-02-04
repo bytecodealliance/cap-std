@@ -96,9 +96,9 @@ impl<'start> Context<'start> {
 
         #[cfg(not(windows))]
         {
-            // Add the path components to the worklist. Rust's `Path` normalizes
-            // away `.` components, however a trailing `.` affects path lookup, so
-            // special-case it here.
+            // Add the path components to the worklist. Rust's `Path`
+            // normalizes away `.` components, however a trailing `.` affects
+            // path lookup, so special-case it here.
             if trailing_dot {
                 components.push(CowComponent::CurDir);
             }
@@ -143,8 +143,8 @@ impl<'start> Context<'start> {
             // than to ask for permission. But we use `check_dot_access` to
             // check access for opening `.` and `..` in situations where we
             // already have open handles to them, and now we're accessing them
-            // through different paths, and we need to check whether these paths
-            // allow us access.
+            // through different paths, and we need to check whether these
+            // paths allow us access.
             //
             // Android and Emscripten lack `AT_EACCESS`.
             // <https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp>
@@ -245,8 +245,8 @@ impl<'start> Context<'start> {
                 .dir_required(dir_required),
         ) {
             Ok(file) => {
-                // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file` is a
-                // symlink, follow it.
+                // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file`
+                // is a symlink, follow it.
                 #[cfg(any(target_os = "android", target_os = "linux"))]
                 if should_emulate_o_path(&use_options) {
                     match read_link_one(
@@ -258,8 +258,9 @@ impl<'start> Context<'start> {
                         Ok(destination) => {
                             return self.push_symlink_destination(destination);
                         }
-                        // If it isn't a symlink, handle it as normal. `readlinkat` returns
-                        // `ENOENT` if the file isn't a symlink in this situation.
+                        // If it isn't a symlink, handle it as normal.
+                        // `readlinkat` returns `ENOENT` if the file isn't a
+                        // symlink in this situation.
                         Err(err) if err.kind() == io::ErrorKind::NotFound => (),
                         // If `readlinkat` fails any other way, pass it on.
                         Err(err) => return Err(err),
@@ -291,9 +292,10 @@ impl<'start> Context<'start> {
             }
             Err(OpenUncheckedError::NotFound(err)) => Err(err),
             Err(OpenUncheckedError::Other(err)) => {
-                // An error occurred. If this was the last component, and the error wasn't
-                // due to invalid inputs (eg. the path has an embedded NUL), record it as
-                // the last component of the canonical path, even if we couldn't open it.
+                // An error occurred. If this was the last component, and the
+                // error wasn't due to invalid inputs (eg. the path has an
+                // embedded NUL), record it as the last component of the
+                // canonical path, even if we couldn't open it.
                 if self.components.is_empty() && err.kind() != io::ErrorKind::InvalidInput {
                     self.canonical_path.push(one);
                     self.canonical_path.complete();
@@ -324,8 +326,8 @@ impl<'start> Context<'start> {
             // ends in a `.`.
             let trailing_dot_really = path_really_has_trailing_dot(&destination);
 
-            // Windows appears to disallow symlinks to paths with trailing slashes,
-            // slashdots, or slashdotdots.
+            // Windows appears to disallow symlinks to paths with trailing
+            // slashes, slashdots, or slashdotdots.
             if trailing_slash
                 || (trailing_dot_really && destination.as_os_str() != Component::CurDir.as_os_str())
                 || (trailing_dotdot && destination.as_os_str() != Component::ParentDir.as_os_str())
@@ -474,10 +476,12 @@ pub(crate) fn stat<'start>(
             CowComponent::ParentDir => ctx.parent_dir()?,
             CowComponent::Normal(one) => {
                 if ctx.components.is_empty() {
-                    // If this is the last component, do a non-following `stat_unchecked` on it.
+                    // If this is the last component, do a non-following
+                    // `stat_unchecked` on it.
                     let stat = stat_unchecked(&ctx.base, one.as_ref(), FollowSymlinks::No)?;
 
-                    // If we weren't asked to follow symlinks, or it wasn't a symlink, we're done.
+                    // If we weren't asked to follow symlinks, or it wasn't a
+                    // symlink, we're done.
                     if options.follow == FollowSymlinks::No || !stat.file_type().is_symlink() {
                         if stat.is_dir() {
                             if ctx.dir_precluded {
@@ -489,7 +493,8 @@ pub(crate) fn stat<'start>(
                         return Ok(stat);
                     }
 
-                    // On Windows, symlinks know whether they are a file or directory.
+                    // On Windows, symlinks know whether they are a file or
+                    // directory.
                     #[cfg(windows)]
                     if stat.file_attributes() & FILE_ATTRIBUTE_DIRECTORY != 0 {
                         ctx.dir_required = true;
@@ -497,7 +502,8 @@ pub(crate) fn stat<'start>(
                         ctx.dir_precluded = true;
                     }
 
-                    // If it was a symlink and we're asked to follow symlinks, dereference it.
+                    // If it was a symlink and we're asked to follow symlinks,
+                    // dereference it.
                     ctx.symlink(&one, &mut symlink_count)?
                 } else {
                     // Otherwise open the path component normally.

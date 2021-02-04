@@ -6,7 +6,7 @@ use std::time;
 /// This does not directly correspond to anything in `std`, however its methods
 /// correspond to [methods in `std::time::Instant`].
 ///
-/// [methods in `std::time::Instant`]: https://doc.rust-lang.org/std/time/struct.Instant.html
+/// [methods in `std::time::Instant`]: https://doc.rust-lang.org/std/time/struct.Instant.html#impl
 pub struct MonotonicClock(());
 
 impl MonotonicClock {

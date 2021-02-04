@@ -50,7 +50,7 @@ pub fn cvt(i: winapi::shared::minwindef::BOOL) -> io::Result<winapi::shared::min
 }
 
 // Creating a directory junction on windows involves dealing with reparse
-// points and the DeviceIoControl function, and this code is a skeleton of
+// points and the `DeviceIoControl` function, and this code is a skeleton of
 // what can be found here:
 //
 // http://www.flexhex.com/docs/articles/hard-links.phtml

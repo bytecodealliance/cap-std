@@ -477,9 +477,10 @@ impl Dir {
 
     /// Checks if `path` is a directory.
     ///
-    /// This is similar to [`async_std::path::Path::is_dir`] in that it checks if `path` relative to
-    /// `Dir` is a directory. This function will traverse symbolic links to query information about
-    /// the destination file. In case of broken symbolic links, this will return `false`.
+    /// This is similar to [`async_std::path::Path::is_dir`] in that it checks
+    /// if `path` relative to `Dir` is a directory. This function will traverse
+    /// symbolic links to query information about the destination file. In case
+    /// of broken symbolic links, this will return `false`.
     #[inline]
     pub fn is_dir<P: AsRef<str>>(&self, path: P) -> bool {
         match from_utf8(path) {

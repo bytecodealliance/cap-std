@@ -13,8 +13,8 @@ pub(crate) enum FileTypeExt {
 }
 
 impl FileTypeExt {
-    /// Constructs a new instance of `Self` from the given `std::fs::File` and
-    /// `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`]
+    /// and [`std::fs::Metadata`].
     pub(crate) fn from(file: &fs::File, metadata: &fs::Metadata) -> io::Result<FileType> {
         // Check for the things we can do with just metadata.
         let file_type = Self::from_just_metadata(metadata);
@@ -34,14 +34,16 @@ impl FileTypeExt {
         Ok(FileType::unknown())
     }
 
-    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::Metadata`].
     #[inline]
     pub(crate) fn from_just_metadata(metadata: &fs::Metadata) -> FileType {
         let std = metadata.file_type();
         Self::from_std(std)
     }
 
-    /// Constructs a new instance of `Self` from the given `std::fs::FileType`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::FileType`].
     #[inline]
     pub(crate) fn from_std(std: fs::FileType) -> FileType {
         if std.is_file() {

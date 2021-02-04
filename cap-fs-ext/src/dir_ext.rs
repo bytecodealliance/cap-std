@@ -51,9 +51,9 @@ pub trait DirExt {
 
     /// Creates a new symbolic link on a filesystem.
     ///
-    /// This corresponds to [`std::os::unix::fs::symlink`], except that
-    /// it's supported on non-Unix platforms as well, and it's not guaranteed
-    /// to be atomic.
+    /// This corresponds to [`std::os::unix::fs::symlink`], except that it's
+    /// supported on non-Unix platforms as well, and it's not guaranteed to be
+    /// atomic.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -61,8 +61,8 @@ pub trait DirExt {
     /// Creates a new file symbolic link on a filesystem.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_file`], except that
-    /// it's supported on non-Windows platforms as well, and it's not guaranteed
-    /// to fail if the target is not a file.
+    /// it's supported on non-Windows platforms as well, and it's not
+    /// guaranteed to fail if the target is not a file.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -70,8 +70,8 @@ pub trait DirExt {
     /// Creates a new directory symbolic link on a filesystem.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_dir`], except that
-    /// it's supported on non-Windows platforms as well, and it's not guaranteed
-    /// to fail if the target is not a directory.
+    /// it's supported on non-Windows platforms as well, and it's not
+    /// guaranteed to fail if the target is not a directory.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
     fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -84,12 +84,12 @@ pub trait DirExt {
 
     /// Removes a file or symlink from a filesystem.
     ///
-    /// Removal of symlinks has different behavior under Windows - if a symlink points
-    /// to a directory, it cannot be removed with the remove_file operation. This
-    /// method will remove files and all symlinks.
+    /// Removal of symlinks has different behavior under Windows - if a symlink
+    /// points to a directory, it cannot be removed with the `remove_file`
+    /// operation. This method will remove files and all symlinks.
     ///
-    /// On Windows, if a file or symlink does not exist at this path, but an empty directory does
-    /// exist, this function will remove the directory.
+    /// On Windows, if a file or symlink does not exist at this path, but an
+    /// empty directory does exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
 }
 
@@ -137,9 +137,9 @@ pub trait DirExtUtf8 {
 
     /// Creates a new symbolic link on a filesystem.
     ///
-    /// This corresponds to [`std::os::unix::fs::symlink`], except that
-    /// it's supported on non-Unix platforms as well, and it's not guaranteed
-    /// to be atomic.
+    /// This corresponds to [`std::os::unix::fs::symlink`], except that it's
+    /// supported on non-Unix platforms as well, and it's not guaranteed to be
+    /// atomic.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -147,8 +147,8 @@ pub trait DirExtUtf8 {
     /// Creates a new file symbolic link on a filesystem.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_file`], except that
-    /// it's supported on non-Windows platforms as well, and it's not guaranteed
-    /// to fail if the target is not a file.
+    /// it's supported on non-Windows platforms as well, and it's not
+    /// guaranteed to fail if the target is not a file.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     fn symlink_file<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -156,8 +156,8 @@ pub trait DirExtUtf8 {
     /// Creates a new directory symbolic link on a filesystem.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_dir`], except that
-    /// it's supported on non-Windows platforms as well, and it's not guaranteed
-    /// to fail if the target is not a directory.
+    /// it's supported on non-Windows platforms as well, and it's not
+    /// guaranteed to fail if the target is not a directory.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
     fn symlink_dir<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
@@ -170,12 +170,12 @@ pub trait DirExtUtf8 {
 
     /// Removes a file or symlink from a filesystem.
     ///
-    /// Removal of symlinks has different behavior under Windows - if a symlink points
-    /// to a directory, it cannot be removed with the remove_file operation. This
-    /// method will remove files and all symlinks.
+    /// Removal of symlinks has different behavior under Windows - if a symlink
+    /// points to a directory, it cannot be removed with the remove_file
+    /// operation. This method will remove files and all symlinks.
     ///
-    /// On Windows, ff a file or symlink does not exist at this path, but an empty directory does
-    /// exist, this function will remove the directory.
+    /// On Windows, if a file or symlink does not exist at this path, but an
+    /// empty directory does exist, this function will remove the directory.
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 

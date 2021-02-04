@@ -2,8 +2,8 @@ use super::open_parent;
 use crate::fs::MaybeOwnedFile;
 use std::{fs, io, path::Path};
 
-/// Implement `symlink` by `open`ing up the parent component of the path and then
-/// calling `symlink_unchecked` on the last component.
+/// Implement `symlink` by `open`ing up the parent component of the path and
+/// then calling `symlink_unchecked` on the last component.
 #[cfg(not(windows))]
 pub(crate) fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_unchecked;
@@ -14,8 +14,8 @@ pub(crate) fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) ->
     symlink_unchecked(old_path, &new_dir, new_basename.as_ref())
 }
 
-/// Implement `symlink_file` by `open`ing up the parent component of the path and then
-/// calling `symlink_file` on the last component.
+/// Implement `symlink_file` by `open`ing up the parent component of the path
+/// and then calling `symlink_file` on the last component.
 #[cfg(windows)]
 pub(crate) fn symlink_file(
     old_path: &Path,
@@ -30,8 +30,8 @@ pub(crate) fn symlink_file(
     symlink_file_unchecked(old_path, &new_dir, new_basename.as_ref())
 }
 
-/// Implement `symlink_dir` by `open`ing up the parent component of the path and then
-/// calling `symlink_dir` on the last component.
+/// Implement `symlink_dir` by `open`ing up the parent component of the path
+/// and then calling `symlink_dir` on the last component.
 #[cfg(windows)]
 pub(crate) fn symlink_dir(
     old_path: &Path,

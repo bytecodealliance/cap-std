@@ -47,7 +47,8 @@ impl<'path_buf> CanonicalPath<'path_buf> {
     /// The complete canonical path has been scanned. Set `path` to `None`
     /// so that it isn't cleared when `self` is dropped.
     pub(super) fn complete(&mut self) {
-        // Replace "" with ".", since "" as a relative path is interpreted as an error.
+        // Replace "" with ".", since "" as a relative path is interpreted as
+        // an error.
         if let Some(path) = &mut self.path {
             if path.as_os_str().is_empty() {
                 path.push(Component::CurDir);
@@ -60,9 +61,9 @@ impl<'path_buf> CanonicalPath<'path_buf> {
 impl<'path_buf> Drop for CanonicalPath<'path_buf> {
     fn drop(&mut self) {
         // If `self.path` is still `Some` here, it means that we haven't called
-        // `complete()` yet, meaning the `CanonicalPath` is being dropped before
-        // the complete path has been processed. In that case, clear `path` to
-        // indicate that we weren't able to obtain a complete path.
+        // `complete()` yet, meaning the `CanonicalPath` is being dropped
+        // before the complete path has been processed. In that case, clear
+        // `path` to indicate that we weren't able to obtain a complete path.
         if let Some(path) = &mut self.path {
             path.clear();
             self.path = None;

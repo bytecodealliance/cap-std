@@ -1,8 +1,8 @@
 use std::{borrow::Cow, ffi::OsStr, path::Component};
 
 /// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
-/// we don't support absolute paths, and `Normal` has a `Cow` instead of a plain
-/// `OsStr` reference, so it can optionally own its own string.
+/// we don't support absolute paths, and `Normal` has a `Cow` instead of a
+/// plain `OsStr` reference, so it can optionally own its own string.
 pub(super) enum CowComponent<'borrow> {
     PrefixOrRootDir,
     CurDir,

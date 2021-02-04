@@ -13,7 +13,8 @@ pub enum SystemTimeSpec {
 }
 
 impl SystemTimeSpec {
-    /// Constructs a new instance of `Self` from the given `fs_set_times::SystemTimeSpec`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`fs_set_times::SystemTimeSpec`].
     // TODO: Make this a `const fn` once `SystemTime::from_std` is a `const fn`.
     #[inline]
     pub fn from_std(std: fs_set_times::SystemTimeSpec) -> Self {
@@ -25,7 +26,8 @@ impl SystemTimeSpec {
         }
     }
 
-    /// Constructs a new instance of `std::time::SystemTimeSpec` from the given `Self`.
+    /// Constructs a new instance of [`fs_set_times::SystemTimeSpec`] from the
+    /// given `Self`.
     #[inline]
     pub const fn into_std(self) -> fs_set_times::SystemTimeSpec {
         match self {

@@ -35,7 +35,7 @@ pub struct SystemTime {
 
 impl SystemTime {
     /// Constructs a new instance of `Self` from the given
-    /// `std::time::SystemTime`.
+    /// [`std::time::SystemTime`].
     // TODO: Make this a `const fn` once `time::Duration::checked_add` is a `const fn`.
     #[inline]
     pub fn from_std(std: time::SystemTime) -> Self {
@@ -50,7 +50,7 @@ impl SystemTime {
         }
     }
 
-    /// Constructs a new instance of `std::time::SystemTime` from the given
+    /// Constructs a new instance of [`std::time::SystemTime`] from the given
     /// `Self`.
     #[inline]
     pub const fn into_std(self) -> time::SystemTime {

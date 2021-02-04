@@ -32,23 +32,24 @@ pub struct File {
 }
 
 impl File {
-    /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
     /// # Safety
     ///
-    /// `std::fs::File` is not sandboxed and may access any path that the host
+    /// [`std::fs::File`] is not sandboxed and may access any path that the
+    /// host process has access to.
     #[inline]
     pub unsafe fn from_std(std: fs::File) -> Self {
         Self { std }
     }
 
-    /// Consumes `self` and returns a `std::fs::File`.
+    /// Consumes `self` and returns a [`std::fs::File`].
     #[inline]
     pub fn into_std(self) -> fs::File {
         self.std
     }
 
-    /// Returns a new `OpenOptions` object.
+    /// Returns a new [`OpenOptions`] object.
     ///
     /// This corresponds to [`std::fs::File::with_options`].
     #[inline]

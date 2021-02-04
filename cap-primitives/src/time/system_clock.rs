@@ -7,7 +7,7 @@ use std::time;
 /// This does not directly correspond to anything in `std`, however its methods
 /// correspond to [methods in `std::time::SystemTime`].
 ///
-/// [methods in `std::time::SystemTime`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html
+/// [methods in `std::time::SystemTime`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#impl
 pub struct SystemClock(());
 
 impl SystemClock {

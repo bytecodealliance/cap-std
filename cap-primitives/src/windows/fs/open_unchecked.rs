@@ -65,7 +65,8 @@ pub(crate) fn open_unchecked(
             // may be disabled above; do it manually if needed.
             if manually_trunc {
                 // Unwrap is ok because 0 never overflows, and we'll only
-                // have `manually_trunc` set when the file is opened for writing.
+                // have `manually_trunc` set when the file is opened for
+                // writing.
                 f.set_len(0).unwrap();
             }
             Ok(f)

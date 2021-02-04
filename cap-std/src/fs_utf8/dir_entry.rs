@@ -80,7 +80,8 @@ impl DirEntry {
         self.cap_std.file_type()
     }
 
-    /// Returns the bare file name of this directory entry without any other leading path component.
+    /// Returns the bare file name of this directory entry without any other
+    /// leading path component.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_name`].
     #[inline]

@@ -117,14 +117,16 @@ impl OpenOptions {
         self
     }
 
-    /// Sets the option to enable an error if the opened object is not a directory.
+    /// Sets the option to enable an error if the opened object is not a
+    /// directory.
     #[inline]
     pub(crate) fn dir_required(&mut self, dir_required: bool) -> &mut Self {
         self.dir_required = dir_required;
         self
     }
 
-    /// Sets the option to disable an error if the opened object is a directory.
+    /// Sets the option to disable an error if the opened object is a
+    /// directory.
     #[inline]
     pub(crate) fn maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
         self.maybe_dir = maybe_dir;

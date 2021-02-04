@@ -13,9 +13,9 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
     // at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
     let filetype = stat(start, path, FollowSymlinks::No)?.file_type();
     if filetype.is_symlink() {
-        // On Windows symlinks to files and directories are removed differently.
-        // `remove_dir` only deletes dir symlinks and junctions, not file
-        // symlinks.
+        // On Windows symlinks to files and directories are removed
+        // differently. `remove_dir` only deletes dir symlinks and junctions,
+        // not file symlinks.
         remove_dir(start, path)
     } else {
         remove_dir_all_recursive(start, path)?;

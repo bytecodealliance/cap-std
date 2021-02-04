@@ -9,11 +9,11 @@ use std::fmt;
 /// creating directories requires a capability. Use [`Dir::create_dir_with`]
 /// instead.
 ///
-/// [`Dir::create_dir_with`]: https://doc.rust-lang.org/std/fs/struct.Dir.html#method.create_dir_with
+/// [`Dir::create_dir_with`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.create_dir_with
 ///
 /// <details>
-/// We need to define our own version because the libstd `DirBuilder` doesn't have
-/// public accessors that we can use.
+/// We need to define our own version because the libstd `DirBuilder` doesn't
+/// have public accessors that we can use.
 /// </details>
 pub struct DirBuilder {
     pub(crate) recursive: bool,
@@ -21,8 +21,8 @@ pub struct DirBuilder {
 }
 
 impl DirBuilder {
-    /// Creates a new set of options with default mode/security settings for all platforms and also
-    /// non-recursive.
+    /// Creates a new set of options with default mode/security settings for
+    /// all platforms and also non-recursive.
     ///
     /// This corresponds to [`std::fs::DirBuilder::new`].
     #[allow(clippy::new_without_default)]

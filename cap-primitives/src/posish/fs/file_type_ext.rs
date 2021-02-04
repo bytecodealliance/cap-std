@@ -11,8 +11,8 @@ pub(crate) enum FileTypeExt {
 }
 
 impl FileTypeExt {
-    /// Constructs a new instance of `FileType` from the given `std::fs::File` and
-    /// `std::fs::FileType`.
+    /// Constructs a new instance of `FileType` from the given
+    /// [`std::fs::File`] and [`std::fs::FileType`].
     #[inline]
     #[allow(clippy::unnecessary_wraps)]
     pub(crate) fn from(_file: &fs::File, metadata: &fs::Metadata) -> io::Result<FileType> {
@@ -20,14 +20,16 @@ impl FileTypeExt {
         Ok(Self::from_just_metadata(metadata))
     }
 
-    /// Constructs a new instance of `FileType` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `FileType` from the given
+    /// [`std::fs::Metadata`].
     #[inline]
     pub(crate) fn from_just_metadata(metadata: &fs::Metadata) -> FileType {
         let std = metadata.file_type();
         Self::from_std(std)
     }
 
-    /// Constructs a new instance of `Self` from the given `std::fs::FileType`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::FileType`].
     #[inline]
     pub(crate) fn from_std(std: fs::FileType) -> FileType {
         use std::os::unix::fs::FileTypeExt;
@@ -50,7 +52,8 @@ impl FileTypeExt {
         }
     }
 
-    /// Constructs a new instance of `FileType` from the given `libc::mode_t`.
+    /// Constructs a new instance of `FileType` from the given
+    /// [`libc::mode_t`].
     #[inline]
     pub(crate) const fn from_libc(mode: libc::mode_t) -> FileType {
         match mode & libc::S_IFMT {
@@ -95,6 +98,7 @@ impl FileTypeExt {
         Self::Socket
     }
 
+    /// Tests whether this file type represents a symbolic link.
     #[inline]
     pub(crate) fn is_symlink(&self) -> bool {
         *self == Self::Symlink

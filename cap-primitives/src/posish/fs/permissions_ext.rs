@@ -7,7 +7,8 @@ pub(crate) struct PermissionsExt {
 }
 
 impl PermissionsExt {
-    /// Constructs a new instance of `Self` from the given `std::fs::Permissions`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::Permissions`].
     #[inline]
     pub(crate) fn from_std(std: fs::Permissions) -> Self {
         use std::os::unix::fs::PermissionsExt;
@@ -16,7 +17,8 @@ impl PermissionsExt {
         }
     }
 
-    /// Constructs a new instance of `Permissions` from the given `libc::mode_t`.
+    /// Constructs a new instance of `Permissions` from the given
+    /// `libc::mode_t`.
     #[inline]
     pub(crate) const fn from_libc(mode: libc::mode_t) -> Permissions {
         Permissions {

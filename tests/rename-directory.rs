@@ -6,7 +6,7 @@
 #![allow(unused_must_use)]
 #![allow(unused_imports)]
 // This test can't be a unit test in std,
-// because it needs TempDir, which is in extra
+// because it needs `TempDir`, which is in extra
 
 // ignore-cross-compile
 

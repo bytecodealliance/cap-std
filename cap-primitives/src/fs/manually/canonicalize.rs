@@ -8,14 +8,15 @@ use std::{
     path::{Path, PathBuf},
 };
 
-/// Implement `canonicalize` by breaking up the path into components and resolving
-/// each component individually, and resolving symbolic links manually.
+/// Implement `canonicalize` by breaking up the path into components and
+/// resolving each component individually, and resolving symbolic links
+/// manually.
 pub(crate) fn canonicalize(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     canonicalize_with(start, path, FollowSymlinks::Yes)
 }
 
-/// The main body of `canonicalize`, which takes an extra `follow` flag allowing
-/// the caller to disable following symlinks in the last component.
+/// The main body of `canonicalize`, which takes an extra `follow` flag
+/// allowing the caller to disable following symlinks in the last component.
 pub(crate) fn canonicalize_with(
     start: &fs::File,
     path: &Path,
