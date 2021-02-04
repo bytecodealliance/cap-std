@@ -2,22 +2,24 @@ use crate::not_found;
 use cap_std::fs::Dir;
 use std::io;
 
-/// `UserDirs` provides paths of user-facing standard directories, following the
-/// conventions of the operating system the library is running on.
+/// `UserDirs` provides paths of user-facing standard directories, following
+/// the conventions of the operating system the library is running on.
 ///
-/// This corresponds to [`directories_next::UserDirs`], except that the functions open the
-/// directories and returns `Dir`s instead of returning `Path`s.
+/// This corresponds to [`directories_next::UserDirs`], except that the
+/// functions open the directories and returns `Dir`s instead of returning
+/// `Path`s.
 ///
-/// Unlike `directories_next::UserDirs`, the `*_dir` functions return `Dir`s rather than
-/// `Path`s, because absolute paths don't interoperate well with the capability model.
+/// Unlike `directories_next::UserDirs`, the `*_dir` functions return `Dir`s
+/// rather than `Path`s, because absolute paths don't interoperate well with
+/// the capability model.
 #[derive(Clone)]
 pub struct UserDirs {
     inner: directories_next::UserDirs,
 }
 
 impl UserDirs {
-    /// Creates a `UserDirs` struct which holds the paths to user-facing directories for audio,
-    /// font, video, etc. data on the system.
+    /// Creates a `UserDirs` struct which holds the paths to user-facing
+    /// directories for audio, font, video, etc. data on the system.
     ///
     /// This corresponds to [`directories_next::UserDirs::new`].
     pub fn new() -> Option<Self> {

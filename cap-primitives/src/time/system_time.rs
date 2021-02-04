@@ -34,7 +34,8 @@ pub struct SystemTime {
 }
 
 impl SystemTime {
-    /// Constructs a new instance of `Self` from the given `std::time::SystemTime`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::time::SystemTime`.
     // TODO: Make this a `const fn` once `time::Duration::checked_add` is a `const fn`.
     #[inline]
     pub fn from_std(std: time::SystemTime) -> Self {
@@ -49,7 +50,8 @@ impl SystemTime {
         }
     }
 
-    /// Constructs a new instance of `std::time::SystemTime` from the given `Self`.
+    /// Constructs a new instance of `std::time::SystemTime` from the given
+    /// `Self`.
     #[inline]
     pub const fn into_std(self) -> time::SystemTime {
         self.std
@@ -63,9 +65,9 @@ impl SystemTime {
         self.std.duration_since(earlier.std)
     }
 
-    /// Returns `Some(t)` where `t` is the time `self + duration` if `t` can be represented as
-    /// `SystemTime` (which means it's inside the bounds of the underlying data structure), `None`
-    /// otherwise.
+    /// Returns `Some(t)` where `t` is the time `self + duration` if `t` can be
+    /// represented as `SystemTime` (which means it's inside the bounds of the
+    /// underlying data structure), `None` otherwise.
     ///
     /// This corresponds to [`std::time::SystemTime::checked_add`].
     #[inline]
@@ -73,9 +75,9 @@ impl SystemTime {
         self.std.checked_add(duration).map(Self::from_std)
     }
 
-    /// Returns `Some(t)` where `t` is the time `self - duration` if `t` can be represented as
-    /// `SystemTime` (which means it's inside the bounds of the underlying data structure), `None`
-    /// otherwise.
+    /// Returns `Some(t)` where `t` is the time `self - duration` if `t` can be
+    /// represented as `SystemTime` (which means it's inside the bounds of the
+    /// underlying data structure), `None` otherwise.
     ///
     /// This corresponds to [`std::time::SystemTime::checked_sub`].
     #[inline]
@@ -89,8 +91,9 @@ impl Add<Duration> for SystemTime {
 
     /// # Panics
     ///
-    /// This function may panic if the resulting point in time cannot be represented by the
-    /// underlying data structure. See [`SystemTime::checked_add`] for a version without panic.
+    /// This function may panic if the resulting point in time cannot be
+    /// represented by the underlying data structure. See
+    /// [`SystemTime::checked_add`] for a version without panic.
     #[inline]
     fn add(self, dur: Duration) -> Self {
         self.checked_add(dur)

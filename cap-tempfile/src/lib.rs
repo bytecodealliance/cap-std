@@ -13,13 +13,14 @@ use std::{env, fmt, fs, io, mem, ops::Deref};
 #[cfg(not(target_os = "emscripten"))]
 use uuid::Uuid;
 
-/// A directory in a filesystem that is automatically deleted when it goes out of scope.
+/// A directory in a filesystem that is automatically deleted when it goes out
+/// of scope.
 ///
 /// This corresponds to [`tempfile::TempDir`].
 ///
-/// Unlike `tempfile::TempDir`, this API has no `TempDir::path`, `TempDir::into_path`,
-/// or `impl AsRef<Path>`, because absolute paths don't interoperate well with the capability
-/// model.
+/// Unlike `tempfile::TempDir`, this API has no `TempDir::path`,
+/// `TempDir::into_path`, or `impl AsRef<Path>`, because absolute paths don't
+/// interoperate well with the capability model.
 ///
 /// [`tempfile::TempDir`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html
 pub struct TempDir {

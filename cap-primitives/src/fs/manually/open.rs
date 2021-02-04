@@ -50,11 +50,10 @@ struct Context<'start> {
     /// Where there a trailing slash on the path?
     trailing_slash: bool,
 
-    /// If a path ends in `.`, `..`, or `/`, including after expanding symlinks,
-    /// If a path ends in `.`, `..`, or `/`, including after expanding symlinks,
-    /// we need to follow path resolution by opening `.` so that we obtain a
-    /// full `dir_options` file descriptor and confirm that we have search
-    /// rights in the last component.
+    /// If a path ends in `.`, `..`, or `/`, including after expanding
+    /// symlinks, we need to follow path resolution by opening `.` so that we
+    /// obtain a full `dir_options` file descriptor and confirm that we have
+    /// search rights in the last component.
     follow_with_dot: bool,
 
     /// A `PathBuf` that we reuse for calling `read_link_one` to minimize

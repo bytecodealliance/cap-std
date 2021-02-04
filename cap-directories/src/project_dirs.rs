@@ -3,16 +3,17 @@ use cap_std::fs::Dir;
 use std::{fs, io};
 
 /// `ProjectDirs` computes the cache, config or data directories for a specific
-/// application, which are derived from the standard directories and the name of the
-/// project/organization.
+/// application, which are derived from the standard directories and the name
+/// of the project/organization.
 ///
-/// This corresponds to [`directories_next::ProjectDirs`], except that the functions
-/// create the directories if they don't exist, open them, and return `Dir`s
-/// instead of returning `Path`s.
+/// This corresponds to [`directories_next::ProjectDirs`], except that the
+/// functions create the directories if they don't exist, open them, and return
+/// `Dir`s instead of returning `Path`s.
 ///
-/// Unlike `directories_next::ProjectDirs`, this API has no `ProjectDirs::from_path`,
-/// `ProjectDirs::path` or `ProjectDirs::project_path`, and the `*_dir` functions return
-/// `Dir`s rather than `Path`s, because absolute paths don't interoperate well with the
+/// Unlike `directories_next::ProjectDirs`, this API has no
+/// `ProjectDirs::from_path`, `ProjectDirs::path` or
+/// `ProjectDirs::project_path`, and the `*_dir` functions return `Dir`s rather
+/// than `Path`s, because absolute paths don't interoperate well with the
 /// capability model.
 #[derive(Clone)]
 pub struct ProjectDirs {

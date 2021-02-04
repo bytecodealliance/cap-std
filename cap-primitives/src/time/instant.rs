@@ -23,7 +23,8 @@ pub struct Instant {
 }
 
 impl Instant {
-    /// Constructs a new instance of `Self` from the given `std::time::Instant`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::time::Instant`].
     #[inline]
     pub const fn from_std(std: time::Instant) -> Self {
         Self { std }
@@ -37,8 +38,8 @@ impl Instant {
         self.std.duration_since(earlier.std)
     }
 
-    /// Returns the amount of time elapsed from another instant to this one, or None if that instant
-    /// is later than this one.
+    /// Returns the amount of time elapsed from another instant to this one, or
+    /// None if that instant is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::checked_duration_since`].
     #[inline]
@@ -46,8 +47,8 @@ impl Instant {
         self.std.checked_duration_since(earlier.std)
     }
 
-    /// Returns the amount of time elapsed from another instant to this one, or zero duration if
-    /// that instant is later than this one.
+    /// Returns the amount of time elapsed from another instant to this one, or
+    /// zero duration if that instant is later than this one.
     ///
     /// This corresponds to [`std::time::Instant::saturating_duration_since`].
     #[inline]
@@ -55,9 +56,9 @@ impl Instant {
         self.std.saturating_duration_since(earlier.std)
     }
 
-    /// Returns `Some(t)` where `t` is the time `self + duration` if `t` can be represented as
-    /// `Instant` (which means it's inside the bounds of the underlying data structure), `None`
-    /// otherwise.
+    /// Returns `Some(t)` where `t` is the time `self + duration` if `t` can be
+    /// represented as `Instant` (which means it's inside the bounds of the
+    /// underlying data structure), `None` otherwise.
     ///
     /// This corresponds to [`std::time::Instant::checked_add`].
     #[inline]
@@ -65,9 +66,9 @@ impl Instant {
         self.std.checked_add(duration).map(Self::from_std)
     }
 
-    /// Returns `Some(t)` where `t` is the time `self - duration` if `t` can be represented as
-    /// `Instant` (which means it's inside the bounds of the underlying data structure), `None`
-    /// otherwise.
+    /// Returns `Some(t)` where `t` is the time `self - duration` if `t` can be
+    /// represented as `Instant` (which means it's inside the bounds of the
+    /// underlying data structure), `None` otherwise.
     ///
     /// This corresponds to [`std::time::Instant::checked_sub`].
     #[inline]
@@ -81,8 +82,9 @@ impl Add<Duration> for Instant {
 
     /// # Panics
     ///
-    /// This function may panic if the resulting point in time cannot be represented by the
-    /// underlying data structure. See [`Instant::checked_add`] for a version without panic.
+    /// This function may panic if the resulting point in time cannot be
+    /// represented by the underlying data structure. See
+    /// [`Instant::checked_add`] for a version without panic.
     #[inline]
     fn add(self, other: Duration) -> Self {
         self.checked_add(other)

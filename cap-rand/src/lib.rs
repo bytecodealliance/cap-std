@@ -54,11 +54,12 @@ pub mod rngs {
     #[cfg(feature = "small_rng")]
     pub use rand::rngs::SmallRng;
 
-    /// A random number generator that retrieves randomness from from the operating system.
+    /// A random number generator that retrieves randomness from from the
+    /// operating system.
     ///
-    /// This corresponds to [`rand::rngs::OsRng`], except instead of implementing
-    /// `Default` it has an unsafe `default` function since accessing the
-    /// operating system requires ambient authority.
+    /// This corresponds to [`rand::rngs::OsRng`], except instead of
+    /// implementing `Default` it has an unsafe `default` function since
+    /// accessing the operating system requires ambient authority.
     #[derive(Clone, Copy, Debug)]
     pub struct OsRng(());
 
@@ -67,9 +68,9 @@ pub mod rngs {
         ///
         /// # Safety
         ///
-        /// This function is unsafe because it makes use of ambient authority to
-        /// access the platform entropy source, which doesn't uphold the invariant
-        /// of the rest of the API. It is otherwise safe to use.
+        /// This function is unsafe because it makes use of ambient authority
+        /// to access the platform entropy source, which doesn't uphold the
+        /// invariant of the rest of the API. It is otherwise safe to use.
         pub const unsafe fn default() -> Self {
             Self(())
         }
@@ -95,11 +96,11 @@ pub mod rngs {
 
     impl crate::CryptoRng for OsRng {}
 
-    /// The type returned by `thread_rng`, essentially just a reference to a PRNG
-    /// in memory.
+    /// The type returned by `thread_rng`, essentially just a reference to a
+    /// PRNG in memory.
     ///
-    /// This corresponds to [`rand::rngs::ThreadRng`], except that it isn't tied
-    /// to thread-local memory.
+    /// This corresponds to [`rand::rngs::ThreadRng`], except that it isn't
+    /// tied to thread-local memory.
     #[derive(Clone, Debug)]
     pub struct CapRng {
         pub(super) inner: rand::rngs::ThreadRng,
@@ -110,9 +111,9 @@ pub mod rngs {
         ///
         /// # Safety
         ///
-        /// This function is unsafe because it makes use of ambient authority to
-        /// access the platform entropy source, which doesn't uphold the invariant
-        /// of the rest of the API. It is otherwise safe to use.
+        /// This function is unsafe because it makes use of ambient authority
+        /// to access the platform entropy source, which doesn't uphold the
+        /// invariant of the rest of the API. It is otherwise safe to use.
         pub unsafe fn default() -> Self {
             crate::thread_rng()
         }
@@ -139,7 +140,8 @@ pub mod rngs {
     impl crate::CryptoRng for CapRng {}
 }
 
-/// Retrieve the lazily-initialized thread-local random number generator, seeded by the system.
+/// Retrieve the lazily-initialized thread-local random number generator,
+/// seeded by the system.
 ///
 /// This corresponds to [`rand::thread_rng`].
 ///

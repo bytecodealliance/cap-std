@@ -51,8 +51,8 @@ impl SystemClockExt for cap_primitives::time::SystemClock {
     }
 
     fn resolution(&self) -> Duration {
-        // According to [this blog post], the system timer resolution is 55ms or 10ms.
-        // Use the more conservative of the two.
+        // According to [this blog post], the system timer resolution is 55ms
+        // or 10ms. Use the more conservative of the two.
         //
         // [this blog post]: https://devblogs.microsoft.com/oldnewthing/20170921-00/?p=97057
         Duration::new(0, 55_000_000)
