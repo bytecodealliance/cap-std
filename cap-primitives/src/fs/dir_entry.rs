@@ -69,10 +69,11 @@ impl DirEntry {
     ///
     /// On Windows, this produces a `Metadata` object which does not contain
     /// the optional values returned by [`MetadataExt`]. Use
-    /// `cap_fs_ext::DirEntryExt::full_metadata` to obtain a `Metadata` with
+    /// [`cap_fs_ext::DirEntryExt::full_metadata`] to obtain a `Metadata` with
     /// the values filled in.
     ///
     /// [`MetadataExt`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html
+    /// [`cap_fs_ext::DirEntryExt::full_metadata`]: https://docs.rs/cap-fs-ext/latest/cap_fs_ext/trait.DirEntryExt.html#tymethod.full_metadata
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
         self.inner.metadata()
