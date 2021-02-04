@@ -439,7 +439,7 @@ impl DirExt for cap_async_std::fs::Dir {
         // This operation may race, because it checks the metadata before deleting
         // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
         // not get it to work.
-        fn delete_symlink_to_dir(dir: &cap_std::fs::Dir, path: &str) -> io::Result<()> {
+        fn delete_symlink_to_dir(dir: &cap_std::fs::Dir, path: &Path) -> io::Result<()> {
             use crate::{FollowSymlinks, OpenOptionsFollowExt};
             use cap_std::fs::OpenOptions;
             use std::os::windows::fs::OpenOptionsExt;
@@ -699,7 +699,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
         // This operation may race, because it checks the metadata before deleting
         // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
         // not get it to work.
-        fn delete_symlink_to_dir(dir: &cap_std_async::fs_utf8::Dir, path: &str) -> io::Result<()> {
+        fn delete_symlink_to_dir(dir: &cap_async_std::fs_utf8::Dir, path: &str) -> io::Result<()> {
             use crate::{FollowSymlinks, OpenOptionsFollowExt};
             use cap_std::fs::OpenOptions;
             use std::os::windows::fs::OpenOptionsExt;
