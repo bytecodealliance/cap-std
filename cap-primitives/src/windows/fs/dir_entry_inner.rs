@@ -43,8 +43,13 @@ impl DirEntryInner {
     #[inline]
     pub(crate) fn full_metadata(&self) -> io::Result<Metadata> {
         // If we can open the file, we can get a more complete Metadata which
-        // includes file_index, volume_serial_number, and number_of_links.
-        match self.open(OpenOptions::new().read(true).follow(FollowSymlinks::No)) {
+        // includes `file_index`, `volume_serial_number`, and
+        // `number_of_links`.
+        let mut opts = OpenOptions::new();
+        opts.access_mode(0);
+        opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+        opts.follow(FollowSymlinks::No);
+        match self.open(&opts) {
             Ok(opened) => Metadata::from_file(&opened),
             Err(_) => self.metadata(),
         }
