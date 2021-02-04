@@ -67,8 +67,25 @@ impl MetadataExt {
     ///
     /// [`std::fs::Metadata::volume_serial_number`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.volume_serial_number
     #[inline]
+    #[allow(unused_mut)]
     pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
-        Self::from_parts(std, None, None, None)
+        let (mut volume_serial_number, mut number_of_links, mut file_index) = (None, None, None);
+
+        #[cfg(windows_by_handle)]
+        {
+            use std::os::windows::fs::MetadataExt;
+            if let Some(some) = std.volume_serial_number() {
+                volume_serial_number = Some(some);
+            }
+            if let Some(some) = std.number_of_links() {
+                number_of_links = Some(some);
+            }
+            if let Some(some) = std.file_index() {
+                file_index = Some(some);
+            }
+        }
+
+        Self::from_parts(std, volume_serial_number, number_of_links, file_index)
     }
 
     #[inline]
