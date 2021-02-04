@@ -30,8 +30,8 @@ pub(crate) struct MetadataExt {
 }
 
 impl MetadataExt {
-    /// Constructs a new instance of `Self` from the given `std::fs::File` and
-    /// `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`]
+    /// and [`std::fs::Metadata`].
     #[inline]
     #[allow(clippy::unnecessary_wraps)]
     pub(crate) fn from(_file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
@@ -39,7 +39,8 @@ impl MetadataExt {
         Ok(Self::from_just_metadata(std))
     }
 
-    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::Metadata`].
     #[inline]
     pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;

@@ -26,7 +26,7 @@ pub struct Dir {
 }
 
 impl Dir {
-    /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.

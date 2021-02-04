@@ -25,7 +25,7 @@ pub struct Metadata {
 
 #[allow(clippy::len_without_is_empty)]
 impl Metadata {
-    /// Constructs a new instance of `Self` from the given `std::fs::File`.
+    /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     #[inline]
     pub fn from_file(file: &fs::File) -> io::Result<Self> {
         let std = file.metadata()?;
@@ -34,7 +34,8 @@ impl Metadata {
         Ok(Self::from_parts(std, ext, file_type))
     }
 
-    /// Constructs a new instance of `Self` from the given `std::fs::Metadata`.
+    /// Constructs a new instance of `Self` from the given
+    /// [`std::fs::Metadata`].
     ///
     /// As with the comments in [`std::fs::Metadata::volume_serial_number`] and
     /// nearby functions, some fields of the resulting metadata will be `None`.

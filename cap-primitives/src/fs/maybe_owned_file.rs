@@ -5,16 +5,19 @@ use std::{fmt, fs, io, mem, ops::Deref, path::Component};
 use {crate::fs::file_path, std::path::PathBuf};
 
 /// Several places in the code need to be able to handle either owned or
-/// borrowed `std::fs::File`s. Cloning a `File` to let them always have an owned
-/// `File` is expensive and fallible, so use this `struct` to hold either one,
-/// and implement `Deref` to allow them to be handled in a uniform way.
+/// borrowed [`std::fs::File]`s. Cloning a `File` to let them always have an
+/// owned `File` is expensive and fallible, so use this `struct` to hold either
+/// one, and implement [`Deref`] to allow them to be handled in a uniform way.
 ///
-/// This is similar to `Cow`, except without the copy-on-write part ;-). `Cow`
-/// requires a `Clone` implementation, which `File` doesn't have, and most users
-/// of this type don't need copy-on-write behavior.
+/// This is similar to [`Cow`], except without the copy-on-write part ;-).
+/// `Cow` requires a `Clone` implementation, which `File` doesn't have, and
+/// most users of this type don't need copy-on-write behavior.
 ///
 /// And, this type has the special `descend_to`, which just does an assignment,
 /// but also some useful assertion checks.
+///
+/// [`Deref`]: std::ops::Deref
+/// [`Cow`]: std::borrow::Cow
 pub(super) struct MaybeOwnedFile<'borrow> {
     inner: MaybeOwned<'borrow, fs::File>,
 
