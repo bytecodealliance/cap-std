@@ -80,5 +80,10 @@ fn test_metadata_ext() {
             (d_metadata.ino(), d_metadata.dev()),
             (b_metadata.ino(), b_metadata.dev())
         );
+
+        #[cfg(windows)]
+        {
+            assert!(false);
+        }
     }
 }
