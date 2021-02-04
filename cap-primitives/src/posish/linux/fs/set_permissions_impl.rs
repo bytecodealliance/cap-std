@@ -68,7 +68,7 @@ pub(crate) fn set_permissions_impl(
     set_permissions_through_proc_self_fd(start, path, std_perm)
 }
 
-/// Like `file.set_permissions(perm)`, but without dependeing on libc's
+/// Like `file.set_permissions(perm)`, but without depending on libc's
 /// `fchmod`, since some libc implementations such as musl emulate `O_PATH`
 /// support by emulating it with /proc.
 fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {

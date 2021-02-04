@@ -12,7 +12,7 @@ pub(crate) fn remove_open_dir_impl(dir: fs::File) -> io::Result<()> {
     // a directory with this path after the handle is dropped, however it's
     // unlikely to happen by accident, and unlikely to cause major problems.
     // It may cause spurious failures, or failures with different error codes,
-    // but this appears to be unaoidable.
+    // but this appears to be unavoidable.
     //
     // Even if we did have `FILE_SHARE_DELETE` and we kept the handle open
     // while doing the `remove_dir, `FILE_SHARE_DELETE` would grant other

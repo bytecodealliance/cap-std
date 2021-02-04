@@ -9,7 +9,7 @@ use sys_common::io::tmpdir;
 fn basic_reopen() {
     let tmpdir = tmpdir();
 
-    // Open the file with both read and write priveleges, so that we can
+    // Open the file with both read and write privileges, so that we can
     // write to it, and then reopen it for reading.
     let mut file = check!(tmpdir.open_with(
         "file",

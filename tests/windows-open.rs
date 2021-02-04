@@ -24,7 +24,7 @@ fn windows_open_one() {
 
     drop(dir);
 
-    // Now that we've droped the handle, the same operations should succeed.
+    // Now that we've dropped the handle, the same operations should succeed.
     check!(tmpdir.rename("aaa", &tmpdir, "xxx"));
     check!(tmpdir.remove_dir("xxx"));
 }
@@ -45,7 +45,7 @@ fn windows_open_multiple() {
 
     drop(dir);
 
-    // Now that we've droped the handle, the same operations should succeed.
+    // Now that we've dropped the handle, the same operations should succeed.
     check!(tmpdir.rename("aaa/bbb", &tmpdir, "aaa/www"));
     check!(tmpdir.rename("aaa", &tmpdir, "xxx"));
     check!(tmpdir.remove_dir("xxx/www"));
@@ -84,7 +84,7 @@ fn windows_open_tricky() {
 
     drop(dir);
 
-    // Now that we've droped the handle, the same operations should succeed.
+    // Now that we've dropped the handle, the same operations should succeed.
     check!(tmpdir.rename("qqq/aaa/bbb", &tmpdir, "qqq/aaa/www"));
     check!(tmpdir.rename("qqq/aaa", &tmpdir, "qqq/xxx"));
     check!(tmpdir.rename("qqq", &tmpdir, "uuu"));
@@ -110,7 +110,7 @@ fn windows_open_ambient() {
 
     drop(dir);
 
-    // Now that we've droped the handle, the same operations should succeed.
+    // Now that we've dropped the handle, the same operations should succeed.
     check!(tmpdir.rename("aaa", &tmpdir, "xxx"));
     check!(tmpdir.remove_dir("xxx"));
 }

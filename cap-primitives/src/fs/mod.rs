@@ -100,7 +100,7 @@ fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::Erro
     }
 }
 
-/// Test that `file_path` works on a few miscelleanous directory paths.
+/// Test that `file_path` works on a few miscellaneous directory paths.
 #[test]
 fn dir_paths() {
     for path in &[std::env::current_dir().unwrap(), std::env::temp_dir()] {
