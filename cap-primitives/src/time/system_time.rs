@@ -20,14 +20,14 @@ use std::{
 /// `RUSTFLAGS=--cfg emulate_second_only_system` is set, `SystemTime` will
 /// round times from the operating system down to the second. This emulates
 /// the behavior of some file systems, mostly
-/// [HFS](https://en.wikipedia.org/wiki/HFS_Plus), allowing debugging on other
-/// hardware.
+/// [HFS], allowing debugging on other hardware.
 ///
 /// [`SystemClock`]: crate::time::SystemClock
 /// [`SystemClock::now`]: crate::time::SystemClock::now
 /// [`SystemClock::elapsed`]: crate::time::SystemClock::elapsed
 /// [`SystemClock::UNIX_EPOCH`]: crate::time::SystemClock::UNIX_EPOCH
 /// [`filetime` crate]: https://crates.io/crates/filetime
+/// [HFS]: https://en.wikipedia.org/wiki/HFS_Plus
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct SystemTime {
     pub(crate) std: time::SystemTime,

@@ -69,7 +69,7 @@ fn check_proc_dir(
         }
 
         // Proc is a non-device filesystem, so check for major number 0.
-        // https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
+        // <https://www.kernel.org/doc/Documentation/admin-guide/devices.txt>
         if major(dir_metadata.dev()) != 0 {
             return Err(io::Error::new(
                 io::ErrorKind::Other,

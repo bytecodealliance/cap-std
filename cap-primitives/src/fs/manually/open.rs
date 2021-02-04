@@ -148,7 +148,7 @@ impl<'start> Context<'start> {
             // allow us access.
             //
             // Android and Emscripten lack `AT_EACCESS`.
-            // https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp
+            // <https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp>
             #[cfg(any(target_os = "emscripten", target_os = "android"))]
             let at_flags = posish::fs::AtFlags::empty();
             #[cfg(not(any(target_os = "emscripten", target_os = "android")))]

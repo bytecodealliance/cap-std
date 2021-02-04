@@ -72,7 +72,7 @@ pub(crate) use stat_unchecked::*;
 pub(crate) use symlink_unchecked::*;
 
 // On Windows, there is a limit of 63 reparse points on any given path.
-// https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points
+// <https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points>
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;
 
 #[cfg(any(test, racy_asserts))]

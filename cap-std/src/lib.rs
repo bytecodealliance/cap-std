@@ -44,5 +44,5 @@ pub mod net;
 pub mod os;
 pub mod time;
 // For now, re-export `path`; see
-// https://github.com/bytecodealliance/cap-std/issues/88
+// <https://github.com/bytecodealliance/cap-std/issues/88>
 pub use std::path;

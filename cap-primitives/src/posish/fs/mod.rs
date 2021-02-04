@@ -40,7 +40,7 @@ pub(crate) mod errors;
 // FreeBSD has a similar mechanism in `O_BENEATH`, however it appears to have
 // different behavior on absolute and `..` paths in ways that make it unsuitable
 // for `cap-std`'s style of sandboxing. For more information, see the bug filed
-// upstream: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335
+// upstream: <https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335>
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) use crate::posish::darwin::fs::*;
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -108,7 +108,7 @@ pub(crate) use symlink_unchecked::symlink_unchecked;
 pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked};
 
 // On Linux, there is a limit of 40 symlink expansions.
-// Source: https://man7.org/linux/man-pages/man7/path_resolution.7.html
+// Source: <https://man7.org/linux/man-pages/man7/path_resolution.7.html>
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 40;
 
 pub(super) use oflags::*;
