@@ -1,6 +1,6 @@
 [package]
 name = "cap-fs-ext"
-version = "0.13.3-alpha.0"
+version = "0.13.3"
 description = "Extension traits for `Dir`, `File`, etc."
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
