@@ -113,8 +113,10 @@ fn cap_smoke_test() {
 }
 
 #[test]
-#[cfg(target_family = "unix")]
 fn symlinks() {
+    #[cfg(windows)]
+    use cap_fs_ext::DirExt;
+
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all("dir/inner"));
     check!(tmpdir.write("red.txt", b"hello world\n"));
@@ -124,36 +126,86 @@ fn symlinks() {
     let inner = check!(tmpdir.open_dir("dir/inner"));
 
     check!(tmpdir.symlink("dir", "link"));
+    #[cfg(not(windows))]
     check!(tmpdir.symlink("does_not_exist", "badlink"));
 
     check!(tmpdir.open("link/../red.txt"));
     check!(tmpdir.open("link/green.txt"));
     check!(tmpdir.open("link/inner/blue.txt"));
-    error_contains!(tmpdir.open("link/red.txt"), "No such file");
-    error_contains!(tmpdir.open("link/../green.txt"), "No such file");
+    #[cfg(not(windows))]
+    {
+        error_contains!(tmpdir.open("link/red.txt"), "No such file");
+        error_contains!(tmpdir.open("link/../green.txt"), "No such file");
+    }
+    #[cfg(windows)]
+    {
+        error_contains!(
+            tmpdir.open("link/red.txt"),
+            "The system cannot find the file specified."
+        );
+        error_contains!(
+            tmpdir.open("link/../green.txt"),
+            "The system cannot find the file specified."
+        );
+    }
 
     check!(tmpdir.open("./dir/.././/link/..///./red.txt"));
-    error_contains!(
-        tmpdir.open("./dir/.././/link/..///./not.txt"),
-        "No such file"
-    );
     check!(tmpdir.open("link/inner/../inner/../../red.txt"));
     error_contains!(
         inner.open("../inner/../inner/../../link/other.txt"),
         "a path led outside of the filesystem"
     );
-
-    error_contains!(tmpdir.open("link/other.txt"), "No such file");
-    error_contains!(tmpdir.open("badlink/../red.txt"), "No such file");
+    #[cfg(not(windows))]
+    {
+        error_contains!(
+            tmpdir.open("./dir/.././/link/..///./not.txt"),
+            "No such file"
+        );
+        error_contains!(tmpdir.open("link/other.txt"), "No such file");
+        error_contains!(tmpdir.open("badlink/../red.txt"), "No such file");
+    }
+    #[cfg(windows)]
+    {
+        error_contains!(
+            tmpdir.open("./dir/.././/link/..///./not.txt"),
+            "The system cannot find the file specified."
+        );
+        error_contains!(
+            tmpdir.open("link/other.txt"),
+            "The system cannot find the file specified."
+        );
+    }
 }
 
 #[test]
-#[cfg(target_family = "unix")]
+#[cfg(not(windows))]
 fn symlink_loop() {
+    #[cfg(windows)]
+    use cap_fs_ext::DirExt;
+
     let tmpdir = tmpdir();
     check!(tmpdir.symlink("link", "link"));
     // TODO: Check the error message
     error_contains!(tmpdir.open("link"), "");
+}
+
+#[test]
+fn symlink_loop_from_rename() {
+    #[cfg(windows)]
+    use cap_fs_ext::DirExt;
+
+    let tmpdir = tmpdir();
+    check!(tmpdir.create("file"));
+    check!(tmpdir.symlink("file", "link"));
+    check!(tmpdir.open("link"));
+    check!(tmpdir.rename("file", &tmpdir, "renamed"));
+    error_contains!(tmpdir.open("link"), "");
+    check!(tmpdir.rename("link", &tmpdir, "file"));
+    error_contains!(tmpdir.open("file"), "");
+    check!(tmpdir.rename("file", &tmpdir, "link"));
+    error_contains!(tmpdir.open("link"), "");
+    check!(tmpdir.rename("renamed", &tmpdir, "file"));
+    check!(tmpdir.open("link"));
 }
 
 #[cfg(linux)]
