@@ -167,9 +167,9 @@ pub trait DirExtUtf8 {
 
     /// Removes a file or symlink from a filesystem.
     ///
-    /// Removal of symlinks has different behavior under Windows - if a symlink
-    /// points to a directory, it cannot be removed with the remove_file
-    /// operation. This method will remove files and all symlinks.
+    /// This is similar to [`std::fs::remove_file`], except that it also works
+    /// on symlinks to directories on Windows, similar to how `unlink` works
+    /// on symlinks to directories on Posix-ish platforms.
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
 }
 
@@ -262,37 +262,39 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        // This operation may race, because it checks the metadata before deleting
-        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
-        // not get it to work.
-        fn delete_symlink_to_dir(dir: &cap_std::fs::Dir, path: &Path) -> io::Result<()> {
-            use crate::{FollowSymlinks, OpenOptionsFollowExt};
-            use cap_std::fs::OpenOptions;
-            use std::os::windows::fs::OpenOptionsExt;
-            use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+        use crate::{FollowSymlinks, OpenOptionsFollowExt};
+        use cap_primitives::fs::_WindowsByHandle;
+        use cap_std::fs::OpenOptions;
+        use std::os::windows::fs::OpenOptionsExt;
+        use winapi::um::{
+            winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT},
+            winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY},
+        };
+        let path = path.as_ref();
 
-            let mut opts = OpenOptions::new();
-            opts.read(true);
-            opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
-            opts.follow(FollowSymlinks::No);
-            let file = dir.open_with(path, &opts)?;
+        let mut opts = OpenOptions::new();
+        opts.access_mode(DELETE);
+        opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
+        opts.follow(FollowSymlinks::No);
+        let file = self.open_with(path, &opts)?;
 
-            let meta = file.metadata()?;
-            if meta.file_type().is_symlink() {
-                drop(file);
-                // Symlinks that point to directories use the remove_dir, not remove_file,
-                // operation on windows:
-                dir.remove_dir(path)?;
-                Ok(())
-            } else {
-                Err(io::Error::from_raw_os_error(
-                    winapi::shared::winerror::ERROR_DIRECTORY as i32,
-                ))
-            }
+        let meta = file.metadata()?;
+        if meta.file_type().is_symlink()
+            && unsafe { meta.file_attributes() } & FILE_ATTRIBUTE_DIRECTORY
+                == FILE_ATTRIBUTE_DIRECTORY
+        {
+            self.remove_dir(path)?;
+        } else {
+            self.remove_file(path)?;
         }
 
-        self.remove_file(path.as_ref())
-            .or_else(|e| delete_symlink_to_dir(&self, path.as_ref()).map_err(|_| e))
+        // Drop the file after calling `remove_file` or `remove_dir`, since
+        // Windows doesn't actually remove the file until after the last open
+        // handle is closed, and this protects us from race conditions where
+        // other processes replace the file out from underneath us.
+        drop(file);
+
+        Ok(())
     }
 }
 
