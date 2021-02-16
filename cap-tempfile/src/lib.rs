@@ -199,7 +199,7 @@ fn close_tempdir_in() {
 #[test]
 fn close_outer() {
     let t = unsafe { tempdir().unwrap() };
-    let _s = tempdir_in(&t).unwrap();
+    let s = tempdir_in(&t).unwrap();
     #[cfg(windows)]
     assert_eq!(
         t.close().unwrap_err().raw_os_error(),
@@ -207,6 +207,7 @@ fn close_outer() {
     );
     #[cfg(not(windows))]
     t.close().unwrap();
+    drop(s);
 }
 
 #[test]

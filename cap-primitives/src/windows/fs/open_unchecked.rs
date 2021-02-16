@@ -12,9 +12,16 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> Result<fs::File, OpenUncheckedError> {
-    let full_path =
+    let (full_path, enforce_dir) =
         concatenate_or_return_absolute(start, path).map_err(OpenUncheckedError::Other)?;
-    let (opts, manually_trunc) = open_options_to_std(options);
+
+    let mut options = options.clone();
+    if enforce_dir {
+        options.dir_required(true);
+    }
+    drop(enforce_dir);
+
+    let (opts, manually_trunc) = open_options_to_std(&options);
     match opts.open(full_path) {
         Ok(f) => {
             let enforce_dir = options.dir_required;

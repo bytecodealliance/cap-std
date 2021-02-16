@@ -1,4 +1,4 @@
-use crate::fs::{open, FollowSymlinks, OpenOptions};
+use crate::fs::{open, open_unchecked, FollowSymlinks, OpenOptions};
 use std::{
     ffi::OsString,
     fs, io,
@@ -66,7 +66,7 @@ fn cvt(i: i32) -> io::Result<i32> {
 // library/std/src/sys/windows/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-/// *Unsandboxed* function similar to `read_link`, but which does not perform sandboxing.
+/// Implementation function for `read_link`.
 pub(crate) fn read_link_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Open the link with no access mode, instead of generic read.
     // By default FILE_LIST_DIRECTORY is denied for the junction "C:\Documents and Settings", so
@@ -76,6 +76,22 @@ pub(crate) fn read_link_impl(start: &fs::File, path: &Path) -> io::Result<PathBu
     opts.custom_flags(c::FILE_FLAG_OPEN_REPARSE_POINT | c::FILE_FLAG_BACKUP_SEMANTICS);
     opts.follow(FollowSymlinks::No);
     let file = open(start, path, &opts)?;
+    read_link(&file)
+}
+
+/// *Unsandboxed* function similar to `read_link`, but which does not perform
+/// sandboxing.
+pub(crate) fn read_link_unchecked(
+    start: &fs::File,
+    path: &Path,
+    _reuse: PathBuf,
+) -> io::Result<PathBuf> {
+    // The same as `read_link_impl`, but uses `open_unchecked`.
+    let mut opts = OpenOptions::new();
+    opts.access_mode(0);
+    opts.custom_flags(c::FILE_FLAG_OPEN_REPARSE_POINT | c::FILE_FLAG_BACKUP_SEMANTICS);
+    opts.follow(FollowSymlinks::No);
+    let file = open_unchecked(start, path, &opts)?;
     read_link(&file)
 }
 

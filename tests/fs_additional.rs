@@ -130,9 +130,9 @@ fn trailing_slash() {
         assert!(check!(check!(tmpdir.open("file/../file")).metadata()).is_file());
         assert!(check!(check!(tmpdir.open_dir("file/..")).dir_metadata()).is_dir());
         assert!(check!(check!(tmpdir.open("file/.")).metadata()).is_file());
-        error!(tmpdir.open("file/../file/"), 123);
-        error!(tmpdir.open("file/"), 123);
-        error!(tmpdir.open_dir("file/../file/"), 123);
+        assert!(tmpdir.open("file/../file/").is_err());
+        assert!(tmpdir.open("file/").is_err());
+        assert!(tmpdir.open_dir("file/../file/").is_err());
         assert!(tmpdir.open_dir("file/../file").is_err());
         assert!(tmpdir.open_dir("file/.").is_err());
         assert!(tmpdir.open_dir("file/").is_err());
@@ -164,9 +164,9 @@ fn trailing_slash_in_dir() {
         assert!(check!(check!(tmpdir.open("dir/file/../file")).metadata()).is_file());
         assert!(check!(check!(tmpdir.open_dir("dir/file/..")).dir_metadata()).is_dir());
         assert!(check!(check!(tmpdir.open("dir/file/.")).metadata()).is_file());
-        error!(tmpdir.open("dir/file/../file/"), 123);
-        error!(tmpdir.open("dir/file/"), 123);
-        error!(tmpdir.open_dir("dir/file/../file/"), 123);
+        assert!(tmpdir.open("dir/file/../file/").is_err());
+        assert!(tmpdir.open("dir/file/").is_err());
+        assert!(tmpdir.open_dir("dir/file/../file/").is_err());
         assert!(tmpdir.open_dir("dir/file/../file").is_err());
         assert!(tmpdir.open_dir("dir/file/.").is_err());
         assert!(tmpdir.open_dir("dir/file/").is_err());

@@ -1,8 +1,8 @@
-#[cfg(windows_by_handle)]
-use super::get_path::concatenate_or_return_absolute;
 use crate::fs::{FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+#[cfg(windows_by_handle)]
+use {super::get_path::concatenate_or_return_absolute, crate::fs::errors};
 #[cfg(not(windows_by_handle))]
 use {
     crate::fs::{open_unchecked, OpenOptions},
@@ -19,12 +19,15 @@ pub(crate) fn stat_unchecked(
     // has everything.
     #[cfg(windows_by_handle)]
     {
-        let full_path = concatenate_or_return_absolute(start, path)?;
-        match follow {
+        let (full_path, enforce_dir) = concatenate_or_return_absolute(start, path)?;
+        let meta = Metadata::from_just_metadata(match follow {
             FollowSymlinks::Yes => fs::metadata(full_path),
             FollowSymlinks::No => fs::symlink_metadata(full_path),
+        }?);
+        if enforce_dir && !meta.is_dir() {
+            return Err(errors::trailing_slash());
         }
-        .map(Metadata::from_just_metadata)
+        return Ok(meta);
     }
 
     // Otherwise, attempt to open the file to get the metadata that way, as

@@ -20,3 +20,8 @@ pub(crate) fn is_not_directory() -> io::Error {
 pub(crate) fn too_many_symlinks() -> io::Error {
     io::Error::from_raw_os_error(winerror::ERROR_TOO_MANY_LINKS as i32)
 }
+
+#[cold]
+pub(crate) fn trailing_slash() -> io::Error {
+    io::Error::from_raw_os_error(winerror::ERROR_INVALID_NAME as i32)
+}

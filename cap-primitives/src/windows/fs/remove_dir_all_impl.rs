@@ -3,6 +3,8 @@ use crate::fs::{
 };
 #[cfg(windows_file_type_ext)]
 use std::os::windows::fs::FileTypeExt;
+#[cfg(not(windows_file_type_ext))]
+use std::path::PathBuf;
 use std::{
     fs, io,
     path::{Component, Path},
@@ -55,7 +57,11 @@ fn remove_dir_all_recursive(start: &fs::File, path: &Path) -> io::Result<()> {
         let child = child?;
         let child_type = child.file_type()?;
         if child_type.is_dir() {
-            let path = path.join(child.file_name());
+            let path = if path.components().collect::<Vec<_>>() == vec![Component::CurDir] {
+                PathBuf::from(child.file_name())
+            } else {
+                path.join(child.file_name())
+            };
             remove_dir_all_recursive(start, &path)?;
             remove_dir(start, &path)?;
         } else {

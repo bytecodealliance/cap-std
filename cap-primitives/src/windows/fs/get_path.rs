@@ -2,7 +2,7 @@ use std::{
     ffi::OsString,
     fs, io,
     os::windows::ffi::{OsStrExt, OsStringExt},
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
 
 /// Calculates system path of `file`.
@@ -12,27 +12,56 @@ use std::{
 /// path with relative components.
 pub(crate) fn get_path(file: &fs::File) -> io::Result<PathBuf> {
     // get system path to the handle
-    let path = winx::file::get_file_path(file)?;
-
-    // strip extended prefix; otherwise we will error out on any relative
-    // components with `out_path`
-    let wide: Vec<_> = path.as_os_str().encode_wide().collect();
-    let wide_final = if wide.starts_with(&['\\' as u16, '\\' as _, '?' as _, '\\' as _]) {
-        &wide[4..]
-    } else {
-        &wide
-    };
-    Ok(PathBuf::from(OsString::from_wide(wide_final)))
+    winx::file::get_file_path(file).map(PathBuf::from)
 }
 
 /// Convenience function for calling `get_path` and concatenating the result
 /// with `path`. This function also checks if `path` is absolute in which case,
 /// it emulates POSIX and returns the absolute path unmodified instead.
-pub(super) fn concatenate_or_return_absolute(file: &fs::File, path: &Path) -> io::Result<PathBuf> {
+pub(super) fn concatenate_or_return_absolute(
+    file: &fs::File,
+    path: &Path,
+) -> io::Result<(PathBuf, bool)> {
     if path.is_absolute() {
-        return Ok(path.into());
+        return Ok((path.into(), false));
     }
 
     let file_path = get_path(file)?;
-    Ok(file_path.join(path))
+
+    // `path` is relative, so it isn't a UNC path, so Rust will have normalized
+    // `.` paths in it, unless it's just `.`. Check for that case so that we
+    // don't join `.` to a UNC path, which Windows doesn't support.
+    if path.as_os_str() == Component::CurDir.as_os_str() {
+        // Return false for `enforce_dir` since Windows canonicalizes a trailing
+        // `\.` away, even when it doesn't canonicalize a trailing `\` away.
+        return Ok((file_path, false));
+    }
+
+    // Convert `file_path` to 16-bit code units.
+    let wide_file_path: Vec<_> = file_path.as_os_str().encode_wide().collect();
+
+    // If we don't have a UNC path, use the path as is.
+    if !wide_file_path.starts_with(&['\\' as u16, '\\' as _, '?' as _, '\\' as _]) {
+        return Ok((file_path.join(path), false));
+    }
+
+    // Otherwise, we have a UNC path and it's needed. Perform canonicalization
+    // and check for a trailing slash meaning that callers should manually
+    // enforce that the path names a directory.
+    let mut wide_path: Vec<_> = path.as_os_str().encode_wide().collect();
+
+    // Strip trailing dots and whitespace.
+    while wide_path.ends_with(&['.' as u16]) || wide_path.ends_with(&[' ' as u16]) {
+        wide_path.pop();
+    }
+
+    // Strip trailing slashes.
+    let mut dir_required = false;
+    while wide_path.ends_with(&['/' as u16]) || wide_path.ends_with(&['\\' as u16]) {
+        dir_required = true;
+        wide_path.pop();
+    }
+
+    let wide_path = PathBuf::from(OsString::from_wide(&wide_path));
+    Ok((file_path.join(wide_path), dir_required))
 }

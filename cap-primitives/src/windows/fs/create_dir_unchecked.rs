@@ -11,6 +11,6 @@ pub(crate) fn create_dir_unchecked(
     path: &Path,
     _options: &DirOptions,
 ) -> io::Result<()> {
-    let out_path = concatenate_or_return_absolute(start, path)?;
+    let (out_path, _enforce_dir) = concatenate_or_return_absolute(start, path)?;
     fs::create_dir(out_path)
 }
