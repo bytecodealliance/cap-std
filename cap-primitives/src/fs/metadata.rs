@@ -396,6 +396,7 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 #[cfg(windows)]
 #[doc(hidden)]
 pub unsafe trait _WindowsByHandle {
+    unsafe fn file_attributes(&self) -> u32;
     unsafe fn volume_serial_number(&self) -> Option<u32>;
     unsafe fn number_of_links(&self) -> Option<u32>;
     unsafe fn file_index(&self) -> Option<u64>;
