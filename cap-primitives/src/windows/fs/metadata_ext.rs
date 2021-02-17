@@ -1,6 +1,6 @@
 #![allow(clippy::useless_conversion)]
 
-use std::{fs, io};
+use std::{convert::TryInto, fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -38,17 +38,19 @@ impl MetadataExt {
 
         #[cfg(not(windows_by_handle))]
         if volume_serial_number.is_none() || number_of_links.is_none() || file_index.is_none() {
-            let fileinfo = winx::file::get_fileinfo(file)?;
+            let fileinfo = winapi_util::file::information(file)?;
             if volume_serial_number.is_none() {
-                volume_serial_number = Some(fileinfo.dwVolumeSerialNumber);
+                let t64: u64 = fileinfo.volume_serial_number();
+                let t32: u32 = t64.try_into().unwrap();
+                volume_serial_number = Some(t32);
             }
             if number_of_links.is_none() {
-                number_of_links = Some(fileinfo.nNumberOfLinks);
+                let t64: u64 = fileinfo.number_of_links();
+                let t32: u32 = t64.try_into().unwrap();
+                number_of_links = Some(t32);
             }
             if file_index.is_none() {
-                file_index = Some(
-                    (u64::from(fileinfo.nFileIndexHigh) << 32) | u64::from(fileinfo.nFileIndexLow),
-                );
+                file_index = Some(fileinfo.file_index());
             }
         }
 
