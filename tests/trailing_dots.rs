@@ -69,18 +69,75 @@ fn trailing_dots_dir() {
     tmpdir.open_dir("dir. . . ").unwrap();
     tmpdir.open_dir("dir/").unwrap();
     tmpdir.open_dir("dir/.").unwrap();
-    tmpdir.open_dir("dir./").unwrap_err();
-    tmpdir.open_dir("dir./.").unwrap_err();
+    tmpdir.open_dir("dir./").unwrap();
+    tmpdir.open_dir("dir./.").unwrap();
+    tmpdir.open_dir("dir/ ").unwrap();
+    tmpdir.open_dir("dir /").unwrap();
+    tmpdir.open_dir("dir / ").unwrap();
+    tmpdir.open_dir("dir./ ").unwrap();
+    tmpdir.open_dir("dir /.").unwrap();
     tmpdir.open_dir("dir/ . . .").unwrap();
     tmpdir.open_dir("dir/. . . ").unwrap();
     tmpdir.open_dir("dir. . . / . . .").unwrap_err();
     tmpdir.open_dir("dir . . ./. . . ").unwrap_err();
     tmpdir.open_dir("dir/ . . ./. . . / . . .").unwrap_err();
     tmpdir.open_dir("dir/. . . / . . ./. . . ").unwrap_err();
-    tmpdir.open_dir("dir. . . / . . ./. . . / . . .").unwrap_err();
-    tmpdir.open_dir("dir . . ./. . . / . . ./. . . ").unwrap_err();
+    tmpdir
+        .open_dir("dir. . . / . . ./. . . / . . .")
+        .unwrap_err();
+    tmpdir
+        .open_dir("dir . . ./. . . / . . ./. . . ")
+        .unwrap_err();
     tmpdir.open_dir("dir*").unwrap_err();
     tmpdir.open_dir("dir*.").unwrap_err();
     tmpdir.open_dir("dir*..").unwrap_err();
     tmpdir.open_dir("dir*...").unwrap_err();
+}
+
+#[test]
+fn ambient_trailing_dots_dir() {
+    use std::os::windows::fs::OpenOptionsExt;
+    use std::{fs, io, path::Path};
+    use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+
+    fn open_dir(s: &Path) -> io::Result<fs::File> {
+        fs::OpenOptions::new()
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .read(true)
+            .open(s)
+    }
+
+    let dir = tempfile::tempdir().unwrap();
+
+    fs::create_dir(dir.path().join("dir")).unwrap();
+    open_dir(&dir.path().join("dir")).unwrap();
+    open_dir(&dir.path().join("dir.")).unwrap();
+    open_dir(&dir.path().join("dir..")).unwrap();
+    open_dir(&dir.path().join("dir...")).unwrap();
+    open_dir(&dir.path().join("dir ")).unwrap();
+    open_dir(&dir.path().join("dir  ")).unwrap();
+    open_dir(&dir.path().join("dir   ")).unwrap();
+    open_dir(&dir.path().join("dir . . .")).unwrap();
+    open_dir(&dir.path().join("dir. . . ")).unwrap();
+    open_dir(&dir.path().join("dir/")).unwrap();
+    open_dir(&dir.path().join("dir/.")).unwrap();
+    open_dir(&dir.path().join("dir./")).unwrap();
+    open_dir(&dir.path().join("dir./.")).unwrap();
+    open_dir(&dir.path().join("dir/ ")).unwrap();
+    open_dir(&dir.path().join("dir /")).unwrap();
+    open_dir(&dir.path().join("dir / ")).unwrap();
+    open_dir(&dir.path().join("dir./ ")).unwrap();
+    open_dir(&dir.path().join("dir /.")).unwrap();
+    open_dir(&dir.path().join("dir/ . . .")).unwrap();
+    open_dir(&dir.path().join("dir/. . . ")).unwrap();
+    open_dir(&dir.path().join("dir. . . / . . .")).unwrap_err();
+    open_dir(&dir.path().join("dir . . ./. . . ")).unwrap_err();
+    open_dir(&dir.path().join("dir/ . . ./. . . / . . .")).unwrap_err();
+    open_dir(&dir.path().join("dir/. . . / . . ./. . . ")).unwrap_err();
+    open_dir(&dir.path().join("dir. . . / . . ./. . . / . . .")).unwrap_err();
+    open_dir(&dir.path().join("dir . . ./. . . / . . ./. . . ")).unwrap_err();
+    open_dir(&dir.path().join("dir*")).unwrap_err();
+    open_dir(&dir.path().join("dir*.")).unwrap_err();
+    open_dir(&dir.path().join("dir*..")).unwrap_err();
+    open_dir(&dir.path().join("dir*...")).unwrap_err();
 }
