@@ -9,8 +9,8 @@ use std::{
     },
     path::{Path, PathBuf},
 };
+use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
 use winapi::um::winnt;
-use winx::file::Flags;
 
 /// Rust's `Path` implicitly strips redundant slashes, however they aren't
 /// redundant in one case: at the end of a path they indicate that a path is
@@ -68,7 +68,7 @@ pub(crate) fn dir_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
         .dir_required(true)
-        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
         .share_mode(winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE)
         .clone()
 }
@@ -83,7 +83,7 @@ pub(crate) fn readdir_options() -> OpenOptions {
 pub(crate) fn canonicalize_options() -> OpenOptions {
     OpenOptions::new()
         .read(true)
-        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
         .clone()
 }
 
@@ -100,7 +100,7 @@ pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> 
     // underneath us, since we use paths to implement many directory operations.
     let dir = fs::OpenOptions::new()
         .read(true)
-        .custom_flags(Flags::FILE_FLAG_BACKUP_SEMANTICS.bits())
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
         .share_mode(winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE)
         .open(&path)?;
 

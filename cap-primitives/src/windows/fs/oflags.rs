@@ -1,6 +1,6 @@
 use crate::fs::{FollowSymlinks, OpenOptions};
 use std::{fs, os::windows::fs::OpenOptionsExt};
-use winx::file::Flags;
+use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
 
 /// Translate the given `cap_std` into `std` options. Also return a bool
 /// indicating that the `trunc` flag was requested but could not be set,
@@ -18,11 +18,11 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
                 manually_trunc = true;
                 trunc = false;
             }
-            opts.ext.custom_flags | Flags::FILE_FLAG_OPEN_REPARSE_POINT.bits()
+            opts.ext.custom_flags | FILE_FLAG_OPEN_REPARSE_POINT
         }
     };
     if opts.maybe_dir {
-        custom_flags |= Flags::FILE_FLAG_BACKUP_SEMANTICS.bits();
+        custom_flags |= FILE_FLAG_BACKUP_SEMANTICS;
     }
     let mut std_opts = fs::OpenOptions::new();
     std_opts
