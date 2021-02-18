@@ -1,3 +1,5 @@
+#![cfg(not(target_os = "freebsd"))] // FreeBSD can't reopen arbitrary files.
+
 #[macro_use]
 mod sys_common;
 
@@ -26,8 +28,15 @@ fn basic_reopen() {
     assert!(buf.is_empty());
 
     let mut ro = check!(file.reopen(OpenOptions::new().read(true)));
+    let mut another = check!(file.reopen(OpenOptions::new().read(true)));
     check!(ro.read_to_string(&mut buf));
     assert_eq!(buf, "hello, world");
+    buf.clear();
+    check!(another.read_to_string(&mut buf));
+    assert_eq!(buf, "hello, world");
+    buf.clear();
+    check!(another.read_to_string(&mut buf));
+    assert!(buf.is_empty());
 }
 
 /// Don't allow `reopen` to grant new permissions.
