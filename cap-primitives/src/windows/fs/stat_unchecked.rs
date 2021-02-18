@@ -2,6 +2,7 @@
 use super::get_path::concatenate_or_return_absolute;
 use crate::fs::{FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
+#[cfg(not(windows_by_handle))]
 use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
 #[cfg(not(windows_by_handle))]
 use {
