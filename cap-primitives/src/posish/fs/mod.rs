@@ -119,7 +119,14 @@ fn tty_path() {
     #[cfg(unix)]
     use std::os::unix::fs::FileTypeExt;
 
-    for path in &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"] {
+    // On FreeBSD, `ttyname` doesn't seem to work on /dev/std{in,out,err}.
+    let paths: &[&str] = if cfg!(target_os = "freebsd") {
+        &["/dev/tty"]
+    } else {
+        &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"]
+    };
+
+    for path in paths {
         // Not all host configurations have these, so only test them if we can
         // open and canonicalize them, and if they're not FIFOs, which some
         // OS's use for stdin/stdout/stderr.

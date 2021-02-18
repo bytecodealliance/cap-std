@@ -584,15 +584,53 @@ fn dir_unsearchable_unreadable() {
     options.mode(0o000);
     check!(tmpdir.create_dir_with("dir", &options));
 
-    // Platforms with `O_PATH` can open a directory with no permissions.
+    // Platforms with `O_PATH` can open a directory with no permissions. And
+    // somehow FreeBSD can too; see `dir_unsearchable_unreadable_ambient`
+    // below confirming this.
     if cfg!(any(
-        target_os = "linux",
         target_os = "android",
-        target_os = "redox"
+        target_os = "linux",
+        target_os = "redox",
     )) {
-        check!(tmpdir.open_dir("dir"));
+        let dir = check!(tmpdir.open_dir("dir"));
+        assert!(dir.entries().is_err());
+        assert!(dir.open_dir(".").is_err());
+    } else if cfg!(target_os = "freebsd") {
+        let dir = check!(tmpdir.open_dir("dir"));
+        check!(dir.metadata("."));
+        check!(dir.entries());
+        check!(dir.open_dir("."));
     } else {
         assert!(tmpdir.open_dir("dir").is_err());
+    }
+}
+
+/// Like `dir_unsearchable_unreadable`, but uses ambient-authority APIs
+/// to test underlying host functionality.
+#[cfg(unix)]
+#[test]
+fn dir_unsearchable_unreadable_ambient() {
+    use std::{fs::DirBuilder, os::unix::fs::DirBuilderExt};
+
+    let dir = tempfile::tempdir().unwrap();
+
+    let mut options = DirBuilder::new();
+    options.mode(0o000);
+    check!(options.create(dir.path().join("dir")));
+
+    // FreeBSD seems able to open directories with 0o000 permissions.
+    if cfg!(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "redox",
+    )) {
+        assert!(std::fs::File::open(dir.path().join("dir")).is_err());
+        assert!(std::fs::read_dir(dir.path().join("dir")).is_err());
+        assert!(std::fs::File::open(dir.path().join("dir/.")).is_err());
+    } else if cfg!(target_os = "freebsd") {
+        check!(std::fs::File::open(dir.path().join("dir")));
+        check!(std::fs::read_dir(dir.path().join("dir")));
+        check!(std::fs::File::open(dir.path().join("dir/.")));
     }
 }
 
@@ -600,7 +638,6 @@ fn dir_unsearchable_unreadable() {
 /// ambient API instead of `cap_std`. The purpose of this test is to
 /// confirm fundamentally OS-specific behaviors.
 #[test]
-#[cfg_attr(any(target_os = "macos", target_os = "freebsd"), ignore)] // submitted to upstream as https://github.com/rust-lang/rust/pull/78026
 fn symlink_hard_link_ambient() {
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
