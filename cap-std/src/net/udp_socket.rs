@@ -1,9 +1,10 @@
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use std::{io, net, time::Duration};
+#[cfg(not(windows))]
+use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::OwnsRaw;
 
 /// A UDP socket.
 ///
@@ -267,7 +268,7 @@ impl UdpSocket {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for UdpSocket {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -283,7 +284,7 @@ impl FromRawSocket for UdpSocket {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for UdpSocket {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -299,7 +300,7 @@ impl AsRawSocket for UdpSocket {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for UdpSocket {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -314,5 +315,8 @@ impl IntoRawSocket for UdpSocket {
         self.std.into_raw_socket()
     }
 }
+
+// Safety: `UdpSocket` wraps a `net::UdpSocket` which owns its handle.
+unsafe impl OwnsRaw for UdpSocket {}
 
 // TODO: impl Debug for UdpSocket

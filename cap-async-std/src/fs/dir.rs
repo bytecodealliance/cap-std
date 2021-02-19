@@ -14,7 +14,7 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use std::fmt;
-use unsafe_io::{AsUnsafeFile, FromUnsafeFile};
+use unsafe_io::{AsUnsafeFile, FromUnsafeFile, OwnsRaw};
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -588,7 +588,7 @@ impl Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -606,7 +606,7 @@ impl FromRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -622,7 +622,7 @@ impl AsRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -637,6 +637,9 @@ impl IntoRawHandle for Dir {
         self.std_file.into_raw_handle()
     }
 }
+
+// Safety: `Dir` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for Dir {}
 
 /// Indicates how large a buffer to pre-allocate before reading the entire file.
 ///

@@ -1,24 +1,23 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
+#[cfg(unix)]
+use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
     read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{
-    fs::OpenOptionsExt,
-    io::{AsRawFd, IntoRawFd},
-};
+use posish::fs::OpenOptionsExt;
 use std::{
     fmt, fs,
     io::{self, Read, Write},
     path::{Path, PathBuf},
 };
-#[cfg(unix)]
+use unsafe_io::OwnsRaw;
+#[cfg(not(windows))]
 use {
-    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
     cap_primitives::fs::symlink,
-    std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 #[cfg(windows)]
 use {
@@ -566,7 +565,7 @@ impl Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -584,7 +583,7 @@ impl FromRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -600,7 +599,7 @@ impl AsRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -615,6 +614,9 @@ impl IntoRawHandle for Dir {
         self.std_file.into_raw_handle()
     }
 }
+
+// Safety: `Dir` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for Dir {}
 
 /// Indicates how large a buffer to pre-allocate before reading the entire file.
 ///

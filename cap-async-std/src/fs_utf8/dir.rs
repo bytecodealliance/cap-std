@@ -6,6 +6,7 @@ use crate::{
 use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::{fs, io};
 use std::fmt;
+use unsafe_io::OwnsRaw;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -503,7 +504,7 @@ impl Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -521,7 +522,7 @@ impl FromRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -537,7 +538,7 @@ impl AsRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -552,6 +553,9 @@ impl IntoRawHandle for Dir {
         self.cap_std.into_raw_handle()
     }
 }
+
+// Safety: `Dir` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for Dir {}
 
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

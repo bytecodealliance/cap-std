@@ -20,7 +20,7 @@ use std::{
     path::{Component, Path},
     sync::Arc,
 };
-use unsafe_io::AsUnsafeFile;
+use unsafe_io::{AsUnsafeFile, OwnsRaw};
 
 pub(crate) struct ReadDirInner {
     posish: Arc<Dir>,
@@ -107,6 +107,9 @@ impl AsRawFd for ReadDirInner {
         self.posish.as_raw_fd()
     }
 }
+
+// Safety: `ReadDirInner` wraps a `Dir` which owns its handle.
+unsafe impl OwnsRaw for ReadDirInner {}
 
 impl fmt::Debug for ReadDirInner {
     // Like libstd's version, but doesn't print the path.

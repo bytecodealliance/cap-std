@@ -87,7 +87,7 @@ impl DirEntry {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 impl DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {

@@ -4,6 +4,7 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use async_std::{io, net};
+use unsafe_io::OwnsRaw;
 
 /// A TCP socket server, listening for connections.
 ///
@@ -70,7 +71,7 @@ impl TcpListener {
     // async_std doesn't have `TcpListener::set_nonblocking`.
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for TcpListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -86,7 +87,7 @@ impl FromRawSocket for TcpListener {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for TcpListener {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -102,7 +103,7 @@ impl AsRawSocket for TcpListener {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for TcpListener {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -117,5 +118,8 @@ impl IntoRawSocket for TcpListener {
         self.std.into_raw_socket()
     }
 }
+
+/// Safety: `TcpListener` wraps a `net::TcpListener` which owns its handle.
+unsafe impl OwnsRaw for TcpListener {}
 
 // TODO: impl Debug for TcpListener

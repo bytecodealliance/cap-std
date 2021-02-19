@@ -12,7 +12,7 @@ use async_std::{
 };
 use cap_primitives::fs::is_file_read_write;
 use std::{fmt, pin::Pin};
-use unsafe_io::AsUnsafeFile;
+use unsafe_io::{AsUnsafeFile, OwnsRaw};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -175,6 +175,9 @@ impl IntoRawHandle for File {
         self.std.into_raw_handle()
     }
 }
+
+// Safety: `File` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for File {}
 
 impl Read for File {
     #[inline]
