@@ -27,6 +27,7 @@ enum Inner {
 /// a public constructor that we can use.
 /// </details>
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[repr(transparent)]
 pub struct FileType(Inner);
 
 impl FileType {
