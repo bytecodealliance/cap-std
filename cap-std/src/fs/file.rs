@@ -2,10 +2,6 @@
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
 use cap_primitives::fs::is_file_read_write;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 #[cfg(target_os = "wasi")]
@@ -15,6 +11,9 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
     process,
 };
+#[cfg(not(windows))]
+use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::OwnsRaw;
 
 /// A reference to an open file on a filesystem.
 ///
@@ -183,6 +182,9 @@ impl IntoRawHandle for File {
         self.std.into_raw_handle()
     }
 }
+
+// Safety: `File` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for File {}
 
 impl Read for File {
     #[inline]

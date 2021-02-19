@@ -7,6 +7,7 @@ use std::{
     },
     time::Duration,
 };
+use unsafe_io::OwnsRaw;
 
 /// A Unix stream socket.
 ///
@@ -170,6 +171,9 @@ impl IntoRawFd for UnixStream {
         self.std.into_raw_fd()
     }
 }
+
+// Safety: `UnixStream` wraps a `net::UnixStream` which owns its handle.
+unsafe impl OwnsRaw for UnixStream {}
 
 impl Read for UnixStream {
     #[inline]

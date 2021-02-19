@@ -1,8 +1,6 @@
 use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions, ReadDir};
-#[cfg(unix)]
-use std::os::unix::fs::DirEntryExt;
-#[cfg(target_os = "wasi")]
-use std::os::wasi::fs::DirEntryExt;
+#[cfg(not(windows))]
+use posish::fs::DirEntryExt;
 use std::{ffi::OsString, fmt, fs, io};
 
 /// Entries returned by the `ReadDir` iterator.
@@ -104,7 +102,7 @@ impl DirEntry {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(windows))]
 impl DirEntryExt for DirEntry {
     #[inline]
     fn ino(&self) -> u64 {

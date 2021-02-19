@@ -6,6 +6,7 @@ use std::{
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
+use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
 ///
@@ -119,6 +120,9 @@ impl IntoRawFd for UnixListener {
         self.std.into_raw_fd()
     }
 }
+
+// Safety: `UnixListener` wraps a `net::UnixListener` which owns its handle.
+unsafe impl OwnsRaw for UnixListener {}
 
 impl<'a> IntoIterator for &'a UnixListener {
     type IntoIter = Incoming<'a>;

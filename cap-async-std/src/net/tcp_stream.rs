@@ -9,6 +9,7 @@ use async_std::{
     task::{Context, Poll},
 };
 use std::pin::Pin;
+use unsafe_io::OwnsRaw;
 
 /// A TCP stream between a local and a remote socket.
 ///
@@ -108,7 +109,7 @@ impl TcpStream {
     // async_std doesn't have `set_nonblocking`.
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -124,7 +125,7 @@ impl FromRawSocket for TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for TcpStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -140,7 +141,7 @@ impl AsRawSocket for TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for TcpStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -155,6 +156,9 @@ impl IntoRawSocket for TcpStream {
         self.std.into_raw_socket()
     }
 }
+
+// Safety: `TcpStream` wraps a `net::TcpStream` which owns its handle.
+unsafe impl OwnsRaw for TcpStream {}
 
 impl Read for TcpStream {
     #[inline]

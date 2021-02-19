@@ -1,3 +1,5 @@
+#[cfg(unix)]
+use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use crate::{
     fs::{OpenOptions, Permissions},
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
@@ -5,11 +7,9 @@ use crate::{
 #[cfg(windows)]
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::{fmt, fs, io};
-#[cfg(unix)]
-use {
-    crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
-    std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-};
+#[cfg(not(windows))]
+use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::OwnsRaw;
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -504,7 +504,7 @@ impl Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -522,7 +522,7 @@ impl FromRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -538,7 +538,7 @@ impl AsRawHandle for Dir {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -553,6 +553,9 @@ impl IntoRawHandle for Dir {
         self.cap_std.into_raw_handle()
     }
 }
+
+// Safety: `Dir` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for Dir {}
 
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

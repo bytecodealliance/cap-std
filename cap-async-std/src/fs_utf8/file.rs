@@ -11,6 +11,7 @@ use async_std::{
     task::{Context, Poll},
 };
 use std::{fmt, pin::Pin};
+use unsafe_io::OwnsRaw;
 
 /// A reference to an open file on a filesystem.
 ///
@@ -145,6 +146,9 @@ impl IntoRawHandle for File {
         self.cap_std.into_raw_handle()
     }
 }
+
+// Safety: `File` wraps a `fs::File` which owns its handle.
+unsafe impl OwnsRaw for File {}
 
 impl Read for File {
     #[inline]

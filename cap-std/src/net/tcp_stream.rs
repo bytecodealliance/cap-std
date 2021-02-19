@@ -1,6 +1,4 @@
 use crate::net::{Shutdown, SocketAddr};
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use std::{
@@ -8,6 +6,9 @@ use std::{
     net,
     time::Duration,
 };
+#[cfg(not(windows))]
+use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::OwnsRaw;
 
 /// A TCP stream between a local and a remote socket.
 ///
@@ -150,7 +151,7 @@ impl TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
@@ -166,7 +167,7 @@ impl FromRawSocket for TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl AsRawFd for TcpStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -182,7 +183,7 @@ impl AsRawSocket for TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(not(windows))]
 impl IntoRawFd for TcpStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -197,6 +198,9 @@ impl IntoRawSocket for TcpStream {
         self.std.into_raw_socket()
     }
 }
+
+// Safety: `TcpStream` wraps a `net::TcpStream` which owns its handle.
+unsafe impl OwnsRaw for TcpStream {}
 
 impl Read for TcpStream {
     #[inline]

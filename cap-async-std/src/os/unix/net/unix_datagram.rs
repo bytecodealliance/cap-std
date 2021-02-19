@@ -6,6 +6,7 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
+use unsafe_io::OwnsRaw;
 
 /// A Unix datagram socket.
 ///
@@ -159,5 +160,8 @@ impl IntoRawFd for UnixDatagram {
         self.std.into_raw_fd()
     }
 }
+
+// Safety: `UnixDatagram` wraps a `net::UnixDatagram` which owns its handle.
+unsafe impl OwnsRaw for UnixDatagram {}
 
 // TODO: impl Debug for UnixDatagram

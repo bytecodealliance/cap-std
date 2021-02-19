@@ -6,6 +6,7 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
+use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
 ///
@@ -97,5 +98,8 @@ impl IntoRawFd for UnixListener {
 }
 
 // async_std's `IntoStream` is unstable.
+
+// Safety: `UnixListener` wraps a `net::UnixListener` which owns its handle.
+unsafe impl OwnsRaw for UnixListener {}
 
 // TODO: impl Debug for UnixListener

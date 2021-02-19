@@ -1,4 +1,4 @@
-//! The `posish` module contains code specific to the Unix-like platforms
+//! The `posish` module contains code specific to the Posix-ish platforms
 //! supported by the `posish` crate.
 
 pub(crate) mod fs;
