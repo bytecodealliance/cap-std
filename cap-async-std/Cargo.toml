@@ -19,6 +19,9 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 cap-primitives = { path = "../cap-primitives", version = "^0.13.4-alpha.0"}
 unsafe-io = { version = "0.5.1", features = ["async-std"] }
 
+[target.'cfg(not(windows))'.dependencies]
+posish = "0.5.12"
+
 [features]
 default = []
 fs_utf8 = ["arf-strings"]
