@@ -43,7 +43,7 @@ impl MetadataExt {
     /// [`std::fs::Metadata`].
     #[inline]
     pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
-        use std::os::unix::fs::MetadataExt;
+        use posish::fs::MetadataExt;
         Self {
             dev: std.dev(),
             ino: std.ino(),
@@ -190,7 +190,7 @@ fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
     ))
 }
 
-impl std::os::unix::fs::MetadataExt for MetadataExt {
+impl posish::fs::MetadataExt for MetadataExt {
     #[inline]
     fn dev(&self) -> u64 {
         self.dev

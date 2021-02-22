@@ -29,7 +29,8 @@ fn open_to_and_set_permissions(
     path: &Path,
     reader_metadata: fs::Metadata,
 ) -> io::Result<(fs::File, fs::Metadata)> {
-    use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+    use posish::fs::OpenOptionsExt;
+    use std::os::unix::fs::PermissionsExt;
 
     let perm = reader_metadata.permissions();
     let writer = open(

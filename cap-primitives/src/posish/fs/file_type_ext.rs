@@ -32,7 +32,7 @@ impl FileTypeExt {
     /// [`std::fs::FileType`].
     #[inline]
     pub(crate) fn from_std(std: fs::FileType) -> FileType {
-        use std::os::unix::fs::FileTypeExt;
+        use posish::fs::FileTypeExt;
         if std.is_file() {
             FileType::file()
         } else if std.is_dir() {
