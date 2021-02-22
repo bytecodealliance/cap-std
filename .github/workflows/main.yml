@@ -44,8 +44,8 @@ jobs:
     # i686-pc-windows-msvc, and i686-pc-windows-gnu for now, since async-std
     # doesn't currently support cross-compiling to Windows.
     #
-    # Also disable x86_64-fuchsia, since async-std doesn't currently compile
-    # on it.
+    # Also disable x86_64-fuchsia and wasm32-unknown-emscripten, since
+    # async-std doesn't currently cross-compile on them.
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
@@ -56,7 +56,6 @@ jobs:
         x86_64-unknown-netbsd
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
-        wasm32-unknown-emscripten
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-linux-gnux32
@@ -66,7 +65,6 @@ jobs:
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
 
   check_cross_windows:
     name: Check Cross-Compilation on Windows
@@ -122,8 +120,8 @@ jobs:
     # aarch64-pc-windows-msvc, since async-std doesn't currently support
     # cross-compiling to Windows.
     #
-    # Also disable x86_64-fuchsia, since async-std doesn't currently compile
-    # on it.
+    # Also disable x86_64-fuchsia and wasm32-unknown-emscripten, since
+    # async-std doesn't currently cross-compile on them.
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
@@ -135,7 +133,6 @@ jobs:
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         aarch64-apple-darwin
-        wasm32-unknown-emscripten
         riscv64gc-unknown-linux-gnu
         arm-unknown-linux-gnueabihf
         aarch64-linux-android
@@ -152,8 +149,6 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=arm-unknown-linux-gnueabihf
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-linux-android
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
 
   check_cross_nightly_windows:
     name: Check Cross-Compilation on Rust nightly on Windows
