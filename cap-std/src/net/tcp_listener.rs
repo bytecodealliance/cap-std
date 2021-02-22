@@ -1,10 +1,13 @@
 use crate::net::{Incoming, SocketAddr, TcpStream};
-#[cfg(windows)]
-use std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use std::{fmt, io, net};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
+#[cfg(windows)]
+use {
+    std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+};
 
 /// A TCP socket server, listening for connections.
 ///
@@ -133,6 +136,14 @@ impl AsRawSocket for TcpListener {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for TcpListener {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.std.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for TcpListener {
     #[inline]
@@ -146,6 +157,14 @@ impl IntoRawSocket for TcpListener {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for TcpListener {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.std.into_raw_handle_or_socket()
     }
 }
 

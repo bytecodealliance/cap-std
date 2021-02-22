@@ -23,6 +23,7 @@ use {
 use {
     cap_primitives::fs::{symlink_dir, symlink_file},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open directory on a filesystem.
@@ -599,6 +600,14 @@ impl AsRawHandle for Dir {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for Dir {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.std_file.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
@@ -612,6 +621,14 @@ impl IntoRawHandle for Dir {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.std_file.into_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for Dir {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.std_file.into_raw_handle_or_socket()
     }
 }
 

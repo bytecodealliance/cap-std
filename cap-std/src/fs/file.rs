@@ -2,8 +2,6 @@
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
 use cap_primitives::fs::is_file_read_write;
-#[cfg(windows)]
-use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 #[cfg(target_os = "wasi")]
 use std::path::Path;
 use std::{
@@ -14,6 +12,11 @@ use std::{
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
+#[cfg(windows)]
+use {
+    std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -167,6 +170,14 @@ impl AsRawHandle for File {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for File {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.std.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for File {
     #[inline]
@@ -180,6 +191,14 @@ impl IntoRawHandle for File {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.std.into_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for File {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.std.into_raw_handle_or_socket()
     }
 }
 

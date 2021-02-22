@@ -1,10 +1,13 @@
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(windows)]
-use async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use async_std::{io, net};
 use unsafe_io::OwnsRaw;
+#[cfg(windows)]
+use {
+    async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+};
 
 /// A UDP socket.
 ///
@@ -244,6 +247,14 @@ impl AsRawSocket for UdpSocket {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for UdpSocket {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.std.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for UdpSocket {
     #[inline]
@@ -257,6 +268,14 @@ impl IntoRawSocket for UdpSocket {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for UdpSocket {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.std.into_raw_handle_or_socket()
     }
 }
 
