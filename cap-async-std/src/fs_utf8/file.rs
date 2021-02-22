@@ -3,8 +3,6 @@ use crate::fs::{Metadata, Permissions};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(windows)]
-use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::{
     fs,
     io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
@@ -12,6 +10,11 @@ use async_std::{
 };
 use std::{fmt, pin::Pin};
 use unsafe_io::OwnsRaw;
+#[cfg(windows)]
+use {
+    async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+};
 
 /// A reference to an open file on a filesystem.
 ///
@@ -131,6 +134,14 @@ impl AsRawHandle for File {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for File {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.cap_std.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for File {
     #[inline]
@@ -144,6 +155,14 @@ impl IntoRawHandle for File {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.cap_std.into_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for File {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.cap_std.into_raw_handle_or_socket()
     }
 }
 

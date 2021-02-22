@@ -1,8 +1,6 @@
 use crate::net::{Shutdown, SocketAddr};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(windows)]
-use async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 use async_std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net,
@@ -10,6 +8,11 @@ use async_std::{
 };
 use std::pin::Pin;
 use unsafe_io::OwnsRaw;
+#[cfg(windows)]
+use {
+    async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+};
 
 /// A TCP stream between a local and a remote socket.
 ///
@@ -141,6 +144,14 @@ impl AsRawSocket for TcpStream {
     }
 }
 
+#[cfg(windows)]
+impl AsRawHandleOrSocket for TcpStream {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.std.as_raw_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for TcpStream {
     #[inline]
@@ -154,6 +165,14 @@ impl IntoRawSocket for TcpStream {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawHandleOrSocket for TcpStream {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.std.into_raw_handle_or_socket()
     }
 }
 
