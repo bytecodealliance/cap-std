@@ -40,6 +40,9 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+    # Disable x86_64-pc-windows-msvc, x86_64-pc-windows-gnu,
+    # i686-pc-windows-msvc, and i686-pc-windows-gnu for now, since async-std
+    # doesn't currently support cross-compiling to Windows.
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
@@ -50,10 +53,6 @@ jobs:
         x86_64-unknown-netbsd
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
-        x86_64-pc-windows-msvc
-        x86_64-pc-windows-gnu
-        i686-pc-windows-msvc
-        i686-pc-windows-gnu
         x86_64-fuchsia
         wasm32-unknown-emscripten
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv
@@ -65,12 +64,39 @@ jobs:
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-unknown-netbsd
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-gnu
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-unknown-linux-musl
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
-    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-gnu
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-fuchsia
     - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
+
+  check_cross_windows:
+    name: Check Cross-Compilation on Windows
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [stable, beta]
+        include:
+          - build: stable
+            os: windows-latest
+            rust: stable
+          - build: beta
+            os: windows-latest
+            rust: beta
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: >
+        rustup target add
+        x86_64-pc-windows-gnu
+        i686-pc-windows-msvc
+        i686-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --bins --examples --tests --features=fs_utf8 --release -vv --target=i686-pc-windows-gnu
 
   check_cross_nightly:
     name: Check Cross-Compilation on Rust nightly
@@ -90,6 +116,10 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+    # Disable x86_64-pc-windows-msvc, x86_64-pc-windows-gnu,
+    # i686-pc-windows-msvc, i686-pc-windows-gnu for now, and
+    # aarch64-pc-windows-msvc, since async-std # doesn't currently support
+    # cross-compiling to Windows.
     - run: >
         rustup target add
         x86_64-unknown-linux-musl
@@ -101,16 +131,11 @@ jobs:
         i686-unknown-linux-gnu
         i686-unknown-linux-musl
         aarch64-apple-darwin
-        x86_64-pc-windows-msvc
-        x86_64-pc-windows-gnu
-        i686-pc-windows-msvc
-        i686-pc-windows-gnu
         x86_64-fuchsia
         wasm32-unknown-emscripten
         riscv64gc-unknown-linux-gnu
         arm-unknown-linux-gnueabihf
         aarch64-linux-android
-        aarch64-pc-windows-msvc
     - run: cargo check --workspace --all-targets --all-features --release -vv
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-gnux32
@@ -124,13 +149,38 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=arm-unknown-linux-gnueabihf
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-linux-android
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-msvc
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-pc-windows-gnu
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-msvc
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=i686-pc-windows-gnu
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=x86_64-fuchsia
     - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=wasm32-unknown-emscripten
-    - run: cargo check --workspace --all-targets --features fs_utf8 --exclude=cap-async-std --exclude=cap-std-workspace --release -vv --target=aarch64-pc-windows-msvc
+
+  check_cross_nightly_windows:
+    name: Check Cross-Compilation on Rust nightly on Windows
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [nightly]
+        include:
+          - build: nightly
+            os: windows-latest
+            rust: nightly
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    - run: >
+        rustup target add
+        x86_64-pc-windows-gnu
+        i686-pc-windows-msvc
+        i686-pc-windows-gnu
+        aarch64-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --all-features --release -vv
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-pc-windows-msvc
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=i686-pc-windows-gnu
+    - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-pc-windows-msvc
 
   test:
     name: Test
