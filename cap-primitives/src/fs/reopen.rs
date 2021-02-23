@@ -26,7 +26,7 @@ pub fn reopen(file: &fs::File, options: &OpenOptions) -> io::Result<fs::File> {
         ));
     }
 
-    let new = reopen_impl(file, &options)?;
+    let new = reopen_impl(file, options)?;
 
     if !is_same_file(file, &new)? {
         return Err(io::Error::new(io::ErrorKind::Other, "Couldn't reopen file"));

@@ -38,6 +38,7 @@ impl SystemTimeSpec {
 }
 
 impl From<SystemTime> for SystemTimeSpec {
+    #[inline]
     fn from(time: SystemTime) -> Self {
         Self::Absolute(time)
     }

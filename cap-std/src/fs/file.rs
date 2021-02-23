@@ -267,7 +267,7 @@ impl Read for &File {
     #[cfg(can_vector)]
     #[inline]
     fn is_read_vectored(&self) -> bool {
-        (&mut &self.std).is_read_vectored()
+        self.std.is_read_vectored()
     }
 }
 
@@ -329,7 +329,7 @@ impl Write for &File {
     #[cfg(can_vector)]
     #[inline]
     fn is_write_vectored(&self) -> bool {
-        (&mut &self.std).is_write_vectored()
+        self.std.is_write_vectored()
     }
 
     #[cfg(write_all_vectored)]

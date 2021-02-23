@@ -452,11 +452,7 @@ pub(super) fn internal_open<'start>(
 }
 
 /// Implement manual `stat` in a similar manner as manual `open`.
-pub(crate) fn stat<'start>(
-    start: &fs::File,
-    path: &'start Path,
-    follow: FollowSymlinks,
-) -> io::Result<Metadata> {
+pub(crate) fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Metadata> {
     // POSIX returns `ENOENT` on an empty path. TODO: On Windows, we should
     // be compatible with what Windows does instead.
     if path.as_os_str().is_empty() {

@@ -25,6 +25,7 @@ impl SystemClockExt for cap_primitives::time::SystemClock {
     type SystemTime = cap_primitives::time::SystemTime;
 
     #[cfg(not(target_os = "wasi"))]
+    #[inline]
     fn now_with(&self, _precision: Duration) -> Self::SystemTime {
         // On systems with no optimized form of `clock_gettime`, ignore the
         // precision argument.
@@ -44,6 +45,7 @@ impl SystemClockExt for cap_primitives::time::SystemClock {
 impl SystemClockExt for cap_primitives::time::SystemClock {
     type SystemTime = cap_primitives::time::SystemTime;
 
+    #[inline]
     fn now_with(&self, _precision: Duration) -> Self::SystemTime {
         // On systems with no optimized form of `clock_gettime`, ignore the
         // precision argument.

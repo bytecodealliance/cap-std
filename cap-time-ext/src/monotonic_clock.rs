@@ -24,6 +24,7 @@ impl MonotonicClockExt for cap_primitives::time::MonotonicClock {
     type Instant = cap_primitives::time::Instant;
 
     #[cfg(not(target_os = "wasi"))]
+    #[inline]
     fn now_with(&self, _precision: Duration) -> Self::Instant {
         // On systems with no optimized form of `clock_gettime`, ignore the
         // precision argument.
@@ -43,6 +44,7 @@ impl MonotonicClockExt for cap_primitives::time::MonotonicClock {
 impl MonotonicClockExt for cap_primitives::time::MonotonicClock {
     type Instant = cap_primitives::time::Instant;
 
+    #[inline]
     fn now_with(&self, _precision: Duration) -> Self::Instant {
         // On systems with no optimized form of `clock_gettime`, ignore the
         // precision argument.

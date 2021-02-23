@@ -71,24 +71,29 @@ pub mod rngs {
         /// This function is unsafe because it makes use of ambient authority
         /// to access the platform entropy source, which doesn't uphold the
         /// invariant of the rest of the API. It is otherwise safe to use.
+        #[inline]
         pub const unsafe fn default() -> Self {
             Self(())
         }
     }
 
     impl crate::RngCore for OsRng {
+        #[inline]
         fn next_u32(&mut self) -> u32 {
             rand::rngs::OsRng.next_u32()
         }
 
+        #[inline]
         fn next_u64(&mut self) -> u64 {
             rand::rngs::OsRng.next_u64()
         }
 
+        #[inline]
         fn fill_bytes(&mut self, bytes: &mut [u8]) {
             rand::rngs::OsRng.fill_bytes(bytes)
         }
 
+        #[inline]
         fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), crate::Error> {
             rand::rngs::OsRng.try_fill_bytes(bytes)
         }
@@ -114,24 +119,29 @@ pub mod rngs {
         /// This function is unsafe because it makes use of ambient authority
         /// to access the platform entropy source, which doesn't uphold the
         /// invariant of the rest of the API. It is otherwise safe to use.
+        #[inline]
         pub unsafe fn default() -> Self {
             crate::thread_rng()
         }
     }
 
     impl crate::RngCore for CapRng {
+        #[inline]
         fn next_u32(&mut self) -> u32 {
             self.inner.next_u32()
         }
 
+        #[inline]
         fn next_u64(&mut self) -> u64 {
             self.inner.next_u64()
         }
 
+        #[inline]
         fn fill_bytes(&mut self, bytes: &mut [u8]) {
             self.inner.fill_bytes(bytes)
         }
 
+        #[inline]
         fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), crate::Error> {
             self.inner.try_fill_bytes(bytes)
         }
@@ -150,6 +160,7 @@ pub mod rngs {
 /// This function is unsafe because it makes use of ambient authority to
 /// access the platform entropy source, which doesn't uphold the invariant
 /// of the rest of the API. It is otherwise safe to use.
+#[inline]
 pub unsafe fn thread_rng() -> rngs::CapRng {
     rngs::CapRng {
         inner: rand::thread_rng(),
@@ -165,6 +176,7 @@ pub unsafe fn thread_rng() -> rngs::CapRng {
 /// This function is unsafe because it makes use of ambient authority to
 /// access the platform entropy source, which doesn't uphold the invariant
 /// of the rest of the API. It is otherwise safe to use.
+#[inline]
 pub unsafe fn random<T>() -> T
 where
     crate::distributions::Standard: crate::distributions::Distribution<T>,
