@@ -1,6 +1,6 @@
 [package]
 name = "cap-primitives"
-version = "0.13.4"
+version = "0.13.5"
 description = "Capability-oriented primitives"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
