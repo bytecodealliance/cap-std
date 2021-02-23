@@ -1,6 +1,6 @@
 [package]
 name = "cap-directories"
-version = "0.13.5"
+version = "0.13.6"
 description = "Capability-oriented standard directories for config, cache and other data"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
