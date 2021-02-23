@@ -1,7 +1,7 @@
 #[macro_use]
 mod sys_common;
 
-use sys_common::io::tmpdir;
+use sys_common::{io::tmpdir, symlink_supported};
 
 #[test]
 fn cap_smoke_test() {
@@ -117,6 +117,10 @@ fn symlinks() {
     #[cfg(windows)]
     use cap_fs_ext::DirExt;
 
+    if !symlink_supported() {
+        return;
+    }
+
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir_all("dir/inner"));
     check!(tmpdir.write("red.txt", b"hello world\n"));
@@ -193,6 +197,10 @@ fn symlink_loop() {
 fn symlink_loop_from_rename() {
     #[cfg(windows)]
     use cap_fs_ext::DirExt;
+
+    if !symlink_supported() {
+        return;
+    }
 
     let tmpdir = tmpdir();
     check!(tmpdir.create("file"));
