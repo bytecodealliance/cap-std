@@ -1,6 +1,6 @@
 [package]
 name = "cap-directories"
-version = "0.13.6"
+version = "0.13.7-alpha.0"
 description = "Capability-oriented standard directories for config, cache and other data"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -14,7 +14,7 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^0.13.5"}
+cap-std = { path = "../cap-std", version = "0.13.7-alpha.0"}
 directories-next = "2.0.0"
 
 [target.'cfg(not(windows))'.dependencies]
