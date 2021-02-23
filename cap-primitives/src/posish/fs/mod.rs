@@ -89,7 +89,8 @@ pub(crate) use file_type_ext::FileTypeExt;
 pub(crate) use hard_link_unchecked::hard_link_unchecked;
 pub(crate) use is_file_read_write_impl::is_file_read_write_impl;
 pub(crate) use is_root_dir::is_root_dir;
-pub(crate) use is_same_file::is_same_file;
+#[allow(unused_imports)]
+pub(crate) use is_same_file::{is_different_file, is_different_file_metadata, is_same_file};
 pub(crate) use metadata_ext::MetadataExt;
 pub(crate) use open_options_ext::OpenOptionsExt;
 pub(crate) use open_unchecked::open_unchecked;
