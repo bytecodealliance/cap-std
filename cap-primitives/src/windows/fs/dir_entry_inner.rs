@@ -105,7 +105,6 @@ impl fmt::Debug for DirEntryInner {
     }
 }
 
-#[cfg(windows)]
 #[doc(hidden)]
 unsafe impl crate::fs::_WindowsDirEntryExt for crate::fs::DirEntry {
     #[inline]

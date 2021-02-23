@@ -181,7 +181,6 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
     }
 }
 
-#[cfg(windows)]
 #[doc(hidden)]
 unsafe impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
     #[inline]

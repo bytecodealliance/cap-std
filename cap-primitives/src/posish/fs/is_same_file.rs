@@ -1,5 +1,4 @@
 use crate::fs::Metadata;
-#[cfg(not(windows))]
 use posish::fs::MetadataExt;
 use std::{fs, io};
 

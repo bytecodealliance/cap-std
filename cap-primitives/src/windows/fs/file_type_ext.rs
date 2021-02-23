@@ -96,7 +96,6 @@ impl FileTypeExt {
     }
 }
 
-#[cfg(windows)]
 #[doc(hidden)]
 unsafe impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
     #[inline]
