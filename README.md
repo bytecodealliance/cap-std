@@ -85,9 +85,14 @@ For a complete example of cap-std in action, see
 cap-std to access the static files. [The diff] shows the kinds of changes
 needed to use this API.
 
+For another example, the io-streams crate [uses `cap-tempdir`] to create
+temporary directories for unit tests. Here, the main benefit of `Dir` is just
+convenience—`Dir`'s API lets tests just say `dir.open(...)` instead of using
+`open(path.join(...))` or `chdir`.
+
+[uses `cap-tempdir`]: https://github.com/sunfishcode/io-streams/blob/main/tests/tests.rs#L16
 [this port of tide-naive-static-files]: https://github.com/sunfishcode/tide-naive-static-files/
 [The diff]: https://github.com/eignnx/tide-naive-static-files/compare/master...sunfishcode:main
-
 [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
 
 ## How do I obtain a [`Dir`]?
