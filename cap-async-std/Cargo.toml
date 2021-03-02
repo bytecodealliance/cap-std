@@ -17,10 +17,10 @@ readme = "README.md"
 arf-strings = { version = "0.3.0", optional = true }
 async-std = { version = "1.9.0", features = ["attributes"] }
 cap-primitives = { path = "../cap-primitives", version = "0.13.7-alpha.0"}
-unsafe-io = { version = "0.5.1", features = ["async-std"] }
+unsafe-io = { version = "0.6.0", features = ["async-std"] }
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.5.12"
+posish = "0.6.0"
 
 [features]
 default = []

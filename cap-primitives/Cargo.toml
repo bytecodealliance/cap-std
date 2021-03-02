@@ -17,14 +17,14 @@ readme = "README.md"
 rustc_version = "0.3.0"
 
 [dependencies]
-arbitrary = { version = "0.4.7", optional = true, features = ["derive"] }
+arbitrary = { version = "1.0.0", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
 maybe-owned = "0.3.4"
-fs-set-times = "0.2.4"
-unsafe-io = "0.5.1"
+fs-set-times = "0.3.0"
+unsafe-io = "0.6.0"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.5.12"
+posish = "0.6.0"
 libc = "0.2.81"
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]

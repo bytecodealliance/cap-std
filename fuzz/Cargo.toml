@@ -8,8 +8,8 @@ publish = false
 cargo-fuzz = true
 
 [dependencies]
-libfuzzer-sys = "0.3.4"
-arbitrary = { version = "0.4.7", features = ["derive"] }
+libfuzzer-sys = "0.4.0"
+arbitrary = { version = "1.0.0", features = ["derive"] }
 tempfile = "3.1.0"
 cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
 
