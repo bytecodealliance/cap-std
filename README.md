@@ -80,19 +80,6 @@ This allows application logic to configure its own access, without changing the
 behavior of the whole host process, setting up a separate host process, or
 requiring external configuration.
 
-For a complete example of cap-std in action, see
-[this port of tide-naive-static-files], a simple static-file Web server, to use
-cap-std to access the static files. [The diff] shows the kinds of changes
-needed to use this API.
-
-For another example, the io-streams crate [uses `cap-tempdir`] to create
-temporary directories for unit tests. Here, the main benefit of `Dir` is just
-convenience—`Dir`'s API lets tests just say `dir.open(...)` instead of using
-`open(path.join(...))` or `chdir`.
-
-[uses `cap-tempdir`]: https://github.com/sunfishcode/io-streams/blob/main/tests/tests.rs#L16
-[this port of tide-naive-static-files]: https://github.com/sunfishcode/tide-naive-static-files/
-[The diff]: https://github.com/eignnx/tide-naive-static-files/compare/master...sunfishcode:main
 [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
 
 ## How do I obtain a [`Dir`]?
@@ -108,11 +95,37 @@ There currently are three main ways:
    function is not sandboxed, and may open any file the host process has
    access to.
 
-See the [`kv-cli` example] for a simple example of a program using `cap-directories`
-and `cap-std` APIs.
+## Examples
 
+There are several examples of cap-std in use:
+
+ - As a sandbox: For a simple yet complete example of cap-std in action, see
+   [this port of tide-naive-static-files], a simple static-file Web server, to
+   use cap-std to access the static files, where it prevents path resolution
+   from following symlinks outside of the designated root directory. [The diff]
+   shows the kinds of changes needed to use this API.
+
+ - As a general-purpose `Dir` type for working with directories: The io-streams
+   crate [uses `cap-tempdir`] to create temporary directories for unit tests.
+   Here, the main benefit of `Dir` is just convenience—`Dir`'s API lets tests
+   just say `dir.open(...)` instead of using `open(path.join(...))` or dealing
+   with `chdir` and global mutable state. The fact that it also sandboxes the
+   unit tests is just a nice side effect.
+
+ - As an application data store: See the [`kv-cli` example] for a simple example
+   of a program using `cap-directories` and `cap-std` APIs to store
+   application-specific data.
+
+ - And, cap-std is a foundation for the [`WASI`] implementation in [`Wasmtime`],
+   providing sandboxing and support for Linux, macOS, Windows, and more.
+
+[uses `cap-tempdir`]: https://github.com/sunfishcode/io-streams/blob/main/tests/tests.rs#L16
+[this port of tide-naive-static-files]: https://github.com/sunfishcode/tide-naive-static-files/
+[The diff]: https://github.com/eignnx/tide-naive-static-files/compare/master...sunfishcode:main
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
 [`kv-cli` example]: https://github.com/bytecodealliance/cap-std/blob/main/examples/kv-cli.rs
+[`WASI`]: https://github.com/WebAssembly/WASI/
+[`Wasmtime`]: https://wasmtime.dev/
 
 ## What can I use `cap-std` for?
 
