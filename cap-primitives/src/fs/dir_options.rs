@@ -38,7 +38,7 @@ impl std::os::vxworks::fs::DirBuilderExt for DirOptions {
 }
 
 #[cfg(feature = "arbitrary")]
-impl arbitrary::Arbitrary for DirOptions {
+impl arbitrary::Arbitrary<'_> for DirOptions {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
         #[cfg(any(unix, target_os = "vxworks"))]
         use std::os::unix::fs::DirBuilderExt;

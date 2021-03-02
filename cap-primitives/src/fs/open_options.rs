@@ -231,7 +231,7 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
 }
 
 #[cfg(feature = "arbitrary")]
-impl arbitrary::Arbitrary for OpenOptions {
+impl arbitrary::Arbitrary<'_> for OpenOptions {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
         use arbitrary::Arbitrary;
         let (read, write) = match u.int_in_range(0..=2)? {
