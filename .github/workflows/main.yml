@@ -185,7 +185,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows, macos, macos-11.0, beta, ubuntu-16.04, ubuntu-20.04, windows-2016, aarch64-ubuntu]
+        build: [stable, windows, macos, macos-11.0, beta, ubuntu-16.04, ubuntu-18.04, windows-2016, aarch64-ubuntu]
         include:
           - build: stable
             os: ubuntu-latest
@@ -205,8 +205,8 @@ jobs:
           - build: ubuntu-16.04
             os: ubuntu-16.04
             rust: stable
-          - build: ubuntu-20.04
-            os: ubuntu-20.04
+          - build: ubuntu-18.04
+            os: ubuntu-18.04
             rust: stable
           - build: windows-2016
             os: windows-2016
