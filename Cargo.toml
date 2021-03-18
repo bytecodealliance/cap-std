@@ -11,7 +11,6 @@ keywords = ["std", "api", "network", "file"]
 categories = ["filesystem", "network-programming"]
 repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
-readme = "README.md"
 publish = false
 
 [build-dependencies]

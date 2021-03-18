@@ -11,7 +11,6 @@ keywords = ["random", "rng"]
 categories = ["algorithms"]
 repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
-readme = "README.md"
 
 [dependencies]
 rand = "0.8.1"
