@@ -1,6 +1,6 @@
 [package]
 name = "cap-time-ext"
-version = "0.13.8-alpha.0"
+version = "0.13.8"
 description = "Extension traits for `SystemClock` and `MonotonicClock`"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
