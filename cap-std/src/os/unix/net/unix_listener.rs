@@ -1,4 +1,5 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{
     fmt, io,
     os::unix::{
@@ -26,12 +27,12 @@ pub struct UnixListener {
 impl UnixListener {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixListener`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::os::unix::net::UnixListener` is not sandboxed and may access any address that
     /// the host process has access to.
     #[inline]
-    pub unsafe fn from_std(std: unix::net::UnixListener) -> Self {
+    pub fn from_std(std: unix::net::UnixListener, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -42,9 +43,9 @@ impl UnixListener {
     /// [`std::os::unix::net::UnixListener::accept`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.accept
     #[inline]
     pub fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
-        self.std
-            .accept()
-            .map(|(unix_stream, addr)| (unsafe { UnixStream::from_std(unix_stream) }, addr))
+        self.std.accept().map(|(unix_stream, addr)| {
+            (UnixStream::from_std(unix_stream, ambient_authority()), addr)
+        })
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -55,7 +56,7 @@ impl UnixListener {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let unix_listener = self.std.try_clone()?;
-        Ok(unsafe { Self::from_std(unix_listener) })
+        Ok(Self::from_std(unix_listener, ambient_authority()))
     }
 
     /// Returns the local socket address of this listener.
@@ -96,14 +97,17 @@ impl UnixListener {
     #[inline]
     pub fn incoming(&self) -> Incoming {
         let incoming = self.std.incoming();
-        unsafe { Incoming::from_std(incoming) }
+        Incoming::from_std(incoming, ambient_authority())
     }
 }
 
 impl FromRawFd for UnixListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(unix::net::UnixListener::from_raw_fd(fd))
+        Self::from_std(
+            unix::net::UnixListener::from_raw_fd(fd),
+            ambient_authority(),
+        )
     }
 }
 
@@ -131,7 +135,7 @@ impl<'a> IntoIterator for &'a UnixListener {
     #[inline]
     fn into_iter(self) -> Incoming<'a> {
         let incoming = self.std.into_iter();
-        unsafe { Incoming::from_std(incoming) }
+        Incoming::from_std(incoming, ambient_authority())
     }
 }
 

@@ -97,12 +97,20 @@ fn windows_open_tricky() {
 #[test]
 #[cfg(windows)]
 fn windows_open_ambient() {
+    use cap_std::{ambient_authority, fs::Dir};
+
     let ambient_dir = tempfile::tempdir().unwrap();
 
-    let tmpdir = check!(unsafe { cap_std::fs::Dir::open_ambient_dir(ambient_dir.path()) });
+    let tmpdir = check!(Dir::open_ambient_dir(
+        ambient_dir.path(),
+        ambient_authority()
+    ));
     check!(tmpdir.create_dir("aaa"));
 
-    let dir = check!(unsafe { cap_std::fs::Dir::open_ambient_dir(ambient_dir.path().join("aaa")) });
+    let dir = check!(Dir::open_ambient_dir(
+        ambient_dir.path().join("aaa"),
+        ambient_authority()
+    ));
 
     // Attempts to remove or rename the open directory should fail.
     tmpdir.remove_dir("aaa").unwrap_err();

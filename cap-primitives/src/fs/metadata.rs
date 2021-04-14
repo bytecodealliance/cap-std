@@ -389,15 +389,13 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 /// Extension trait to allow `volume_serial_number` etc. to be exposed by
 /// the `cap-fs-ext` crate.
 ///
-/// # Safety
-///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
-pub unsafe trait _WindowsByHandle {
-    unsafe fn file_attributes(&self) -> u32;
-    unsafe fn volume_serial_number(&self) -> Option<u32>;
-    unsafe fn number_of_links(&self) -> Option<u32>;
-    unsafe fn file_index(&self) -> Option<u64>;
+pub trait _WindowsByHandle {
+    fn file_attributes(&self) -> u32;
+    fn volume_serial_number(&self) -> Option<u32>;
+    fn number_of_links(&self) -> Option<u32>;
+    fn file_index(&self) -> Option<u64>;
 }

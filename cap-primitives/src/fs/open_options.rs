@@ -142,25 +142,21 @@ impl OpenOptions {
 
     /// Wrapper to allow `follow` to be exposed by the `cap-fs-ext` crate.
     ///
-    /// # Safety
-    ///
     /// This is hidden from the main API since this functionality isn't present in `std`.
     /// Use `cap_fs_ext::OpenOptionsFollowExt` instead of calling this directly.
     #[doc(hidden)]
     #[inline]
-    pub unsafe fn _cap_fs_ext_follow(&mut self, follow: FollowSymlinks) -> &mut Self {
+    pub fn _cap_fs_ext_follow(&mut self, follow: FollowSymlinks) -> &mut Self {
         self.follow(follow)
     }
 
     /// Wrapper to allow `maybe_dir` to be exposed by the `cap-fs-ext` crate.
     ///
-    /// # Safety
-    ///
     /// This is hidden from the main API since this functionality isn't present in `std`.
     /// Use `cap_fs_ext::OpenOptionsMaybeDirExt` instead of calling this directly.
     #[doc(hidden)]
     #[inline]
-    pub unsafe fn _cap_fs_ext_maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
+    pub fn _cap_fs_ext_maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
         self.maybe_dir(maybe_dir)
     }
 }

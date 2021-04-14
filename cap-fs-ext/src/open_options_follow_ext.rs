@@ -19,6 +19,6 @@ impl OpenOptionsFollowExt for cap_primitives::fs::OpenOptions {
         // `follow` functionality is implemented within `cap_primitives`; we're
         // just exposing it here since `OpenOptions` is re-exported by
         // `cap_std` etc. and `follow` isn't in `std`.
-        unsafe { self._cap_fs_ext_follow(follow) }
+        self._cap_fs_ext_follow(follow)
     }
 }

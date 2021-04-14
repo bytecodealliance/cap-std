@@ -1,4 +1,5 @@
 use crate::net::{Shutdown, SocketAddr};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{
     fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
@@ -31,12 +32,12 @@ pub struct TcpStream {
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `std::net::TcpStream`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::net::TcpStream` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::TcpStream) -> Self {
+    pub fn from_std(std: net::TcpStream, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -70,7 +71,7 @@ impl TcpStream {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let tcp_stream = self.std.try_clone()?;
-        Ok(unsafe { Self::from_std(tcp_stream) })
+        Ok(Self::from_std(tcp_stream, ambient_authority()))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -167,7 +168,7 @@ impl TcpStream {
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::TcpStream::from_raw_fd(fd))
+        Self::from_std(net::TcpStream::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -175,7 +176,7 @@ impl FromRawFd for TcpStream {
 impl FromRawSocket for TcpStream {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::TcpStream::from_raw_socket(socket))
+        Self::from_std(net::TcpStream::from_raw_socket(socket), ambient_authority())
     }
 }
 

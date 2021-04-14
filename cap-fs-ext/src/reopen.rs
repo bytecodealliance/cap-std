@@ -1,4 +1,7 @@
-use cap_primitives::fs::{reopen, OpenOptions};
+use cap_primitives::{
+    ambient_authority,
+    fs::{reopen, OpenOptions},
+};
 use std::io;
 #[cfg(any(feature = "std", feature = "async_std"))]
 use unsafe_io::AsUnsafeFile;
@@ -40,7 +43,7 @@ impl Reopen for cap_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&AsUnsafeFile::as_file_view(self), options)?;
-        Ok(unsafe { Self::from_std(file) })
+        Ok(Self::from_std(file, ambient_authority()))
     }
 }
 
@@ -49,7 +52,7 @@ impl Reopen for cap_std::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
-        Ok(unsafe { Self::from_std(file) })
+        Ok(Self::from_std(file, ambient_authority()))
     }
 }
 
@@ -68,7 +71,7 @@ impl Reopen for cap_async_std::fs::File {
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
         let std = async_std::fs::File::from_filelike(file);
-        Ok(unsafe { Self::from_std(std) })
+        Ok(Self::from_std(std, ambient_authority()))
     }
 }
 
@@ -78,6 +81,6 @@ impl Reopen for cap_async_std::fs_utf8::File {
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_file_view(), options)?;
         let std = async_std::fs::File::from_filelike(file);
-        Ok(unsafe { Self::from_std(std) })
+        Ok(Self::from_std(std, ambient_authority()))
     }
 }

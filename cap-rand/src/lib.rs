@@ -20,6 +20,7 @@
 //! [`CapRng`]: crate::rngs::CapRng
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]
@@ -27,6 +28,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
+pub use ambient_authority::{ambient_authority, AmbientAuthority};
 pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, SeedableRng};
 
 /// Convenience re-export of common members.
@@ -48,6 +50,8 @@ pub mod prelude {
 ///
 /// This corresponds to [`rand::rngs`].
 pub mod rngs {
+    use super::AmbientAuthority;
+
     pub use rand::rngs::{adapter, mock, StdRng};
 
     #[cfg(feature = "small_rng")]
@@ -57,21 +61,20 @@ pub mod rngs {
     /// operating system.
     ///
     /// This corresponds to [`rand::rngs::OsRng`], except instead of
-    /// implementing `Default` it has an unsafe `default` function since
-    /// accessing the operating system requires ambient authority.
+    /// implementing `Default` it has an ambient-authority `default` function
+    /// to access the operating system.
     #[derive(Clone, Copy, Debug)]
     pub struct OsRng(());
 
     impl OsRng {
         /// Returns an `OsRng` instance.
         ///
-        /// # Safety
+        /// # Ambient Authority
         ///
-        /// This function is unsafe because it makes use of ambient authority
-        /// to access the platform entropy source, which doesn't uphold the
-        /// invariant of the rest of the API. It is otherwise safe to use.
+        /// This function makes use of ambient authority to access the platform
+        /// entropy source.
         #[inline]
-        pub const unsafe fn default() -> Self {
+        pub const fn default(_: AmbientAuthority) -> Self {
             Self(())
         }
     }
@@ -113,14 +116,13 @@ pub mod rngs {
     impl CapRng {
         /// A convenience alias for calling `thread_rng`.
         ///
-        /// # Safety
+        /// # Ambient Authority
         ///
-        /// This function is unsafe because it makes use of ambient authority
-        /// to access the platform entropy source, which doesn't uphold the
-        /// invariant of the rest of the API. It is otherwise safe to use.
+        /// This function makes use of ambient authority to access the platform
+        /// entropy source.
         #[inline]
-        pub unsafe fn default() -> Self {
-            crate::thread_rng()
+        pub fn default(ambient_authority: AmbientAuthority) -> Self {
+            crate::thread_rng(ambient_authority)
         }
     }
 
@@ -154,13 +156,12 @@ pub mod rngs {
 ///
 /// This corresponds to [`rand::thread_rng`].
 ///
-/// # Safety
+/// # Ambient Authority
 ///
-/// This function is unsafe because it makes use of ambient authority to
-/// access the platform entropy source, which doesn't uphold the invariant
-/// of the rest of the API. It is otherwise safe to use.
+/// This function makes use of ambient authority to access the platform entropy
+/// source.
 #[inline]
-pub unsafe fn thread_rng() -> rngs::CapRng {
+pub fn thread_rng(_: AmbientAuthority) -> rngs::CapRng {
     rngs::CapRng {
         inner: rand::thread_rng(),
     }
@@ -170,13 +171,12 @@ pub unsafe fn thread_rng() -> rngs::CapRng {
 ///
 /// This corresponds to [`rand::random`].
 ///
-/// # Safety
+/// # Ambient Authority
 ///
-/// This function is unsafe because it makes use of ambient authority to
-/// access the platform entropy source, which doesn't uphold the invariant
-/// of the rest of the API. It is otherwise safe to use.
+/// This function makes use of ambient authority to access the platform entropy
+/// source.
 #[inline]
-pub unsafe fn random<T>() -> T
+pub fn random<T>(_: AmbientAuthority) -> T
 where
     crate::distributions::Standard: crate::distributions::Distribution<T>,
 {

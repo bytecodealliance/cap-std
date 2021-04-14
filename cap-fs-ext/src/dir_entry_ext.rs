@@ -35,7 +35,7 @@ impl DirEntryExt for cap_std::fs::DirEntry {
 impl DirEntryExt for cap_std::fs::DirEntry {
     #[inline]
     fn full_metadata(&self) -> io::Result<Metadata> {
-        unsafe { _WindowsDirEntryExt::full_metadata(self) }
+        _WindowsDirEntryExt::full_metadata(self)
     }
 }
 
@@ -51,7 +51,7 @@ impl DirEntryExt for cap_async_std::fs::DirEntry {
 impl DirEntryExt for cap_async_std::fs::DirEntry {
     #[inline]
     fn full_metadata(&self) -> io::Result<Metadata> {
-        unsafe { _WindowsDirEntryExt::full_metadata(self) }
+        _WindowsDirEntryExt::full_metadata(self)
     }
 }
 
@@ -67,7 +67,7 @@ impl DirEntryExt for cap_std::fs_utf8::DirEntry {
 impl DirEntryExt for cap_std::fs_utf8::DirEntry {
     #[inline]
     fn full_metadata(&self) -> io::Result<Metadata> {
-        unsafe { _WindowsDirEntryExt::full_metadata(self) }
+        _WindowsDirEntryExt::full_metadata(self)
     }
 }
 
@@ -83,6 +83,6 @@ impl DirEntryExt for cap_async_std::fs_utf8::DirEntry {
 impl DirEntryExt for cap_async_std::fs_utf8::DirEntry {
     #[inline]
     fn full_metadata(&self) -> io::Result<Metadata> {
-        unsafe { _WindowsDirEntryExt::full_metadata(self) }
+        _WindowsDirEntryExt::full_metadata(self)
     }
 }

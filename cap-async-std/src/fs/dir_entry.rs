@@ -4,6 +4,7 @@ use async_std::io;
 use async_std::os::unix::fs::DirEntryExt;
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::fs::DirEntryExt;
+use cap_primitives::ambient_authority;
 use std::{ffi::OsString, fmt};
 
 /// Entries returned by the `ReadDir` iterator.
@@ -30,21 +31,21 @@ impl DirEntry {
     #[inline]
     pub fn open(&self) -> io::Result<File> {
         let file = self.inner.open()?.into();
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
         let file = self.inner.open_with(options)?.into();
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
         let file = self.inner.open_dir()?.into();
-        Ok(unsafe { Dir::from_std_file(file) })
+        Ok(Dir::from_std_file(file, ambient_authority()))
     }
 
     /// Removes the file from its filesystem.
@@ -97,9 +98,9 @@ impl DirEntryExt for DirEntry {
 
 #[cfg(windows)]
 #[doc(hidden)]
-unsafe impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
+impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
     #[inline]
-    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+    fn full_metadata(&self) -> io::Result<Metadata> {
         self.inner.full_metadata()
     }
 }

@@ -38,6 +38,7 @@ fn windows_symlinks() {
 
 #[test]
 fn windows_symlinks_ambient() {
+    use cap_std::{ambient_authority, fs::Dir};
     use std::{
         fs,
         os::windows::fs::{symlink_dir, symlink_file},
@@ -68,11 +69,11 @@ fn windows_symlinks_ambient() {
     let (_maj, _min, build) = nt_version::get();
     if (build & 0xffff) > 17134 {
         assert!(
-            unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("dir_symlink_file")) }
+            Dir::open_ambient_dir(dir.path().join("dir_symlink_file"), ambient_authority())
                 .is_err()
         );
         assert!(
-            unsafe { cap_std::fs::Dir::open_ambient_dir(dir.path().join("file_symlink_dir")) }
+            Dir::open_ambient_dir(dir.path().join("file_symlink_dir"), ambient_authority())
                 .is_err()
         );
         assert!(fs::metadata(dir.path().join("dir_symlink_file")).is_err());

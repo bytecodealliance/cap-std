@@ -1,8 +1,11 @@
 #[cfg(not(windows))]
 use cap_primitives::fs::symlink;
-use cap_primitives::fs::{open_dir_nofollow, set_times, set_times_nofollow};
 #[cfg(windows)]
 use cap_primitives::fs::{symlink_dir, symlink_file};
+use cap_primitives::{
+    ambient_authority,
+    fs::{open_dir_nofollow, set_times, set_times_nofollow},
+};
 use std::{io, path::Path};
 use unsafe_io::AsUnsafeFile;
 
@@ -248,7 +251,7 @@ impl DirExt for cap_std::fs::Dir {
     #[inline]
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref()) {
-            Ok(file) => Ok(unsafe { Self::from_std_file(file) }),
+            Ok(file) => Ok(Self::from_std_file(file, ambient_authority())),
             Err(e) => Err(e),
         }
     }
@@ -280,8 +283,7 @@ impl DirExt for cap_std::fs::Dir {
 
         let meta = file.metadata()?;
         if meta.file_type().is_symlink()
-            && unsafe { meta.file_attributes() } & FILE_ATTRIBUTE_DIRECTORY
-                == FILE_ATTRIBUTE_DIRECTORY
+            && meta.file_attributes() & FILE_ATTRIBUTE_DIRECTORY == FILE_ATTRIBUTE_DIRECTORY
         {
             self.remove_dir(path)?;
         } else {
@@ -373,7 +375,7 @@ impl DirExt for cap_async_std::fs::Dir {
     #[inline]
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref()) {
-            Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
+            Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
             Err(e) => Err(e),
         }
     }
@@ -500,7 +502,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[inline]
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
-            Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
+            Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
             Err(e) => Err(e),
         }
     }
@@ -633,7 +635,7 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[inline]
     fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(&self.as_file_view(), path.as_ref().as_ref()) {
-            Ok(file) => Ok(unsafe { Self::from_std_file(file.into()) }),
+            Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
             Err(e) => Err(e),
         }
     }

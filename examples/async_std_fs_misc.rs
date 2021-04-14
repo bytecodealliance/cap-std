@@ -2,7 +2,10 @@
 // adapted to use this crate instead.
 
 use async_std::{io, io::prelude::*};
-use cap_async_std::fs::{Dir, OpenOptions};
+use cap_async_std::{
+    ambient_authority,
+    fs::{Dir, OpenOptions},
+};
 //use async_std::os::unix;
 use std::path::Path;
 
@@ -33,7 +36,7 @@ fn touch(dir: &mut Dir, path: &Path) -> io::Result<()> {
 
 #[async_std::main]
 async fn main() {
-    let mut cwd = unsafe { Dir::open_ambient_dir(".") }.expect("!");
+    let mut cwd = Dir::open_ambient_dir(".", ambient_authority()).expect("!");
 
     println!("`mkdir a`");
 

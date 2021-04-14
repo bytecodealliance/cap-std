@@ -1,6 +1,7 @@
 //! Extension traits for `Dir`
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![cfg_attr(all(windows, windows_by_handle), feature(windows_by_handle))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
@@ -31,3 +32,5 @@ pub use reopen::Reopen;
 
 /// Re-export these to allow them to be used with `Reuse`.
 pub use cap_primitives::fs::{FollowSymlinks, Metadata, OpenOptions};
+
+pub use cap_primitives::{ambient_authority, AmbientAuthority};

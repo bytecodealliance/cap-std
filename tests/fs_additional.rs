@@ -281,7 +281,7 @@ fn follow_dotdot_symlink() {
 
 #[test]
 fn follow_dotdot_symlink_ambient() {
-    use cap_std::fs::Dir;
+    use cap_std::{ambient_authority, fs::Dir};
     #[cfg(unix)]
     use std::os::unix::fs::symlink as symlink_dir;
     #[cfg(windows)]
@@ -298,33 +298,52 @@ fn follow_dotdot_symlink_ambient() {
     check!(symlink_dir("../../..", dir.path().join("a/b/e")));
     check!(symlink_dir("../../../..", dir.path().join("a/b/f")));
 
-    unsafe {
-        check!(Dir::open_ambient_dir(dir.path().join("a/b/c")));
-        assert!(check!(std::fs::metadata(dir.path().join("a/b/c"))).is_dir());
+    check!(Dir::open_ambient_dir(
+        dir.path().join("a/b/c"),
+        ambient_authority()
+    ));
+    assert!(check!(std::fs::metadata(dir.path().join("a/b/c"))).is_dir());
 
-        #[cfg(windows)]
-        {
-            error!(Dir::open_ambient_dir(dir.path().join("a/b/d")), 123);
-            error!(std::fs::metadata(dir.path().join("a/b/d")), 123);
+    #[cfg(windows)]
+    {
+        error!(
+            Dir::open_ambient_dir(dir.path().join("a/b/d"), ambient_authority()),
+            123
+        );
+        error!(std::fs::metadata(dir.path().join("a/b/d")), 123);
 
-            error!(Dir::open_ambient_dir(dir.path().join("a/b/e")), 123);
-            error!(std::fs::metadata(dir.path().join("a/b/e")), 123);
+        error!(
+            Dir::open_ambient_dir(dir.path().join("a/b/e"), ambient_authority()),
+            123
+        );
+        error!(std::fs::metadata(dir.path().join("a/b/e")), 123);
 
-            error!(Dir::open_ambient_dir(dir.path().join("a/b/f")), 123);
-            error!(std::fs::metadata(dir.path().join("a/b/f")), 123);
-        }
+        error!(
+            Dir::open_ambient_dir(dir.path().join("a/b/f"), ambient_authority()),
+            123
+        );
+        error!(std::fs::metadata(dir.path().join("a/b/f")), 123);
+    }
 
-        #[cfg(not(windows))]
-        {
-            check!(Dir::open_ambient_dir(dir.path().join("a/b/d")));
-            assert!(check!(std::fs::metadata(dir.path().join("a/b/d"))).is_dir());
+    #[cfg(not(windows))]
+    {
+        check!(Dir::open_ambient_dir(
+            dir.path().join("a/b/d"),
+            ambient_authority()
+        ));
+        assert!(check!(std::fs::metadata(dir.path().join("a/b/d"))).is_dir());
 
-            check!(Dir::open_ambient_dir(dir.path().join("a/b/e")));
-            assert!(check!(std::fs::metadata(dir.path().join("a/b/e"))).is_dir());
+        check!(Dir::open_ambient_dir(
+            dir.path().join("a/b/e"),
+            ambient_authority()
+        ));
+        assert!(check!(std::fs::metadata(dir.path().join("a/b/e"))).is_dir());
 
-            check!(Dir::open_ambient_dir(dir.path().join("a/b/f")));
-            assert!(check!(std::fs::metadata(dir.path().join("a/b/f"))).is_dir());
-        }
+        check!(Dir::open_ambient_dir(
+            dir.path().join("a/b/f"),
+            ambient_authority()
+        ));
+        assert!(check!(std::fs::metadata(dir.path().join("a/b/f"))).is_dir());
     }
 }
 
@@ -486,7 +505,7 @@ fn file_with_trailing_slashdot() {
 #[cfg(windows)]
 #[test]
 fn file_with_trailing_slashdot_ambient() {
-    use cap_std::fs::Dir;
+    use cap_std::{ambient_authority, fs::Dir};
     let dir = tempfile::tempdir().unwrap();
     check!(std::fs::File::create(dir.path().join("file")));
     check!(std::fs::File::open(dir.path().join("file")));
@@ -498,17 +517,36 @@ fn file_with_trailing_slashdot_ambient() {
     assert!(std::fs::File::open(dir.path().join("file/")).is_err());
     assert!(std::fs::File::open(dir.path().join("file\\.\\")).is_err());
     assert!(std::fs::File::open(dir.path().join("file/./")).is_err());
-    unsafe {
-        check!(Dir::open_ambient_dir(dir.path().join("file/..")));
-        check!(Dir::open_ambient_dir(dir.path().join("file\\.\\..")));
-        check!(Dir::open_ambient_dir(dir.path().join("file/./..")));
-        check!(Dir::open_ambient_dir(dir.path().join("file\\..\\.")));
-        check!(Dir::open_ambient_dir(dir.path().join("file/../.")));
-        check!(Dir::open_ambient_dir(dir.path().join("file\\..\\")));
-        check!(Dir::open_ambient_dir(dir.path().join("file/../")));
-        assert!(Dir::open_ambient_dir(dir.path().join("file\\...")).is_err());
-        assert!(Dir::open_ambient_dir(dir.path().join("file/...")).is_err());
-    }
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file/.."),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file\\.\\.."),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file/./.."),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file\\..\\."),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file/../."),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file\\..\\"),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("file/../"),
+        ambient_authority()
+    ));
+    assert!(Dir::open_ambient_dir(dir.path().join("file\\..."), ambient_authority()).is_err());
+    assert!(Dir::open_ambient_dir(dir.path().join("file/..."), ambient_authority()).is_err());
 }
 
 #[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]

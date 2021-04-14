@@ -8,7 +8,10 @@ mod sys_common;
 
 use std::io::prelude::*;
 
-use cap_std::fs::{self, Dir, OpenOptions};
+use cap_std::{
+    ambient_authority,
+    fs::{self, Dir, OpenOptions},
+};
 #[cfg(not(racy_asserts))] // racy asserts are racy
 use std::thread;
 use std::{
@@ -849,7 +852,7 @@ fn symlink_noexist() {
 fn read_link() {
     if cfg!(windows) {
         // directory symlink
-        let root = unsafe { Dir::open_ambient_dir(r"C:\").unwrap() };
+        let root = Dir::open_ambient_dir(r"C:\", ambient_authority()).unwrap();
         error_contains!(
             root.read_link(r"Users\All Users"),
             "a path led outside of the filesystem"

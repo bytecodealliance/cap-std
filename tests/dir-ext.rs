@@ -1,13 +1,13 @@
 mod sys_common;
 
 use cap_fs_ext::DirExt;
-use cap_tempfile::TempDir;
+use cap_tempfile::{ambient_authority, TempDir};
 
 use sys_common::symlink_supported;
 
 #[test]
 fn remove_file() {
-    let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+    let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     let file = tempdir.create("file").expect("create file to delete");
     drop(file);
     tempdir.remove_file_or_symlink("file").expect("delete file");
@@ -20,7 +20,7 @@ fn remove_symlink_to_file() {
         return;
     }
 
-    let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+    let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     let target = tempdir.create("target").expect("create target file");
     drop(target);
     tempdir.symlink("target", "link").expect("create symlink");
@@ -38,7 +38,7 @@ fn remove_symlink_to_dir() {
         return;
     }
 
-    let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+    let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     let target = tempdir.create_dir("target").expect("create target dir");
     drop(target);
     tempdir.symlink("target", "link").expect("create symlink");
@@ -52,7 +52,7 @@ fn remove_symlink_to_dir() {
 
 #[test]
 fn do_not_remove_dir() {
-    let tempdir = unsafe { TempDir::new() }.expect("create tempdir");
+    let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     let subdir = tempdir.create_dir("subdir").expect("create dir");
     drop(subdir);
     assert!(tempdir.exists("subdir"), "subdir created");

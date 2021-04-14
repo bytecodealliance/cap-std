@@ -7,6 +7,7 @@ use async_std::{
     },
 };
 use std::fmt;
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
@@ -27,12 +28,12 @@ pub struct UnixListener {
 impl UnixListener {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixListener`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::os::unix::net::UnixListener` is not sandboxed and may access any address that
     /// the host process has access to.
     #[inline]
-    pub unsafe fn from_std(std: unix::net::UnixListener) -> Self {
+    pub fn from_std(std: unix::net::UnixListener, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -43,10 +44,9 @@ impl UnixListener {
     /// [`async_std::os::unix::net::UnixListener::accept`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.accept
     #[inline]
     pub async fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
-        self.std
-            .accept()
-            .await
-            .map(|(unix_stream, addr)| (unsafe { UnixStream::from_std(unix_stream) }, addr))
+        self.std.accept().await.map(|(unix_stream, addr)| {
+            (UnixStream::from_std(unix_stream, ambient_authority()), addr)
+        })
     }
 
     // async_std doesn't have `try_clone`.
@@ -73,14 +73,17 @@ impl UnixListener {
     #[inline]
     pub fn incoming(&self) -> Incoming {
         let incoming = self.std.incoming();
-        unsafe { Incoming::from_std(incoming) }
+        Incoming::from_std(incoming, ambient_authority())
     }
 }
 
 impl FromRawFd for UnixListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(unix::net::UnixListener::from_raw_fd(fd))
+        Self::from_std(
+            unix::net::UnixListener::from_raw_fd(fd),
+            ambient_authority(),
+        )
     }
 }
 

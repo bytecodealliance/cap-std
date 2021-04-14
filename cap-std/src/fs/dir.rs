@@ -1,10 +1,15 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-use cap_primitives::fs::{
-    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
-    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
+use cap_primitives::{
+    ambient_authority,
+    fs::{
+        canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+        read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+        remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks,
+        Permissions,
+    },
+    AmbientAuthority,
 };
 #[cfg(target_os = "wasi")]
 use posish::fs::OpenOptionsExt;
@@ -46,12 +51,12 @@ impl Dir {
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::fs::File` is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
+    pub fn from_std_file(std_file: fs::File, _: AmbientAuthority) -> Self {
         Self { std_file }
     }
 
@@ -85,21 +90,21 @@ impl Dir {
     #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let dir = open(&self.std_file, path, options)?;
-        Ok(unsafe { File::from_std(dir) })
+        Ok(File::from_std(dir, ambient_authority()))
     }
 
     #[cfg(target_os = "wasi")]
     #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let dir = options.open_at(&self.std_file, path)?;
-        Ok(unsafe { File::from_std(dir) })
+        Ok(File::from_std(dir, ambient_authority()))
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         let dir = open_dir(&self.std_file, path.as_ref())?;
-        Ok(unsafe { Self::from_std_file(dir) })
+        Ok(Self::from_std_file(dir, ambient_authority()))
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -521,7 +526,7 @@ impl Dir {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let dir = self.std_file.try_clone()?;
-        Ok(unsafe { Self::from_std_file(dir) })
+        Ok(Self::from_std_file(dir, ambient_authority()))
     }
 
     /// Returns `true` if the path points at an existing entity.
@@ -555,14 +560,17 @@ impl Dir {
     /// Constructs a new instance of `Self` by opening the given path as a
     /// directory using the host process' ambient authority.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        let dir = open_ambient_dir(path.as_ref())?;
-        Ok(Self::from_std_file(dir))
+    pub fn open_ambient_dir<P: AsRef<Path>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        let dir = open_ambient_dir(path.as_ref(), ambient_authority)?;
+        Ok(Self::from_std_file(dir, ambient_authority))
     }
 }
 
@@ -570,7 +578,7 @@ impl Dir {
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std_file(fs::File::from_raw_fd(fd))
+        Self::from_std_file(fs::File::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -580,7 +588,7 @@ impl FromRawHandle for Dir {
     /// `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std_file(fs::File::from_raw_handle(handle))
+        Self::from_std_file(fs::File::from_raw_handle(handle), ambient_authority())
     }
 }
 

@@ -90,21 +90,21 @@ impl FileTypeExt for cap_primitives::fs::FileType {
 impl FileTypeExt for cap_primitives::fs::FileType {
     #[inline]
     fn is_block_device(&self) -> bool {
-        unsafe { _WindowsFileTypeExt::is_block_device(self) }
+        _WindowsFileTypeExt::is_block_device(self)
     }
 
     #[inline]
     fn is_char_device(&self) -> bool {
-        unsafe { _WindowsFileTypeExt::is_char_device(self) }
+        _WindowsFileTypeExt::is_char_device(self)
     }
 
     #[inline]
     fn is_fifo(&self) -> bool {
-        unsafe { _WindowsFileTypeExt::is_fifo(self) }
+        _WindowsFileTypeExt::is_fifo(self)
     }
 
     #[inline]
     fn is_socket(&self) -> bool {
-        unsafe { _WindowsFileTypeExt::is_socket(self) }
+        _WindowsFileTypeExt::is_socket(self)
     }
 }

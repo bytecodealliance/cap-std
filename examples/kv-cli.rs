@@ -5,7 +5,7 @@
 //! scheme the filesystem uses, but it makes a simple illustration of the
 //! `cap-std` API.
 
-use cap_directories::ProjectDirs;
+use cap_directories::{ambient_authority, ProjectDirs};
 use std::{env::args, path::PathBuf, str};
 
 fn main() -> anyhow::Result<()> {
@@ -19,13 +19,12 @@ fn main() -> anyhow::Result<()> {
     }
 
     // Obtain the `data_dir` for this program.
-    let project_dirs = unsafe {
-        ProjectDirs::from(
-            "com.example",
-            "Example Organization",
-            "Cap-std Key-Value CLI Example",
-        )
-    }
+    let project_dirs = ProjectDirs::from(
+        "com.example",
+        "Example Organization",
+        "Cap-std Key-Value CLI Example",
+        ambient_authority(),
+    )
     .ok_or_else(no_project_dirs)?;
     let mut data_dir = project_dirs.data_dir()?;
 

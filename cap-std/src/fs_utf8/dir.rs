@@ -4,6 +4,7 @@ use crate::{
     fs::{OpenOptions, Permissions},
     fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
 };
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{fmt, fs, io};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
@@ -34,13 +35,13 @@ impl Dir {
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::fs::File` is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
-        Self::from_cap_std(crate::fs::Dir::from_std_file(std_file))
+    pub fn from_std_file(std_file: fs::File, ambient_authority: AmbientAuthority) -> Self {
+        Self::from_cap_std(crate::fs::Dir::from_std_file(std_file, ambient_authority))
     }
 
     /// Constructs a new instance of `Self` from the given `cap_std::fs::Dir`.
@@ -496,14 +497,17 @@ impl Dir {
     /// Constructs a new instance of `Self` by opening the given path as a
     /// directory using the host process' ambient authority.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn open_ambient_dir<P: AsRef<str>>(path: P) -> io::Result<Self> {
+    pub fn open_ambient_dir<P: AsRef<str>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
         let path = from_utf8(path)?;
-        crate::fs::Dir::open_ambient_dir(path).map(Self::from_cap_std)
+        crate::fs::Dir::open_ambient_dir(path, ambient_authority).map(Self::from_cap_std)
     }
 }
 
@@ -511,7 +515,7 @@ impl Dir {
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std_file(fs::File::from_raw_fd(fd))
+        Self::from_std_file(fs::File::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -521,7 +525,7 @@ impl FromRawHandle for Dir {
     /// `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std_file(fs::File::from_raw_handle(handle))
+        Self::from_std_file(fs::File::from_raw_handle(handle), ambient_authority())
     }
 }
 

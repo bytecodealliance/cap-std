@@ -1,6 +1,7 @@
 //! Capability-based temporary directories.
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]
@@ -12,6 +13,8 @@ use cap_std::fs::Dir;
 use std::{env, fmt, fs, io, mem, ops::Deref};
 #[cfg(not(target_os = "emscripten"))]
 use uuid::Uuid;
+
+pub use cap_std::{ambient_authority, AmbientAuthority};
 
 /// A directory in a filesystem that is automatically deleted when it goes out
 /// of scope.
@@ -34,18 +37,17 @@ impl TempDir {
     ///
     /// [`tempfile::TempDir::new`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.new
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
-    /// This function is unsafe because it makes use of ambient authority to
-    /// access temporary directories, which doesn't uphold the invariant of
-    /// the rest of the API. It is otherwise safe to use.
-    pub unsafe fn new() -> io::Result<Self> {
+    /// This function makes use of ambient authority to access temporary
+    /// directories.
+    pub fn new(ambient_authority: AmbientAuthority) -> io::Result<Self> {
         let system_tmp = env::temp_dir();
         for _ in 0..Self::num_iterations() {
             let name = system_tmp.join(&Self::new_name());
             match fs::create_dir(&name) {
                 Ok(()) => {
-                    let dir = match Dir::open_ambient_dir(&name) {
+                    let dir = match Dir::open_ambient_dir(&name, ambient_authority) {
                         Ok(dir) => dir,
                         Err(e) => {
                             fs::remove_dir(name).ok();
@@ -152,13 +154,12 @@ impl fmt::Debug for TempDir {
 ///
 /// [`tempfile::tempdir`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir.html
 ///
-/// # Safety
+/// # Ambient Authority
 ///
-/// This function is unsafe because it makes use of ambient authority to
-/// access temporary directories, which doesn't uphold the invariant of
-/// the rest of the API. It is otherwise safe to use.
-pub unsafe fn tempdir() -> io::Result<TempDir> {
-    TempDir::new()
+/// This function makes use of ambient authority to access temporary
+/// directories.
+pub fn tempdir(ambient_authority: AmbientAuthority) -> io::Result<TempDir> {
+    TempDir::new(ambient_authority)
 }
 
 /// Create a new temporary directory.
@@ -172,33 +173,43 @@ pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
 
 #[test]
 fn drop_tempdir() {
-    let t = unsafe { tempdir().unwrap() };
+    use crate::ambient_authority;
+
+    let t = tempdir(ambient_authority()).unwrap();
     drop(t)
 }
 
 #[test]
 fn close_tempdir() {
-    let t = unsafe { tempdir().unwrap() };
+    use crate::ambient_authority;
+
+    let t = tempdir(ambient_authority()).unwrap();
     t.close().unwrap();
 }
 
 #[test]
 fn drop_tempdir_in() {
-    let dir = unsafe { Dir::open_ambient_dir(env::temp_dir()).unwrap() };
+    use crate::ambient_authority;
+
+    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
     let t = tempdir_in(&dir).unwrap();
     drop(t);
 }
 
 #[test]
 fn close_tempdir_in() {
-    let dir = unsafe { Dir::open_ambient_dir(env::temp_dir()).unwrap() };
+    use crate::ambient_authority;
+
+    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
     let t = tempdir_in(&dir).unwrap();
     t.close().unwrap();
 }
 
 #[test]
 fn close_outer() {
-    let t = unsafe { tempdir().unwrap() };
+    use crate::ambient_authority;
+
+    let t = tempdir(ambient_authority()).unwrap();
     let _s = tempdir_in(&t).unwrap();
     #[cfg(windows)]
     assert_eq!(
@@ -211,7 +222,9 @@ fn close_outer() {
 
 #[test]
 fn close_inner() {
-    let t = unsafe { tempdir().unwrap() };
+    use crate::ambient_authority;
+
+    let t = tempdir(ambient_authority()).unwrap();
     let s = tempdir_in(&t).unwrap();
     s.close().unwrap();
 }

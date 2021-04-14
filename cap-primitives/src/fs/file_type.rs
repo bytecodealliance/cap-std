@@ -146,15 +146,13 @@ impl std::os::windows::fs::FileTypeExt for FileType {
 /// Extension trait to allow `is_block_device` etc. to be exposed by
 /// the `cap-fs-ext` crate.
 ///
-/// # Safety
-///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::FileTypeExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
-pub unsafe trait _WindowsFileTypeExt {
-    unsafe fn is_block_device(&self) -> bool;
-    unsafe fn is_char_device(&self) -> bool;
-    unsafe fn is_fifo(&self) -> bool;
-    unsafe fn is_socket(&self) -> bool;
+pub trait _WindowsFileTypeExt {
+    fn is_block_device(&self) -> bool;
+    fn is_char_device(&self) -> bool;
+    fn is_fifo(&self) -> bool;
+    fn is_socket(&self) -> bool;
 }
