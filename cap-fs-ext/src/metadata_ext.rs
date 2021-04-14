@@ -92,27 +92,21 @@ impl MetadataExt for cap_primitives::fs::Metadata {
 #[cfg(all(windows, any(feature = "std", feature = "async_std")))]
 impl MetadataExt for cap_primitives::fs::Metadata {
     fn dev(&self) -> u64 {
-        unsafe {
-            _WindowsByHandle::volume_serial_number(self)
-                .expect("`dev` depends on a Metadata constructed from an open `File`")
-                .into()
-        }
+        _WindowsByHandle::volume_serial_number(self)
+            .expect("`dev` depends on a Metadata constructed from an open `File`")
+            .into()
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        unsafe {
-            _WindowsByHandle::file_index(self)
-                .expect("`ino` depends on a Metadata constructed from an open `File`")
-        }
+        _WindowsByHandle::file_index(self)
+            .expect("`ino` depends on a Metadata constructed from an open `File`")
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        unsafe {
-            _WindowsByHandle::number_of_links(self)
-                .expect("`nlink` depends on a Metadata constructed from an open `File`")
-                .into()
-        }
+        _WindowsByHandle::number_of_links(self)
+            .expect("`nlink` depends on a Metadata constructed from an open `File`")
+            .into()
     }
 }

@@ -103,8 +103,10 @@ fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::Erro
 /// Test that `file_path` works on a few miscellaneous directory paths.
 #[test]
 fn dir_paths() {
+    use crate::ambient_authority;
+
     for path in &[std::env::current_dir().unwrap(), std::env::temp_dir()] {
-        let dir = unsafe { open_ambient_dir(&path).unwrap() };
+        let dir = open_ambient_dir(&path, ambient_authority()).unwrap();
         assert_eq!(
             file_path(&dir)
                 .as_ref()

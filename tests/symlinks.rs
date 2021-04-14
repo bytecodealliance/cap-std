@@ -2,7 +2,7 @@
 mod sys_common;
 
 use cap_fs_ext::DirExt;
-use cap_std::fs::Dir;
+use cap_std::{ambient_authority, fs::Dir};
 use sys_common::{io::tmpdir, symlink_supported};
 
 #[test]
@@ -82,7 +82,7 @@ fn readlink_absolute() {
         dir.path().join("dir_symlink_dir")
     ));
 
-    let tmpdir = check!(unsafe { Dir::open_ambient_dir(dir.path()) });
+    let tmpdir = check!(Dir::open_ambient_dir(dir.path(), ambient_authority()));
 
     #[cfg(not(windows))]
     error_contains!(
@@ -326,154 +326,224 @@ fn open_dir_nofollow_ambient() {
     check!(symlink_dir("./", dir.path().join("symlink_dotslash")));
     check!(symlink_dir(".", dir.path().join("symlink_dot")));
 
-    unsafe {
-        assert!(Dir::open_ambient_dir(dir.path().join("file")).is_err());
-        assert!(Dir::open_ambient_dir(dir.path().join("symlink_file")).is_err());
-        check!(Dir::open_ambient_dir(dir.path().join("symlink_dir")));
-        #[cfg(windows)]
-        check!(Dir::open_ambient_dir(dir.path().join("symlink_dir\\")));
-        check!(Dir::open_ambient_dir(dir.path().join("symlink_dir/")));
-        #[cfg(windows)]
-        {
-            error!(
-                Dir::open_ambient_dir(dir.path().join("symlink_dir_slash")),
-                123
-            );
-            error!(
-                Dir::open_ambient_dir(dir.path().join("symlink_dir_slashdotdot")),
-                123
-            );
-            error!(
-                Dir::open_ambient_dir(dir.path().join("symlink_dir_slashdotdotslash")),
-                123
-            );
-            error!(
-                Dir::open_ambient_dir(dir.path().join("symlink_dotslash")),
-                123
-            );
-            error!(
-                Dir::open_ambient_dir(dir.path().join("symlink_dir_slashdot")),
-                123
-            );
-        }
-        #[cfg(not(windows))]
-        {
-            check!(Dir::open_ambient_dir(dir.path().join("symlink_dir_slash")));
-            check!(Dir::open_ambient_dir(
-                dir.path().join("symlink_dir_slashdotdot")
-            ));
-            check!(Dir::open_ambient_dir(
-                dir.path().join("symlink_dir_slashdotdotslash")
-            ));
-            check!(Dir::open_ambient_dir(dir.path().join("symlink_dotslash")));
-            check!(Dir::open_ambient_dir(
-                dir.path().join("symlink_dir_slashdot")
-            ));
-        }
-        check!(Dir::open_ambient_dir(dir.path().join("symlink_dot")));
-        check!(Dir::open_ambient_dir(dir.path().join("dir")));
+    assert!(Dir::open_ambient_dir(dir.path().join("file"), ambient_authority()).is_err());
+    assert!(Dir::open_ambient_dir(dir.path().join("symlink_file"), ambient_authority()).is_err());
+    check!(Dir::open_ambient_dir(
+        dir.path().join("symlink_dir"),
+        ambient_authority()
+    ));
+    #[cfg(windows)]
+    check!(Dir::open_ambient_dir(
+        dir.path().join("symlink_dir\\"),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("symlink_dir/"),
+        ambient_authority()
+    ));
+    #[cfg(windows)]
+    {
+        error!(
+            Dir::open_ambient_dir(dir.path().join("symlink_dir_slash"), ambient_authority()),
+            123
+        );
+        error!(
+            Dir::open_ambient_dir(
+                dir.path().join("symlink_dir_slashdotdot"),
+                ambient_authority()
+            ),
+            123
+        );
+        error!(
+            Dir::open_ambient_dir(
+                dir.path().join("symlink_dir_slashdotdotslash"),
+                ambient_authority()
+            ),
+            123
+        );
+        error!(
+            Dir::open_ambient_dir(dir.path().join("symlink_dotslash"), ambient_authority()),
+            123
+        );
+        error!(
+            Dir::open_ambient_dir(dir.path().join("symlink_dir_slashdot"), ambient_authority()),
+            123
+        );
+    }
+    #[cfg(not(windows))]
+    {
+        check!(Dir::open_ambient_dir(
+            dir.path().join("symlink_dir_slash"),
+            ambient_authority()
+        ));
+        check!(Dir::open_ambient_dir(
+            dir.path().join("symlink_dir_slashdotdot"),
+            ambient_authority()
+        ));
+        check!(Dir::open_ambient_dir(
+            dir.path().join("symlink_dir_slashdotdotslash"),
+            ambient_authority()
+        ));
+        check!(Dir::open_ambient_dir(
+            dir.path().join("symlink_dotslash"),
+            ambient_authority()
+        ));
+        check!(Dir::open_ambient_dir(
+            dir.path().join("symlink_dir_slashdot"),
+            ambient_authority()
+        ));
+    }
+    check!(Dir::open_ambient_dir(
+        dir.path().join("symlink_dot"),
+        ambient_authority()
+    ));
+    check!(Dir::open_ambient_dir(
+        dir.path().join("dir"),
+        ambient_authority()
+    ));
 
-        // Check various ways of spelling `dir/../symlink_dir`.
-        for dir_name in &["dir", "symlink_dir"] {
-            let name = format!("{}/../symlink_dir", dir_name);
-            check!(Dir::open_ambient_dir(dir.path().join(&name)));
-        }
+    // Check various ways of spelling `dir/../symlink_dir`.
+    for dir_name in &["dir", "symlink_dir"] {
+        let name = format!("{}/../symlink_dir", dir_name);
+        check!(Dir::open_ambient_dir(
+            dir.path().join(&name),
+            ambient_authority()
+        ));
+    }
 
-        // Check various paths which end with a symlink (even though the symlink
-        // expansion may end with `/` or a non-symlink).
-        for suffix in &[""] {
-            for symlink_dir in &["symlink_dot"] {
-                let name = format!("{}{}", symlink_dir, suffix);
-                check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                for dir_name in &["dir", "symlink_dir"] {
-                    let name = format!("{}/../{}", dir_name, name);
-                    check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                }
+    // Check various paths which end with a symlink (even though the symlink
+    // expansion may end with `/` or a non-symlink).
+    for suffix in &[""] {
+        for symlink_dir in &["symlink_dot"] {
+            let name = format!("{}{}", symlink_dir, suffix);
+            check!(Dir::open_ambient_dir(
+                dir.path().join(&name),
+                ambient_authority()
+            ));
+            for dir_name in &["dir", "symlink_dir"] {
+                let name = format!("{}/../{}", dir_name, name);
+                check!(Dir::open_ambient_dir(
+                    dir.path().join(&name),
+                    ambient_authority()
+                ));
             }
         }
+    }
 
-        // Check more paths which end with a symlink. On Windows, these fail due to
-        // the symlink-to-path-ending-in-trailing-slash error.
-        for suffix in &[""] {
-            for symlink_dir in &[
-                "symlink_dir_slashdotdot",
-                "symlink_dir_slashdot",
-                "symlink_dir_slash",
-                "symlink_dir_slashdotdotslash",
-                "symlink_dotslash",
-            ] {
-                let name = format!("{}{}", symlink_dir, suffix);
+    // Check more paths which end with a symlink. On Windows, these fail due to
+    // the symlink-to-path-ending-in-trailing-slash error.
+    for suffix in &[""] {
+        for symlink_dir in &[
+            "symlink_dir_slashdotdot",
+            "symlink_dir_slashdot",
+            "symlink_dir_slash",
+            "symlink_dir_slashdotdotslash",
+            "symlink_dotslash",
+        ] {
+            let name = format!("{}{}", symlink_dir, suffix);
+            #[cfg(windows)]
+            {
+                error!(
+                    Dir::open_ambient_dir(dir.path().join(&name), ambient_authority()),
+                    123
+                );
+            }
+            #[cfg(not(windows))]
+            {
+                check!(Dir::open_ambient_dir(
+                    dir.path().join(&name),
+                    ambient_authority()
+                ));
+            }
+            for dir_name in &["dir", "symlink_dir"] {
+                let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
-                    error!(Dir::open_ambient_dir(dir.path().join(&name)), 123);
+                    error!(
+                        Dir::open_ambient_dir(dir.path().join(&name), ambient_authority()),
+                        123
+                    );
                 }
                 #[cfg(not(windows))]
                 {
-                    check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                }
-                for dir_name in &["dir", "symlink_dir"] {
-                    let name = format!("{}/../{}", dir_name, name);
-                    #[cfg(windows)]
-                    {
-                        error!(Dir::open_ambient_dir(dir.path().join(&name)), 123);
-                    }
-                    #[cfg(not(windows))]
-                    {
-                        check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                    }
+                    check!(Dir::open_ambient_dir(
+                        dir.path().join(&name),
+                        ambient_authority()
+                    ));
                 }
             }
         }
+    }
 
-        // Check those same paths, but with various suffixes appended.
-        for suffix in &["/", "/.", "/./"] {
-            for symlink_dir in &["symlink_dir", "symlink_dot"] {
-                let name = format!("{}{}", symlink_dir, suffix);
-                check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                for dir_name in &["dir", "symlink_dir"] {
-                    let name = format!("{}/../{}", dir_name, name);
-                    check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                }
+    // Check those same paths, but with various suffixes appended.
+    for suffix in &["/", "/.", "/./"] {
+        for symlink_dir in &["symlink_dir", "symlink_dot"] {
+            let name = format!("{}{}", symlink_dir, suffix);
+            check!(Dir::open_ambient_dir(
+                dir.path().join(&name),
+                ambient_authority()
+            ));
+            for dir_name in &["dir", "symlink_dir"] {
+                let name = format!("{}/../{}", dir_name, name);
+                check!(Dir::open_ambient_dir(
+                    dir.path().join(&name),
+                    ambient_authority()
+                ));
             }
         }
+    }
 
-        // Check those same paths, but with various suffixes appended. On
-        // Windows, these fail due to the
-        // symlink-to-path-ending-in-trailing-slash error.
-        for suffix in &["/", "/.", "/./"] {
-            for symlink_dir in &[
-                "symlink_dir_slash",
-                "symlink_dir_slashdot",
-                "symlink_dir_slashdotdot",
-                "symlink_dir_slashdotdotslash",
-                "symlink_dotslash",
-            ] {
-                let name = format!("{}{}", symlink_dir, suffix);
+    // Check those same paths, but with various suffixes appended. On
+    // Windows, these fail due to the
+    // symlink-to-path-ending-in-trailing-slash error.
+    for suffix in &["/", "/.", "/./"] {
+        for symlink_dir in &[
+            "symlink_dir_slash",
+            "symlink_dir_slashdot",
+            "symlink_dir_slashdotdot",
+            "symlink_dir_slashdotdotslash",
+            "symlink_dotslash",
+        ] {
+            let name = format!("{}{}", symlink_dir, suffix);
+            #[cfg(windows)]
+            {
+                error!(
+                    Dir::open_ambient_dir(dir.path().join(&name), ambient_authority()),
+                    123
+                );
+            }
+            #[cfg(not(windows))]
+            {
+                check!(Dir::open_ambient_dir(
+                    dir.path().join(&name),
+                    ambient_authority()
+                ));
+            }
+            for dir_name in &["dir", "symlink_dir"] {
+                let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
-                    error!(Dir::open_ambient_dir(dir.path().join(&name)), 123);
+                    error!(
+                        Dir::open_ambient_dir(dir.path().join(&name), ambient_authority()),
+                        123
+                    );
                 }
                 #[cfg(not(windows))]
                 {
-                    check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                }
-                for dir_name in &["dir", "symlink_dir"] {
-                    let name = format!("{}/../{}", dir_name, name);
-                    #[cfg(windows)]
-                    {
-                        error!(Dir::open_ambient_dir(dir.path().join(&name)), 123);
-                    }
-                    #[cfg(not(windows))]
-                    {
-                        check!(Dir::open_ambient_dir(dir.path().join(&name)));
-                    }
+                    check!(Dir::open_ambient_dir(
+                        dir.path().join(&name),
+                        ambient_authority()
+                    ));
                 }
             }
         }
+    }
 
-        // Check various ways of spelling `.`.
-        for cur_dir in &["dir/..", "dir/../", ".", "./"] {
-            check!(Dir::open_ambient_dir(dir.path().join(cur_dir)));
-        }
+    // Check various ways of spelling `.`.
+    for cur_dir in &["dir/..", "dir/../", ".", "./"] {
+        check!(Dir::open_ambient_dir(
+            dir.path().join(cur_dir),
+            ambient_authority()
+        ));
     }
 }

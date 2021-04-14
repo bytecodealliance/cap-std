@@ -6,6 +6,7 @@ use async_std::{
     task::{Context, Poll},
 };
 use std::{fmt, pin::Pin};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///
@@ -20,12 +21,12 @@ pub struct Incoming<'a> {
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::Incoming`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::net::Incoming` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: unix::net::Incoming<'a>) -> Self {
+    pub fn from_std(std: unix::net::Incoming<'a>, _: AmbientAuthority) -> Self {
         Self { std }
     }
 }
@@ -38,7 +39,7 @@ impl<'a> Stream for Incoming<'a> {
         Stream::poll_next(Pin::new(&mut self.std), cx).map(|poll| {
             poll.map(|result| {
                 let unix_stream = result?;
-                Ok(unsafe { UnixStream::from_std(unix_stream) })
+                Ok(UnixStream::from_std(unix_stream, ambient_authority()))
             })
         })
     }

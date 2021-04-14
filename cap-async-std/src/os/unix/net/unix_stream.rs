@@ -7,6 +7,7 @@ use async_std::{
     },
     task::{Context, Poll},
 };
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{fmt, pin::Pin};
 use unsafe_io::OwnsRaw;
 
@@ -28,12 +29,12 @@ pub struct UnixStream {
 impl UnixStream {
     /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixStream`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::os::unix::net::UnixStream` is not sandboxed and may access any address that
     /// the host process has access to.
     #[inline]
-    pub unsafe fn from_std(std: unix::net::UnixStream) -> Self {
+    pub fn from_std(std: unix::net::UnixStream, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -46,8 +47,12 @@ impl UnixStream {
     /// [`async_std::os::unix::net::UnixStream::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixStream::pair()
-            .map(|(a, b)| unsafe { (Self::from_std(a), Self::from_std(b)) })
+        unix::net::UnixStream::pair().map(|(a, b)| {
+            (
+                Self::from_std(a, ambient_authority()),
+                Self::from_std(b, ambient_authority()),
+            )
+        })
     }
 
     // async_std doesn't have `try_clone`.
@@ -98,7 +103,7 @@ impl UnixStream {
 impl FromRawFd for UnixStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_raw_fd(fd))
+        Self::from_std(unix::net::UnixStream::from_raw_fd(fd), ambient_authority())
     }
 }
 

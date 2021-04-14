@@ -1,5 +1,5 @@
 use crate::not_found;
-use cap_std::fs::Dir;
+use cap_std::{ambient_authority, fs::Dir, AmbientAuthority};
 use std::{fs, io};
 
 /// `ProjectDirs` computes the cache, config or data directories for a specific
@@ -25,12 +25,16 @@ impl ProjectDirs {
     ///
     /// This corresponds to [`directories_next::ProjectDirs::from`].
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
-    /// This function is unsafe because it makes use of ambient authority to
-    /// access the project directories, which doesn't uphold the invariant of
-    /// the rest of the API. It is otherwise safe to use.
-    pub unsafe fn from(qualifier: &str, organization: &str, application: &str) -> Option<Self> {
+    /// This function makes use of ambient authority to access the project
+    /// directories.
+    pub fn from(
+        qualifier: &str,
+        organization: &str,
+        application: &str,
+        _: AmbientAuthority,
+    ) -> Option<Self> {
         let inner = directories_next::ProjectDirs::from(qualifier, organization, application)?;
         Some(Self { inner })
     }
@@ -41,7 +45,7 @@ impl ProjectDirs {
     pub fn cache_dir(&self) -> io::Result<Dir> {
         let path = self.inner.cache_dir();
         fs::create_dir_all(path)?;
-        unsafe { Dir::open_ambient_dir(path) }
+        Dir::open_ambient_dir(path, ambient_authority())
     }
 
     /// Returns the project's config directory.
@@ -50,7 +54,7 @@ impl ProjectDirs {
     pub fn config_dir(&self) -> io::Result<Dir> {
         let path = self.inner.config_dir();
         fs::create_dir_all(path)?;
-        unsafe { Dir::open_ambient_dir(path) }
+        Dir::open_ambient_dir(path, ambient_authority())
     }
 
     /// Returns the project's data directory.
@@ -59,7 +63,7 @@ impl ProjectDirs {
     pub fn data_dir(&self) -> io::Result<Dir> {
         let path = self.inner.data_dir();
         fs::create_dir_all(path)?;
-        unsafe { Dir::open_ambient_dir(path) }
+        Dir::open_ambient_dir(path, ambient_authority())
     }
 
     /// Returns the project's local data directory.
@@ -68,7 +72,7 @@ impl ProjectDirs {
     pub fn data_local_dir(&self) -> io::Result<Dir> {
         let path = self.inner.data_local_dir();
         fs::create_dir_all(path)?;
-        unsafe { Dir::open_ambient_dir(path) }
+        Dir::open_ambient_dir(path, ambient_authority())
     }
 
     /// Returns the project's runtime directory.
@@ -77,6 +81,6 @@ impl ProjectDirs {
     pub fn runtime_dir(&self) -> io::Result<Dir> {
         let path = self.inner.runtime_dir().ok_or_else(not_found)?;
         fs::create_dir_all(path)?;
-        unsafe { Dir::open_ambient_dir(path) }
+        Dir::open_ambient_dir(path, ambient_authority())
     }
 }

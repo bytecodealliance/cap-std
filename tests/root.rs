@@ -1,12 +1,12 @@
 #[macro_use]
 mod sys_common;
 
-use cap_std::fs::Dir;
+use cap_std::{ambient_authority, fs::Dir};
 use std::{fs, path::Component};
 
 #[test]
 fn open_root() {
-    let root = unsafe { Dir::open_ambient_dir(Component::RootDir.as_os_str()) }
+    let root = Dir::open_ambient_dir(Component::RootDir.as_os_str(), ambient_authority())
         .expect("expect to be able to open the root directory");
     error_contains!(
         root.read_dir(Component::ParentDir.as_os_str()),
@@ -19,7 +19,7 @@ fn open_root() {
 #[test]
 fn remove_root() {
     let _observed = {
-        let root = unsafe { Dir::open_ambient_dir(Component::RootDir.as_os_str()) }
+        let root = Dir::open_ambient_dir(Component::RootDir.as_os_str(), ambient_authority())
             .expect("expect to be able to open the root directory");
         root.remove_open_dir().unwrap_err()
     };

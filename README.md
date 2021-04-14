@@ -91,9 +91,8 @@ There currently are three main ways:
  - Use the [`cap-directories`] crate to create `Dir`s for config, cache and
    other data directories.
  - Use the [`cap-tempfile`] crate to create `Dir`s for temporary directories.
- - Use the `unsafe` [`Dir::open_ambient_dir`] to open a plain path. This
-   function is not sandboxed, and may open any file the host process has
-   access to.
+ - Use [`Dir::open_ambient_dir`] to open a plain path. This function is not
+   sandboxed, and may open any file the host process has access to.
 
 ## Examples
 

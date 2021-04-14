@@ -1,4 +1,5 @@
 use crate::time::{Duration, Instant};
+use ambient_authority::AmbientAuthority;
 use std::time;
 
 /// A reference to a monotonically nondecreasing clock.
@@ -12,11 +13,11 @@ pub struct MonotonicClock(());
 impl MonotonicClock {
     /// Constructs a new instance of `Self`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
-    /// This is unsafe because access to clocks is an ambient authority.
+    /// This uses ambient authority to accesses clocks.
     #[inline]
-    pub const unsafe fn new() -> Self {
+    pub const fn new(_: AmbientAuthority) -> Self {
         Self(())
     }
 

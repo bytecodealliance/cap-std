@@ -1,6 +1,7 @@
 //! Capability-oriented primitives.
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(all(windows, windows_by_handle), feature(windows_by_handle))]
 #![cfg_attr(all(windows, windows_file_type_ext), feature(windows_file_type_ext))]
@@ -19,3 +20,5 @@ mod windows;
 pub mod fs;
 pub mod net;
 pub mod time;
+
+pub use ambient_authority::{ambient_authority, AmbientAuthority};

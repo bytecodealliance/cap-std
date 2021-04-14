@@ -1,4 +1,7 @@
-use crate::fs::{errors, OpenOptions};
+use crate::{
+    fs::{errors, OpenOptions},
+    AmbientAuthority,
+};
 use std::{
     ffi::OsString,
     fs, io,
@@ -89,11 +92,11 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// Open a directory named by a bare path, using the host process' ambient
 /// authority.
 ///
-/// # Safety
+/// # Ambient Authority
 ///
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
-pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Result<fs::File> {
     // Set `FILE_FLAG_BACKUP_SEMANTICS` so that we can open directories. Unset
     // `FILE_SHARE_DELETE` so that directories can't be renamed or deleted
     // underneath us, since we use paths to implement many directory operations.

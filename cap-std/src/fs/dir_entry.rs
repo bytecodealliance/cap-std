@@ -1,4 +1,5 @@
 use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
+use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use posish::fs::DirEntryExt;
 use std::{ffi::OsString, fmt, io};
@@ -27,21 +28,21 @@ impl DirEntry {
     #[inline]
     pub fn open(&self) -> io::Result<File> {
         let file = self.inner.open()?;
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
         let file = self.inner.open_with(options)?;
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
         let dir = self.inner.open_dir()?;
-        Ok(unsafe { Dir::from_std_file(dir) })
+        Ok(Dir::from_std_file(dir, ambient_authority()))
     }
 
     /// Removes the file from its filesystem.
@@ -92,9 +93,9 @@ impl DirEntryExt for DirEntry {
 
 #[cfg(windows)]
 #[doc(hidden)]
-unsafe impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
+impl cap_primitives::fs::_WindowsDirEntryExt for DirEntry {
     #[inline]
-    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+    fn full_metadata(&self) -> io::Result<Metadata> {
         cap_primitives::fs::_WindowsDirEntryExt::full_metadata(&self.inner)
     }
 }

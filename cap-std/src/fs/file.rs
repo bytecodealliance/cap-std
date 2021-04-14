@@ -1,7 +1,7 @@
 #[cfg(with_options)]
 use crate::fs::OpenOptions;
 use crate::fs::{Metadata, Permissions};
-use cap_primitives::fs::is_file_read_write;
+use cap_primitives::{ambient_authority, fs::is_file_read_write, AmbientAuthority};
 #[cfg(target_os = "wasi")]
 use std::path::Path;
 use std::{
@@ -36,12 +36,12 @@ pub struct File {
 impl File {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// [`std::fs::File`] is not sandboxed and may access any path that the
     /// host process has access to.
     #[inline]
-    pub unsafe fn from_std(std: fs::File) -> Self {
+    pub fn from_std(std: fs::File, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -101,7 +101,7 @@ impl File {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let file = self.std.try_clone()?;
-        Ok(unsafe { Self::from_std(file) })
+        Ok(Self::from_std(file, ambient_authority()))
     }
 
     /// Changes the permissions on the underlying file.
@@ -142,7 +142,7 @@ fn permissions_into_std(_file: &fs::File, permissions: Permissions) -> io::Resul
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(fs::File::from_raw_fd(fd))
+        Self::from_std(fs::File::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -150,7 +150,7 @@ impl FromRawFd for File {
 impl FromRawHandle for File {
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std(fs::File::from_raw_handle(handle))
+        Self::from_std(fs::File::from_raw_handle(handle), ambient_authority())
     }
 }
 

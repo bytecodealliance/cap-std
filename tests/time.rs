@@ -1,7 +1,10 @@
 // This file is derived from Rust's library/std/src/time/tests.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-use cap_std::time::{Duration, MonotonicClock, SystemClock};
+use cap_std::{
+    ambient_authority,
+    time::{Duration, MonotonicClock, SystemClock},
+};
 
 macro_rules! assert_almost_eq {
     ($a:expr, $b:expr) => {{
@@ -20,7 +23,7 @@ macro_rules! assert_almost_eq {
 
 #[test]
 fn instant_monotonic() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
     let b = clock.now();
     assert!(b >= a);
@@ -28,14 +31,14 @@ fn instant_monotonic() {
 
 #[test]
 fn instant_elapsed() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
     clock.elapsed(a);
 }
 
 #[test]
 fn instant_math() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
     let b = clock.now();
     println!("a: {:?}", a);
@@ -68,7 +71,7 @@ fn instant_math() {
 
 #[test]
 fn instant_math_is_associative() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let now = clock.now();
     let offset = Duration::from_millis(5);
     // Changing the order of instant math shouldn't change the results,
@@ -79,14 +82,14 @@ fn instant_math_is_associative() {
 #[test]
 #[should_panic]
 fn instant_duration_since_panic() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
     (a - Duration::new(1, 0)).duration_since(a);
 }
 
 #[test]
 fn instant_checked_duration_since_nopanic() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let now = clock.now();
     let earlier = now - Duration::new(1, 0);
     let later = now + Duration::new(1, 0);
@@ -97,7 +100,7 @@ fn instant_checked_duration_since_nopanic() {
 
 #[test]
 fn instant_saturating_duration_since_nopanic() {
-    let clock = unsafe { MonotonicClock::new() };
+    let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
     let ret = (a - Duration::new(1, 0)).saturating_duration_since(a);
     assert_eq!(ret, Duration::new(0, 0));
@@ -105,7 +108,7 @@ fn instant_saturating_duration_since_nopanic() {
 
 #[test]
 fn system_time_math() {
-    let clock = unsafe { SystemClock::new() };
+    let clock = SystemClock::new(ambient_authority());
     let a = clock.now();
     let b = clock.now();
     match b.duration_since(a) {
@@ -156,14 +159,14 @@ fn system_time_math() {
 
 #[test]
 fn system_time_elapsed() {
-    let clock = unsafe { SystemClock::new() };
+    let clock = SystemClock::new(ambient_authority());
     let a = clock.now();
     drop(clock.elapsed(a));
 }
 
 #[test]
 fn since_epoch() {
-    let clock = unsafe { SystemClock::new() };
+    let clock = SystemClock::new(ambient_authority());
     let ts = clock.now();
     let a = ts
         .duration_since(SystemClock::UNIX_EPOCH + Duration::new(1, 0))

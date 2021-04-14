@@ -1,4 +1,5 @@
 use crate::fs::OpenOptions;
+use ambient_authority::AmbientAuthority;
 use posish::fs::OFlags;
 #[cfg(unix)]
 use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
@@ -91,11 +92,11 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// Open a directory named by a bare path, using the host process' ambient
 /// authority.
 ///
-/// # Safety
+/// # Ambient Authority
 ///
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
-pub(crate) unsafe fn open_ambient_dir_impl(path: &Path) -> io::Result<fs::File> {
+pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Result<fs::File> {
     // This is for `std::fs`, so we don't have `dir_required`, so set
     // `O_DIRECTORY` manually.
     let flags = OFlags::DIRECTORY | target_o_path();

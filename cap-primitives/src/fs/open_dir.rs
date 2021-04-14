@@ -4,6 +4,7 @@
 #[allow(unused_imports)]
 use crate::fs::open_unchecked;
 use crate::fs::{dir_options, open, open_ambient_dir_impl, readdir_options, FollowSymlinks};
+use ambient_authority::AmbientAuthority;
 use std::{fs, io, path::Path};
 
 /// Open a directory by performing an `openat`-like operation,
@@ -48,11 +49,11 @@ pub(crate) fn open_dir_for_reading_unchecked(
 /// Open a directory named by a bare path, using the host process' ambient
 /// authority.
 ///
-/// # Safety
+/// # Ambient Authority
 ///
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
 #[inline]
-pub unsafe fn open_ambient_dir(path: &Path) -> io::Result<fs::File> {
-    open_ambient_dir_impl(path)
+pub fn open_ambient_dir(path: &Path, ambient_authority: AmbientAuthority) -> io::Result<fs::File> {
+    open_ambient_dir_impl(path, ambient_authority)
 }

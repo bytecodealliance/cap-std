@@ -120,12 +120,10 @@ impl fmt::Debug for DirEntry {
 /// Extension trait to allow `full_metadata` etc. to be exposed by
 /// the `cap-fs-ext` crate.
 ///
-/// # Safety
-///
 /// This is hidden from the main API since this functionality isn't present in `std`.
 /// Use `cap_fs_ext::DirEntryExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
-pub unsafe trait _WindowsDirEntryExt {
-    unsafe fn full_metadata(&self) -> io::Result<Metadata>;
+pub trait _WindowsDirEntryExt {
+    fn full_metadata(&self) -> io::Result<Metadata>;
 }

@@ -1,6 +1,7 @@
 //! Capability-oriented standard directories.
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]
@@ -13,6 +14,7 @@ use std::io;
 mod project_dirs;
 mod user_dirs;
 
+pub use cap_std::{ambient_authority, AmbientAuthority};
 pub use project_dirs::ProjectDirs;
 pub use user_dirs::UserDirs;
 

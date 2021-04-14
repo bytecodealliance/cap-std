@@ -7,6 +7,7 @@ use async_std::{
     task::{Context, Poll},
 };
 use std::{fmt, pin::Pin};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
@@ -31,12 +32,12 @@ pub struct TcpStream {
 impl TcpStream {
     /// Constructs a new instance of `Self` from the given `async_std::net::TcpStream`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::net::TcpStream` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::TcpStream) -> Self {
+    pub fn from_std(std: net::TcpStream, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -124,7 +125,7 @@ impl TcpStream {
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::TcpStream::from_raw_fd(fd))
+        Self::from_std(net::TcpStream::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -132,7 +133,7 @@ impl FromRawFd for TcpStream {
 impl FromRawSocket for TcpStream {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::TcpStream::from_raw_socket(socket))
+        Self::from_std(net::TcpStream::from_raw_socket(socket), ambient_authority())
     }
 }
 

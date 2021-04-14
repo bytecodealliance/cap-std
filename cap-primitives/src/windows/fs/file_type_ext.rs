@@ -97,24 +97,24 @@ impl FileTypeExt {
 }
 
 #[doc(hidden)]
-unsafe impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
+impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
     #[inline]
-    unsafe fn is_block_device(&self) -> bool {
+    fn is_block_device(&self) -> bool {
         false
     }
 
     #[inline]
-    unsafe fn is_char_device(&self) -> bool {
+    fn is_char_device(&self) -> bool {
         *self == FileType::ext(FileTypeExt::CharacterDevice)
     }
 
     #[inline]
-    unsafe fn is_fifo(&self) -> bool {
+    fn is_fifo(&self) -> bool {
         *self == FileType::ext(FileTypeExt::Fifo)
     }
 
     #[inline]
-    unsafe fn is_socket(&self) -> bool {
+    fn is_socket(&self) -> bool {
         false
     }
 }

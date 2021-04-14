@@ -1,4 +1,7 @@
-use cap_std::fs::{Dir, DirEntry};
+use cap_std::{
+    ambient_authority,
+    fs::{Dir, DirEntry},
+};
 use std::{collections::HashMap, path::Path};
 
 #[test]
@@ -36,7 +39,7 @@ fn test_dir_entries() {
 #[test]
 fn test_reread_entries() {
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
-    let dir = unsafe { Dir::open_ambient_dir(tmpdir.path()).unwrap() };
+    let dir = Dir::open_ambient_dir(tmpdir.path(), ambient_authority()).unwrap();
 
     let entries = read_entries(&dir);
     assert_eq!(entries.len(), 0, "empty dir");
@@ -67,7 +70,7 @@ fn test_reread_entries() {
 }
 
 fn dir_entries(path: &Path) -> HashMap<String, DirEntry> {
-    let dir = unsafe { Dir::open_ambient_dir(path).unwrap() };
+    let dir = Dir::open_ambient_dir(path, ambient_authority()).unwrap();
     read_entries(&dir)
 }
 

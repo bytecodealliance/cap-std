@@ -8,10 +8,15 @@ use async_std::{
     fs, io,
     path::{Path, PathBuf},
 };
-use cap_primitives::fs::{
-    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
-    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
+use cap_primitives::{
+    ambient_authority,
+    fs::{
+        canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+        read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+        remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks,
+        Permissions,
+    },
+    AmbientAuthority,
 };
 use std::fmt;
 use unsafe_io::{AsUnsafeFile, FromUnsafeFile, OwnsRaw};
@@ -48,12 +53,12 @@ impl Dir {
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::fs::File` is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std_file(std_file: fs::File) -> Self {
+    pub fn from_std_file(std_file: fs::File, _: AmbientAuthority) -> Self {
         Self { std_file }
     }
 
@@ -87,13 +92,13 @@ impl Dir {
     #[cfg(not(target_os = "wasi"))]
     fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let file = open(file, path.as_ref(), options)?.into();
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     #[cfg(target_os = "wasi")]
     fn _open_with(file: &std::fs::File, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let file = options.open_at(&self.std_file, path)?.into();
-        Ok(unsafe { File::from_std(file) })
+        Ok(File::from_std(file, ambient_authority()))
     }
 
     /// Attempts to open a directory.
@@ -101,7 +106,7 @@ impl Dir {
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         let file = self.std_file.as_file_view();
         let dir = open_dir(&file, path.as_ref().as_ref())?.into();
-        Ok(unsafe { Self::from_std_file(dir) })
+        Ok(Self::from_std_file(dir, ambient_authority()))
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -579,13 +584,17 @@ impl Dir {
     /// Constructs a new instance of `Self` by opening the given path as a
     /// directory using the host process' ambient authority.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn open_ambient_dir<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        open_ambient_dir(path.as_ref().as_ref()).map(|f| Self::from_std_file(f.into()))
+    pub fn open_ambient_dir<P: AsRef<Path>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        open_ambient_dir(path.as_ref().as_ref(), ambient_authority)
+            .map(|f| Self::from_std_file(f.into(), ambient_authority))
     }
 }
 
@@ -593,7 +602,7 @@ impl Dir {
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std_file(fs::File::from_raw_fd(fd))
+        Self::from_std_file(fs::File::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -603,7 +612,7 @@ impl FromRawHandle for Dir {
     /// `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std_file(fs::File::from_raw_handle(handle))
+        Self::from_std_file(fs::File::from_raw_handle(handle), ambient_authority())
     }
 }
 

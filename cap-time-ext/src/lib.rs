@@ -1,6 +1,7 @@
 //! Extension traits for `SystemClock` and `MonotonicClock`
 
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
 )]

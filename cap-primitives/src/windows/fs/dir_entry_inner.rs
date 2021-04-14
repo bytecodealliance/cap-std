@@ -1,7 +1,10 @@
 use super::open_options_to_std;
-use crate::fs::{
-    open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir,
-    ReadDirInner,
+use crate::{
+    ambient_authority,
+    fs::{
+        open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions,
+        ReadDir, ReadDirInner,
+    },
 };
 use std::{ffi::OsString, fmt, fs, io, os::windows::fs::OpenOptionsExt};
 use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
@@ -25,14 +28,14 @@ impl DirEntryInner {
                 }
                 Ok(file)
             }
-            FollowSymlinks::Yes => unsafe {
+            FollowSymlinks::Yes => {
                 let path = self.std.path();
                 open(
-                    &open_ambient_dir(path.parent().unwrap())?,
+                    &open_ambient_dir(path.parent().unwrap(), ambient_authority())?,
                     path.file_name().unwrap().as_ref(),
                     options,
                 )
-            },
+            }
         }
     }
 
@@ -104,9 +107,9 @@ impl fmt::Debug for DirEntryInner {
 }
 
 #[doc(hidden)]
-unsafe impl crate::fs::_WindowsDirEntryExt for crate::fs::DirEntry {
+impl crate::fs::_WindowsDirEntryExt for crate::fs::DirEntry {
     #[inline]
-    unsafe fn full_metadata(&self) -> io::Result<Metadata> {
+    fn full_metadata(&self) -> io::Result<Metadata> {
         DirEntryInner::full_metadata(&self.inner)
     }
 }

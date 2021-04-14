@@ -1,4 +1,5 @@
 use crate::os::unix::net::UnixStream;
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{fmt, io, os::unix};
 
 /// An iterator over incoming connections to a [`UnixListener`].
@@ -14,12 +15,12 @@ pub struct Incoming<'a> {
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::os::unix::net::Incoming`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::net::Incoming` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: unix::net::Incoming<'a>) -> Self {
+    pub fn from_std(std: unix::net::Incoming<'a>, _: AmbientAuthority) -> Self {
         Self { std }
     }
 }
@@ -31,7 +32,7 @@ impl<'a> Iterator for Incoming<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.std.next().map(|result| {
             let unix_stream = result?;
-            Ok(unsafe { UnixStream::from_std(unix_stream) })
+            Ok(UnixStream::from_std(unix_stream, ambient_authority()))
         })
     }
 

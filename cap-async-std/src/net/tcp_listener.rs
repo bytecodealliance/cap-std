@@ -3,6 +3,7 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
 use std::fmt;
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
@@ -27,12 +28,12 @@ pub struct TcpListener {
 impl TcpListener {
     /// Constructs a new instance of `Self` from the given `async_std::net::TcpListener`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::net::TcpListener` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::TcpListener) -> Self {
+    pub fn from_std(std: net::TcpListener, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -54,7 +55,7 @@ impl TcpListener {
         self.std
             .accept()
             .await
-            .map(|(tcp_stream, addr)| (unsafe { TcpStream::from_std(tcp_stream) }, addr))
+            .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream, ambient_authority()), addr))
     }
 
     /// Returns an iterator over the connections being received on this listener.
@@ -63,7 +64,7 @@ impl TcpListener {
     #[inline]
     pub fn incoming(&self) -> Incoming {
         let incoming = self.std.incoming();
-        unsafe { Incoming::from_std(incoming) }
+        Incoming::from_std(incoming, ambient_authority())
     }
 
     // async_std doesn't have `TcpListener::set_ttl`.
@@ -79,7 +80,7 @@ impl TcpListener {
 impl FromRawFd for TcpListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::TcpListener::from_raw_fd(fd))
+        Self::from_std(net::TcpListener::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -87,7 +88,10 @@ impl FromRawFd for TcpListener {
 impl FromRawSocket for TcpListener {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::TcpListener::from_raw_socket(socket))
+        Self::from_std(
+            net::TcpListener::from_raw_socket(socket),
+            ambient_authority(),
+        )
     }
 }
 

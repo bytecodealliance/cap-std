@@ -1,4 +1,5 @@
 use crate::net::TcpStream;
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{fmt, io, net};
 
 /// An iterator that infinitely `accept`s connections on a [`TcpListener`].
@@ -13,12 +14,12 @@ pub struct Incoming<'a> {
 impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given `std::net::Incoming`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::net::Incoming` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::Incoming<'a>) -> Self {
+    pub fn from_std(std: net::Incoming<'a>, _: AmbientAuthority) -> Self {
         Self { std }
     }
 }
@@ -30,7 +31,7 @@ impl<'a> Iterator for Incoming<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.std.next().map(|result| {
             let tcp_stream = result?;
-            Ok(unsafe { TcpStream::from_std(tcp_stream) })
+            Ok(TcpStream::from_std(tcp_stream, ambient_authority()))
         })
     }
 

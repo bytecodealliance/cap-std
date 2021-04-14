@@ -3,6 +3,7 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
 use std::fmt;
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
@@ -31,12 +32,12 @@ pub struct UdpSocket {
 impl UdpSocket {
     /// Constructs a new instance of `Self` from the given `async_std::net::UdpSocket`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `async_std::net::UdpSocket` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::UdpSocket) -> Self {
+    pub fn from_std(std: net::UdpSocket, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -220,7 +221,7 @@ impl UdpSocket {
 impl FromRawFd for UdpSocket {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_fd(fd))
+        Self::from_std(net::UdpSocket::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -228,7 +229,7 @@ impl FromRawFd for UdpSocket {
 impl FromRawSocket for UdpSocket {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_socket(socket))
+        Self::from_std(net::UdpSocket::from_raw_socket(socket), ambient_authority())
     }
 }
 

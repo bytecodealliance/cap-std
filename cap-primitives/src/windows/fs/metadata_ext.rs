@@ -182,24 +182,24 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
 }
 
 #[doc(hidden)]
-unsafe impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
+impl crate::fs::_WindowsByHandle for crate::fs::Metadata {
     #[inline]
-    unsafe fn file_attributes(&self) -> u32 {
+    fn file_attributes(&self) -> u32 {
         self.ext.file_attributes
     }
 
     #[inline]
-    unsafe fn volume_serial_number(&self) -> Option<u32> {
+    fn volume_serial_number(&self) -> Option<u32> {
         self.ext.volume_serial_number
     }
 
     #[inline]
-    unsafe fn number_of_links(&self) -> Option<u32> {
+    fn number_of_links(&self) -> Option<u32> {
         self.ext.number_of_links
     }
 
     #[inline]
-    unsafe fn file_index(&self) -> Option<u64> {
+    fn file_index(&self) -> Option<u64> {
         self.ext.file_index
     }
 }

@@ -1,4 +1,5 @@
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::{fmt, io, net, time::Duration};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
@@ -30,12 +31,12 @@ pub struct UdpSocket {
 impl UdpSocket {
     /// Constructs a new instance of `Self` from the given `std::net::UdpSocket`.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// `std::net::UdpSocket` is not sandboxed and may access any address that the host
     /// process has access to.
     #[inline]
-    pub unsafe fn from_std(std: net::UdpSocket) -> Self {
+    pub fn from_std(std: net::UdpSocket, _: AmbientAuthority) -> Self {
         Self { std }
     }
 
@@ -77,7 +78,7 @@ impl UdpSocket {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let udp_socket = self.std.try_clone()?;
-        Ok(unsafe { Self::from_std(udp_socket) })
+        Ok(Self::from_std(udp_socket, ambient_authority()))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -275,7 +276,7 @@ impl UdpSocket {
 impl FromRawFd for UdpSocket {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_fd(fd))
+        Self::from_std(net::UdpSocket::from_raw_fd(fd), ambient_authority())
     }
 }
 
@@ -283,7 +284,7 @@ impl FromRawFd for UdpSocket {
 impl FromRawSocket for UdpSocket {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_socket(socket))
+        Self::from_std(net::UdpSocket::from_raw_socket(socket), ambient_authority())
     }
 }
 
