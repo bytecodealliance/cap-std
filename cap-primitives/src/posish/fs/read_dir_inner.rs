@@ -5,10 +5,7 @@ use crate::fs::{
 };
 use posish::fs::Dir;
 #[cfg(unix)]
-use std::os::unix::{
-    ffi::OsStrExt,
-    io::{AsRawFd, RawFd},
-};
+use std::os::unix::{ffi::OsStrExt, io::AsRawFd};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{
     ffi::OsStrExt,
@@ -20,7 +17,7 @@ use std::{
     path::{Component, Path},
     sync::Arc,
 };
-use unsafe_io::{AsUnsafeFile, OwnsRaw};
+use unsafe_io::{AsUnsafeFile, View};
 
 pub(crate) struct ReadDirInner {
     posish: Arc<Dir>,
@@ -76,6 +73,10 @@ impl ReadDirInner {
     pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {
         read_dir_unchecked(&self.as_file_view(), file_name.as_ref())
     }
+
+    fn as_file_view(&self) -> View<fs::File> {
+        self.posish.as_file_view()
+    }
 }
 
 impl Iterator for ReadDirInner {
@@ -100,16 +101,6 @@ impl Iterator for ReadDirInner {
         }
     }
 }
-
-impl AsRawFd for ReadDirInner {
-    #[inline]
-    fn as_raw_fd(&self) -> RawFd {
-        self.posish.as_raw_fd()
-    }
-}
-
-// Safety: `ReadDirInner` wraps a `Dir` which owns its handle.
-unsafe impl OwnsRaw for ReadDirInner {}
 
 impl fmt::Debug for ReadDirInner {
     // Like libstd's version, but doesn't print the path.
