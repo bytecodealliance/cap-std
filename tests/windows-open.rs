@@ -114,3 +114,39 @@ fn windows_open_ambient() {
     check!(tmpdir.rename("aaa", &tmpdir, "xxx"));
     check!(tmpdir.remove_dir("xxx"));
 }
+
+#[test]
+#[cfg(windows)]
+fn windows_open_special() {
+    let tmpdir = tmpdir();
+
+    // Opening any of these should fail.
+    for device in &[
+        "CON", "PRN", "AUX", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
+        "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8",
+        "LPT9",
+    ] {
+        tmpdir.open(device).unwrap_err();
+        tmpdir.open(&format!(".\\{}", device)).unwrap_err();
+        tmpdir.open(&format!("{}.ext", device)).unwrap_err();
+        tmpdir.open(&format!(".\\{}.ext", device)).unwrap_err();
+
+        let mut options = cap_std::fs::OpenOptions::new();
+        options.write(true);
+        tmpdir.open_with(device, &options).unwrap_err();
+        tmpdir
+            .open_with(&format!(".\\{}", device), &options)
+            .unwrap_err();
+        tmpdir
+            .open_with(&format!("{}.ext", device), &options)
+            .unwrap_err();
+        tmpdir
+            .open_with(&format!(".\\{}.ext", device), &options)
+            .unwrap_err();
+
+        tmpdir.create(device).unwrap_err();
+        tmpdir.create(&format!(".\\{}", device)).unwrap_err();
+        tmpdir.create(&format!("{}.ext", device)).unwrap_err();
+        tmpdir.create(&format!(".\\{}.ext", device)).unwrap_err();
+    }
+}
