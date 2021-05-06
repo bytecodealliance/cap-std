@@ -50,10 +50,8 @@ impl DirEntryInner {
         opts.access_mode(0);
         opts.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
         opts.follow(FollowSymlinks::No);
-        match self.open(&opts) {
-            Ok(opened) => Metadata::from_file(&opened),
-            Err(_) => self.metadata(),
-        }
+        let opened = self.open(&opts)?;
+        Metadata::from_file(&opened)
     }
 
     #[inline]
