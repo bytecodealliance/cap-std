@@ -1,5 +1,3 @@
-use crate::fs::manually;
-
 mod copy;
 mod create_dir_unchecked;
 mod dir_entry_inner;
@@ -12,6 +10,7 @@ mod is_file_read_write_impl;
 mod is_same_file;
 mod metadata_ext;
 mod oflags;
+mod open_impl;
 mod open_options_ext;
 mod open_unchecked;
 mod read_dir_inner;
@@ -53,8 +52,8 @@ pub(crate) use file_type_ext::*;
 pub(crate) use hard_link_unchecked::*;
 pub(crate) use is_file_read_write_impl::*;
 pub(crate) use is_same_file::*;
-pub(crate) use manually::open as open_impl;
 pub(crate) use metadata_ext::*;
+pub(crate) use open_impl::open_impl;
 pub(crate) use open_options_ext::*;
 pub(crate) use open_unchecked::*;
 pub(crate) use read_dir_inner::*;
