@@ -7,6 +7,11 @@ use std::io;
 pub trait DirEntryExt {
     /// Return the full metadata, which on Windows includes the optional
     /// values.
+    ///
+    /// If the full metadata cannot be computed, this fails rather than
+    /// falling back to partial metadata, even when that might not fail.
+    /// If partial metadata is desired, `std::fs::DirEntry::metadata` can
+    /// be used.
     fn full_metadata(&self) -> io::Result<Metadata>;
 }
 
