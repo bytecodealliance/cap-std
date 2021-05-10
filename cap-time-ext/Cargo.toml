@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 cap-primitives = { path = "../cap-primitives", version = "^0.13.11-alpha.0"}
-cap-std = { path = "../cap-std", optional = true, version = "^0.13.10-alpha.0"}
+cap-std = { path = "../cap-std", optional = true, version = "^0.13.11-alpha.0"}
 
 [target.'cfg(not(windows))'.dependencies]
 posish = "0.6.0"

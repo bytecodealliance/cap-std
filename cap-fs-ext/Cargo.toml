@@ -19,7 +19,7 @@ rustc_version = "0.3.0"
 arf-strings = { version = "0.3.0", optional = true }
 async-std = { version = "1.9.0", optional = true }
 cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.13.11-alpha.0"}
-cap-std = { path = "../cap-std", optional = true, version = "^0.13.10-alpha.0"}
+cap-std = { path = "../cap-std", optional = true, version = "^0.13.11-alpha.0"}
 cap-primitives = { path = "../cap-primitives", version = "^0.13.11-alpha.0"}
 unsafe-io = "0.6.0"
 
