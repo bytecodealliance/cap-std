@@ -3,7 +3,7 @@
 
 mod net;
 
-use cap_std::net::*;
+use cap_std::{ambient_authority, net::*};
 use net::{next_test_ip4, next_test_ip6};
 use std::{
     fmt,
@@ -30,9 +30,7 @@ macro_rules! t {
 #[test]
 fn bind_error() {
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr("1.1.1.1:9999".parse().unwrap());
-    }
+    pool.insert_socket_addr("1.1.1.1:9999".parse().unwrap(), ambient_authority());
 
     match pool.bind_tcp_listener("1.1.1.1:9999") {
         Ok(..) => panic!(),
@@ -43,9 +41,7 @@ fn bind_error() {
 #[test]
 fn connect_error() {
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr("0.0.0.0:1".parse().unwrap());
-    }
+    pool.insert_socket_addr("0.0.0.0:1".parse().unwrap(), ambient_authority());
 
     match pool.connect_tcp_stream("0.0.0.0:1") {
         Ok(..) => panic!(),
@@ -66,16 +62,12 @@ fn listen_localhost() {
     let socket_addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(socket_addr);
-    }
+    pool.insert_socket_addr(socket_addr, ambient_authority());
     for resolved in format!("localhost:{}", socket_addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&socket_addr));
@@ -95,9 +87,7 @@ fn listen_localhost() {
 fn connect_loopback() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -121,9 +111,7 @@ fn connect_loopback() {
 fn smoke_test() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -146,9 +134,7 @@ fn smoke_test() {
 fn read_eof() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -170,9 +156,7 @@ fn read_eof() {
 fn write_close() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -204,9 +188,7 @@ fn write_close() {
 fn multiple_connect_serial() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let max = 10;
         let acceptor = t!(pool.bind_tcp_listener(&addr));
@@ -232,9 +214,7 @@ fn multiple_connect_interleaved_greedy_schedule() {
     const MAX: usize = 10;
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -274,9 +254,7 @@ fn multiple_connect_interleaved_lazy_schedule() {
     const MAX: usize = 10;
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -313,9 +291,7 @@ fn multiple_connect_interleaved_lazy_schedule() {
 fn socket_and_peer_name() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let listener = t!(pool.bind_tcp_listener(&addr));
         let so_name = t!(listener.local_addr());
@@ -333,9 +309,7 @@ fn socket_and_peer_name() {
 fn partial_read() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let (tx, rx) = channel();
         let srv = t!(pool.bind_tcp_listener(&addr));
@@ -359,9 +333,7 @@ fn partial_read() {
 fn read_vectored() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let srv = t!(pool.bind_tcp_listener(&addr));
         let mut s1 = t!(pool.connect_tcp_stream(&addr));
@@ -390,9 +362,7 @@ fn write_vectored() {
     let mut pool = Pool::new();
 
     each_ip(&mut |addr| {
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let srv = t!(pool.bind_tcp_listener(&addr));
         let mut s1 = t!(pool.connect_tcp_stream(&addr));
@@ -420,9 +390,7 @@ fn double_bind() {
     let mut pool = Pool::new();
 
     each_ip(&mut |addr| {
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let listener1 = t!(pool.bind_tcp_listener(&addr));
         match pool.bind_tcp_listener(&addr) {
@@ -449,9 +417,7 @@ fn double_bind() {
 fn tcp_clone_smoke() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -485,9 +451,7 @@ fn tcp_clone_smoke() {
 fn tcp_clone_two_read() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
         let (tx1, rx) = channel();
@@ -524,9 +488,7 @@ fn tcp_clone_two_read() {
 fn tcp_clone_two_write() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let acceptor = t!(pool.bind_tcp_listener(&addr));
 
@@ -558,9 +520,7 @@ fn tcp_clone_two_write() {
 fn shutdown_smoke() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let a = t!(pool.bind_tcp_listener(&addr));
         let _t = thread::spawn(move || {
@@ -585,9 +545,7 @@ fn shutdown_smoke() {
 fn close_readwrite_smoke() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let a = t!(pool.bind_tcp_listener(&addr));
         let (tx, rx) = channel::<()>();
@@ -630,9 +588,7 @@ fn close_read_wakes_up() {
     let mut pool = Pool::new();
 
     each_ip(&mut |addr| {
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let a = t!(pool.bind_tcp_listener(&addr));
         let (tx1, rx) = channel::<()>();
@@ -662,9 +618,7 @@ fn close_read_wakes_up() {
 fn clone_while_reading() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let accept = t!(pool.bind_tcp_listener(&addr));
 
@@ -707,9 +661,7 @@ fn clone_while_reading() {
 fn clone_accept_smoke() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let a = t!(pool.bind_tcp_listener(&addr));
         let a2 = t!(a.try_clone());
@@ -732,9 +684,7 @@ fn clone_accept_smoke() {
 fn clone_accept_concurrent() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let a = t!(pool.bind_tcp_listener(&addr));
         let a2 = t!(a.try_clone());
@@ -791,16 +741,12 @@ fn debug() {
 
     let inner_name = if cfg!(windows) { "socket" } else { "fd" };
     let socket_addr = next_test_ip4();
-    unsafe {
-        pool.insert_socket_addr(socket_addr);
-    }
+    pool.insert_socket_addr(socket_addr, ambient_authority());
     for resolved in format!("localhost:{}", socket_addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&socket_addr));
@@ -836,16 +782,12 @@ fn timeouts() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&addr));
@@ -877,16 +819,12 @@ fn test_read_timeout() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&addr));
@@ -916,16 +854,12 @@ fn test_read_with_timeout() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&addr));
@@ -962,9 +896,7 @@ fn test_timeout_zero_duration() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let listener = t!(pool.bind_tcp_listener(&addr));
     let stream = t!(pool.connect_tcp_stream(&addr));
@@ -986,16 +918,12 @@ fn nodelay() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let _listener = t!(pool.bind_tcp_listener(&addr));
@@ -1017,16 +945,12 @@ fn ttl() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&addr));
@@ -1046,16 +970,12 @@ fn set_nonblocking() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     for resolved in format!("localhost:{}", addr.port())
         .to_socket_addrs()
         .unwrap()
     {
-        unsafe {
-            pool.insert_socket_addr(resolved);
-        }
+        pool.insert_socket_addr(resolved, ambient_authority());
     }
 
     let listener = t!(pool.bind_tcp_listener(&addr));
@@ -1081,9 +1001,7 @@ fn set_nonblocking() {
 fn peek() {
     each_ip(&mut |addr| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let (txdone, rxdone) = channel();
 
@@ -1117,15 +1035,11 @@ fn peek() {
 #[cfg_attr(target_env = "sgx", ignore)] // FIXME: https://github.com/fortanix/rust-sgx/issues/31
 fn connect_timeout_valid() {
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr("127.0.0.1:0".parse().unwrap());
-    }
+    pool.insert_socket_addr("127.0.0.1:0".parse().unwrap(), ambient_authority());
     let listener = pool.bind_tcp_listener("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
     pool.connect_timeout_tcp_stream(&addr, Duration::from_secs(2))
         .unwrap();
 }

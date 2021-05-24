@@ -1,3 +1,4 @@
+use ambient_authority::AmbientAuthority;
 use ipnet::IpNet;
 use std::{io, net};
 
@@ -47,10 +48,10 @@ impl Pool {
 
     /// Add a range of network addresses with a specific port to the pool.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub unsafe fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16) {
+    pub fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16, _: AmbientAuthority) {
         self.grants.push(IpGrant {
             set: AddrSet::Net(ip_net),
             port,
@@ -59,10 +60,10 @@ impl Pool {
 
     /// Add a specific [`net::SocketAddr`] to the pool.
     ///
-    /// # Safety
+    /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub unsafe fn insert_socket_addr(&mut self, addr: net::SocketAddr) {
+    pub fn insert_socket_addr(&mut self, addr: net::SocketAddr, _: AmbientAuthority) {
         self.grants.push(IpGrant {
             set: AddrSet::Net(addr.ip().into()),
             port: addr.port(),

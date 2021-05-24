@@ -4,8 +4,8 @@ use async_std::{
     stream::Stream,
     task::{Context, Poll},
 };
-use std::{fmt, pin::Pin};
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use std::{fmt, pin::Pin};
 
 /// An iterator that infinitely `accept`s connections on a [`TcpListener`].
 ///
