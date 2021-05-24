@@ -1,9 +1,11 @@
-#![allow(missing_docs)] // TODO: add docs
-
 use crate::net::{TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use async_std::{io, net};
 use cap_primitives::net::NO_SOCKET_ADDRS;
 
+/// A pool of network addresses.
+///
+/// This does not directly correspond to anything in `std`, however its methods
+/// correspond to the several functions in [`std::net`].
 #[derive(Clone)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
@@ -17,6 +19,8 @@ impl Pool {
         }
     }
 
+    /// Add a range of network addresses with a specific port to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -24,6 +28,8 @@ impl Pool {
         self.cap.insert_ip_net(ip_net, port)
     }
 
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -31,6 +37,10 @@ impl Pool {
         self.cap.insert_socket_addr(addr)
     }
 
+    /// Creates a new `TcpListener` which will be bound to the specified
+    /// address.
+    ///
+    /// This corresponds to [`async_std::net::TcpListener::bind`].
     #[inline]
     pub async fn bind_tcp_listener<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpListener> {
         let addrs = addr.to_socket_addrs().await?;
@@ -50,6 +60,9 @@ impl Pool {
         }
     }
 
+    /// Creates a new TCP stream connected to the specified address.
+    ///
+    /// This corresponds to [`async_std::net::TcpStream::connect`].
     #[inline]
     pub async fn connect_tcp_stream<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpStream> {
         let addrs = addr.to_socket_addrs().await?;
@@ -71,6 +84,9 @@ impl Pool {
 
     // async_std doesn't have `connect_timeout`.
 
+    /// Creates a UDP socket from the given address.
+    ///
+    /// This corresponds to [`async_std::net::UdpSocket::bind`].
     #[inline]
     pub async fn bind_udp_socket<A: ToSocketAddrs>(&self, addr: A) -> io::Result<UdpSocket> {
         let addrs = addr.to_socket_addrs().await?;
@@ -89,6 +105,9 @@ impl Pool {
         }
     }
 
+    /// Sends data on the socket to the given address.
+    ///
+    /// This corresponds to [`async_std::net::UdpSocket::send_to`].
     #[inline]
     pub async fn send_to_udp_socket_addr<A: ToSocketAddrs>(
         &self,
@@ -107,6 +126,9 @@ impl Pool {
         udp_socket.std.send_to(buf, addr).await
     }
 
+    /// Connects the UDP socket to a remote address.
+    ///
+    /// This corresponds to [`async_std::net::UdpSocket::connect`].
     #[inline]
     pub async fn connect_udp_socket<A: ToSocketAddrs>(
         &self,

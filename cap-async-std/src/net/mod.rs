@@ -1,7 +1,5 @@
 //! A capability-oriented network API modeled after `async_std::net`.
 //!
-//! XXX: The interfaces in this module are not yet implemented.
-//!
 //! This corresponds to [`async_std::net`].
 //!
 //! Instead of [`async_std::net`]'s constructor methods which take an address to
