@@ -33,21 +33,19 @@ impl IpGrant {
 
 /// A representation of a set of network resources that may be accessed.
 /// This is presently a very incomplete concept.
-///
-/// TODO: rename this?
-pub struct Catalog {
+pub struct Pool {
     // TODO: when compiling for WASI, use WASI-specific handle instead
     grants: Vec<IpGrant>,
 }
 
-impl Catalog {
+impl Pool {
     pub fn check_addr(&self, addr: &net::SocketAddr) -> io::Result<()> {
         if self.grants.iter().any(|grant| grant.contains(addr)) {
             Ok(())
         } else {
             Err(io::Error::new(
                 io::ErrorKind::PermissionDenied,
-                "An address led outside the catalog",
+                "An address was outside the pool",
             ))
         }
     }

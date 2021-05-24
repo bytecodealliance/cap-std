@@ -5,18 +5,18 @@
 //! This corresponds to [`async_std::net`].
 //!
 //! Instead of [`async_std::net`]'s constructor methods which take an address to
-//! connect to, this crates has methods on [`Catalog`] which operate on addresses
-//! which must be present in the catalog.
+//! connect to, this crates has methods on [`Pool`] which operate on addresses
+//! which must be present in the pool.
 //!
-//! [`Catalog`]: struct.Catalog.html
+//! [`Pool`]: struct.Pool.html
 
-mod catalog;
+mod pool;
 mod incoming;
 mod tcp_listener;
 mod tcp_stream;
 mod udp_socket;
 
-pub use catalog::*;
+pub use pool::*;
 pub use incoming::*;
 pub use tcp_listener::*;
 pub use tcp_stream::*;
