@@ -18,6 +18,7 @@ rustc_version = "0.3.0"
 [dependencies]
 arf-strings = { version = "0.3.0", optional = true }
 cap-primitives = { path = "../cap-primitives", version = "^0.13.11-alpha.0"}
+ipnet = "2.3.0"
 unsafe-io = "0.6.0"
 
 [target.'cfg(not(windows))'.dependencies]

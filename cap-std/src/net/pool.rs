@@ -11,6 +11,27 @@ pub struct Pool {
 }
 
 impl Pool {
+    /// Construct a new empty pool.
+    pub fn new() -> Self {
+        Self {
+            cap: cap_primitives::net::Pool::new(),
+        }
+    }
+
+    /// # Safety
+    ///
+    /// This function allows ambient access to any IP address.
+    pub unsafe fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16) {
+        self.cap.insert_ip_net(ip_net, port)
+    }
+
+    /// # Safety
+    ///
+    /// This function allows ambient access to any IP address.
+    pub unsafe fn insert_socket_addr(&mut self, addr: net::SocketAddr) {
+        self.cap.insert_socket_addr(addr)
+    }
+
     #[inline]
     pub fn bind_tcp_listener<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpListener> {
         let addrs = addr.to_socket_addrs()?;
