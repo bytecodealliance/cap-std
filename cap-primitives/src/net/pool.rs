@@ -9,6 +9,10 @@ use std::{io, net};
 #[derive(Clone)]
 enum AddrSet {
     Net(IpNet),
+
+    // TODO: Perhaps we should have our own version of `ToSocketAddrs`
+    // which returns hostnames rather than parsing them, so we can
+    // look up hostnames here.
     NameWildcard(String),
 }
 
