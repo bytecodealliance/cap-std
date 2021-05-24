@@ -1,5 +1,5 @@
 //! Networking utilities.
 
-mod catalog;
+mod pool;
 
-pub use catalog::*;
+pub use pool::*;

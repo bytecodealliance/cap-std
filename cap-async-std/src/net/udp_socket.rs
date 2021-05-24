@@ -15,14 +15,14 @@ use {
 ///
 /// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods. To
 /// create a `UdpSocket` bound to an address or to send a message to an address,
-/// you must first obtain a [`Catalog`] permitting the address, and then call
-/// [`Catalog::bind_udp_socket`], or [`Catalog::connect_udp_socket`], or
-/// [`Catalog::send_to_udp_socket_addr`].
+/// you must first obtain a [`Pool`] permitting the address, and then call
+/// [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
+/// [`Pool::send_to_udp_socket_addr`].
 ///
-/// [`Catalog`]: struct.Catalog.html
-/// [`Catalog::bind_udp_socket`]: struct.Catalog.html#method.bind_udp_socket
-/// [`Catalog::connect_udp_socket`]: struct.Catalog.html#method.connect_udp_socket
-/// [`Catalog::send_to_udp_socket_addr`]: struct.Catalog.html#method.send_to_udp_socket_addr
+/// [`Pool`]: struct.Pool.html
+/// [`Pool::bind_udp_socket`]: struct.Pool.html#method.bind_udp_socket
+/// [`Pool::connect_udp_socket`]: struct.Pool.html#method.connect_udp_socket
+/// [`Pool::send_to_udp_socket_addr`]: struct.Pool.html#method.send_to_udp_socket_addr
 pub struct UdpSocket {
     pub(crate) std: net::UdpSocket,
 }
