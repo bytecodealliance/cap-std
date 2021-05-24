@@ -6,6 +6,7 @@ use std::{io, net, time::Duration};
 
 // FIXME: lots more to do here
 
+#[derive(Clone)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
 }

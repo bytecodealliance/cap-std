@@ -6,6 +6,7 @@ use std::{io, net};
 
 // FIXME: lots more to do here
 
+#[derive(Clone)]
 enum AddrSet {
     Net(IpNet),
     NameWildcard(String),
@@ -20,6 +21,7 @@ impl AddrSet {
     }
 }
 
+#[derive(Clone)]
 struct IpGrant {
     set: AddrSet,
     port: u16, // TODO: IANA port names, TODO: range
@@ -33,6 +35,7 @@ impl IpGrant {
 
 /// A representation of a set of network resources that may be accessed.
 /// This is presently a very incomplete concept.
+#[derive(Clone)]
 pub struct Pool {
     // TODO: when compiling for WASI, use WASI-specific handle instead
     grants: Vec<IpGrant>,
