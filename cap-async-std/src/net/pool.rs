@@ -6,6 +6,7 @@ use cap_primitives::net::NO_SOCKET_ADDRS;
 
 // FIXME: lots more to do here
 
+#[derive(Clone)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
 }
