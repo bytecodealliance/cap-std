@@ -1,4 +1,4 @@
-//! A capability-oriented filesystem API modeled after `async_std::fs`.
+//! A capability-based filesystem API modeled after `async_std::fs`.
 //!
 //! This corresponds to [`async_std::fs`].
 //!
@@ -9,17 +9,17 @@
 //! Where `async_std` says "the filesystem", this API says "a filesystem", as
 //! it doesn't assume that there's a single global filesystem namespace.
 //!
-//! Since all functions which expose raw file descriptors are `unsafe`,
-//! I/O handles in this API are unforgeable (unsafe code notwithstanding).
-//! This combined with a lack of absolute paths provides a natural
-//! capability-oriented interface.
+//! Since all functions which expose raw file descriptors are `unsafe`, I/O
+//! handles in this API are unforgeable (unsafe code notwithstanding). This
+//! combined with a lack of absolute paths provides a natural capability-based
+//! interface.
 //!
-//! This crate uses the existing `async_std::path::Path` rather than having its own
-//! path type, however while `async_std::path::Path` is mostly just a pure datatype,
-//! it includes aliases for several `async_std::fs` functions. To preserve the
-//! capability-oriented interface, avoid using `async_std::path::Path`'s
-//! `canonicalize`, `read_link`, `read_dir`, `metadata`, and `symlink_metadata`
-//! functions.
+//! This crate uses the existing `async_std::path::Path` rather than having its
+//! own path type, however while `async_std::path::Path` is mostly just a pure
+//! datatype, it includes aliases for several `async_std::fs` functions. To
+//! preserve the capability-based interface, avoid using
+//! `async_std::path::Path`'s `canonicalize`, `read_link`, `read_dir`,
+//! `metadata`, and `symlink_metadata` functions.
 //!
 //! [`async_std::fs`'s free functions]: https://docs.rs/async-std/latest/async_std/fs/#functions
 

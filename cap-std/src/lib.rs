@@ -1,10 +1,9 @@
-//! A capability-oriented API modeled after `std`.
+//! A capability-based API modeled after `std`.
 //!
 //! This corresponds to [`std`].
 //!
-//! Capability-oriented APIs represent access to external resources as
-//! objects which can be passed around between different parts of a
-//! program.
+//! Capability-based APIs represent access to external resources as values
+//! which can be passed around between different parts of a program.
 //!
 //! Two notable features are the [`Dir`] and [`Pool`] types:
 //!  - `Dir` represents an open directory in a filesystem. Instead of

@@ -1,4 +1,4 @@
-//! Capability-oriented temporary directories.
+//! Capability-based temporary directories.
 
 #![deny(missing_docs)]
 #![doc(

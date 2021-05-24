@@ -2,7 +2,7 @@
   <h1><code>cap-rand</code></h1>
 
   <p>
-    <strong>Capability-oriented random number generators</strong>
+    <strong>Capability-based random number generators</strong>
   </p>
 
   <p>
@@ -12,5 +12,5 @@
   </p>
 </div>
 
-The `cap-rand` crate provides a capability-oriented interface to
-random number generators via the [`rand`] crate.
+The `cap-rand` crate provides a capability-based interface to random number
+generators via the [`rand`] crate.

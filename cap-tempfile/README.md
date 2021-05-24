@@ -2,7 +2,7 @@
   <h1><code>cap-tempfile</code></h1>
 
   <p>
-    <strong>Capability-oriented temporary directories</strong>
+    <strong>Capability-based temporary directories</strong>
   </p>
 
   <p>

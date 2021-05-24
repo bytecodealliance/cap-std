@@ -1,4 +1,4 @@
-//! Capability-oriented primitives.
+//! Capability-based primitives.
 
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]

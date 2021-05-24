@@ -1,4 +1,4 @@
-//! A capability-oriented filesystem API modeled after `std::fs`.
+//! A capability-based filesystem API modeled after `std::fs`.
 //!
 //! This corresponds to [`std::fs`].
 //!
@@ -12,14 +12,13 @@
 //! Since all functions which expose raw file descriptors are `unsafe`,
 //! I/O handles in this API are unforgeable (unsafe code notwithstanding).
 //! This combined with a lack of absolute paths provides a natural
-//! capability-oriented interface.
+//! capability-based interface.
 //!
 //! This crate uses the existing `std::path::Path` rather than having its own
 //! path type, however while `std::path::Path` is mostly just a pure datatype,
 //! it includes aliases for several `std::fs` functions. To preserve the
-//! capability-oriented interface, avoid using `std::path::Path`'s
-//! `canonicalize`, `read_link`, `read_dir`, `metadata`, and `symlink_metadata`
-//! functions.
+//! capability-based interface, avoid using `std::path::Path`'s `canonicalize`,
+//! `read_link`, `read_dir`, `metadata`, and `symlink_metadata` functions.
 //!
 //! [`std::fs`'s free functions]: https://doc.rust-lang.org/std/fs/#functions
 

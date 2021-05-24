@@ -2,7 +2,7 @@
   <h1><code>cap-std</code></h1>
 
   <p>
-    <strong>Capability-oriented version of the Rust standard library</strong>
+    <strong>Capability-based version of the Rust standard library</strong>
   </p>
 
   <p>
@@ -12,8 +12,8 @@
   </p>
 </div>
 
-This crate provides a capability-oriented version of [`std`]. See the
-[toplevel README.md] for more information about capability-oriented security.
+This crate provides a capability-based version of [`std`]. See the
+[toplevel README.md] for more information about capability-based security.
 
 The filesystem module [`cap_std::fs`], the networking module [`cap_std::net`],
 and the time module [`cap_std::time`] currently support Linux, macOS, FreeBSD,

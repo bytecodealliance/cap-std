@@ -1,7 +1,7 @@
 [package]
 name = "cap-rand"
 version = "0.13.11-alpha.0"
-description = "Capability-oriented random number generators"
+description = "Capability-based random number generators"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",

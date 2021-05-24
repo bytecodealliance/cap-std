@@ -2,7 +2,7 @@
   <h1><code>cap-primitives</code></h1>
 
   <p>
-    <strong>Capability-oriented primitives</strong>
+    <strong>Capability-based primitives</strong>
   </p>
 
   <p>

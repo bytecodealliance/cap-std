@@ -2,7 +2,7 @@
   <h1><code>cap-std</code></h1>
 
   <p>
-    <strong>Capability-oriented version of the Rust standard library</strong>
+    <strong>Capability-based version of the Rust standard library</strong>
   </p>
 
   <strong>A <a href="https://bytecodealliance.org/">Bytecode Alliance</a> project</strong>
@@ -13,19 +13,19 @@
 </div>
 
 The `cap-std` project is organized around the eponymous [`cap-std`] crate, and
-develops libraries to make it easy to write capability-oriented code, including:
+develops libraries to make it easy to write capability-based code, including:
 
- - [`cap-std`] itself, which provides capability-oriented versions of `std` APIs
+ - [`cap-std`] itself, which provides capability-based versions of `std` APIs
  - [`cap-async-std`], which is to [`async-std`] what `cap-std` is to `std`
- - [`cap-directories`] which provides capability-oriented access to
+ - [`cap-directories`] which provides capability-based access to
    [standard application directories]
- - [`cap-tempfile`], which provides capability-oriented access to
+ - [`cap-tempfile`], which provides capability-based access to
    [temporary directories]
  - [`cap-fs-ext`], which provides additional filesystem features beyond
    what's available in `std`
  - [`cap-time-ext`], which provides additional time features beyond
    what's available in `std`
- - [`cap-rand`], which provides capability-oriented access to
+ - [`cap-rand`], which provides capability-based access to
    [random number generators]
 
 [`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
@@ -41,7 +41,7 @@ develops libraries to make it easy to write capability-oriented code, including:
 [temporary directories]: https://docs.rs/tempfile/
 [random number generators]: https://docs.rs/rand/
 
-## Capability-oriented security
+## Capability-based security
 
 Operating systems have a concept of resource handles, or file descriptors, which
 are values that can be passed around within and sometimes between programs, and
@@ -57,7 +57,7 @@ There may be access-control lists, namespaces, firewalls, or virtualization
 mechanisms governing which resources can actually be accessed, but those are
 typically coarse-grained and configured outside of the application.
 
-Capability-oriented security seeks to avoid ambient authority, to make sandboxing
+Capability-based security seeks to avoid ambient authority, to make sandboxing
 finer-grained and composable. To open a file, one needs a [`Dir`], representing
 an open directory it's in:
 
@@ -164,10 +164,10 @@ and `green`.
 
 ## What about networking?
 
-cap-std also contains a simple capability-oriented version of `std::net`, with
-a [`Pool`] type that represents a pool of network addresses and ports that can
-be accessed, which serves an analogous role to [`Dir`]. It's usable for basic
-use cases, though it's not yet very sophisticated.
+cap-std also contains a simple capability-based version of `std::net`, with a
+[`Pool`] type that represents a pool of network addresses and ports that can be
+accessed, which serves an analogous role to [`Dir`]. It's usable for basic use
+cases, though it's not yet very sophisticated.
 
 [`Pool`]: https://docs.rs/cap-std/latest/cap_std/net/struct.Pool.html
 

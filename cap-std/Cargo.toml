@@ -1,7 +1,7 @@
 [package]
 name = "cap-std"
 version = "0.13.11-alpha.0"
-description = "Capability-oriented version of the Rust standard library"
+description = "Capability-based version of the Rust standard library"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",

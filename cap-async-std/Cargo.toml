@@ -1,7 +1,7 @@
 [package]
 name = "cap-async-std"
 version = "0.13.11-alpha.0"
-description = "Capability-oriented version of async-std"
+description = "Capability-based version of async-std"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
     "Jakub Konka <kubkon@jakubkonka.com>",

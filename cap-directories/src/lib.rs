@@ -1,4 +1,4 @@
-//! Capability-oriented standard directories.
+//! Capability-based standard directories.
 
 #![deny(missing_docs)]
 #![doc(

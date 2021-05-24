@@ -1,4 +1,4 @@
-//! A capability-oriented network API modeled after `std::net`.
+//! A capability-based network API modeled after `std::net`.
 //!
 //! This corresponds to [`std::net`].
 //!

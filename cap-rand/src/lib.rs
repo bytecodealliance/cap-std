@@ -1,20 +1,19 @@
-//! Capability-oriented random number generators
+//! Capability-based random number generators
 //!
 //! This corresponds to [`rand`].
 //!
-//! Capability-oriented APIs represent access to external resources as
-//! objects which can be passed around between different parts of a
-//! program.
+//! Capability-based APIs represent access to external resources as values
+//! which can be passed around between different parts of a program.
 //!
 //! Two notable features are the [`OsRng`] and [`CapRng`] types, which
 //! wrap up access to the operating system entropy source in capability
-//! objects.
+//! values.
 //!
 //! This crate uses the existing `rand::SeedableRng` trait rather than having
 //! its own version, however while `rand::SeedableRng` is mostly just a pure
 //! interface, it provides a `from_entropy` function which directly reads
 //! from the operating system entropy source. To preserve the
-//! capability-oriented interface, avoid using `rand::SeedableRng`'s
+//! capability-based interface, avoid using `rand::SeedableRng`'s
 //! `from_entropy` function on any of the types that implement that trait.
 //!
 //! [`OsRng`]: crate::rngs::OsRng

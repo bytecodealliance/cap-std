@@ -2,7 +2,7 @@
   <h1><code>cap-async-std</code></h1>
 
   <p>
-    <strong>Capability-oriented version of `async-std`</strong>
+    <strong>Capability-based version of `async-std`</strong>
   </p>
 
   <p>
@@ -12,8 +12,8 @@
   </p>
 </div>
 
-This crate provides a capability-oriented version of [`async-std`]. See the
-[toplevel README.md] for more information about capability-oriented security.
+This crate provides a capability-based version of [`async-std`]. See the
+[toplevel README.md] for more information about capability-based security.
 
 At the moment, `cap-async-std` is a very rudimentary translation of [`cap-std`] to
 `async-std`. It hasn't yet been optimized to make effective use of `async`.
