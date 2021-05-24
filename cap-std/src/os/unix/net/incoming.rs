@@ -1,5 +1,5 @@
 use crate::os::unix::net::UnixStream;
-use std::{io, os::unix};
+use std::{fmt, io, os::unix};
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///
@@ -41,4 +41,8 @@ impl<'a> Iterator for Incoming<'a> {
     }
 }
 
-// TODO: impl Debug for Incoming
+impl<'a> fmt::Debug for Incoming<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

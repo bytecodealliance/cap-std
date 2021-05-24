@@ -6,6 +6,7 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
+use std::fmt;
 use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
@@ -102,4 +103,8 @@ impl IntoRawFd for UnixListener {
 // Safety: `UnixListener` wraps a `net::UnixListener` which owns its handle.
 unsafe impl OwnsRaw for UnixListener {}
 
-// TODO: impl Debug for UnixListener
+impl fmt::Debug for UnixListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

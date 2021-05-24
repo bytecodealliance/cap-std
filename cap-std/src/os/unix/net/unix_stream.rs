@@ -1,5 +1,6 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
 use std::{
+    fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::{
         self,
@@ -309,4 +310,8 @@ impl Write for &UnixStream {
     }
 }
 
-// TODO: impl Debug for UnixStream
+impl fmt::Debug for UnixStream {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

@@ -173,8 +173,6 @@ unsafe impl OwnsRaw for TcpListener {}
 
 impl fmt::Debug for TcpListener {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Don't leak the address/port.
-        let mut res = f.debug_struct("TcpListener");
-        res.finish()
+        self.std.fmt(f)
     }
 }

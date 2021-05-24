@@ -10,14 +10,14 @@
 //!
 //! [`Pool`]: struct.Pool.html
 
-mod pool;
 mod incoming;
+mod pool;
 mod tcp_listener;
 mod tcp_stream;
 mod udp_socket;
 
-pub use pool::*;
 pub use incoming::*;
+pub use pool::*;
 pub use tcp_listener::*;
 pub use tcp_stream::*;
 pub use udp_socket::*;

@@ -1,6 +1,6 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
 use std::{
-    io,
+    fmt, io,
     os::unix::{
         self,
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
@@ -135,4 +135,8 @@ impl<'a> IntoIterator for &'a UnixListener {
     }
 }
 
-// TODO: impl Debug for UnixListener
+impl fmt::Debug for UnixListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

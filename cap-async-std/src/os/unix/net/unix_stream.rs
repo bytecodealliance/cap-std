@@ -7,7 +7,7 @@ use async_std::{
     },
     task::{Context, Poll},
 };
-use std::pin::Pin;
+use std::{fmt, pin::Pin};
 use unsafe_io::OwnsRaw;
 
 /// A Unix stream socket.
@@ -231,4 +231,8 @@ impl Write for &UnixStream {
     // async_std doesn't have `write_all_vectored`.
 }
 
-// TODO: impl Debug for UnixStream
+impl fmt::Debug for UnixStream {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}
