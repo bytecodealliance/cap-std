@@ -15,13 +15,12 @@
 This crate provides a capability-oriented version of [`std`]. See the
 [toplevel README.md] for more information about capability-oriented security.
 
-The filesystem module [`cap_std::fs`] and the time module [`cap_std::time`]
-currently support Linux, macOS, FreeBSD, and Windows. WASI support is in
-development, though not yet usable.
-
-The networking module, `net`, is not yet usable.
+The filesystem module [`cap_std::fs`], the networking module [`cap_std::net`],
+and the time module [`cap_std::time`] currently support Linux, macOS, FreeBSD,
+and Windows. WASI support is in development, though not yet usable.
 
 [`std`]: https://doc.rust-lang.org/std/
 [toplevel README.md]: https://github.com/bytecodealliance/cap-std/blob/main/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
+[`cap_std::net`]: https://docs.rs/cap-std/latest/cap_std/net/index.html
 [`cap_std::time`]: https://docs.rs/cap-std/latest/cap_std/time/index.html

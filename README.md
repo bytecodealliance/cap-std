@@ -164,9 +164,12 @@ and `green`.
 
 ## What about networking?
 
-This library contains a few sketches of how to apply similar ideas to
-networking, but it's very incomplete at this time. If you're interested in this
-area, let's talk about what this might become!
+cap-std also contains a simple capability-oriented version of `std::net`, with
+a [`Pool`] type that represents a pool of network addresses and ports that can
+be accessed, which serves an analogous role to [`Dir`]. It's usable for basic
+use cases, though it's not yet very sophisticated.
+
+[`Pool`]: https://docs.rs/cap-std/latest/cap_std/net/struct.Pool.html
 
 ## What is `cap_std::fs_utf8`?
 
