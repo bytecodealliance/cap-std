@@ -1,7 +1,5 @@
 //! A capability-oriented network API modeled after `std::net`.
 //!
-//! XXX: The interfaces in this module are not yet implemented.
-//!
 //! This corresponds to [`std::net`].
 //!
 //! Instead of [`std::net`]'s constructor methods which take an address to

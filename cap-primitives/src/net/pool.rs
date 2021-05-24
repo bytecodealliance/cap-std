@@ -1,26 +1,18 @@
-#![allow(missing_docs)] // TODO: add docs
-#![allow(dead_code, unused_variables)] // TODO: When more things are implemented, remove these.
-
 use ipnet::IpNet;
 use std::{io, net};
 
-// FIXME: lots more to do here
-
+// TODO: Perhaps we should have our own version of `ToSocketAddrs` which
+// returns hostnames rather than parsing them, so we can add unresolved
+// hostnames to the pool.
 #[derive(Clone)]
 enum AddrSet {
     Net(IpNet),
-
-    // TODO: Perhaps we should have our own version of `ToSocketAddrs`
-    // which returns hostnames rather than parsing them, so we can
-    // look up hostnames here.
-    NameWildcard(String),
 }
 
 impl AddrSet {
     fn contains(&self, addr: net::IpAddr) -> bool {
         match self {
             Self::Net(ip_net) => ip_net.contains(&addr),
-            Self::NameWildcard(name) => false,
         }
     }
 }
@@ -38,7 +30,9 @@ impl IpGrant {
 }
 
 /// A representation of a set of network resources that may be accessed.
-/// This is presently a very incomplete concept.
+///
+/// This is presently a very simple concept, though it could grow in
+/// sophistication in the future.
 #[derive(Clone)]
 pub struct Pool {
     // TODO: when compiling for WASI, use WASI-specific handle instead
@@ -51,6 +45,8 @@ impl Pool {
         Self { grants: Vec::new() }
     }
 
+    /// Add a range of network addresses with a specific port to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -61,6 +57,8 @@ impl Pool {
         })
     }
 
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -71,6 +69,7 @@ impl Pool {
         })
     }
 
+    /// Check whether the given address is within the pool.
     pub fn check_addr(&self, addr: &net::SocketAddr) -> io::Result<()> {
         if self.grants.iter().any(|grant| grant.contains(addr)) {
             Ok(())
@@ -83,4 +82,5 @@ impl Pool {
     }
 }
 
+/// An empty array of `SocketAddr`s.
 pub const NO_SOCKET_ADDRS: &[net::SocketAddr] = &[];

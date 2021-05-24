@@ -1,9 +1,11 @@
-#![allow(missing_docs)] // TODO: add docs
-
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use cap_primitives::net::NO_SOCKET_ADDRS;
 use std::{io, net, time::Duration};
 
+/// A pool of network addresses.
+///
+/// This does not directly correspond to anything in `std`, however its methods
+/// correspond to the several functions in [`std::net`].
 #[derive(Clone)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
@@ -17,6 +19,8 @@ impl Pool {
         }
     }
 
+    /// Add a range of network addresses with a specific port to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -24,6 +28,8 @@ impl Pool {
         self.cap.insert_ip_net(ip_net, port)
     }
 
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
     /// # Safety
     ///
     /// This function allows ambient access to any IP address.
@@ -31,6 +37,9 @@ impl Pool {
         self.cap.insert_socket_addr(addr)
     }
 
+    /// Creates a new `TcpListener` which will be bound to the specified address.
+    ///
+    /// This corresponds to [`std::net::TcpListener::bind`].
     #[inline]
     pub fn bind_tcp_listener<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpListener> {
         let addrs = addr.to_socket_addrs()?;
@@ -50,6 +59,9 @@ impl Pool {
         }
     }
 
+    /// Opens a TCP connection to a remote host.
+    ///
+    /// This corresponds to [`std::net::TcpStream::connect`].
     #[inline]
     pub fn connect_tcp_stream<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpStream> {
         let addrs = addr.to_socket_addrs()?;
@@ -69,6 +81,9 @@ impl Pool {
         }
     }
 
+    /// Opens a TCP connection to a remote host with a timeout.
+    ///
+    /// This corresponds to [`std::net::TcpStream::connect_timeout`].
     #[inline]
     pub fn connect_timeout_tcp_stream(
         &self,
@@ -80,6 +95,9 @@ impl Pool {
         Ok(unsafe { TcpStream::from_std(tcp_stream) })
     }
 
+    /// Creates a UDP socket from the given address.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::bind`].
     #[inline]
     pub fn bind_udp_socket<A: ToSocketAddrs>(&self, addr: A) -> io::Result<UdpSocket> {
         let addrs = addr.to_socket_addrs()?;
@@ -98,6 +116,10 @@ impl Pool {
         }
     }
 
+    /// Sends data on the socket to the given address. On success, returns the
+    /// number of bytes written.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::send_to`].
     #[inline]
     pub fn send_to_udp_socket_addr<A: ToSocketAddrs>(
         &self,
@@ -115,6 +137,11 @@ impl Pool {
         udp_socket.std.send_to(buf, addr)
     }
 
+    /// Connects this UDP socket to a remote address, allowing the `send` and
+    /// `recv` syscalls to be used to send data and also applies filters to
+    /// only receive data from the specified address.
+    ///
+    /// This corresponds to [`std::net::UdpSocket::connect`].
     #[inline]
     pub fn connect_udp_socket<A: ToSocketAddrs>(
         &self,
