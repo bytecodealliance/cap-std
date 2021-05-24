@@ -40,6 +40,14 @@ impl TcpStream {
         Self { std }
     }
 
+    /// Returns the socket address of the remote peer of this TCP connection.
+    ///
+    /// This corresponds to [`std::net::TcpStream::peer_addr`].
+    #[inline]
+    pub fn peer_addr(&self) -> io::Result<SocketAddr> {
+        self.std.peer_addr()
+    }
+
     /// Returns the local socket address of this listener.
     ///
     /// This corresponds to [`std::net::TcpStream::local_addr`].
