@@ -4,7 +4,7 @@
 mod net;
 mod sys_common;
 
-use cap_std::net::*;
+use cap_std::{ambient_authority, net::*};
 use net::{next_test_ip4, next_test_ip6};
 use std::{io::ErrorKind, sync::mpsc::channel};
 //use sys_common::AsInner;
@@ -30,9 +30,7 @@ macro_rules! t {
 #[test]
 fn bind_error() {
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr("1.1.1.1:9999".parse().unwrap());
-    }
+    pool.insert_socket_addr("1.1.1.1:9999".parse().unwrap(), ambient_authority());
 
     match pool.bind_udp_socket("1.1.1.1:9999") {
         Ok(..) => panic!(),
@@ -44,13 +42,9 @@ fn bind_error() {
 fn socket_smoke_test_ip4() {
     each_ip(&mut |server_ip, client_ip| {
         let mut client_pool = Pool::new();
-        unsafe {
-            client_pool.insert_socket_addr(client_ip);
-        }
+        client_pool.insert_socket_addr(client_ip, ambient_authority());
         let mut server_pool = Pool::new();
-        unsafe {
-            server_pool.insert_socket_addr(server_ip);
-        }
+        server_pool.insert_socket_addr(server_ip, ambient_authority());
 
         let (tx1, rx1) = channel();
         let (tx2, rx2) = channel();
@@ -78,9 +72,7 @@ fn socket_smoke_test_ip4() {
 fn socket_name() {
     each_ip(&mut |addr, _| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let server = t!(pool.bind_udp_socket(&addr));
         assert_eq!(addr, t!(server.local_addr()));
@@ -91,13 +83,9 @@ fn socket_name() {
 fn socket_peer() {
     each_ip(&mut |addr1, addr2| {
         let mut pool1 = Pool::new();
-        unsafe {
-            pool1.insert_socket_addr(addr1);
-        }
+        pool1.insert_socket_addr(addr1, ambient_authority());
         let mut pool2 = Pool::new();
-        unsafe {
-            pool2.insert_socket_addr(addr2);
-        }
+        pool2.insert_socket_addr(addr2, ambient_authority());
 
         let server = t!(pool1.bind_udp_socket(&addr1));
         assert_eq!(
@@ -113,13 +101,9 @@ fn socket_peer() {
 fn udp_clone_smoke() {
     each_ip(&mut |addr1, addr2| {
         let mut pool1 = Pool::new();
-        unsafe {
-            pool1.insert_socket_addr(addr1);
-        }
+        pool1.insert_socket_addr(addr1, ambient_authority());
         let mut pool2 = Pool::new();
-        unsafe {
-            pool2.insert_socket_addr(addr2);
-        }
+        pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = t!(pool1.bind_udp_socket(&addr1));
         let sock2 = t!(pool2.bind_udp_socket(&addr2));
@@ -152,13 +136,9 @@ fn udp_clone_smoke() {
 fn udp_clone_two_read() {
     each_ip(&mut |addr1, addr2| {
         let mut pool1 = Pool::new();
-        unsafe {
-            pool1.insert_socket_addr(addr1);
-        }
+        pool1.insert_socket_addr(addr1, ambient_authority());
         let mut pool2 = Pool::new();
-        unsafe {
-            pool2.insert_socket_addr(addr2);
-        }
+        pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = t!(pool1.bind_udp_socket(&addr1));
         let sock2 = t!(pool2.bind_udp_socket(&addr2));
@@ -193,13 +173,9 @@ fn udp_clone_two_read() {
 fn udp_clone_two_write() {
     each_ip(&mut |addr1, addr2| {
         let mut pool1 = Pool::new();
-        unsafe {
-            pool1.insert_socket_addr(addr1);
-        }
+        pool1.insert_socket_addr(addr1, ambient_authority());
         let mut pool2 = Pool::new();
-        unsafe {
-            pool2.insert_socket_addr(addr2);
-        }
+        pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = t!(pool1.bind_udp_socket(&addr1));
         let sock2 = t!(pool2.bind_udp_socket(&addr2));
@@ -242,9 +218,7 @@ fn debug() {
     let socket_addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe { pool.insert_socket_addr(socket_addr); }
 
-    let udpsock = t!(pool.bind_udp_socket(&socket_addr));
     let udpsock_inner = udpsock.0.socket().as_inner();
     let compare = format!("UdpSocket {{ addr: {:?}, {}: {:?} }}", socket_addr, name, udpsock_inner);
     assert_eq!(format!("{:?}", udpsock), compare);
@@ -263,9 +237,7 @@ fn timeouts() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = t!(pool.bind_udp_socket(&addr));
     let dur = Duration::new(15410, 0);
@@ -292,9 +264,7 @@ fn test_read_timeout() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = t!(pool.bind_udp_socket(&addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
@@ -325,9 +295,7 @@ fn test_read_with_timeout() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = t!(pool.bind_udp_socket(&addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
@@ -364,9 +332,7 @@ fn test_timeout_zero_duration() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let socket = t!(pool.bind_udp_socket(&addr));
 
@@ -384,9 +350,7 @@ fn connect_send_recv() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let socket = t!(pool.bind_udp_socket(&addr));
     t!(pool.connect_udp_socket(&socket, addr));
@@ -402,9 +366,7 @@ fn connect_send_recv() {
 fn connect_send_peek_recv() {
     each_ip(&mut |addr, _| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = t!(pool.bind_udp_socket(&addr));
         t!(pool.connect_udp_socket(&socket, addr));
@@ -429,9 +391,7 @@ fn connect_send_peek_recv() {
 fn peek_from() {
     each_ip(&mut |addr, _| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = t!(pool.bind_udp_socket(&addr));
         t!(pool.send_to_udp_socket_addr(&socket, b"hello world", &addr));
@@ -457,9 +417,7 @@ fn ttl() {
     let addr = next_test_ip4();
 
     let mut pool = Pool::new();
-    unsafe {
-        pool.insert_socket_addr(addr);
-    }
+    pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = t!(pool.bind_udp_socket(&addr));
 
@@ -471,9 +429,7 @@ fn ttl() {
 fn set_nonblocking() {
     each_ip(&mut |addr, _| {
         let mut pool = Pool::new();
-        unsafe {
-            pool.insert_socket_addr(addr);
-        }
+        pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = t!(pool.bind_udp_socket(&addr));
 

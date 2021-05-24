@@ -1,5 +1,5 @@
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
-use cap_primitives::{ambient_authority, net::NO_SOCKET_ADDRS};
+use cap_primitives::{ambient_authority, net::NO_SOCKET_ADDRS, AmbientAuthority};
 use std::{io, net, time::Duration};
 
 /// A pool of network addresses.
@@ -21,20 +21,29 @@ impl Pool {
 
     /// Add a range of network addresses with a specific port to the pool.
     ///
-    /// # Safety
+    /// # AmbientAuthority
     ///
     /// This function allows ambient access to any IP address.
-    pub unsafe fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16) {
-        self.cap.insert_ip_net(ip_net, port)
+    pub fn insert_ip_net(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        port: u16,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.cap.insert_ip_net(ip_net, port, ambient_authority)
     }
 
     /// Add a specific [`net::SocketAddr`] to the pool.
     ///
-    /// # Safety
+    /// # AmbientAuthority
     ///
     /// This function allows ambient access to any IP address.
-    pub unsafe fn insert_socket_addr(&mut self, addr: net::SocketAddr) {
-        self.cap.insert_socket_addr(addr)
+    pub fn insert_socket_addr(
+        &mut self,
+        addr: net::SocketAddr,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.cap.insert_socket_addr(addr, ambient_authority)
     }
 
     /// Creates a new `TcpListener` which will be bound to the specified address.

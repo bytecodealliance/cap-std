@@ -2,8 +2,8 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
-use std::fmt;
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use std::fmt;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {

@@ -6,8 +6,8 @@ use async_std::{
         io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
     },
 };
-use std::fmt;
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use std::fmt;
 use unsafe_io::OwnsRaw;
 
 /// A Unix datagram socket.
