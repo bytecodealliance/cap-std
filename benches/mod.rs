@@ -3,8 +3,6 @@
 
 #![feature(test)]
 
-extern crate cap_tempfile;
-extern crate tempfile;
 extern crate test;
 
 use std::{fs, path::PathBuf};
