@@ -1,5 +1,5 @@
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::{io, net, time::Duration};
+use std::{fmt, io, net, time::Duration};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
@@ -338,4 +338,8 @@ impl IntoRawHandleOrSocket for UdpSocket {
 // Safety: `UdpSocket` wraps a `net::UdpSocket` which owns its handle.
 unsafe impl OwnsRaw for UdpSocket {}
 
-// TODO: impl Debug for UdpSocket
+impl fmt::Debug for UdpSocket {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

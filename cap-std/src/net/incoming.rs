@@ -1,5 +1,5 @@
 use crate::net::TcpStream;
-use std::{io, net};
+use std::{fmt, io, net};
 
 /// An iterator that infinitely `accept`s connections on a [`TcpListener`].
 ///
@@ -40,4 +40,8 @@ impl<'a> Iterator for Incoming<'a> {
     }
 }
 
-// TODO: impl Debug for Incoming
+impl<'a> fmt::Debug for Incoming<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

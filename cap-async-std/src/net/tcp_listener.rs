@@ -2,6 +2,7 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
+use std::fmt;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
@@ -141,4 +142,8 @@ impl IntoRawHandleOrSocket for TcpListener {
 /// Safety: `TcpListener` wraps a `net::TcpListener` which owns its handle.
 unsafe impl OwnsRaw for TcpListener {}
 
-// TODO: impl Debug for TcpListener
+impl fmt::Debug for TcpListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

@@ -1,5 +1,6 @@
 use crate::net::{Shutdown, SocketAddr};
 use std::{
+    fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net,
     time::Duration,
@@ -355,4 +356,8 @@ impl Write for &TcpStream {
     }
 }
 
-// TODO: impl Debug for TcpStream
+impl fmt::Debug for TcpStream {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

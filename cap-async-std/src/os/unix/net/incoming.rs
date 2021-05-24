@@ -5,7 +5,7 @@ use async_std::{
     stream::Stream,
     task::{Context, Poll},
 };
-use std::pin::Pin;
+use std::{fmt, pin::Pin};
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///
@@ -49,4 +49,8 @@ impl<'a> Stream for Incoming<'a> {
     }
 }
 
-// TODO: impl Debug for Incoming
+impl<'a> fmt::Debug for Incoming<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}

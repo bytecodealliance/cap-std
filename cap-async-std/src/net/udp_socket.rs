@@ -2,6 +2,7 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
+use std::fmt;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
@@ -282,4 +283,8 @@ impl IntoRawHandleOrSocket for UdpSocket {
 /// Safety: `UdpSocket` wraps a `net::UdpSocket` which owns its handle.
 unsafe impl OwnsRaw for UdpSocket {}
 
-// TODO: impl Debug for UdpSocket
+impl fmt::Debug for UdpSocket {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.std.fmt(f)
+    }
+}
