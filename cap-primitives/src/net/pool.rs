@@ -39,6 +39,31 @@ pub struct Pool {
 }
 
 impl Pool {
+    /// Construct a new empty pool.
+    pub fn new() -> Self {
+        Self { grants: Vec::new() }
+    }
+
+    /// # Safety
+    ///
+    /// This function allows ambient access to any IP address.
+    pub unsafe fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16) {
+        self.grants.push(IpGrant {
+            set: AddrSet::Net(ip_net),
+            port,
+        })
+    }
+
+    /// # Safety
+    ///
+    /// This function allows ambient access to any IP address.
+    pub unsafe fn insert_socket_addr(&mut self, addr: net::SocketAddr) {
+        self.grants.push(IpGrant {
+            set: AddrSet::Net(addr.ip().into()),
+            port: addr.port(),
+        })
+    }
+
     pub fn check_addr(&self, addr: &net::SocketAddr) -> io::Result<()> {
         if self.grants.iter().any(|grant| grant.contains(addr)) {
             Ok(())
