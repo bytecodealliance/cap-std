@@ -12,7 +12,8 @@ use crate::fs::{
 };
 use once_cell::sync::Lazy;
 use posish::{
-    fs::{chmodat, fstatfs, major, renameat, Mode},
+    fs::{chmodat, fstatfs, major, renameat, Mode, OFlags, PROC_SUPER_MAGIC},
+    io::Errno,
     path::DecInt,
     process::{getgid, getpid, getuid},
 };
@@ -24,18 +25,6 @@ use std::{
 
 /// Linux's procfs always uses inode 1 for its root directory.
 const PROC_ROOT_INO: u64 = 1;
-
-/// The filesystem magic number for procfs.
-/// <https://man7.org/linux/man-pages/man2/fstatfs.2.html#DESCRIPTION>
-///
-/// This is defined in the `libc` crate for linux-gnu but not for
-/// linux-musl, so we define it ourselves.
-#[cfg(not(any(target_env = "musl", target_os = "android", target_arch = "s390x")))]
-const PROC_SUPER_MAGIC: libc::__fsword_t = 0x0000_9fa0;
-#[cfg(all(target_arch = "s390x", not(target_env = "musl")))]
-const PROC_SUPER_MAGIC: libc::c_uint = 0x0000_9fa0;
-#[cfg(any(target_env = "musl", target_os = "android"))]
-const PROC_SUPER_MAGIC: libc::c_ulong = 0x0000_9fa0;
 
 // Identify a subdirectory of "/proc", to determine which anomalies to
 // check for.
@@ -171,34 +160,23 @@ fn check_procfs(file: &fs::File) -> io::Result<()> {
 /// `rename` call that would otherwise fail, but which fails with `EXDEV`
 /// first if it would cross a mount point.
 fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
-    let e = renameat(file, "../.", file, ".").unwrap_err();
-    match e.raw_os_error() {
-        Some(libc::EXDEV) => Ok(true), // the rename failed due to crossing a mount point
-        Some(libc::EBUSY) => Ok(false), // the rename failed normally
-        _ => panic!("Unexpected error from `renameat`: {:?}", e),
+    let err = renameat(file, "../.", file, ".").unwrap_err();
+    match Errno::from_io_error(&err) {
+        Some(Errno::XDEV) => Ok(true), // the rename failed due to crossing a mount point
+        Some(Errno::BUSY) => Ok(false), // the rename failed normally
+        _ => panic!("Unexpected error from `renameat`: {:?}", err),
     }
 }
 
 fn proc_self_fd() -> io::Result<&'static fs::File> {
     #[allow(clippy::useless_conversion)]
     static PROC_SELF_FD: Lazy<io::Result<fs::File>> = Lazy::new(|| {
-        // When libc does have this constant, check that our copy has the same value.
-        #[cfg(not(any(target_env = "musl", target_os = "android", target_arch = "s390x")))]
-        assert_eq!(
-            PROC_SUPER_MAGIC,
-            libc::__fsword_t::from(libc::PROC_SUPER_MAGIC)
-        );
-        #[cfg(all(target_arch = "s390x", not(target_env = "musl")))]
-        assert_eq!(PROC_SUPER_MAGIC, libc::c_uint::from(libc::PROC_SUPER_MAGIC));
-        #[cfg(target_os = "android")]
-        assert_eq!(PROC_SUPER_MAGIC as libc::c_long, libc::PROC_SUPER_MAGIC);
-
         // Open "/proc". Here and below, use `read(true)` even though we don't need
         // read permissions, because Rust's libstd requires an access mode, and
         // Linux ignores `O_RDONLY` with `O_PATH`.
         let proc = fs::OpenOptions::new()
             .read(true)
-            .custom_flags(libc::O_PATH | libc::O_DIRECTORY | libc::O_NOFOLLOW)
+            .custom_flags((OFlags::PATH | OFlags::DIRECTORY | OFlags::NOFOLLOW).bits())
             .open("/proc")?;
         let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
 
@@ -207,7 +185,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
         let options = options
             .read(true)
             .follow(FollowSymlinks::No)
-            .custom_flags(libc::O_PATH | libc::O_DIRECTORY);
+            .custom_flags((OFlags::PATH | OFlags::DIRECTORY).bits());
 
         // Open "/proc/self". Use our pid to compute the name rather than literally
         // using "self", as "self" is a symlink.
@@ -243,7 +221,9 @@ pub(crate) fn set_permissions_through_proc_self_fd(
     let opath = open(
         start,
         path,
-        OpenOptions::new().read(true).custom_flags(libc::O_PATH),
+        OpenOptions::new()
+            .read(true)
+            .custom_flags(OFlags::PATH.bits()),
     )?;
 
     let dirfd = proc_self_fd()?;
@@ -260,7 +240,9 @@ pub(crate) fn set_times_through_proc_self_fd(
     let opath = open(
         start,
         path,
-        OpenOptions::new().read(true).custom_flags(libc::O_PATH),
+        OpenOptions::new()
+            .read(true)
+            .custom_flags(OFlags::PATH.bits()),
     )?;
 
     // Don't pass `AT_SYMLINK_NOFOLLOW`, because we do actually want to follow

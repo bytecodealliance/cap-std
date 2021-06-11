@@ -1,24 +1,27 @@
 use crate::{fs::SystemTimeSpec, time::SystemClock};
-use posish::fs::{utimensat, AtFlags};
+use posish::{
+    fs::{utimensat, AtFlags, UTIME_NOW, UTIME_OMIT},
+    time::Timespec,
+};
 use std::{convert::TryInto, fs, io, path::Path};
 
 #[allow(clippy::useless_conversion)]
-fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<libc::timespec> {
+fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<Timespec> {
     Ok(match ft {
-        None => libc::timespec {
+        None => Timespec {
             tv_sec: 0,
-            tv_nsec: libc::UTIME_OMIT.into(),
+            tv_nsec: UTIME_OMIT.into(),
         },
-        Some(SystemTimeSpec::SymbolicNow) => libc::timespec {
+        Some(SystemTimeSpec::SymbolicNow) => Timespec {
             tv_sec: 0,
-            tv_nsec: libc::UTIME_NOW.into(),
+            tv_nsec: UTIME_NOW.into(),
         },
         Some(SystemTimeSpec::Absolute(ft)) => {
             let duration = ft.duration_since(SystemClock::UNIX_EPOCH).unwrap();
             let nanoseconds = duration.subsec_nanos();
-            assert_ne!(i64::from(nanoseconds), i64::from(libc::UTIME_OMIT));
-            assert_ne!(i64::from(nanoseconds), i64::from(libc::UTIME_NOW));
-            libc::timespec {
+            assert_ne!(i64::from(nanoseconds), i64::from(UTIME_OMIT));
+            assert_ne!(i64::from(nanoseconds), i64::from(UTIME_NOW));
+            Timespec {
                 tv_sec: duration
                     .as_secs()
                     .try_into()

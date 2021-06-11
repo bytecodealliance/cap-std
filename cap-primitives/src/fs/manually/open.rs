@@ -6,6 +6,8 @@ use crate::fs::{
     dir_options, errors, open_unchecked, path_has_trailing_dot, path_has_trailing_slash,
     stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use posish::fs::OFlags;
 use std::{
     borrow::Cow,
     ffi::OsStr,
@@ -529,7 +531,7 @@ pub(crate) fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io:
 /// potentially being a symlink we need to follow, due to use of `O_PATH`.
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
-    (use_options.ext.custom_flags & libc::O_PATH) == libc::O_PATH
+    (use_options.ext.custom_flags & OFlags::PATH.bits()) == OFlags::PATH.bits()
         && use_options.follow == FollowSymlinks::Yes
 }
 

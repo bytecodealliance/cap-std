@@ -103,7 +103,7 @@ pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Res
 
     fs::OpenOptions::new()
         .read(true)
-        .custom_flags(flags.bits())
+        .custom_flags(flags.bits() as i32)
         .open(&path)
 }
 

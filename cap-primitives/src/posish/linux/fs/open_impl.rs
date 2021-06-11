@@ -11,7 +11,9 @@ use super::super::super::fs::{c_str, compute_oflags};
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
+use io_lifetimes::FromFd;
 use posish::fs::{openat2, Mode, OFlags, ResolveFlags};
+use posish::io::Errno;
 use std::{
     fs, io,
     path::Path,
@@ -27,8 +29,8 @@ pub(crate) fn open_impl(
     let result = open_beneath(start, path, options);
 
     // If that returned `ENOSYS`, use a fallback strategy.
-    if let Err(e) = &result {
-        if let Some(libc::ENOSYS) = e.raw_os_error() {
+    if let Err(err) = &result {
+        if let Some(Errno::NOSYS) = Errno::from_io_error(err) {
             return manually::open(start, path, options);
         }
     }
@@ -73,6 +75,7 @@ pub(crate) fn open_beneath(
                 ResolveFlags::BENEATH | ResolveFlags::NO_MAGICLINKS,
             ) {
                 Ok(file) => {
+                    let file = fs::File::from_into_fd(file);
                     // Note that we don't bother with `ensure_cloexec` here
                     // because Linux has supported `O_CLOEXEC` since 2.6.18,
                     // and `openat2` was introduced in 5.6.
@@ -82,9 +85,9 @@ pub(crate) fn open_beneath(
 
                     return Ok(file);
                 }
-                Err(err) => match err.raw_os_error() {
-                    Some(libc::EAGAIN) => continue,
-                    Some(libc::EXDEV) => return Err(errors::escape_attempt()),
+                Err(err) => match Errno::from_io_error(&err) {
+                    Some(Errno::AGAIN) => continue,
+                    Some(Errno::XDEV) => return Err(errors::escape_attempt()),
 
                     // `EPERM` is used by some `seccomp` sandboxes to indicate
                     // that `openat2` is unimplemented:
@@ -94,11 +97,11 @@ pub(crate) fn open_beneath(
                     // or a file seal prevented the operation, and it's complex
                     // to detect those cases, so exit the loop and use the
                     // fallback.
-                    Some(libc::EPERM) => break,
+                    Some(Errno::PERM) => break,
 
                     // `ENOSYS` means `openat2` is permanently unavailable;
                     // mark it so and exit the loop.
-                    Some(libc::ENOSYS) => {
+                    Some(Errno::NOSYS) => {
                         INVALID.store(true, Relaxed);
                         break;
                     }
@@ -110,7 +113,7 @@ pub(crate) fn open_beneath(
     }
 
     // `openat2` is unavailable, either temporarily or permanently.
-    Err(io::Error::from_raw_os_error(libc::ENOSYS))
+    Err(Errno::NOSYS.io_error())
 }
 
 #[cfg(racy_asserts)]

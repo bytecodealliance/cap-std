@@ -1,5 +1,6 @@
 #[cfg(any(unix, target_os = "vxworks"))]
 use crate::fs::PermissionsExt;
+use posish::fs::RawMode;
 use std::{fs, io};
 
 /// Representation of the various permissions on a file.
@@ -92,7 +93,7 @@ impl std::os::unix::fs::PermissionsExt for Permissions {
     #[inline]
     fn from_mode(mode: u32) -> Self {
         Self {
-            readonly: PermissionsExt::readonly(mode as libc::mode_t),
+            readonly: PermissionsExt::readonly(mode as RawMode),
             ext: PermissionsExt::from_mode(mode),
         }
     }

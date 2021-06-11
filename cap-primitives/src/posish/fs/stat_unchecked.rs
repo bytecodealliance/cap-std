@@ -13,5 +13,5 @@ pub(crate) fn stat_unchecked(
         FollowSymlinks::No => AtFlags::SYMLINK_NOFOLLOW,
     };
 
-    statat(start, path, atflags).map(MetadataExt::from_libc)
+    statat(start, path, atflags).map(MetadataExt::from_posish)
 }

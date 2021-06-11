@@ -814,7 +814,7 @@ fn readdir_write() {
                 "dir",
                 OpenOptions::new()
                     .write(true)
-                    .custom_flags(libc::O_DIRECTORY)
+                    .custom_flags(posish::fs::OFlags::DIRECTORY.bits())
             )
             .is_err());
         assert!(tmpdir
@@ -822,7 +822,7 @@ fn readdir_write() {
                 "dir",
                 OpenOptions::new()
                     .append(true)
-                    .custom_flags(libc::O_DIRECTORY)
+                    .custom_flags(posish::fs::OFlags::DIRECTORY.bits())
             )
             .is_err());
     }

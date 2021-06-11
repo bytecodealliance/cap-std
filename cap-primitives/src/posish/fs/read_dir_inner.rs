@@ -5,28 +5,30 @@ use crate::fs::{
 };
 use posish::fs::Dir;
 #[cfg(unix)]
-use std::os::unix::{ffi::OsStrExt, io::AsRawFd};
+use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{
-    ffi::OsStrExt,
-    io::{AsRawFd, RawFd},
-};
+use std::os::wasi::ffi::OsStrExt;
 use std::{
     ffi::OsStr,
     fmt, fs, io,
+    mem::ManuallyDrop,
     path::{Component, Path},
     sync::Arc,
+    sync::Mutex,
 };
-use unsafe_io::{AsUnsafeFile, View};
+use unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd};
 
 pub(crate) struct ReadDirInner {
-    posish: Arc<Dir>,
+    raw_fd: RawFd,
+    posish: Arc<Mutex<Dir>>,
 }
 
 impl ReadDirInner {
     pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
+        let dir = Dir::from(open_dir_for_reading(start, path)?)?;
         Ok(Self {
-            posish: Arc::new(Dir::from(open_dir_for_reading(start, path)?)?),
+            raw_fd: dir.as_raw_fd(),
+            posish: Arc::new(Mutex::new(dir)),
         })
     }
 
@@ -35,18 +37,21 @@ impl ReadDirInner {
         // `dup` since in that case the resulting file descriptor would share
         // a current position with the original, and `read_dir` calls after
         // the first `read_dir` call wouldn't start from the beginning.
+        let dir = Dir::from(open_dir_for_reading_unchecked(
+            start,
+            Component::CurDir.as_ref(),
+        )?)?;
         Ok(Self {
-            posish: Arc::new(Dir::from(open_dir_for_reading_unchecked(
-                start,
-                Component::CurDir.as_ref(),
-            )?)?),
+            raw_fd: dir.as_raw_fd(),
+            posish: Arc::new(Mutex::new(dir)),
         })
     }
 
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
         let dir = open_dir_for_reading_unchecked(start, path)?;
         Ok(Self {
-            posish: Arc::new(Dir::from(dir)?),
+            raw_fd: dir.as_raw_fd(),
+            posish: Arc::new(Mutex::new(Dir::from(dir)?)),
         })
     }
 
@@ -74,8 +79,11 @@ impl ReadDirInner {
         read_dir_unchecked(&self.as_file_view(), file_name.as_ref())
     }
 
-    fn as_file_view(&self) -> View<fs::File> {
-        self.posish.as_file_view()
+    #[allow(unsafe_code)]
+    fn as_file_view(&self) -> ManuallyDrop<fs::File> {
+        // Safety: `self.posish` owns the file desctiptor. We just hold a
+        // copy outside so that we can read it without taking a lock.
+        ManuallyDrop::new(unsafe { fs::File::from_raw_fd(self.raw_fd) })
     }
 }
 
@@ -84,7 +92,7 @@ impl Iterator for ReadDirInner {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let entry = match self.posish.read()? {
+            let entry = match self.posish.lock().unwrap().read()? {
                 Ok(entry) => entry,
                 Err(e) => return Some(Err(e)),
             };
@@ -95,7 +103,10 @@ impl Iterator for ReadDirInner {
                 let clone = Arc::clone(&self.posish);
                 return Some(Ok(DirEntryInner {
                     posish: entry,
-                    read_dir: Self { posish: clone },
+                    read_dir: Self {
+                        raw_fd: self.raw_fd,
+                        posish: clone,
+                    },
                 }));
             }
         }
@@ -106,8 +117,7 @@ impl fmt::Debug for ReadDirInner {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("ReadDir");
-        let fd = self.posish.as_raw_fd();
-        b.field("fd", &fd);
+        b.field("raw_fd", &self.raw_fd);
         b.finish()
     }
 }

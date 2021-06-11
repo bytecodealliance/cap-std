@@ -2,7 +2,9 @@ use super::compute_oflags;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use crate::fs::ensure_cloexec;
 use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
+use io_lifetimes::{AsFd, FromFd};
 use posish::fs::{openat, Mode};
+use posish::io::Errno;
 use std::{fs, path::Path};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
@@ -19,28 +21,28 @@ pub(crate) fn open_unchecked(
     let err = match openat(start, path, oflags, mode) {
         Ok(file) => {
             #[cfg(any(target_os = "android", target_os = "linux"))]
-            ensure_cloexec(&file).map_err(OpenUncheckedError::Other)?;
+            ensure_cloexec(file.as_fd()).map_err(OpenUncheckedError::Other)?;
 
-            return Ok(file);
+            return Ok(fs::File::from_fd(file));
         }
         Err(err) => err,
     };
-    match err.raw_os_error() {
+    match Errno::from_io_error(&err) {
         // `ELOOP` is the POSIX standard and most widely used error code to
         // indicate that a symlink was found when `O_NOFOLLOW` was set.
         #[cfg(not(any(target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd")))]
-        Some(libc::ELOOP) => Err(OpenUncheckedError::Symlink(err, ())),
+        Some(Errno::LOOP) => Err(OpenUncheckedError::Symlink(err, ())),
 
         // FreeBSD and similar (but not Darwin) use `EMLINK`.
         #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
-        Some(libc::EMLINK) => Err(OpenUncheckedError::Symlink(err, ())),
+        Some(Errno::MLINK) => Err(OpenUncheckedError::Symlink(err, ())),
 
         // NetBSD uses `EFTYPE`.
         #[cfg(any(target_os = "netbsd"))]
-        Some(libc::EFTYPE) => Err(OpenUncheckedError::Symlink(err, ())),
+        Some(Errno::FTYPE) => Err(OpenUncheckedError::Symlink(err, ())),
 
-        Some(libc::ENOENT) => Err(OpenUncheckedError::NotFound(err)),
-        Some(libc::ENOTDIR) => {
+        Some(Errno::NOENT) => Err(OpenUncheckedError::NotFound(err)),
+        Some(Errno::NOTDIR) => {
             if options.dir_required
                 && stat_unchecked(start, path, options.follow)
                     .map(|m| m.file_type().is_symlink())

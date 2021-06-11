@@ -20,7 +20,7 @@ ipnet = "2.3.0"
 unsafe-io = { version = "0.6.0", features = ["async-std"] }
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.6.0"
+posish = "0.8.0"
 
 [features]
 default = []

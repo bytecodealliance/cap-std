@@ -1,5 +1,6 @@
 use crate::fs::{Metadata, MetadataExt};
 use posish::fs::{statat, AtFlags};
+use posish::io::Errno;
 use std::{
     fs, io,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
@@ -15,14 +16,14 @@ pub(super) fn file_metadata(file: &fs::File) -> io::Result<Metadata> {
     if !FSTAT_PATH_BADF.load(Relaxed) {
         match Metadata::from_file(file) {
             Ok(metadata) => return Ok(metadata),
-            Err(e) => match e.raw_os_error() {
+            Err(err) => match Errno::from_io_error(&err) {
                 // Before Linux 3.6, `fstat` with `O_PATH` returned `EBADF`.
-                Some(libc::EBADF) => FSTAT_PATH_BADF.store(true, Relaxed),
-                _ => return Err(e),
+                Some(Errno::BADF) => FSTAT_PATH_BADF.store(true, Relaxed),
+                _ => return Err(err),
             },
         }
     }
 
     // If `fstat` with `O_PATH` isn't supported, use `statat` with `AT_EMPTY_PATH`.
-    statat(file, "", AtFlags::EMPTY_PATH).map(MetadataExt::from_libc)
+    statat(file, "", AtFlags::EMPTY_PATH).map(MetadataExt::from_posish)
 }

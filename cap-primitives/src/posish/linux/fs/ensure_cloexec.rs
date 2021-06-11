@@ -1,5 +1,6 @@
-use posish::fs::{getfd, setfd, FdFlags};
-use std::{fs, io};
+use io_lifetimes::BorrowedFd;
+use posish::fs::{fcntl_getfd, fcntl_setfd, FdFlags};
+use std::io;
 
 // Implementation derived from `ensure_cloexec` in Rust's
 // library/std/src/sys/unix/fs.rs at revision
@@ -14,7 +15,7 @@ use std::{fs, io};
 //
 // The CLOEXEC flag, however, is supported on versions of macOS/BSD/etc
 // that we support, so we only do this on Linux currently.
-pub(crate) fn ensure_cloexec(file: &fs::File) -> io::Result<()> {
+pub(crate) fn ensure_cloexec(fd: BorrowedFd<'_>) -> io::Result<()> {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     const OPEN_CLOEXEC_UNKNOWN: usize = 0;
@@ -25,7 +26,7 @@ pub(crate) fn ensure_cloexec(file: &fs::File) -> io::Result<()> {
     let need_to_set;
     match OPEN_CLOEXEC.load(Ordering::Relaxed) {
         OPEN_CLOEXEC_UNKNOWN => {
-            need_to_set = !get_cloexec(file)?;
+            need_to_set = !get_cloexec(fd)?;
             OPEN_CLOEXEC.store(
                 if need_to_set {
                     OPEN_CLOEXEC_NOTSUPPORTED
@@ -40,7 +41,7 @@ pub(crate) fn ensure_cloexec(file: &fs::File) -> io::Result<()> {
         _ => unreachable!(),
     }
     if need_to_set {
-        set_cloexec(file)?;
+        set_cloexec(fd)?;
     }
     Ok(())
 }
@@ -49,15 +50,15 @@ pub(crate) fn ensure_cloexec(file: &fs::File) -> io::Result<()> {
 // `set_cloexec` in Rust's library/std/src/sys/unix/fd.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-fn get_cloexec(file: &fs::File) -> io::Result<bool> {
-    Ok(getfd(file)?.contains(FdFlags::CLOEXEC))
+fn get_cloexec(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    Ok(fcntl_getfd(fd)?.contains(FdFlags::CLOEXEC))
 }
 
-fn set_cloexec(file: &fs::File) -> io::Result<()> {
-    let previous = getfd(file)?;
+fn set_cloexec(fd: BorrowedFd<'_>) -> io::Result<()> {
+    let previous = fcntl_getfd(fd)?;
     let new = previous | FdFlags::CLOEXEC;
     if new != previous {
-        setfd(file, new)?;
+        fcntl_setfd(fd, new)?;
     }
     Ok(())
 }

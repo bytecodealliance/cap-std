@@ -1,4 +1,5 @@
 use crate::fs::FileType;
+use posish::fs::RawMode;
 use std::{fs, io};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -53,17 +54,17 @@ impl FileTypeExt {
     }
 
     /// Constructs a new instance of `FileType` from the given
-    /// [`libc::mode_t`].
+    /// [`RawMode`].
     #[inline]
-    pub(crate) const fn from_libc(mode: libc::mode_t) -> FileType {
-        match mode & libc::S_IFMT {
-            libc::S_IFREG => FileType::file(),
-            libc::S_IFDIR => FileType::dir(),
-            libc::S_IFLNK => FileType::ext(Self::symlink()),
-            libc::S_IFIFO => FileType::ext(Self::fifo()),
-            libc::S_IFCHR => FileType::ext(Self::char_device()),
-            libc::S_IFBLK => FileType::ext(Self::block_device()),
-            libc::S_IFSOCK => FileType::ext(Self::socket()),
+    pub(crate) const fn from_raw_mode(mode: RawMode) -> FileType {
+        match posish::fs::FileType::from_raw_mode(mode) {
+            posish::fs::FileType::RegularFile => FileType::file(),
+            posish::fs::FileType::Directory => FileType::dir(),
+            posish::fs::FileType::Symlink => FileType::ext(Self::symlink()),
+            posish::fs::FileType::Fifo => FileType::ext(Self::fifo()),
+            posish::fs::FileType::CharacterDevice => FileType::ext(Self::char_device()),
+            posish::fs::FileType::BlockDevice => FileType::ext(Self::block_device()),
+            posish::fs::FileType::Socket => FileType::ext(Self::socket()),
             _ => FileType::unknown(),
         }
     }

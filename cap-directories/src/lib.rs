@@ -20,7 +20,7 @@ pub use user_dirs::UserDirs;
 
 #[cfg(not(windows))]
 pub(crate) fn not_found() -> io::Error {
-    io::Error::from_raw_os_error(libc::ENOENT)
+    posish::io::Errno::NOENT.io_error()
 }
 
 #[cfg(windows)]
