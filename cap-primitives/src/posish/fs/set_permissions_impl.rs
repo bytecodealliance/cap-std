@@ -1,5 +1,8 @@
 use crate::fs::{errors, open, OpenOptions, Permissions};
-use posish::fs::{fchmod, Mode};
+use posish::{
+    fs::{fchmod, Mode},
+    io::Errno,
+};
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::{convert::TryInto, fs, io, path::Path};
@@ -20,8 +23,8 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match err.raw_os_error() {
-            Some(libc::EACCES) => (),
+        Err(err) => match Errno::from_io_error(err) {
+            Some(Errno::ACCES) => (),
             _ => return Err(err),
         },
     }
@@ -29,14 +32,14 @@ pub(crate) fn set_permissions_impl(
     // Next try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match err.raw_os_error() {
-            Some(libc::EACCES) | Some(libc::EISDIR) => (),
+        Err(err) => match Errno::from_io_error(&err) {
+            Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
             _ => return Err(err),
         },
     }
 
     // If neither of those worked, we're out of luck.
-    Err(io::Error::from_raw_os_error(libc::ENOTSUP))
+    Err(Errno::NOTSUP.io_error())
 }
 
 pub(crate) fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {

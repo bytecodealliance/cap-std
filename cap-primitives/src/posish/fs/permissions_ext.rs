@@ -1,9 +1,10 @@
 use crate::fs::Permissions;
+use posish::fs::RawMode;
 use std::fs;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct PermissionsExt {
-    mode: libc::mode_t,
+    mode: RawMode,
 }
 
 impl PermissionsExt {
@@ -13,14 +14,14 @@ impl PermissionsExt {
     pub(crate) fn from_std(std: fs::Permissions) -> Self {
         use std::os::unix::fs::PermissionsExt;
         Self {
-            mode: std.mode() as libc::mode_t & 0o7777,
+            mode: std.mode() as RawMode & 0o7777,
         }
     }
 
     /// Constructs a new instance of `Permissions` from the given
-    /// `libc::mode_t`.
+    /// `RawMode`.
     #[inline]
-    pub(crate) const fn from_libc(mode: libc::mode_t) -> Permissions {
+    pub(crate) const fn from_raw_mode(mode: RawMode) -> Permissions {
         Permissions {
             readonly: Self::readonly(mode),
             ext: Self {
@@ -29,13 +30,13 @@ impl PermissionsExt {
         }
     }
 
-    /// Test whether the given `libc::mode_t` lacks write permissions.
+    /// Test whether the given `RawMode` lacks write permissions.
     #[inline]
-    pub(crate) const fn readonly(mode: libc::mode_t) -> bool {
+    pub(crate) const fn readonly(mode: RawMode) -> bool {
         mode & 0o222 == 0
     }
 
-    /// Test whether the given `libc::mode_t` lacks write permissions.
+    /// Test whether the given `RawMode` lacks write permissions.
     #[inline]
     pub(crate) fn set_readonly(&mut self, readonly: bool) {
         if readonly {
@@ -54,12 +55,12 @@ impl std::os::unix::fs::PermissionsExt for PermissionsExt {
     }
 
     fn set_mode(&mut self, mode: u32) {
-        self.mode = mode as libc::mode_t & 0o7777;
+        self.mode = mode as RawMode & 0o7777;
     }
 
     fn from_mode(mode: u32) -> Self {
         Self {
-            mode: mode as libc::mode_t & 0o7777,
+            mode: mode as RawMode & 0o7777,
         }
     }
 }

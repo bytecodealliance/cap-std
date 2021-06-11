@@ -4,9 +4,9 @@ use crate::{
     fs::{FileTypeExt, Metadata, PermissionsExt},
     time::{Duration, SystemClock, SystemTime},
 };
-use posish::fs::LibcStat;
+use posish::fs::Stat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-use posish::fs::{makedev, LibcStatx};
+use posish::fs::{makedev, RawMode, Statx};
 use std::{convert::TryFrom, fs, io};
 
 #[derive(Debug, Clone)]
@@ -64,23 +64,23 @@ impl MetadataExt {
         }
     }
 
-    /// Constructs a new instance of `Metadata` from the given `LibcStat`.
+    /// Constructs a new instance of `Metadata` from the given `Stat`.
     #[inline]
-    pub(crate) fn from_libc(stat: LibcStat) -> Metadata {
+    pub(crate) fn from_posish(stat: Stat) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_libc(stat.st_mode),
+            file_type: FileTypeExt::from_raw_mode(stat.st_mode),
             len: u64::try_from(stat.st_size).unwrap(),
-            permissions: PermissionsExt::from_libc(stat.st_mode),
+            permissions: PermissionsExt::from_raw_mode(stat.st_mode),
 
             #[cfg(not(target_os = "netbsd"))]
-            modified: system_time_from_libc(stat.st_mtime.into(), stat.st_mtime_nsec.into()),
+            modified: system_time_from_posish(stat.st_mtime.into(), stat.st_mtime_nsec as _),
             #[cfg(not(target_os = "netbsd"))]
-            accessed: system_time_from_libc(stat.st_atime.into(), stat.st_atime_nsec.into()),
+            accessed: system_time_from_posish(stat.st_atime.into(), stat.st_atime_nsec as _),
 
             #[cfg(target_os = "netbsd")]
-            modified: system_time_from_libc(stat.st_mtime.into(), stat.st_mtimensec.into()),
+            modified: system_time_from_posish(stat.st_mtime.into(), stat.st_mtimensec as _),
             #[cfg(target_os = "netbsd")]
-            accessed: system_time_from_libc(stat.st_atime.into(), stat.st_atimensec.into()),
+            accessed: system_time_from_posish(stat.st_atime.into(), stat.st_atimensec as _),
 
             #[cfg(any(
                 target_os = "freebsd",
@@ -88,10 +88,10 @@ impl MetadataExt {
                 target_os = "macos",
                 target_os = "ios"
             ))]
-            created: system_time_from_libc(stat.st_birthtime.into(), stat.st_birthtime_nsec.into()),
+            created: system_time_from_posish(stat.st_birthtime.into(), stat.st_birthtime_nsec as _),
 
             #[cfg(target_os = "netbsd")]
-            created: system_time_from_libc(stat.st_birthtime.into(), stat.st_birthtimensec.into()),
+            created: system_time_from_posish(stat.st_birthtime.into(), stat.st_birthtimensec as _),
 
             // `stat.st_ctime` is the latest status change; we want the creation.
             #[cfg(not(any(
@@ -112,48 +112,39 @@ impl MetadataExt {
                 gid: stat.st_gid,
                 rdev: u64::try_from(stat.st_rdev).unwrap(),
                 size: u64::try_from(stat.st_size).unwrap(),
-                atime: i64::from(stat.st_atime),
+                atime: i64::try_from(stat.st_atime).unwrap(),
                 #[cfg(not(target_os = "netbsd"))]
-                atime_nsec: i64::from(stat.st_atime_nsec),
+                atime_nsec: stat.st_atime_nsec as _,
                 #[cfg(target_os = "netbsd")]
-                atime_nsec: i64::from(stat.st_atimensec),
-                mtime: i64::from(stat.st_mtime),
+                atime_nsec: stat.st_atimensec as _,
+                mtime: i64::try_from(stat.st_mtime).unwrap(),
                 #[cfg(not(target_os = "netbsd"))]
-                mtime_nsec: i64::from(stat.st_mtime_nsec),
+                mtime_nsec: stat.st_mtime_nsec as _,
                 #[cfg(target_os = "netbsd")]
-                mtime_nsec: i64::from(stat.st_mtimensec),
-                ctime: i64::from(stat.st_ctime),
+                mtime_nsec: stat.st_mtimensec as _,
+                ctime: i64::try_from(stat.st_ctime).unwrap(),
                 #[cfg(not(target_os = "netbsd"))]
-                ctime_nsec: i64::from(stat.st_ctime_nsec),
+                ctime_nsec: stat.st_ctime_nsec as _,
                 #[cfg(target_os = "netbsd")]
-                ctime_nsec: i64::from(stat.st_ctimensec),
+                ctime_nsec: stat.st_ctimensec as _,
                 blksize: u64::try_from(stat.st_blksize).unwrap(),
                 blocks: u64::try_from(stat.st_blocks).unwrap(),
             },
         }
     }
 
-    /// Constructs a new instance of `Metadata` from the given `LibcStatx`.
+    /// Constructs a new instance of `Metadata` from the given `Statx`.
     #[cfg(all(target_os = "linux", target_env = "gnu"))]
     #[inline]
     #[allow(dead_code)] // TODO: use `statx` when possible.
-    pub(crate) fn from_libc_statx(statx: LibcStatx) -> Metadata {
+    pub(crate) fn from_posish_statx(statx: Statx) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_libc(libc::mode_t::from(statx.stx_mode)),
+            file_type: FileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             len: u64::try_from(statx.stx_size).unwrap(),
-            permissions: PermissionsExt::from_libc(libc::mode_t::from(statx.stx_mode)),
-            modified: system_time_from_libc(
-                statx.stx_mtime.tv_sec,
-                i64::from(statx.stx_mtime.tv_nsec),
-            ),
-            accessed: system_time_from_libc(
-                statx.stx_atime.tv_sec,
-                i64::from(statx.stx_atime.tv_nsec),
-            ),
-            created: system_time_from_libc(
-                statx.stx_btime.tv_sec,
-                i64::from(statx.stx_btime.tv_nsec),
-            ),
+            permissions: PermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
+            modified: system_time_from_posish(statx.stx_mtime.tv_sec, statx.stx_mtime.tv_nsec as _),
+            accessed: system_time_from_posish(statx.stx_atime.tv_sec, statx.stx_atime.tv_nsec as _),
+            created: system_time_from_posish(statx.stx_btime.tv_sec, statx.stx_btime.tv_nsec as _),
 
             ext: Self {
                 dev: makedev(statx.stx_dev_major, statx.stx_dev_minor),
@@ -165,11 +156,11 @@ impl MetadataExt {
                 rdev: makedev(statx.stx_rdev_major, statx.stx_rdev_minor),
                 size: statx.stx_size,
                 atime: i64::from(statx.stx_atime.tv_sec),
-                atime_nsec: i64::from(statx.stx_atime.tv_nsec),
+                atime_nsec: statx.stx_atime.tv_nsec as _,
                 mtime: i64::from(statx.stx_mtime.tv_sec),
-                mtime_nsec: i64::from(statx.stx_mtime.tv_nsec),
+                mtime_nsec: statx.stx_mtime.tv_nsec as _,
                 ctime: i64::from(statx.stx_ctime.tv_sec),
-                ctime_nsec: i64::from(statx.stx_ctime.tv_nsec),
+                ctime_nsec: statx.stx_ctime.tv_nsec as _,
                 blksize: u64::from(statx.stx_blksize),
                 blocks: statx.stx_blocks,
             },
@@ -183,11 +174,8 @@ impl MetadataExt {
 }
 
 #[allow(clippy::similar_names)]
-fn system_time_from_libc(sec: i64, nsec: i64) -> Option<SystemTime> {
-    SystemClock::UNIX_EPOCH.checked_add(Duration::new(
-        u64::try_from(sec).unwrap(),
-        u32::try_from(nsec).unwrap(),
-    ))
+fn system_time_from_posish(sec: i64, nsec: u64) -> Option<SystemTime> {
+    SystemClock::UNIX_EPOCH.checked_add(Duration::new(u64::try_from(sec).unwrap(), nsec as _))
 }
 
 impl posish::fs::MetadataExt for MetadataExt {

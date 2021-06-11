@@ -1,5 +1,5 @@
 use crate::fs::DirOptions;
-use posish::fs::{mkdirat, Mode};
+use posish::fs::{mkdirat, Mode, RawMode};
 use std::{fs, io, path::Path};
 
 /// *Unsandboxed* function similar to `create_dir`, but which does not perform
@@ -12,6 +12,6 @@ pub(crate) fn create_dir_unchecked(
     mkdirat(
         start,
         path,
-        Mode::from_bits(options.ext.mode as libc::mode_t).unwrap(),
+        Mode::from_bits(options.ext.mode as RawMode).unwrap(),
     )
 }

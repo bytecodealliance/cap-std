@@ -4,6 +4,8 @@
 
 use super::file_metadata;
 use crate::fs::{manually, open_beneath, FollowSymlinks, Metadata, OpenOptions};
+use posish::fs::OFlags;
+use posish::io::Errno;
 use std::{fs, io, path::Path};
 
 /// Use `openat2` with `O_PATH` and `fstat`. If that's not available, fallback
@@ -24,16 +26,16 @@ pub(crate) fn stat_impl(
         OpenOptions::new()
             .read(true)
             .follow(follow)
-            .custom_flags(libc::O_PATH),
+            .custom_flags(OFlags::PATH.bits()),
     );
 
     // If that worked, call `fstat`.
     match result {
         Ok(file) => file_metadata(&file),
-        Err(err) => match err.raw_os_error() {
+        Err(err) => match Errno::from_io_error(&err) {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(libc::ENOSYS) => manually::stat(start, path, follow),
+            Some(Errno::NOSYS) => manually::stat(start, path, follow),
             _ => Err(err),
         },
     }

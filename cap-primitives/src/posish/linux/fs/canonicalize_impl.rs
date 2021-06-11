@@ -2,6 +2,8 @@
 
 use super::procfs::get_path_from_proc_self_fd;
 use crate::fs::{manually, open_beneath, FollowSymlinks, OpenOptions};
+use posish::fs::OFlags;
+use posish::io::Errno;
 use std::{
     fs, io,
     os::unix::fs::OpenOptionsExt,
@@ -19,7 +21,7 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
         OpenOptions::new()
             .read(true)
             .follow(FollowSymlinks::Yes)
-            .custom_flags(libc::O_PATH),
+            .custom_flags(OFlags::PATH.bits()),
     );
 
     // If that worked, call `readlink`.
@@ -54,10 +56,10 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
                 }
             }
         }
-        Err(err) => match err.raw_os_error() {
+        Err(err) => match Errno::from_io_error(&err) {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(libc::ENOSYS) => (),
+            Some(Errno::NOSYS) => (),
             _ => return Err(err),
         },
     }
