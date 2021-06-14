@@ -140,10 +140,7 @@ impl FromRawSocket for TcpListener {
 impl FromSocket for TcpListener {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(
-            net::TcpListener::from_socket(socket),
-            ambient_authority(),
-        )
+        Self::from_std(net::TcpListener::from_socket(socket), ambient_authority())
     }
 }
 

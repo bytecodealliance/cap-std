@@ -249,10 +249,7 @@ impl FromRawSocket for UdpSocket {
 impl FromSocket for UdpSocket {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(
-            net::UdpSocket::from_socket(socket),
-            ambient_authority(),
-        )
+        Self::from_std(net::UdpSocket::from_socket(socket), ambient_authority())
     }
 }
 
