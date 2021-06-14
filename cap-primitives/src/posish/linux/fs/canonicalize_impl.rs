@@ -21,7 +21,7 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
         OpenOptions::new()
             .read(true)
             .follow(FollowSymlinks::Yes)
-            .custom_flags(OFlags::PATH.bits()),
+            .custom_flags(OFlags::PATH.bits() as i32),
     );
 
     // If that worked, call `readlink`.

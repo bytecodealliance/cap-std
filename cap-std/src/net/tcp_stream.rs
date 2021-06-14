@@ -3,7 +3,7 @@ use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
+use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
 use std::{
     fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
@@ -227,8 +227,8 @@ impl AsRawSocket for TcpStream {
 #[cfg(windows)]
 impl<'s> AsSocket<'s> for &'s TcpStream {
     #[inline]
-    fn as_raw_socket(self) -> BorrowedSocket<'s> {
-        self.std.as_raw_socket()
+    fn as_socket(self) -> BorrowedSocket<'s> {
+        self.std.as_socket()
     }
 }
 
