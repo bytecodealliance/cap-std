@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [build-dependencies]
-rustc_version = "0.3.0"
+rustc_version = "0.4.0"
 
 [dependencies]
 ambient-authority = "0.0.0"
@@ -37,7 +37,7 @@ errno = "0.2.7"
 errno = "0.2.7"
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.25.0"
+winx = "0.26.0"
 winapi = "0.3.9"
 winapi-util = "0.1.5"
 

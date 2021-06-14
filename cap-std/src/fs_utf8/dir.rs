@@ -527,7 +527,7 @@ impl FromRawFd for Dir {
 impl FromFd for Dir {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(fs::File::from_fd(fd), ambient_authority())
+        Self::from_std_file(fs::File::from_fd(fd), ambient_authority())
     }
 }
 
@@ -563,7 +563,7 @@ impl AsRawFd for Dir {
 impl<'f> AsFd<'f> for &'f Dir {
     #[inline]
     fn as_fd(self) -> BorrowedFd<'f> {
-        self.std.as_fd()
+        self.cap_std.as_fd()
     }
 }
 
@@ -603,7 +603,7 @@ impl IntoRawFd for Dir {
 impl IntoFd for Dir {
     #[inline]
     fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+        self.cap_std.into_fd()
     }
 }
 
