@@ -26,7 +26,7 @@ pub(crate) fn stat_impl(
         OpenOptions::new()
             .read(true)
             .follow(follow)
-            .custom_flags(OFlags::PATH.bits()),
+            .custom_flags(OFlags::PATH.bits() as i32),
     );
 
     // If that worked, call `fstat`.

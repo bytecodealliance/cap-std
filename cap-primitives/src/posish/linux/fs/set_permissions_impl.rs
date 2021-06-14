@@ -31,7 +31,7 @@ pub(crate) fn set_permissions_impl(
             path,
             OpenOptions::new()
                 .read(true)
-                .custom_flags(OFlags::PATH.bits()),
+                .custom_flags(OFlags::PATH.bits() as i32),
         );
 
         // If `O_PATH` worked, try to use `fchmod` on it.

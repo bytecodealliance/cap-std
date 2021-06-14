@@ -1,6 +1,8 @@
 #![allow(clippy::useless_conversion)]
 
-use std::{convert::TryInto, fs, io};
+#[cfg(not(windows_by_handle))]
+use std::convert::TryInto;
+use std::{fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {

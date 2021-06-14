@@ -20,8 +20,8 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
         }
     }
     // Use `RWMODE` here instead of `ACCMODE` so that we preserve the `O_PATH` flag.
-    oflags |=
-        OFlags::from_bits(options.ext.custom_flags).expect("unrecognized OFlags") & !OFlags::RWMODE;
+    oflags |= OFlags::from_bits(options.ext.custom_flags as _).expect("unrecognized OFlags")
+        & !OFlags::RWMODE;
     Ok(oflags)
 }
 

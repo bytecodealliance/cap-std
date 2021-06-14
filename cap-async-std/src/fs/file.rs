@@ -195,7 +195,7 @@ impl AsRawHandle for File {
 impl<'h> AsHandle<'h> for &'h File {
     #[inline]
     fn as_handle(self) -> BorrowedHandle<'h> {
-        self.cap_std.as_handle()
+        self.std.as_handle()
     }
 }
 

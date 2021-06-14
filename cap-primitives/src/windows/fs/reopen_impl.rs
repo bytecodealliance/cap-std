@@ -85,7 +85,7 @@ pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<
         return Err(io::Error::new(io::ErrorKind::Other, "Can't reopen file"));
     }
 
-    winx::file::reopen_file(file.as_raw_handle(), new_access_mode, flags)
+    winx::file::reopen_file(file.as_handle(), new_access_mode, flags)
 }
 
 fn get_access_mode(options: &OpenOptions) -> io::Result<DWORD> {

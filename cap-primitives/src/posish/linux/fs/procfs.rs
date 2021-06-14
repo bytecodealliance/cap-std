@@ -176,7 +176,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
         // Linux ignores `O_RDONLY` with `O_PATH`.
         let proc = fs::OpenOptions::new()
             .read(true)
-            .custom_flags((OFlags::PATH | OFlags::DIRECTORY | OFlags::NOFOLLOW).bits())
+            .custom_flags((OFlags::PATH | OFlags::DIRECTORY | OFlags::NOFOLLOW).bits() as i32)
             .open("/proc")?;
         let proc_metadata = check_proc_dir(Subdir::Proc, &proc, None, 0, 0)?;
 
@@ -185,7 +185,7 @@ fn proc_self_fd() -> io::Result<&'static fs::File> {
         let options = options
             .read(true)
             .follow(FollowSymlinks::No)
-            .custom_flags((OFlags::PATH | OFlags::DIRECTORY).bits());
+            .custom_flags((OFlags::PATH | OFlags::DIRECTORY).bits() as i32);
 
         // Open "/proc/self". Use our pid to compute the name rather than literally
         // using "self", as "self" is a symlink.
@@ -223,7 +223,7 @@ pub(crate) fn set_permissions_through_proc_self_fd(
         path,
         OpenOptions::new()
             .read(true)
-            .custom_flags(OFlags::PATH.bits()),
+            .custom_flags(OFlags::PATH.bits() as i32),
     )?;
 
     let dirfd = proc_self_fd()?;
@@ -242,7 +242,7 @@ pub(crate) fn set_times_through_proc_self_fd(
         path,
         OpenOptions::new()
             .read(true)
-            .custom_flags(OFlags::PATH.bits()),
+            .custom_flags(OFlags::PATH.bits() as i32),
     )?;
 
     // Don't pass `AT_SYMLINK_NOFOLLOW`, because we do actually want to follow

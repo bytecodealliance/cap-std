@@ -640,7 +640,7 @@ impl AsRawHandle for Dir {
 impl<'h> AsHandle<'h> for &'h Dir {
     #[inline]
     fn as_handle(self) -> BorrowedHandle<'h> {
-        self.std.as_handle()
+        self.std_file.as_handle()
     }
 }
 

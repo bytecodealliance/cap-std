@@ -7,7 +7,10 @@ use crate::{
 use posish::fs::Stat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use posish::fs::{makedev, RawMode, Statx};
-use std::{convert::TryFrom, fs, io};
+use std::{
+    convert::{TryFrom, TryInto},
+    fs, io,
+};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
@@ -73,14 +76,26 @@ impl MetadataExt {
             permissions: PermissionsExt::from_raw_mode(stat.st_mode),
 
             #[cfg(not(target_os = "netbsd"))]
-            modified: system_time_from_posish(stat.st_mtime.into(), stat.st_mtime_nsec as _),
+            modified: system_time_from_posish(
+                stat.st_mtime.try_into().unwrap(),
+                stat.st_mtime_nsec as _,
+            ),
             #[cfg(not(target_os = "netbsd"))]
-            accessed: system_time_from_posish(stat.st_atime.into(), stat.st_atime_nsec as _),
+            accessed: system_time_from_posish(
+                stat.st_atime.try_into().unwrap(),
+                stat.st_atime_nsec as _,
+            ),
 
             #[cfg(target_os = "netbsd")]
-            modified: system_time_from_posish(stat.st_mtime.into(), stat.st_mtimensec as _),
+            modified: system_time_from_posish(
+                stat.st_mtime.try_into().unwrap(),
+                stat.st_mtimensec as _,
+            ),
             #[cfg(target_os = "netbsd")]
-            accessed: system_time_from_posish(stat.st_atime.into(), stat.st_atimensec as _),
+            accessed: system_time_from_posish(
+                stat.st_atime.try_into().unwrap(),
+                stat.st_atimensec as _,
+            ),
 
             #[cfg(any(
                 target_os = "freebsd",
@@ -88,10 +103,16 @@ impl MetadataExt {
                 target_os = "macos",
                 target_os = "ios"
             ))]
-            created: system_time_from_posish(stat.st_birthtime.into(), stat.st_birthtime_nsec as _),
+            created: system_time_from_posish(
+                stat.st_birthtime.try_into().unwrap(),
+                stat.st_birthtime_nsec as _,
+            ),
 
             #[cfg(target_os = "netbsd")]
-            created: system_time_from_posish(stat.st_birthtime.into(), stat.st_birthtimensec as _),
+            created: system_time_from_posish(
+                stat.st_birthtime.try_into().unwrap(),
+                stat.st_birthtimensec as _,
+            ),
 
             // `stat.st_ctime` is the latest status change; we want the creation.
             #[cfg(not(any(
