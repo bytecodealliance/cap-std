@@ -153,10 +153,7 @@ impl FromRawSocket for TcpStream {
 impl FromSocket for TcpStream {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(
-            net::TcpStream::from_socket(socket),
-            ambient_authority(),
-        )
+        Self::from_std(net::TcpStream::from_socket(socket), ambient_authority())
     }
 }
 

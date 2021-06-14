@@ -1,5 +1,6 @@
 use crate::fs::OpenOptions;
-use std::{fs, io, os::windows::io::AsRawHandle};
+use io_lifetimes::AsHandle;
+use std::{fs, io};
 use winapi::{
     shared::{minwindef::DWORD, winerror::ERROR_INVALID_PARAMETER},
     um::{
@@ -17,7 +18,7 @@ use winx::file::{AccessMode, Flags};
 
 /// Implementation of `reopen`.
 pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<fs::File> {
-    let old_access_mode = winx::file::query_access_information(file.as_raw_handle())?;
+    let old_access_mode = winx::file::query_access_information(file.as_handle())?;
     let new_access_mode = get_access_mode(options)?;
     let flags = get_flags_and_attributes(options);
 
