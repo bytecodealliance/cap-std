@@ -107,6 +107,17 @@ impl FromRawSocket for TcpListener {
     }
 }
 
+#[cfg(windows)]
+impl FromSocket for TcpListener {
+    #[inline]
+    fn from_socket(socket: OwnedSocket) -> Self {
+        Self::from_std(
+            net::TcpListener::from_socket(socket),
+            ambient_authority(),
+        )
+    }
+}
+
 #[cfg(not(windows))]
 impl AsRawFd for TcpListener {
     #[inline]
@@ -127,6 +138,14 @@ impl<'f> AsFd<'f> for &'f TcpListener {
 impl AsRawSocket for TcpListener {
     #[inline]
     fn as_raw_socket(&self) -> RawSocket {
+        self.std.as_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl<'s> AsSocket<'s> for &'s TcpListener {
+    #[inline]
+    fn as_raw_socket(self) -> BorrowedSocket<'s> {
         self.std.as_raw_socket()
     }
 }
@@ -160,6 +179,14 @@ impl IntoRawSocket for TcpListener {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoSocket for TcpListener {
+    #[inline]
+    fn into_socket(self) -> OwnedSocket {
+        self.std.into_socket()
     }
 }
 

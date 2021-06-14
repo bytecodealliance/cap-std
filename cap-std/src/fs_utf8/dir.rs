@@ -541,6 +541,16 @@ impl FromRawHandle for Dir {
     }
 }
 
+#[cfg(windows)]
+impl FromHandle for Dir {
+    /// To prevent race conditions on Windows, the handle must be opened without
+    /// `FILE_SHARE_DELETE`.
+    #[inline]
+    fn from_handle(handle: OwnedHandle) -> Self {
+        Self::from_std_file(fs::File::from_handle(handle), ambient_authority())
+    }
+}
+
 #[cfg(not(windows))]
 impl AsRawFd for Dir {
     #[inline]
@@ -562,6 +572,14 @@ impl AsRawHandle for Dir {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.cap_std.as_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl<'h> AsHandle<'h> for &'h Dir {
+    #[inline]
+    fn as_handle(self) -> BorrowedHandle<'h> {
+        self.cap_std.as_handle()
     }
 }
 
@@ -594,6 +612,14 @@ impl IntoRawHandle for Dir {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.cap_std.into_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl IntoHandle for Dir {
+    #[inline]
+    fn into_handle(self) -> OwnedHandle {
+        self.cap_std.into_handle()
     }
 }
 

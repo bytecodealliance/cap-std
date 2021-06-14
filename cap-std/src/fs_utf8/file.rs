@@ -146,6 +146,14 @@ impl FromRawHandle for File {
     }
 }
 
+#[cfg(windows)]
+impl FromHandle for File {
+    #[inline]
+    fn from_handle(handle: OwnedHandle) -> Self {
+        Self::from_std(fs::File::from_handle(handle), ambient_authority())
+    }
+}
+
 #[cfg(not(windows))]
 impl AsRawFd for File {
     #[inline]
@@ -167,6 +175,14 @@ impl AsRawHandle for File {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.cap_std.as_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl<'h> AsHandle<'h> for &'h File {
+    #[inline]
+    fn as_handle(self) -> BorrowedHandle<'h> {
+        self.cap_std.as_handle()
     }
 }
 
@@ -199,6 +215,14 @@ impl IntoRawHandle for File {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.cap_std.into_raw_handle()
+    }
+}
+
+#[cfg(windows)]
+impl IntoHandle for File {
+    #[inline]
+    fn into_handle(self) -> OwnedHandle {
+        self.cap_std.into_handle()
     }
 }
 
