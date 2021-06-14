@@ -151,7 +151,7 @@ impl AsRawFd for File {
 impl<'f> AsFd<'f> for &'f File {
     #[inline]
     fn as_fd(self) -> BorrowedFd<'f> {
-        self.std.as_fd()
+        self.cap_std.as_fd()
     }
 }
 
@@ -191,7 +191,7 @@ impl IntoRawFd for File {
 impl IntoFd for File {
     #[inline]
     fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+        self.cap_std.into_fd()
     }
 }
 

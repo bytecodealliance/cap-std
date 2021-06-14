@@ -561,7 +561,7 @@ impl AsRawFd for Dir {
 impl<'f> AsFd<'f> for &'f Dir {
     #[inline]
     fn as_fd(self) -> BorrowedFd<'f> {
-        self.std.as_fd()
+        self.cap_std.as_fd()
     }
 }
 
@@ -601,7 +601,7 @@ impl IntoRawFd for Dir {
 impl IntoFd for Dir {
     #[inline]
     fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+        self.cap_std.into_fd()
     }
 }
 
