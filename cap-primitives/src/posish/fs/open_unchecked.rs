@@ -1,11 +1,11 @@
 use super::compute_oflags;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use crate::fs::ensure_cloexec;
 use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
-use io_lifetimes::{AsFd, FromFd};
+use io_lifetimes::FromFd;
 use posish::fs::{openat, Mode};
 use posish::io::Errno;
 use std::{fs, path::Path};
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use {crate::fs::ensure_cloexec, io_lifetimes::AsFd};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
 pub(crate) fn open_unchecked(

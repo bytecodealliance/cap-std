@@ -21,7 +21,7 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Errno::from_io_error(err) {
+        Err(err) => match Errno::from_io_error(&err) {
             Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
             _ => return Err(err),
         },

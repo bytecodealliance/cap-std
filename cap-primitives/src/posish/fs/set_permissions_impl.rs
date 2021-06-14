@@ -23,7 +23,7 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Errno::from_io_error(err) {
+        Err(err) => match Errno::from_io_error(&err) {
             Some(Errno::ACCES) => (),
             _ => return Err(err),
         },

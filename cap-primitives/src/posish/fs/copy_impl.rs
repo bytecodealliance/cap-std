@@ -3,13 +3,16 @@
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 use crate::fs::{open, OpenOptions};
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-use posish::fs::{
-    copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
-    fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
-};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use posish::{fs::copy_file_range, io::Errno};
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use posish::{
+    fs::{
+        copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
+        fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
+    },
+    io::Errno,
+};
 use std::{fs, io, path::Path};
 
 fn open_from(start: &fs::File, path: &Path) -> io::Result<(fs::File, fs::Metadata)> {
