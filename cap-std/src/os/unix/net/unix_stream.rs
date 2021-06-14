@@ -1,5 +1,6 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::{
     fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
@@ -164,6 +165,13 @@ impl FromRawFd for UnixStream {
     }
 }
 
+impl FromFd for UnixStream {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixStream::from_fd(fd), ambient_authority())
+    }
+}
+
 impl AsRawFd for UnixStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -171,10 +179,24 @@ impl AsRawFd for UnixStream {
     }
 }
 
+impl<'f> AsFd<'f> for &'f UnixStream {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
+    }
+}
+
 impl IntoRawFd for UnixStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+impl IntoFd for UnixStream {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 

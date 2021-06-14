@@ -7,6 +7,7 @@ use async_std::{
     },
 };
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
 use unsafe_io::OwnsRaw;
 
@@ -87,6 +88,13 @@ impl FromRawFd for UnixListener {
     }
 }
 
+impl FromFd for UnixListener {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixListener::from_fd(fd), ambient_authority())
+    }
+}
+
 impl AsRawFd for UnixListener {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -94,10 +102,24 @@ impl AsRawFd for UnixListener {
     }
 }
 
+impl<'f> AsFd<'f> for &'f UnixListener {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
+    }
+}
+
 impl IntoRawFd for UnixListener {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+impl IntoFd for UnixListener {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 

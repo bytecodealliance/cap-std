@@ -3,6 +3,10 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
 use cap_primitives::{ambient_authority, AmbientAuthority};
+#[cfg(not(windows))]
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+#[cfg(windows)]
+use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::fmt;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
@@ -84,6 +88,14 @@ impl FromRawFd for TcpListener {
     }
 }
 
+#[cfg(not(windows))]
+impl FromFd for TcpListener {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(net::TcpListener::from_fd(fd), ambient_authority())
+    }
+}
+
 #[cfg(windows)]
 impl FromRawSocket for TcpListener {
     #[inline]
@@ -100,6 +112,14 @@ impl AsRawFd for TcpListener {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.std.as_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl<'f> AsFd<'f> for &'f TcpListener {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
     }
 }
 
@@ -124,6 +144,14 @@ impl IntoRawFd for TcpListener {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl IntoFd for TcpListener {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 
