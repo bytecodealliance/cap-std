@@ -1,5 +1,6 @@
 #[cfg(any(unix, target_os = "vxworks"))]
 use crate::fs::PermissionsExt;
+#[cfg(unix)]
 use posish::fs::RawMode;
 use std::{fs, io};
 
