@@ -149,6 +149,17 @@ impl FromRawSocket for TcpStream {
     }
 }
 
+#[cfg(windows)]
+impl FromSocket for TcpStream {
+    #[inline]
+    fn from_socket(socket: OwnedSocket) -> Self {
+        Self::from_std(
+            net::TcpStream::from_socket(socket),
+            ambient_authority(),
+        )
+    }
+}
+
 #[cfg(not(windows))]
 impl AsRawFd for TcpStream {
     #[inline]
@@ -169,6 +180,14 @@ impl<'f> AsFd<'f> for &'f TcpStream {
 impl AsRawSocket for TcpStream {
     #[inline]
     fn as_raw_socket(&self) -> RawSocket {
+        self.std.as_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl<'s> AsSocket<'s> for &'s TcpStream {
+    #[inline]
+    fn as_raw_socket(self) -> BorrowedSocket<'s> {
         self.std.as_raw_socket()
     }
 }
@@ -202,6 +221,14 @@ impl IntoRawSocket for TcpStream {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoSocket for TcpStream {
+    #[inline]
+    fn into_socket(self) -> OwnedSocket {
+        self.std.into_socket()
     }
 }
 

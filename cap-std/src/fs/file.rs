@@ -169,7 +169,7 @@ impl FromRawHandle for File {
 #[cfg(windows)]
 impl FromHandle for File {
     #[inline]
-    fn from_handle(handle: OwnedFd) -> Self {
+    fn from_handle(handle: OwnedHandle) -> Self {
         Self::from_std(fs::File::from_handle(handle), ambient_authority())
     }
 }
@@ -199,9 +199,9 @@ impl AsRawHandle for File {
 }
 
 #[cfg(windows)]
-impl<'f> AsHandle<'f> for &'f File {
+impl<'h> AsHandle<'h> for &'h File {
     #[inline]
-    fn as_handle(&self) -> BorrowedHandle<'f> {
+    fn as_handle(self) -> BorrowedHandle<'h> {
         self.std.as_handle()
     }
 }

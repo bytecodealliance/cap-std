@@ -300,6 +300,17 @@ impl FromRawSocket for UdpSocket {
     }
 }
 
+#[cfg(windows)]
+impl FromSocket for UdpSocket {
+    #[inline]
+    fn from_socket(socket: OwnedSocket) -> Self {
+        Self::from_std(
+            net::UdpSocket::from_socket(socket),
+            ambient_authority(),
+        )
+    }
+}
+
 #[cfg(not(windows))]
 impl AsRawFd for UdpSocket {
     #[inline]
@@ -320,6 +331,14 @@ impl<'f> AsFd<'f> for &'f UdpSocket {
 impl AsRawSocket for UdpSocket {
     #[inline]
     fn as_raw_socket(&self) -> RawSocket {
+        self.std.as_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl<'s> AsSocket<'s> for &'s UdpSocket {
+    #[inline]
+    fn as_raw_socket(self) -> BorrowedSocket<'s> {
         self.std.as_raw_socket()
     }
 }
@@ -353,6 +372,14 @@ impl IntoRawSocket for UdpSocket {
     #[inline]
     fn into_raw_socket(self) -> RawSocket {
         self.std.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl IntoSocket for UdpSocket {
+    #[inline]
+    fn into_socket(self) -> OwnedSocket {
+        self.std.into_socket()
     }
 }
 
