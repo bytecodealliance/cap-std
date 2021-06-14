@@ -11,6 +11,10 @@ use cap_primitives::{
     },
     AmbientAuthority,
 };
+#[cfg(not(windows))]
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+#[cfg(windows)]
+use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 #[cfg(target_os = "wasi")]
 use posish::fs::OpenOptionsExt;
 use std::{
@@ -582,6 +586,14 @@ impl FromRawFd for Dir {
     }
 }
 
+#[cfg(not(windows))]
+impl FromFd for Dir {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std_file(fs::File::from_fd(fd), ambient_authority())
+    }
+}
+
 #[cfg(windows)]
 impl FromRawHandle for Dir {
     /// To prevent race conditions on Windows, the handle must be opened without
@@ -597,6 +609,14 @@ impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.std_file.as_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl<'f> AsFd<'f> for &'f Dir {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std_file.as_fd()
     }
 }
 
@@ -621,6 +641,14 @@ impl IntoRawFd for Dir {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std_file.into_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl IntoFd for Dir {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std_file.into_fd()
     }
 }
 

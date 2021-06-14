@@ -9,6 +9,10 @@ use async_std::{
     task::{Context, Poll},
 };
 use cap_primitives::{ambient_authority, fs::is_file_read_write, AmbientAuthority};
+#[cfg(not(windows))]
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+#[cfg(windows)]
+use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::{fmt, pin::Pin};
 use unsafe_io::{AsUnsafeFile, OwnsRaw};
 #[cfg(windows)]
@@ -139,6 +143,14 @@ impl FromRawFd for File {
     }
 }
 
+#[cfg(not(windows))]
+impl FromFd for File {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(fs::File::from_fd(fd), ambient_authority())
+    }
+}
+
 #[cfg(windows)]
 impl FromRawHandle for File {
     #[inline]
@@ -152,6 +164,14 @@ impl AsRawFd for File {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.std.as_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl<'f> AsFd<'f> for &'f File {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
     }
 }
 
@@ -176,6 +196,14 @@ impl IntoRawFd for File {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl IntoFd for File {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 

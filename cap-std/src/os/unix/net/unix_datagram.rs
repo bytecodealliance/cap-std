@@ -1,5 +1,6 @@
 use crate::{net::Shutdown, os::unix::net::SocketAddr};
 use cap_primitives::{ambient_authority, AmbientAuthority};
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::{
     fmt, io,
     os::unix::{
@@ -213,6 +214,13 @@ impl FromRawFd for UnixDatagram {
     }
 }
 
+impl FromFd for UnixDatagram {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixDatagram::from_fd(fd), ambient_authority())
+    }
+}
+
 impl AsRawFd for UnixDatagram {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
@@ -220,10 +228,24 @@ impl AsRawFd for UnixDatagram {
     }
 }
 
+impl<'f> AsFd<'f> for &'f UnixDatagram {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
+    }
+}
+
 impl IntoRawFd for UnixDatagram {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+impl IntoFd for UnixDatagram {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 

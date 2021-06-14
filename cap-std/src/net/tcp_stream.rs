@@ -1,5 +1,9 @@
 use crate::net::{Shutdown, SocketAddr};
 use cap_primitives::{ambient_authority, AmbientAuthority};
+#[cfg(not(windows))]
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+#[cfg(windows)]
+use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::{
     fmt,
     io::{self, IoSlice, IoSliceMut, Read, Write},
@@ -172,6 +176,14 @@ impl FromRawFd for TcpStream {
     }
 }
 
+#[cfg(not(windows))]
+impl FromFd for TcpStream {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self::from_std(net::TcpStream::from_fd(fd), ambient_authority())
+    }
+}
+
 #[cfg(windows)]
 impl FromRawSocket for TcpStream {
     #[inline]
@@ -185,6 +197,14 @@ impl AsRawFd for TcpStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.std.as_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl<'f> AsFd<'f> for &'f TcpStream {
+    #[inline]
+    fn as_fd(self) -> BorrowedFd<'f> {
+        self.std.as_fd()
     }
 }
 
@@ -209,6 +229,14 @@ impl IntoRawFd for TcpStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
         self.std.into_raw_fd()
+    }
+}
+
+#[cfg(not(windows))]
+impl IntoFd for TcpStream {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.std.into_fd()
     }
 }
 
