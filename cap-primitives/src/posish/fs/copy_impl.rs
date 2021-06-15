@@ -138,6 +138,7 @@ pub(crate) fn copy_impl(
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 #[allow(non_upper_case_globals)]
+#[allow(unsafe_code)]
 pub(crate) fn copy_impl(
     from_start: &fs::File,
     from_path: &Path,
@@ -149,8 +150,11 @@ pub(crate) fn copy_impl(
     struct FreeOnDrop(copyfile_state_t);
     impl Drop for FreeOnDrop {
         fn drop(&mut self) {
-            // The code below ensures that `FreeOnDrop` is never a null pointer
-            copyfile_state_free(self.0).ok();
+            // Safety: This is the only place where we free the state, and we
+            // never let it escape.
+            unsafe {
+                copyfile_state_free(self.0).ok();
+            }
         }
     }
 
@@ -185,10 +189,7 @@ pub(crate) fn copy_impl(
     // We ensure that `FreeOnDrop` never contains a null pointer so it is
     // always safe to call `copyfile_state_free`
     let state = {
-        let state = copyfile_state_alloc();
-        if state.is_null() {
-            return Err(std::io::Error::last_os_error());
-        }
+        let state = copyfile_state_alloc()?;
         FreeOnDrop(state)
     };
 
@@ -198,7 +199,10 @@ pub(crate) fn copy_impl(
         CopyfileFlags::DATA
     };
 
-    fcopyfile(&reader, &writer, state.0, flags)?;
+    // Safety: We allocated `state` above so it's still live here.
+    unsafe {
+        fcopyfile(&reader, &writer, state.0, flags)?;
 
-    copyfile_state_get_copied(state.0)
+        copyfile_state_get_copied(state.0)
+    }
 }
