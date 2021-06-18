@@ -49,8 +49,8 @@ which represent access to external resources. Programs typically have the
 *ambient authority* to request any file or network handle simply by providing
 its name or address:
 
-```
-    let file = File::open("/anything/you/want.txt")?;
+```rust
+let file = File::open("/anything/you/want.txt")?;
 ```
 
 There may be access-control lists, namespaces, firewalls, or virtualization
@@ -61,17 +61,17 @@ Capability-based security seeks to avoid ambient authority, to make sandboxing
 finer-grained and composable. To open a file, one needs a [`Dir`], representing
 an open directory it's in:
 
-```
-    let file = dir.open("the/thing.txt")?;
+```rust
+let file = dir.open("the/thing.txt")?;
 ```
 
 Attempts to access paths not contained within the directory:
 
-```
-    let hidden = dir.open("../hidden.txt")?;
+```rust
+let hidden = dir.open("../hidden.txt")?;
 
-    dir.symlink("/hidden.txt", "misdirection.txt")?;
-    let secret = dir.open("misdirection.txt")?;
+dir.symlink("/hidden.txt", "misdirection.txt")?;
+let secret = dir.open("misdirection.txt")?;
 ```
 
 return `PermissionDenied` errors.
