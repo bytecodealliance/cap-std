@@ -22,7 +22,7 @@ fn assert_invalid_input<T>(on: &str, result: io::Result<T>) {
                 e.kind() == io::ErrorKind::InvalidInput,
                 "{} returned a strange {:?} on a path with NUL",
                 on,
-                e.kind()
+                e
             ),
         }
     }
