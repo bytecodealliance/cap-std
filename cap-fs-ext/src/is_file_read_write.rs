@@ -1,6 +1,6 @@
 use cap_primitives::fs::is_file_read_write;
+use io_lifetimes::AsFilelike;
 use std::io;
-use unsafe_io::AsUnsafeFile;
 
 /// A trait for the `is_file_read_write` function for `File` types.
 ///
@@ -24,7 +24,7 @@ impl IsFileReadWrite for std::fs::File {
 impl IsFileReadWrite for cap_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_file_view())
+        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }
 
@@ -32,7 +32,7 @@ impl IsFileReadWrite for cap_std::fs::File {
 impl IsFileReadWrite for cap_std::fs_utf8::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_file_view())
+        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }
 
@@ -40,7 +40,7 @@ impl IsFileReadWrite for cap_std::fs_utf8::File {
 impl IsFileReadWrite for async_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_file_view())
+        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }
 
@@ -48,7 +48,7 @@ impl IsFileReadWrite for async_std::fs::File {
 impl IsFileReadWrite for cap_async_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_file_view())
+        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }
 
@@ -56,6 +56,6 @@ impl IsFileReadWrite for cap_async_std::fs::File {
 impl IsFileReadWrite for cap_async_std::fs_utf8::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_file_view())
+        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }

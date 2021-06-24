@@ -20,10 +20,11 @@ use cap_primitives::{
 };
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFilelike, FromFilelike};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::fmt;
-use unsafe_io::{AsUnsafeFile, FromUnsafeFile, OwnsRaw};
+use unsafe_io::OwnsRaw;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -89,7 +90,7 @@ impl Dir {
     /// and it only accesses paths relative to `self`.
     #[inline]
     pub fn open_with<P: AsRef<Path>>(&self, path: P, options: &OpenOptions) -> io::Result<File> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         Self::_open_with(&file, path.as_ref(), options)
     }
 
@@ -108,7 +109,7 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         let dir = open_dir(&file, path.as_ref().as_ref())?.into();
         Ok(Self::from_std_file(dir, ambient_authority()))
     }
@@ -149,7 +150,7 @@ impl Dir {
     }
 
     fn _create_dir_one(&self, path: &Path, dir_options: &DirOptions) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         create_dir(&file, path.as_ref(), dir_options)
     }
 
@@ -199,7 +200,7 @@ impl Dir {
     /// absolute path, returns a path relative to the directory represented by `self`.
     #[inline]
     pub fn canonicalize<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         canonicalize(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
@@ -215,8 +216,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        let from_file = self.std_file.as_file_view();
-        let to_file = to_dir.std_file.as_file_view();
+        let from_file = self.std_file.as_filelike_view::<std::fs::File>();
+        let to_file = to_dir.std_file.as_filelike_view::<std::fs::File>();
         copy(
             &from_file,
             from.as_ref().as_ref(),
@@ -236,8 +237,8 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src_file = self.std_file.as_file_view();
-        let dst_file = dst_dir.std_file.as_file_view();
+        let src_file = self.std_file.as_filelike_view::<std::fs::File>();
+        let dst_file = dst_dir.std_file.as_filelike_view::<std::fs::File>();
         hard_link(
             &src_file,
             src.as_ref().as_ref(),
@@ -252,14 +253,14 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         stat(&file, path.as_ref().as_ref(), FollowSymlinks::Yes)
     }
 
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         read_base_dir(&file).map(|inner| ReadDir { inner })
     }
 
@@ -269,7 +270,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<ReadDir> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         read_dir(&file, path.as_ref().as_ref()).map(|inner| ReadDir { inner })
     }
 
@@ -292,7 +293,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         read_link(&file, path.as_ref().as_ref()).map(PathBuf::from)
     }
 
@@ -314,7 +315,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn remove_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         remove_dir(&file, path.as_ref().as_ref())
     }
 
@@ -324,7 +325,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub async fn remove_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         remove_dir_all(&file, path.as_ref().as_ref())
     }
 
@@ -335,7 +336,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
-        remove_open_dir(std::fs::File::from_filelike(self.std_file))
+        remove_open_dir(std::fs::File::from_into_filelike(self.std_file))
     }
 
     /// Removes the directory referenced by `self`, after removing all its contents, and
@@ -346,7 +347,7 @@ impl Dir {
     /// to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
-        remove_open_dir_all(std::fs::File::from_filelike(self.std_file))
+        remove_open_dir_all(std::fs::File::from_into_filelike(self.std_file))
     }
 
     /// Removes a file from a filesystem.
@@ -355,7 +356,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn remove_file<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         remove_file(&file, path.as_ref().as_ref())
     }
 
@@ -370,8 +371,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
-        let to_file = to_dir.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
+        let to_file = to_dir.std_file.as_filelike_view::<std::fs::File>();
         rename(
             &file,
             from.as_ref().as_ref(),
@@ -386,7 +387,7 @@ impl Dir {
     /// relative to `self`. Also, on some platforms, this function may fail if the
     /// file or directory cannot be opened for reading or writing first.
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         set_permissions(&file, path.as_ref().as_ref(), perm)
     }
 
@@ -396,7 +397,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn symlink_metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         stat(&file, path.as_ref().as_ref(), FollowSymlinks::No)
     }
 
@@ -424,7 +425,7 @@ impl Dir {
     #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         symlink(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
@@ -437,7 +438,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         symlink_file(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 
@@ -450,7 +451,7 @@ impl Dir {
     #[cfg(windows)]
     #[inline]
     pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let file = self.std_file.as_file_view();
+        let file = self.std_file.as_filelike_view::<std::fs::File>();
         symlink_dir(src.as_ref().as_ref(), &file, dst.as_ref().as_ref())
     }
 

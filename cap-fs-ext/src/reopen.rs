@@ -2,11 +2,11 @@ use cap_primitives::{
     ambient_authority,
     fs::{reopen, OpenOptions},
 };
-use std::io;
 #[cfg(any(feature = "std", feature = "async_std"))]
-use unsafe_io::AsUnsafeFile;
+use io_lifetimes::AsFilelike;
 #[cfg(feature = "async_std")]
-use unsafe_io::FromUnsafeFile;
+use io_lifetimes::FromFilelike;
+use std::io;
 
 /// A trait for the `reopen` function.
 pub trait Reopen {
@@ -42,7 +42,10 @@ impl Reopen for std::fs::File {
 impl Reopen for cap_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&AsUnsafeFile::as_file_view(self), options)?;
+        let file = reopen(
+            &AsFilelike::as_filelike_view::<std::fs::File>(self),
+            options,
+        )?;
         Ok(Self::from_std(file, ambient_authority()))
     }
 }
@@ -51,7 +54,7 @@ impl Reopen for cap_std::fs::File {
 impl Reopen for cap_std::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_file_view(), options)?;
+        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
         Ok(Self::from_std(file, ambient_authority()))
     }
 }
@@ -60,8 +63,8 @@ impl Reopen for cap_std::fs_utf8::File {
 impl Reopen for async_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_file_view(), options)?;
-        Ok(async_std::fs::File::from_filelike(file))
+        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
+        Ok(async_std::fs::File::from_into_filelike(file))
     }
 }
 
@@ -69,8 +72,8 @@ impl Reopen for async_std::fs::File {
 impl Reopen for cap_async_std::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_file_view(), options)?;
-        let std = async_std::fs::File::from_filelike(file);
+        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
+        let std = async_std::fs::File::from_into_filelike(file);
         Ok(Self::from_std(std, ambient_authority()))
     }
 }
@@ -79,8 +82,8 @@ impl Reopen for cap_async_std::fs::File {
 impl Reopen for cap_async_std::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_file_view(), options)?;
-        let std = async_std::fs::File::from_filelike(file);
+        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
+        let std = async_std::fs::File::from_into_filelike(file);
         Ok(Self::from_std(std, ambient_authority()))
     }
 }

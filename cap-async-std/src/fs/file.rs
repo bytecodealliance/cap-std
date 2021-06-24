@@ -9,12 +9,13 @@ use async_std::{
     task::{Context, Poll},
 };
 use cap_primitives::{ambient_authority, fs::is_file_read_write, AmbientAuthority};
+use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::{fmt, pin::Pin};
-use unsafe_io::{AsUnsafeFile, OwnsRaw};
+use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
@@ -87,7 +88,7 @@ impl File {
     /// This corresponds to [`async_std::fs::File::metadata`].
     #[inline]
     pub fn metadata(&self) -> io::Result<Metadata> {
-        let sync = self.std.as_file_view();
+        let sync = self.std.as_filelike_view::<std::fs::File>();
         metadata_from(&*sync)
     }
 
@@ -98,7 +99,7 @@ impl File {
     /// This corresponds to [`async_std::fs::File::set_permissions`].
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
-        let sync = self.std.as_file_view();
+        let sync = self.std.as_filelike_view::<std::fs::File>();
         self.std
             .set_permissions(permissions_into_std(&sync, perm)?)
             .await
@@ -392,7 +393,7 @@ impl fmt::Debug for File {
     // Like libstd's version, but doesn't print the path.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut b = f.debug_struct("File");
-        let file = self.std.as_file_view();
+        let file = self.std.as_filelike_view::<std::fs::File>();
         #[cfg(not(windows))]
         b.field("fd", &file.as_raw_fd());
         #[cfg(windows)]
