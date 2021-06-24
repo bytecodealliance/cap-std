@@ -51,14 +51,14 @@ pub(crate) fn ensure_cloexec(fd: BorrowedFd<'_>) -> io::Result<()> {
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 fn get_cloexec(fd: BorrowedFd<'_>) -> io::Result<bool> {
-    Ok(fcntl_getfd(fd)?.contains(FdFlags::CLOEXEC))
+    Ok(fcntl_getfd(&fd)?.contains(FdFlags::CLOEXEC))
 }
 
 fn set_cloexec(fd: BorrowedFd<'_>) -> io::Result<()> {
-    let previous = fcntl_getfd(fd)?;
+    let previous = fcntl_getfd(&fd)?;
     let new = previous | FdFlags::CLOEXEC;
     if new != previous {
-        fcntl_setfd(fd, new)?;
+        fcntl_setfd(&fd, new)?;
     }
     Ok(())
 }

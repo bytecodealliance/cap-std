@@ -163,9 +163,9 @@ impl AsRawFd for File {
 }
 
 #[cfg(not(windows))]
-impl<'f> AsFd<'f> for &'f File {
+impl AsFd for File {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.cap_std.as_fd()
     }
 }
@@ -179,9 +179,9 @@ impl AsRawHandle for File {
 }
 
 #[cfg(windows)]
-impl<'h> AsHandle<'h> for &'h File {
+impl AsHandle for File {
     #[inline]
-    fn as_handle(self) -> BorrowedHandle<'h> {
+    fn as_handle(&self) -> BorrowedHandle<'_> {
         self.cap_std.as_handle()
     }
 }

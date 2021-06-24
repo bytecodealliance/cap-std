@@ -1,5 +1,5 @@
 use crate::fs::{target_o_path, FollowSymlinks, OpenOptions};
-use posish::{fs::OFlags, io::Errno};
+use posish::fs::OFlags;
 use std::io;
 
 pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFlags> {
@@ -36,7 +36,7 @@ pub(crate) fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
         (true, true, false) => Ok(OFlags::RDWR),
         (false, _, true) => Ok(OFlags::WRONLY | OFlags::APPEND),
         (true, _, true) => Ok(OFlags::RDWR | OFlags::APPEND),
-        (false, false, false) => Err(Errno::INVAL.io_error()),
+        (false, false, false) => Err(posish::io::Error::INVAL.into()),
     }
 }
 
@@ -45,12 +45,12 @@ pub(crate) fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlags> {
         (true, false) => {}
         (false, false) => {
             if options.truncate || options.create || options.create_new {
-                return Err(Errno::INVAL.io_error());
+                return Err(posish::io::Error::INVAL.into());
             }
         }
         (_, true) => {
             if options.truncate && !options.create_new {
-                return Err(Errno::INVAL.io_error());
+                return Err(posish::io::Error::INVAL.into());
             }
         }
     }

@@ -122,9 +122,9 @@ impl AsRawFd for UnixStream {
     }
 }
 
-impl<'f> AsFd<'f> for &'f UnixStream {
+impl AsFd for UnixStream {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }

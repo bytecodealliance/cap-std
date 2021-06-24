@@ -12,8 +12,7 @@ use crate::fs::{
 };
 use once_cell::sync::Lazy;
 use posish::{
-    fs::{chmodat, fstatfs, major, renameat, Mode, OFlags, PROC_SUPER_MAGIC},
-    io::Errno,
+    fs::{chmodat, fstatfs, major, renameat, Mode, OFlags, RawMode, PROC_SUPER_MAGIC},
     path::DecInt,
     process::{getgid, getpid, getuid},
 };
@@ -161,9 +160,9 @@ fn check_procfs(file: &fs::File) -> io::Result<()> {
 /// first if it would cross a mount point.
 fn is_mountpoint(file: &fs::File) -> io::Result<bool> {
     let err = renameat(file, "../.", file, ".").unwrap_err();
-    match Errno::from_io_error(&err) {
-        Some(Errno::XDEV) => Ok(true), // the rename failed due to crossing a mount point
-        Some(Errno::BUSY) => Ok(false), // the rename failed normally
+    match err {
+        posish::io::Error::XDEV => Ok(true), // the rename failed due to crossing a mount point
+        posish::io::Error::BUSY => Ok(false), // the rename failed normally
         _ => panic!("Unexpected error from `renameat`: {:?}", err),
     }
 }
@@ -227,8 +226,8 @@ pub(crate) fn set_permissions_through_proc_self_fd(
     )?;
 
     let dirfd = proc_self_fd()?;
-    let mode = Mode::from_bits(perm.mode()).ok_or_else(errors::invalid_flags)?;
-    chmodat(dirfd, DecInt::from_fd(&opath), mode)
+    let mode = Mode::from_bits(perm.mode() as RawMode).ok_or_else(errors::invalid_flags)?;
+    Ok(chmodat(dirfd, DecInt::from_fd(&opath), mode)?)
 }
 
 pub(crate) fn set_times_through_proc_self_fd(

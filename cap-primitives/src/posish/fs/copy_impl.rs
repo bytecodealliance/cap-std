@@ -4,14 +4,11 @@
 
 use crate::fs::{open, OpenOptions};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use posish::{fs::copy_file_range, io::Errno};
+use posish::fs::copy_file_range;
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-use posish::{
-    fs::{
-        copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
-        fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
-    },
-    io::Errno,
+use posish::fs::{
+    copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
+    fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
 };
 use std::{fs, io, path::Path};
 
@@ -102,9 +99,9 @@ pub(crate) fn copy_impl(
             // We actually don't have to adjust the offsets,
             // because copy_file_range adjusts the file offset automatically
             let copy_result = copy_file_range(&reader, None, &writer, None, bytes_to_copy);
-            if let Err(ref copy_err) = copy_result {
-                match Errno::from_io_error(copy_err) {
-                    Some(Errno::NOSYS) | Some(Errno::PERM) => {
+            if let Err(copy_err) = copy_result {
+                match copy_err {
+                    posish::io::Error::NOSYS | posish::io::Error::PERM => {
                         HAS_COPY_FILE_RANGE.store(false, Ordering::Relaxed);
                     }
                     _ => {}
@@ -112,14 +109,16 @@ pub(crate) fn copy_impl(
             }
             copy_result
         } else {
-            Err(Errno::NOSYS.io_error())
+            Err(posish::io::Error::NOSYS.into())
         };
         match copy_result {
             Ok(ret) => written += ret as u64,
             Err(err) => {
-                match Errno::from_io_error(&err) {
-                    Some(Errno::NOSYS) | Some(Errno::XDEV) | Some(Errno::INVAL)
-                    | Some(Errno::PERM) => {
+                match err {
+                    posish::io::Error::NOSYS
+                    | posish::io::Error::XDEV
+                    | posish::io::Error::INVAL
+                    | posish::io::Error::PERM => {
                         // Try fallback io::copy if either:
                         // - Kernel version is < 4.5 (ENOSYS)
                         // - Files are mounted on different fs (EXDEV)
@@ -128,7 +127,7 @@ pub(crate) fn copy_impl(
                         assert_eq!(written, 0);
                         return io::copy(&mut reader, &mut writer);
                     }
-                    _ => return Err(err),
+                    _ => return Err(err.into()),
                 }
             }
         }
@@ -170,14 +169,16 @@ pub(crate) fn copy_impl(
         let clonefile_result = fclonefileat(&reader, to_start, to_path, CloneFlags::empty());
         match clonefile_result {
             Ok(_) => return Ok(reader_metadata.len()),
-            Err(err) => match Errno::from_io_error(&err) {
+            Err(err) => match err {
                 // `fclonefileat` will fail on non-APFS volumes, if the
                 // destination already exists, or if the source and destination
                 // are on different devices. In all these cases `fcopyfile`
                 // should succeed.
-                Some(Errno::NOTSUP) | Some(Errno::EXIST) | Some(Errno::XDEV) => (),
-                Some(Errno::NOSYS) => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
-                _ => return Err(err),
+                posish::io::Error::NOTSUP | posish::io::Error::EXIST | posish::io::Error::XDEV => {
+                    ()
+                }
+                posish::io::Error::NOSYS => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
+                _ => return Err(err.into()),
             },
         }
     }
@@ -203,6 +204,6 @@ pub(crate) fn copy_impl(
     unsafe {
         fcopyfile(&reader, &writer, state.0, flags)?;
 
-        copyfile_state_get_copied(state.0)
+        Ok(copyfile_state_get_copied(state.0)?)
     }
 }

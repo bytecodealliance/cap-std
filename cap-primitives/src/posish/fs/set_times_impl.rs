@@ -3,7 +3,7 @@
 
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
 use fs_set_times::SetTimes;
-use posish::io::Errno;
+use posish::io::Error;
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
@@ -21,8 +21,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
+        Err(err) => match Error::from_io_error(&err) {
+            Some(Error::ACCES) | Some(Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -35,8 +35,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) => (),
+        Err(err) => match Error::from_io_error(&err) {
+            Some(Error::ACCES) => (),
             _ => return Err(err),
         },
     }
@@ -50,5 +50,5 @@ pub(crate) fn set_times_impl(
     //    symlink instead of the file we're trying to get to.
     //
     // So neither does what we need.
-    Err(Errno::NOTSUP.io_error())
+    Err(Error::NOTSUP.into())
 }

@@ -7,5 +7,5 @@ pub(crate) fn symlink_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    symlinkat(old_path, new_start, new_path)
+    Ok(symlinkat(old_path, new_start, new_path)?)
 }

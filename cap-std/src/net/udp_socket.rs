@@ -317,9 +317,9 @@ impl AsRawFd for UdpSocket {
 }
 
 #[cfg(not(windows))]
-impl<'f> AsFd<'f> for &'f UdpSocket {
+impl AsFd for UdpSocket {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }
@@ -333,9 +333,9 @@ impl AsRawSocket for UdpSocket {
 }
 
 #[cfg(windows)]
-impl<'s> AsSocket<'s> for &'s UdpSocket {
+impl AsSocket for UdpSocket {
     #[inline]
-    fn as_socket(self) -> BorrowedSocket<'s> {
+    fn as_socket(&self) -> BorrowedSocket<'_> {
         self.std.as_socket()
     }
 }

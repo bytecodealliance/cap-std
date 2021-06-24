@@ -8,5 +8,5 @@ pub(crate) fn rename_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    renameat(old_start, old_path, new_start, new_path)
+    Ok(renameat(old_start, old_path, new_start, new_path)?)
 }

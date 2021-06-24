@@ -13,5 +13,11 @@ pub(crate) fn hard_link_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    linkat(old_start, old_path, new_start, new_path, AtFlags::empty())
+    Ok(linkat(
+        old_start,
+        old_path,
+        new_start,
+        new_path,
+        AtFlags::empty(),
+    )?)
 }

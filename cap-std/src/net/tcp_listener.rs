@@ -153,9 +153,9 @@ impl AsRawFd for TcpListener {
 }
 
 #[cfg(not(windows))]
-impl<'f> AsFd<'f> for &'f TcpListener {
+impl AsFd for TcpListener {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }
@@ -169,9 +169,9 @@ impl AsRawSocket for TcpListener {
 }
 
 #[cfg(windows)]
-impl<'s> AsSocket<'s> for &'s TcpListener {
+impl AsSocket for TcpListener {
     #[inline]
-    fn as_socket(self) -> BorrowedSocket<'s> {
+    fn as_socket(&self) -> BorrowedSocket<'_> {
         self.std.as_socket()
     }
 }

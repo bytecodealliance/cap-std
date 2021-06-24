@@ -162,12 +162,12 @@ impl<'start> Context<'start> {
             // within `self.base`, which should always be the same. And
             // using `.` means we avoid asking the OS to access a `..` path
             // for us.
-            posish::fs::accessat(
+            Ok(posish::fs::accessat(
                 &*self.base,
                 Component::CurDir.as_os_str(),
                 posish::fs::Access::EXEC_OK,
                 at_flags,
-            )
+            )?)
         }
         #[cfg(windows)]
         open_dir_unchecked(&self.base, Component::CurDir.as_os_str().as_ref()).map(|_| ())

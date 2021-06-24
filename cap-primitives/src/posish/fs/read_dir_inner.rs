@@ -13,8 +13,7 @@ use std::{
     fmt, fs, io,
     mem::ManuallyDrop,
     path::{Component, Path},
-    sync::Arc,
-    sync::Mutex,
+    sync::{Arc, Mutex},
 };
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd};
 
@@ -94,7 +93,7 @@ impl Iterator for ReadDirInner {
         loop {
             let entry = match self.posish.lock().unwrap().read()? {
                 Ok(entry) => entry,
-                Err(e) => return Some(Err(e)),
+                Err(e) => return Some(Err(e.into())),
             };
             let file_name = entry.file_name().to_bytes();
             if file_name != Component::CurDir.as_os_str().as_bytes()

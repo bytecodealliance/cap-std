@@ -39,7 +39,7 @@ pub(crate) fn set_times_nofollow_unchecked(
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
-    utimensat(start, path, &times, AtFlags::SYMLINK_NOFOLLOW)
+    Ok(utimensat(start, path, &times, AtFlags::SYMLINK_NOFOLLOW)?)
 }
 
 #[allow(dead_code)]
@@ -50,5 +50,5 @@ pub(crate) fn set_times_follow_unchecked(
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
-    utimensat(start, path, &times, AtFlags::empty())
+    Ok(utimensat(start, path, &times, AtFlags::empty())?)
 }

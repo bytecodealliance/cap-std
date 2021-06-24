@@ -228,9 +228,9 @@ impl AsRawFd for UnixDatagram {
     }
 }
 
-impl<'f> AsFd<'f> for &'f UnixDatagram {
+impl AsFd for UnixDatagram {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }

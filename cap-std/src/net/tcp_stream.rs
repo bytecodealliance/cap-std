@@ -209,9 +209,9 @@ impl AsRawFd for TcpStream {
 }
 
 #[cfg(not(windows))]
-impl<'f> AsFd<'f> for &'f TcpStream {
+impl AsFd for TcpStream {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }
@@ -225,9 +225,9 @@ impl AsRawSocket for TcpStream {
 }
 
 #[cfg(windows)]
-impl<'s> AsSocket<'s> for &'s TcpStream {
+impl AsSocket for TcpStream {
     #[inline]
-    fn as_socket(self) -> BorrowedSocket<'s> {
+    fn as_socket(&self) -> BorrowedSocket<'_> {
         self.std.as_socket()
     }
 }

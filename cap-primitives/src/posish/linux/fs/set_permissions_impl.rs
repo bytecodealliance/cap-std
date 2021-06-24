@@ -1,7 +1,6 @@
 use super::procfs::set_permissions_through_proc_self_fd;
 use crate::fs::{errors, open, OpenOptions, Permissions};
-use posish::fs::{fchmod, Mode, OFlags};
-use posish::io::Errno;
+use posish::fs::{fchmod, Mode, OFlags, RawMode};
 use std::{
     fs, io,
     os::unix::fs::{OpenOptionsExt, PermissionsExt},
@@ -38,10 +37,10 @@ pub(crate) fn set_permissions_impl(
         if let Ok(file) = opath_result {
             match set_file_permissions(&file, std_perm.clone()) {
                 Ok(()) => return Ok(()),
-                Err(err) => match Errno::from_io_error(&err) {
+                Err(err) => match posish::io::Error::from_io_error(&err) {
                     // If it fails with `EBADF`, `fchmod` didn't like `O_PATH`,
                     // so proceed to the fallback strategies below.
-                    Some(Errno::BADF) => FCHMOD_PATH_BADF.store(true, Relaxed),
+                    Some(posish::io::Error::BADF) => FCHMOD_PATH_BADF.store(true, Relaxed),
                     _ => return Err(err),
                 },
             }
@@ -52,8 +51,8 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) => (),
+        Err(err) => match posish::io::Error::from_io_error(&err) {
+            Some(posish::io::Error::ACCES) => (),
             _ => return Err(err),
         },
     }
@@ -61,8 +60,8 @@ pub(crate) fn set_permissions_impl(
     // Next try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
+        Err(err) => match posish::io::Error::from_io_error(&err) {
+            Some(posish::io::Error::ACCES) | Some(posish::io::Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -72,6 +71,6 @@ pub(crate) fn set_permissions_impl(
 }
 
 fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {
-    let mode = Mode::from_bits(perm.mode()).ok_or_else(errors::invalid_flags)?;
-    fchmod(file, mode)
+    let mode = Mode::from_bits(perm.mode() as RawMode).ok_or_else(errors::invalid_flags)?;
+    Ok(fchmod(file, mode)?)
 }

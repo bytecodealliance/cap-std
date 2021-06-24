@@ -4,9 +4,9 @@ use crate::{
     fs::{FileTypeExt, Metadata, PermissionsExt},
     time::{Duration, SystemClock, SystemTime},
 };
-use posish::fs::Stat;
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
-use posish::fs::{makedev, RawMode, Statx};
+use posish::fs::{makedev, Statx};
+use posish::fs::{RawMode, Stat};
 use std::{
     convert::{TryFrom, TryInto},
     fs, io,
@@ -71,9 +71,9 @@ impl MetadataExt {
     #[inline]
     pub(crate) fn from_posish(stat: Stat) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_raw_mode(stat.st_mode),
+            file_type: FileTypeExt::from_raw_mode(stat.st_mode as RawMode),
             len: u64::try_from(stat.st_size).unwrap(),
-            permissions: PermissionsExt::from_raw_mode(stat.st_mode),
+            permissions: PermissionsExt::from_raw_mode(stat.st_mode as RawMode),
 
             #[cfg(not(target_os = "netbsd"))]
             modified: system_time_from_posish(

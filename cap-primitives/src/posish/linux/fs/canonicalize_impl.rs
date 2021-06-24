@@ -3,7 +3,6 @@
 use super::procfs::get_path_from_proc_self_fd;
 use crate::fs::{manually, open_beneath, FollowSymlinks, OpenOptions};
 use posish::fs::OFlags;
-use posish::io::Errno;
 use std::{
     fs, io,
     os::unix::fs::OpenOptionsExt,
@@ -56,10 +55,10 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
                 }
             }
         }
-        Err(err) => match Errno::from_io_error(&err) {
+        Err(err) => match posish::io::Error::from_io_error(&err) {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(Errno::NOSYS) => (),
+            Some(posish::io::Error::NOSYS) => (),
             _ => return Err(err),
         },
     }

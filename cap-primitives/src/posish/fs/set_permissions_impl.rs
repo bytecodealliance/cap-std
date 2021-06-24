@@ -1,7 +1,7 @@
 use crate::fs::{errors, open, OpenOptions, Permissions};
 use posish::{
     fs::{fchmod, Mode},
-    io::Errno,
+    io::Error,
 };
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -23,8 +23,8 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) => (),
+        Err(err) => match Error::from_io_error(&err) {
+            Some(Error::ACCES) => (),
             _ => return Err(err),
         },
     }
@@ -32,19 +32,19 @@ pub(crate) fn set_permissions_impl(
     // Next try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
+        Err(err) => match Error::from_io_error(&err) {
+            Some(Error::ACCES) | Some(Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
 
     // If neither of those worked, we're out of luck.
-    Err(Errno::NOTSUP.io_error())
+    Err(Error::NOTSUP.into())
 }
 
 pub(crate) fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {
     #[allow(clippy::useless_conversion)]
     let mode =
         Mode::from_bits(perm.mode().try_into().unwrap()).ok_or_else(errors::invalid_flags)?;
-    fchmod(file, mode)
+    Ok(fchmod(file, mode)?)
 }

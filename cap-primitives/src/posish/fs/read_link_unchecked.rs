@@ -10,5 +10,5 @@ pub(crate) fn read_link_unchecked(
     path: &Path,
     reuse: PathBuf,
 ) -> io::Result<PathBuf> {
-    readlinkat(start, path, reuse.into()).map(Into::into)
+    Ok(readlinkat(start, path, reuse.into()).map(Into::into)?)
 }

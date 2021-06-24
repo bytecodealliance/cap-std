@@ -621,9 +621,9 @@ impl AsRawFd for Dir {
 }
 
 #[cfg(not(windows))]
-impl<'f> AsFd<'f> for &'f Dir {
+impl AsFd for Dir {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std_file.as_fd()
     }
 }
@@ -637,9 +637,9 @@ impl AsRawHandle for Dir {
 }
 
 #[cfg(windows)]
-impl<'h> AsHandle<'h> for &'h Dir {
+impl AsHandle for Dir {
     #[inline]
-    fn as_handle(self) -> BorrowedHandle<'h> {
+    fn as_handle(&self) -> BorrowedHandle<'_> {
         self.std_file.as_handle()
     }
 }

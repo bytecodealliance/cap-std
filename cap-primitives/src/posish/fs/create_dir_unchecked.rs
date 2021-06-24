@@ -9,9 +9,9 @@ pub(crate) fn create_dir_unchecked(
     path: &Path,
     options: &DirOptions,
 ) -> io::Result<()> {
-    mkdirat(
+    Ok(mkdirat(
         start,
         path,
         Mode::from_bits(options.ext.mode as RawMode).unwrap(),
-    )
+    )?)
 }

@@ -6,7 +6,7 @@ use sys_common::io::tmpdir;
 /*
 #[cfg(not(windows))]
 fn rename_path_in_use() -> String {
-    posish::io::Errno::BUSY.io_error().to_string()
+    posish::io::Error::BUSY.into().to_string()
 }
 #[cfg(windows)]
 fn rename_path_in_use() -> String {
@@ -16,7 +16,7 @@ fn rename_path_in_use() -> String {
 
 #[cfg(not(windows))]
 fn no_such_file_or_directory() -> String {
-    posish::io::Errno::NOENT.io_error().to_string()
+    posish::io::Error::NOENT.to_string()
 }
 #[cfg(windows)]
 fn no_such_file_or_directory() -> String {
@@ -28,7 +28,7 @@ fn no_such_file_or_directory() -> String {
 cfg_if::cfg_if! {
     if #[cfg(any(target_os = "macos", target_os = "netbsd", target_os = "freebsd", target_os = "openbsd", target_os = "ios", target_os = "dragonfly"))] {
         fn rename_file_over_dir() -> String {
-            posish::io::Errno::ISDIR.io_error().to_string()
+            posish::io::Error::ISDIR.into().to_string()
         }
 
         fn rename_file_over_dot() -> String {
@@ -36,11 +36,11 @@ cfg_if::cfg_if! {
         }
 
         fn rename_dot_over_file() -> String {
-            posish::io::Errno::INVAL.io_error().to_string()
+            posish::io::Error::INVAL.into().to_string()
         }
     } else {
         fn rename_file_over_dir() -> String {
-            posish::io::Errno::NOTEMPTY.io_error().to_string()
+            posish::io::Error::NOTEMPTY.into().to_string()
         }
 
         fn rename_file_over_dot() -> String {

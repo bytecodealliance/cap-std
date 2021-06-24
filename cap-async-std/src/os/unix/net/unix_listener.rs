@@ -102,9 +102,9 @@ impl AsRawFd for UnixListener {
     }
 }
 
-impl<'f> AsFd<'f> for &'f UnixListener {
+impl AsFd for UnixListener {
     #[inline]
-    fn as_fd(self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.std.as_fd()
     }
 }

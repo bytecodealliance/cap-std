@@ -4,7 +4,6 @@
 use super::procfs::set_times_through_proc_self_fd;
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
 use fs_set_times::SetTimes;
-use posish::io::Errno;
 use std::{fs, io, path::Path};
 
 pub(crate) fn set_times_impl(
@@ -22,8 +21,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) | Some(Errno::ISDIR) => (),
+        Err(err) => match posish::io::Error::from_io_error(&err) {
+            Some(posish::io::Error::ACCES) | Some(posish::io::Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -36,8 +35,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Errno::from_io_error(&err) {
-            Some(Errno::ACCES) => (),
+        Err(err) => match posish::io::Error::from_io_error(&err) {
+            Some(posish::io::Error::ACCES) => (),
             _ => return Err(err),
         },
     }
