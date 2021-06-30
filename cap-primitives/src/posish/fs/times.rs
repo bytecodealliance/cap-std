@@ -1,4 +1,5 @@
 use crate::{fs::SystemTimeSpec, time::SystemClock};
+use io_lifetimes::BorrowedFd;
 use posish::{
     fs::{utimensat, AtFlags, UTIME_NOW, UTIME_OMIT},
     time::Timespec,
@@ -44,11 +45,11 @@ pub(crate) fn set_times_nofollow_unchecked(
 
 #[allow(dead_code)]
 pub(crate) fn set_times_follow_unchecked(
-    start: &fs::File,
+    start: BorrowedFd<'_>,
     path: &Path,
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
     let times = [to_timespec(atime)?, to_timespec(mtime)?];
-    Ok(utimensat(start, path, &times, AtFlags::empty())?)
+    Ok(utimensat(&start, path, &times, AtFlags::empty())?)
 }
