@@ -23,7 +23,7 @@ unsafe-io = "0.7.0"
 io-lifetimes = "0.2.0"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.14.0"
+posish = "0.15.0"
 
 [features]
 default = []
