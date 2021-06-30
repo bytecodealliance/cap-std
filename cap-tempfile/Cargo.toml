@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^0.15.1-alpha.0"}
+cap-std = { path = "../cap-std", version = "^0.15.3-alpha.0"}
 uuid = { version = "0.8.1", features = ["v4"] }
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
