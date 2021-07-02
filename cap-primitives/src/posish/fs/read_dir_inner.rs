@@ -3,6 +3,7 @@ use crate::fs::{
     remove_dir_unchecked, remove_file_unchecked, stat_unchecked, DirEntryInner, FollowSymlinks,
     Metadata, OpenOptions, ReadDir,
 };
+use io_lifetimes::AsFd;
 use posish::fs::Dir;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
@@ -26,7 +27,7 @@ impl ReadDirInner {
     pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
         let dir = Dir::from(open_dir_for_reading(start, path)?)?;
         Ok(Self {
-            raw_fd: dir.as_raw_fd(),
+            raw_fd: dir.as_fd().as_raw_fd(),
             posish: Arc::new(Mutex::new(dir)),
         })
     }
@@ -41,7 +42,7 @@ impl ReadDirInner {
             Component::CurDir.as_ref(),
         )?)?;
         Ok(Self {
-            raw_fd: dir.as_raw_fd(),
+            raw_fd: dir.as_fd().as_raw_fd(),
             posish: Arc::new(Mutex::new(dir)),
         })
     }
@@ -49,7 +50,7 @@ impl ReadDirInner {
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
         let dir = open_dir_for_reading_unchecked(start, path)?;
         Ok(Self {
-            raw_fd: dir.as_raw_fd(),
+            raw_fd: dir.as_fd().as_raw_fd(),
             posish: Arc::new(Mutex::new(Dir::from(dir)?)),
         })
     }
