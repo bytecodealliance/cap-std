@@ -21,4 +21,6 @@ pub mod fs;
 pub mod net;
 pub mod time;
 
+#[doc(hidden)]
+pub use ambient_authority::ambient_authority_known_at_compile_time;
 pub use ambient_authority::{ambient_authority, AmbientAuthority};

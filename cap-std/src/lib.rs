@@ -42,7 +42,10 @@ pub mod fs_utf8;
 pub mod net;
 pub mod os;
 pub mod time;
+// Re-export ambient_authority etc. so that users can use our version.
+#[doc(hidden)]
+pub use cap_primitives::ambient_authority_known_at_compile_time;
+pub use cap_primitives::{ambient_authority, AmbientAuthority};
 // For now, re-export `path`; see
 // <https://github.com/bytecodealliance/cap-std/issues/88>
-pub use cap_primitives::{ambient_authority, AmbientAuthority};
 pub use std::path;

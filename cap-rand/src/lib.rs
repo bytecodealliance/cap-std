@@ -28,6 +28,8 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
+#[doc(hidden)]
+pub use ambient_authority::ambient_authority_known_at_compile_time;
 pub use ambient_authority::{ambient_authority, AmbientAuthority};
 pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, SeedableRng};
 

@@ -33,4 +33,6 @@ pub use reopen::Reopen;
 /// Re-export these to allow them to be used with `Reuse`.
 pub use cap_primitives::fs::{FollowSymlinks, Metadata, OpenOptions};
 
+#[doc(hidden)]
+pub use cap_primitives::ambient_authority_known_at_compile_time;
 pub use cap_primitives::{ambient_authority, AmbientAuthority};

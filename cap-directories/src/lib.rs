@@ -14,6 +14,8 @@ use std::io;
 mod project_dirs;
 mod user_dirs;
 
+#[doc(hidden)]
+pub use cap_std::ambient_authority_known_at_compile_time;
 pub use cap_std::{ambient_authority, AmbientAuthority};
 pub use project_dirs::ProjectDirs;
 pub use user_dirs::UserDirs;
