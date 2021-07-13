@@ -469,34 +469,39 @@ impl std::os::wasi::fs::FileExt for File {
     }
 
     #[inline]
-    fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
+    fn create_directory<P: AsRef<str>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
+        let path = from_utf8(path)?;
         self.cap_std.create_directory(dir)
     }
 
     #[inline]
-    fn read_link<P: AsRef<Path>>(
+    fn read_link<P: AsRef<str>>(
         &self,
         path: P,
     ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
+        let path = from_utf8(path)?;
         self.cap_std.read_link(path)
     }
 
     #[inline]
-    fn metadata_at<P: AsRef<Path>>(
+    fn metadata_at<P: AsRef<str>>(
         &self,
         lookup_flags: u32,
         path: P,
     ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
+        let path = from_utf8(path)?;
         self.cap_std.metadata_at(lookup_flags, path)
     }
 
     #[inline]
-    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_file<P: AsRef<str>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        let path = from_utf8(path)?;
         self.cap_std.remove_file(path)
     }
 
     #[inline]
-    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_directory<P: AsRef<str>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        let path = from_utf8(path)?;
         self.cap_std.remove_directory(path)
     }
 }
