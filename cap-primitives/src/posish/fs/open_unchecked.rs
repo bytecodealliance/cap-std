@@ -12,7 +12,8 @@ use std::{fs, path::Path};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {crate::fs::ensure_cloexec, io_lifetimes::AsFd};
 
-/// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `open`, but which does not perform
+/// sandboxing.
 pub(crate) fn open_unchecked(
     start: &fs::File,
     path: &Path,
@@ -62,7 +63,8 @@ pub(crate) fn open_unchecked(
     }
 }
 
-/// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `open`, but which does not perform
+/// sandboxing.
 #[inline]
 pub(crate) fn open_ambient_impl(
     path: &Path,

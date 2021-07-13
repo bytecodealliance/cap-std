@@ -1,4 +1,5 @@
-//! This defines `symlink`, the primary entrypoint to sandboxed symlink creation.
+//! This defines `symlink`, the primary entrypoint to sandboxed symlink
+//! creation.
 
 use crate::fs::errors;
 #[cfg(all(racy_asserts, not(windows)))]
@@ -9,8 +10,8 @@ use crate::fs::{canonicalize, manually, map_result, stat_unchecked, FollowSymlin
 use crate::fs::{symlink_dir_unchecked, symlink_file_unchecked};
 use std::{fs, io, path::Path};
 
-/// Perform a `symlinkat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `symlinkat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[cfg(not(windows))]
 #[inline]
@@ -48,8 +49,8 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
     result
 }
 
-/// Perform a `symlink_file`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `symlink_file`-like operation, ensuring that the resolution of
+/// the path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[cfg(windows)]
 #[inline]
@@ -83,8 +84,8 @@ pub fn symlink_file(old_path: &Path, new_start: &fs::File, new_path: &Path) -> i
     result
 }
 
-/// Perform a `symlink_dir`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `symlink_dir`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[cfg(windows)]
 #[inline]

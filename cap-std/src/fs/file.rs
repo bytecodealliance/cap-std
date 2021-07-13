@@ -75,8 +75,8 @@ impl File {
         self.std.sync_all()
     }
 
-    /// This function is similar to `sync_all`, except that it may not synchronize
-    /// file metadata to a filesystem.
+    /// This function is similar to `sync_all`, except that it may not
+    /// synchronize file metadata to a filesystem.
     ///
     /// This corresponds to [`std::fs::File::sync_data`].
     #[inline]
@@ -84,8 +84,8 @@ impl File {
         self.std.sync_data()
     }
 
-    /// Truncates or extends the underlying file, updating the size of this file
-    /// to become size.
+    /// Truncates or extends the underlying file, updating the size of this
+    /// file to become size.
     ///
     /// This corresponds to [`std::fs::File::set_len`].
     #[inline]
@@ -101,8 +101,8 @@ impl File {
         metadata_from(&self.std)
     }
 
-    /// Creates a new `File` instance that shares the same underlying file handle as the existing
-    /// `File` instance.
+    /// Creates a new `File` instance that shares the same underlying file
+    /// handle as the existing `File` instance.
     ///
     /// This corresponds to [`std::fs::File::try_clone`].
     #[inline]

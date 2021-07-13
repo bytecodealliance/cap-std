@@ -75,8 +75,8 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     }
 
     /// Set this `MaybeOwnedFile` to a new owned file which is from a subtree
-    /// of the current file. Return a `MaybeOwnedFile` representing the previous
-    /// state.
+    /// of the current file. Return a `MaybeOwnedFile` representing the
+    /// previous state.
     pub(super) fn descend_to(&mut self, to: MaybeOwnedFile<'borrow>) -> Self {
         #[cfg(racy_asserts)]
         let path = self.path.clone();

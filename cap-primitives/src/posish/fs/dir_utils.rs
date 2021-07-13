@@ -21,8 +21,8 @@ pub(crate) fn path_requires_dir(path: &Path) -> bool {
     bytes.ends_with(b"/") || bytes.ends_with(b"/.")
 }
 
-/// Rust's `Path` implicitly strips trailing `.` components, however they aren't
-/// redundant in one case: at the end of a path they are the final path
+/// Rust's `Path` implicitly strips trailing `.` components, however they
+/// aren't redundant in one case: at the end of a path they are the final path
 /// component, which has different path lookup behavior.
 pub(crate) fn path_has_trailing_dot(path: &Path) -> bool {
     let mut bytes = path.as_os_str().as_bytes();

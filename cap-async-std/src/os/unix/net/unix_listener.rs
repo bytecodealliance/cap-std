@@ -27,12 +27,13 @@ pub struct UnixListener {
 }
 
 impl UnixListener {
-    /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixListener`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::os::unix::net::UnixListener`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::os::unix::net::UnixListener` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `async_std::os::unix::net::UnixListener` is not sandboxed and may
+    /// access any address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixListener, _: AmbientAuthority) -> Self {
         Self { std }
@@ -54,7 +55,8 @@ impl UnixListener {
 
     /// Returns the local socket address of this listener.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixListener::local_addr`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixListener::local_addr`].
     ///
     /// [`async_std::os::unix::net::UnixListener::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.local_addr
     #[inline]
@@ -68,7 +70,8 @@ impl UnixListener {
 
     /// Returns an iterator over incoming connections.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixListener::incoming`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixListener::incoming`].
     ///
     /// [`async_std::os::unix::net::UnixListener::incoming`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]

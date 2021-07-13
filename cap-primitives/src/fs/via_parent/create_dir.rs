@@ -7,8 +7,9 @@ use std::{fs, io, path::Path};
 pub(crate) fn create_dir(start: &fs::File, path: &Path, options: &DirOptions) -> io::Result<()> {
     let start = MaybeOwnedFile::borrowed(start);
 
-    // As a special case, `create_dir` ignores a trailing slash rather than treating
-    // it as equivalent to a trailing slash-dot, so strip any trailing slashes.
+    // As a special case, `create_dir` ignores a trailing slash rather than
+    // treating it as equivalent to a trailing slash-dot, so strip any trailing
+    // slashes.
     let path = strip_dir_suffix(path);
 
     let (dir, basename) = open_parent(start, &path)?;

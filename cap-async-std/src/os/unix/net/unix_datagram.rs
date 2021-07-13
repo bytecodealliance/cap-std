@@ -23,20 +23,23 @@ use unsafe_io::OwnsRaw;
 ///
 /// [`async_std::os::unix::net::UnixDatagram`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html
 /// [`Dir`]: struct.Dir.html
-/// [`Dir::connect_unix_datagram`]: struct.Dir.html#method.connect_unix_datagram
-/// [`Dir::bind_unix_datagram`]: struct.Dir.html#method.bind_unix_datagram
-/// [`Dir::send_to_unix_datagram_addr`]: struct.Dir.html#method.send_to_unix_datagram_addr
+/// [`Dir::connect_unix_datagram`]:
+/// struct.Dir.html#method.connect_unix_datagram [`Dir::bind_unix_datagram`]:
+/// struct.Dir.html#method.bind_unix_datagram
+/// [`Dir::send_to_unix_datagram_addr`]:
+/// struct.Dir.html#method.send_to_unix_datagram_addr
 pub struct UnixDatagram {
     std: unix::net::UnixDatagram,
 }
 
 impl UnixDatagram {
-    /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixDatagram`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::os::unix::net::UnixDatagram`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::os::unix::net::UnixDatagram` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `async_std::os::unix::net::UnixDatagram` is not sandboxed and may
+    /// access any address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixDatagram, _: AmbientAuthority) -> Self {
         Self { std }
@@ -44,7 +47,8 @@ impl UnixDatagram {
 
     /// Creates a Unix Datagram socket which is not bound to any address.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::unbound`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixDatagram::unbound`].
     ///
     /// TODO: should this require a capability?
     ///
@@ -76,7 +80,8 @@ impl UnixDatagram {
 
     /// Returns the address of this socket.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::local_addr`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixDatagram::local_addr`].
     ///
     /// [`async_std::os::unix::net::UnixDatagram::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.local_addr
     #[inline]
@@ -86,7 +91,8 @@ impl UnixDatagram {
 
     /// Returns the address of this socket's peer.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::peer_addr`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixDatagram::peer_addr`].
     ///
     /// [`async_std::os::unix::net::UnixDatagram::peer_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.peer_addr
     #[inline]
@@ -96,7 +102,8 @@ impl UnixDatagram {
 
     /// Receives data from the socket.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::recv_from`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixDatagram::recv_from`].
     ///
     /// [`async_std::os::unix::net::UnixDatagram::recv_from`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.recv_from
     #[inline]
@@ -138,7 +145,8 @@ impl UnixDatagram {
 
     /// Shut down the read, write, or both halves of this connection.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixDatagram::shutdown`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixDatagram::shutdown`].
     ///
     /// [`async_std::os::unix::net::UnixDatagram::shutdown`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.shutdown
     #[inline]

@@ -64,7 +64,8 @@ fn instant_math() {
     }
     assert_eq!(maybe_t, None);
 
-    // checked_add_duration calculates the right time and will work for another year
+    // checked_add_duration calculates the right time and will work for another
+    // year
     let year = Duration::from_secs(60 * 60 * 24 * 365);
     assert_eq!(a + year, a.checked_add(year).unwrap());
 }
@@ -152,7 +153,8 @@ fn system_time_math() {
     }
     assert_eq!(maybe_t, None);
 
-    // checked_add_duration calculates the right time and will work for another year
+    // checked_add_duration calculates the right time and will work for another
+    // year
     let year = Duration::from_secs(60 * 60 * 24 * 365);
     assert_eq!(a + year, a.checked_add(year).unwrap());
 }

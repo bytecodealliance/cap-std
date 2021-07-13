@@ -9,8 +9,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-/// Perform a `readlinkat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `readlinkat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {

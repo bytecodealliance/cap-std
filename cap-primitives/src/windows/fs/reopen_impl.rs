@@ -25,7 +25,8 @@ pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<
     let new_access_mode = AccessMode::from_bits(new_access_mode).unwrap();
     let flags = Flags::from_bits(flags).unwrap();
 
-    // Disallow custom access modes might imply or require more access than we have.
+    // Disallow custom access modes might imply or require more access than we
+    // have.
     if new_access_mode
         .intersects(AccessMode::from_bits(GENERIC_WRITE | FILE_GENERIC_WRITE).unwrap())
         && !old_access_mode

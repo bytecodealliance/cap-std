@@ -34,7 +34,8 @@ impl DirBuilder {
         }
     }
 
-    /// Indicates that directories should be created recursively, creating all parent directories.
+    /// Indicates that directories should be created recursively, creating all
+    /// parent directories.
     ///
     /// This corresponds to [`std::fs::DirBuilder::recursive`].
     #[inline]

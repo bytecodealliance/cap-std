@@ -26,7 +26,8 @@ pub struct DirEntry {
 }
 
 impl DirEntry {
-    /// Constructs a new instance of `Self` from the given `cap_std::fs::DirEntry`.
+    /// Constructs a new instance of `Self` from the given
+    /// `cap_std::fs::DirEntry`.
     #[inline]
     pub fn from_cap_std(cap_std: crate::fs::DirEntry) -> Self {
         Self { cap_std }

@@ -19,12 +19,13 @@ pub struct Incoming<'a> {
 }
 
 impl<'a> Incoming<'a> {
-    /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::Incoming`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::os::unix::net::Incoming`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::net::Incoming` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `async_std::net::Incoming` is not sandboxed and may access any address
+    /// that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::Incoming<'a>, _: AmbientAuthority) -> Self {
         Self { std }

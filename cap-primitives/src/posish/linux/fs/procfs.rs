@@ -3,8 +3,8 @@
 //! providing additional features with an awkward interface.
 //!
 //! This module does a considerable amount of work to determine whether `/proc`
-//! is mounted, with actual `procfs`, and without any additional mount points on
-//! top of the paths we open.
+//! is mounted, with actual `procfs`, and without any additional mount points
+//! on top of the paths we open.
 
 use crate::fs::{
     errors, open, read_link_unchecked, set_times_follow_unchecked, OpenOptions, SystemTimeSpec,

@@ -1,5 +1,6 @@
-// This test module derived from Rust's src/test/ui-fulldeps/rename-directory.rs
-// at revision 108e90ca78f052c0c1c49c42a22c85620be19712.
+// This test module derived from Rust's
+// src/test/ui-fulldeps/rename-directory.rs at revision
+// 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 // run-pass
 

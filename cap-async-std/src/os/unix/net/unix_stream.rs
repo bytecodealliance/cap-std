@@ -16,9 +16,9 @@ use unsafe_io::OwnsRaw;
 ///
 /// This corresponds to [`async_std::os::unix::net::UnixStream`].
 ///
-/// Note that this `UnixStream` has no `connect` method. To create a `UnixStream`,
-/// you must first obtain a [`Dir`] containing the path, and then call
-/// [`Dir::connect_unix_stream`].
+/// Note that this `UnixStream` has no `connect` method. To create a
+/// `UnixStream`, you must first obtain a [`Dir`] containing the path, and then
+/// call [`Dir::connect_unix_stream`].
 ///
 /// [`async_std::os::unix::net::UnixStream`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html
 /// [`Dir`]: struct.Dir.html
@@ -28,12 +28,13 @@ pub struct UnixStream {
 }
 
 impl UnixStream {
-    /// Constructs a new instance of `Self` from the given `async_std::os::unix::net::UnixStream`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::os::unix::net::UnixStream`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::os::unix::net::UnixStream` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `async_std::os::unix::net::UnixStream` is not sandboxed and may access
+    /// any address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixStream, _: AmbientAuthority) -> Self {
         Self { std }
@@ -60,7 +61,8 @@ impl UnixStream {
 
     /// Returns the socket address of the local half of this connection.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixStream::local_addr`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixStream::local_addr`].
     ///
     /// [`async_std::os::unix::net::UnixStream::local_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.local_addr
     #[inline]
@@ -70,7 +72,8 @@ impl UnixStream {
 
     /// Returns the socket address of the remote half of this connection.
     ///
-    /// This corresponds to [`async_std::os::unix::net::UnixStream::peer_addr`].
+    /// This corresponds to
+    /// [`async_std::os::unix::net::UnixStream::peer_addr`].
     ///
     /// [`async_std::os::unix::net::UnixStream::peer_addr`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.peer_addr
     #[inline]

@@ -23,9 +23,9 @@ use {
 ///
 /// This corresponds to [`std::net::TcpStream`].
 ///
-/// Note that this `TcpStream` has no `connect` method. To create a `TcpStream`,
-/// you must first obtain a [`Pool`] permitting the address, and then call
-/// [`Pool::connect_tcp_stream`].
+/// Note that this `TcpStream` has no `connect` method. To create a
+/// `TcpStream`, you must first obtain a [`Pool`] permitting the address, and
+/// then call [`Pool::connect_tcp_stream`].
 ///
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::connect_tcp_stream`]: struct.Pool.html#method.connect_tcp_stream
@@ -34,12 +34,13 @@ pub struct TcpStream {
 }
 
 impl TcpStream {
-    /// Constructs a new instance of `Self` from the given `std::net::TcpStream`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::net::TcpStream`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::net::TcpStream` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `std::net::TcpStream` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
     pub fn from_std(std: net::TcpStream, _: AmbientAuthority) -> Self {
         Self { std }
@@ -110,8 +111,8 @@ impl TcpStream {
         self.std.write_timeout()
     }
 
-    /// Receives data on the socket from the remote address to which it is connected, without
-    /// removing that data from the queue.
+    /// Receives data on the socket from the remote address to which it is
+    /// connected, without removing that data from the queue.
     ///
     /// This corresponds to [`std::net::TcpStream::peek`].
     #[inline]

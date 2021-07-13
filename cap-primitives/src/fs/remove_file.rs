@@ -1,4 +1,5 @@
-//! This defines `remove_file`, the primary entrypoint to sandboxed file removal.
+//! This defines `remove_file`, the primary entrypoint to sandboxed file
+//! removal.
 
 use crate::fs::remove_file_impl;
 #[cfg(racy_asserts)]

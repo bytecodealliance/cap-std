@@ -46,8 +46,8 @@ pub(crate) fn set_times_impl(
     //  - Follow symlinks, which would open up a race in which a concurrent
     //    modification of the symlink could point outside the sandbox and we
     //    wouldn't be able to detect it, or
-    //  - Don't follow symlinks, which would modify the timestamp of the
-    //    symlink instead of the file we're trying to get to.
+    //  - Don't follow symlinks, which would modify the timestamp of the symlink
+    //    instead of the file we're trying to get to.
     //
     // So neither does what we need.
     Err(Error::NOTSUP.into())

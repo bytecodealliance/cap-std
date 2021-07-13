@@ -26,12 +26,13 @@ pub struct UnixListener {
 }
 
 impl UnixListener {
-    /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixListener`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::os::unix::net::UnixListener`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::os::unix::net::UnixListener` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `std::os::unix::net::UnixListener` is not sandboxed and may access any
+    /// address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixListener, _: AmbientAuthority) -> Self {
         Self { std }
@@ -72,7 +73,8 @@ impl UnixListener {
 
     /// Moves the socket into or out of nonblocking mode.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixListener::set_nonblocking`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixListener::set_nonblocking`].
     ///
     /// [`std::os::unix::net::UnixListener::set_nonblocking`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html#method.set_nonblocking
     #[inline]

@@ -2,9 +2,9 @@
 //!
 //! This corresponds to [`async_std::net`].
 //!
-//! Instead of [`async_std::net`]'s constructor methods which take an address to
-//! connect to, this crates has methods on [`Pool`] which operate on addresses
-//! which must be present in the pool.
+//! Instead of [`async_std::net`]'s constructor methods which take an address
+//! to connect to, this crates has methods on [`Pool`] which operate on
+//! addresses which must be present in the pool.
 //!
 //! [`Pool`]: struct.Pool.html
 

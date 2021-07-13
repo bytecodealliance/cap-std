@@ -353,7 +353,8 @@ fn read_vectored() {
         ],));
         assert!(len > 0);
         assert_eq!(b, [10]);
-        // some implementations don't support readv, so we may only fill the first buffer
+        // some implementations don't support readv, so we may only fill the first
+        // buffer
         assert!(len == 1 || c == [11, 12, 0]);
     })
 }
@@ -376,7 +377,8 @@ fn write_vectored() {
 
         let mut buf = [0; 4];
         let len = t!(s2.read(&mut buf));
-        // some implementations don't support writev, so we may only write the first buffer
+        // some implementations don't support writev, so we may only write the first
+        // buffer
         if len == 1 {
             assert_eq!(buf, [10, 0, 0, 0]);
         } else {

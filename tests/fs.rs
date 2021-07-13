@@ -1036,15 +1036,17 @@ fn open_flavors() {
     // Test various combinations of creation modes and access modes.
     //
     // Allowed:
-    // creation mode           | read  | write | read-write | append | read-append |
-    // :-----------------------|:-----:|:-----:|:----------:|:------:|:-----------:|
-    // not set (open existing) |   X   |   X   |     X      |   X    |      X      |
-    // create                  |       |   X   |     X      |   X    |      X      |
-    // truncate                |       |   X   |     X      |        |             |
-    // create and truncate     |       |   X   |     X      |        |             |
-    // create_new              |       |   X   |     X      |   X    |      X      |
+    // creation mode           | read  | write | read-write | append | read-append
+    // | :-----------------------|:-----:|:-----:|:----------:|:------:|:
+    // -----------:| not set (open existing) |   X   |   X   |     X      |   X
+    // |      X      | create                  |       |   X   |     X      |
+    // X    |      X      | truncate                |       |   X   |     X
+    // |        |             | create and truncate     |       |   X   |     X
+    // |        |             | create_new              |       |   X   |     X
+    // |   X    |      X      |
     //
-    // tested in reverse order, so 'create_new' creates the file, and 'open existing' opens it.
+    // tested in reverse order, so 'create_new' creates the file, and 'open
+    // existing' opens it.
 
     // write-only
     check!(tmpdir.open_with("a", c(&w).create_new(true)));

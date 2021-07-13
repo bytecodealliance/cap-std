@@ -23,8 +23,8 @@ enum Inner {
 /// This corresponds to [`std::fs::FileType`].
 ///
 /// <details>
-/// We need to define our own version because the libstd `FileType` doesn't have
-/// a public constructor that we can use.
+/// We need to define our own version because the libstd `FileType` doesn't
+/// have a public constructor that we can use.
 /// </details>
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(transparent)]
@@ -146,8 +146,8 @@ impl std::os::windows::fs::FileTypeExt for FileType {
 /// Extension trait to allow `is_block_device` etc. to be exposed by
 /// the `cap-fs-ext` crate.
 ///
-/// This is hidden from the main API since this functionality isn't present in `std`.
-/// Use `cap_fs_ext::FileTypeExt` instead of calling this directly.
+/// This is hidden from the main API since this functionality isn't present in
+/// `std`. Use `cap_fs_ext::FileTypeExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
 pub trait _WindowsFileTypeExt {

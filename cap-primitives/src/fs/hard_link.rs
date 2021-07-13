@@ -1,4 +1,5 @@
-//! This defines `hard_link`, the primary entrypoint to sandboxed hard-link creation.
+//! This defines `hard_link`, the primary entrypoint to sandboxed hard-link
+//! creation.
 
 use crate::fs::hard_link_impl;
 #[cfg(racy_asserts)]

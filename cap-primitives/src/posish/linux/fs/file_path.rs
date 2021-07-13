@@ -11,8 +11,8 @@ pub(crate) fn file_path(file: &fs::File) -> Option<PathBuf> {
         .filter(|path| path.starts_with("/"))?;
 
     // Linux appends the string " (deleted)" when a file is deleted; avoid
-    // treating that as the actual name. Check this after doing the `readlink` above so
-    // that we're conservative about concurrent deletions.
+    // treating that as the actual name. Check this after doing the `readlink`
+    // above so that we're conservative about concurrent deletions.
     if file.metadata().ok()?.nlink() == 0 {
         return None;
     }

@@ -18,15 +18,16 @@ use std::{fmt, io};
 /// opening or removing the entry directly, which can be more efficient and
 /// convenient.
 ///
-/// Note that there is no `from_std` method, as `async_std::fs::DirEntry` doesn't
-/// provide a way to construct a `DirEntry` without opening directories by
-/// ambient paths.
+/// Note that there is no `from_std` method, as `async_std::fs::DirEntry`
+/// doesn't provide a way to construct a `DirEntry` without opening directories
+/// by ambient paths.
 pub struct DirEntry {
     cap_std: crate::fs::DirEntry,
 }
 
 impl DirEntry {
-    /// Constructs a new instance of `Self` from the given `cap_std::fs::DirEntry`.
+    /// Constructs a new instance of `Self` from the given
+    /// `cap_std::fs::DirEntry`.
     #[inline]
     pub fn from_cap_std(cap_std: crate::fs::DirEntry) -> Self {
         Self { cap_std }

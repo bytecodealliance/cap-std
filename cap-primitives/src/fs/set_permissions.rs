@@ -6,8 +6,8 @@ use crate::fs::{map_result, stat, stat_unchecked, FollowSymlinks, Metadata};
 use crate::fs::{set_permissions_impl, Permissions};
 use std::{fs, io, path::Path};
 
-/// Perform a `chmodat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `chmodat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn set_permissions(start: &fs::File, path: &Path, perm: Permissions) -> io::Result<()> {

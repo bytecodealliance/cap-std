@@ -38,9 +38,9 @@ pub(crate) mod errors;
 // and `O_PATH` when available.
 //
 // FreeBSD has a similar mechanism in `O_BENEATH`, however it appears to have
-// different behavior on absolute and `..` paths in ways that make it unsuitable
-// for `cap-std`'s style of sandboxing. For more information, see the bug filed
-// upstream: <https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335>
+// different behavior on absolute and `..` paths in ways that make it
+// unsuitable for `cap-std`'s style of sandboxing. For more information, see
+// the bug filed upstream: <https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335>
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) use crate::posish::darwin::fs::*;
 #[cfg(any(target_os = "android", target_os = "linux"))]

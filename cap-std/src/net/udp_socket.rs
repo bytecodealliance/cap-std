@@ -18,27 +18,29 @@ use {
 ///
 /// This corresponds to [`std::net::UdpSocket`].
 ///
-/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods. To
-/// create a `UdpSocket` bound to an address or to send a message to an address,
-/// you must first obtain a [`Pool`] permitting the address, and then call
-/// [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
+/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods.
+/// To create a `UdpSocket` bound to an address or to send a message to an
+/// address, you must first obtain a [`Pool`] permitting the address, and then
+/// call [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
 /// [`Pool::send_to_udp_socket_addr`].
 ///
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::bind_udp_socket`]: struct.Pool.html#method.bind_udp_socket
 /// [`Pool::connect_udp_socket`]: struct.Pool.html#method.connect_udp_socket
-/// [`Pool::send_to_udp_socket_addr`]: struct.Pool.html#method.send_to_udp_socket_addr
+/// [`Pool::send_to_udp_socket_addr`]:
+/// struct.Pool.html#method.send_to_udp_socket_addr
 pub struct UdpSocket {
     pub(crate) std: net::UdpSocket,
 }
 
 impl UdpSocket {
-    /// Constructs a new instance of `Self` from the given `std::net::UdpSocket`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::net::UdpSocket`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::net::UdpSocket` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `std::net::UdpSocket` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
     pub fn from_std(std: net::UdpSocket, _: AmbientAuthority) -> Self {
         Self { std }
@@ -52,7 +54,8 @@ impl UdpSocket {
         self.std.recv_from(buf)
     }
 
-    /// Receives a single datagram message on the socket, without removing it from the queue.
+    /// Receives a single datagram message on the socket, without removing it
+    /// from the queue.
     ///
     /// This corresponds to [`std::net::UdpSocket::peek_from`].
     #[inline]
@@ -60,7 +63,8 @@ impl UdpSocket {
         self.std.peek_from(buf)
     }
 
-    /// Returns the socket address of the remote peer this socket was connected to.
+    /// Returns the socket address of the remote peer this socket was connected
+    /// to.
     ///
     /// This corresponds to [`std::net::UdpSocket::peer_addr`].
     #[inline]
@@ -241,7 +245,8 @@ impl UdpSocket {
         self.std.take_error()
     }
 
-    /// Sends data on the socket to the remote address to which it is connected.
+    /// Sends data on the socket to the remote address to which it is
+    /// connected.
     ///
     /// This corresponds to [`std::net::UdpSocket::send`].
     #[inline]
@@ -249,8 +254,8 @@ impl UdpSocket {
         self.std.send(buf)
     }
 
-    /// Receives a single datagram message on the socket from the remote address to which it is
-    /// connected.
+    /// Receives a single datagram message on the socket from the remote
+    /// address to which it is connected.
     ///
     /// This corresponds to [`std::net::UdpSocket::recv`].
     #[inline]
@@ -258,8 +263,8 @@ impl UdpSocket {
         self.std.recv(buf)
     }
 
-    /// Receives single datagram on the socket from the remote address to which it is connected,
-    /// without removing the message from input queue.
+    /// Receives single datagram on the socket from the remote address to which
+    /// it is connected, without removing the message from input queue.
     ///
     /// This corresponds to [`std::net::UdpSocket::peek`].
     #[inline]

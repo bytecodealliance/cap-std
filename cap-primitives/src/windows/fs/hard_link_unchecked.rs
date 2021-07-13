@@ -1,7 +1,8 @@
 use super::get_path::concatenate_or_return_absolute;
 use std::{fs, io, path::Path};
 
-/// *Unsandboxed* function similar to `hard_link`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `hard_link`, but which does not perform
+/// sandboxing.
 pub(crate) fn hard_link_unchecked(
     old_start: &fs::File,
     old_path: &Path,

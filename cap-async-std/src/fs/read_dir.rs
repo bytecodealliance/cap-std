@@ -6,9 +6,9 @@ use std::fmt;
 ///
 /// This corresponds to [`async_std::fs::ReadDir`].
 ///
-/// Note that there is no `from_std` method, as `async_std::fs::ReadDir` doesn't
-/// provide a way to construct a `ReadDir` without opening directories by
-/// ambient paths.
+/// Note that there is no `from_std` method, as `async_std::fs::ReadDir`
+/// doesn't provide a way to construct a `ReadDir` without opening directories
+/// by ambient paths.
 pub struct ReadDir {
     pub(crate) inner: cap_primitives::fs::ReadDir,
 }

@@ -23,20 +23,23 @@ use unsafe_io::OwnsRaw;
 ///
 /// [`std::os::unix::net::UnixDatagram`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html
 /// [`Dir`]: struct.Dir.html
-/// [`Dir::connect_unix_datagram`]: struct.Dir.html#method.connect_unix_datagram
-/// [`Dir::bind_unix_datagram`]: struct.Dir.html#method.bind_unix_datagram
-/// [`Dir::send_to_unix_datagram_addr`]: struct.Dir.html#method.send_to_unix_datagram_addr
+/// [`Dir::connect_unix_datagram`]:
+/// struct.Dir.html#method.connect_unix_datagram [`Dir::bind_unix_datagram`]:
+/// struct.Dir.html#method.bind_unix_datagram
+/// [`Dir::send_to_unix_datagram_addr`]:
+/// struct.Dir.html#method.send_to_unix_datagram_addr
 pub struct UnixDatagram {
     std: unix::net::UnixDatagram,
 }
 
 impl UnixDatagram {
-    /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixDatagram`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::os::unix::net::UnixDatagram`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::os::unix::net::UnixDatagram` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `std::os::unix::net::UnixDatagram` is not sandboxed and may access any
+    /// address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixDatagram, _: AmbientAuthority) -> Self {
         Self { std }
@@ -135,7 +138,8 @@ impl UnixDatagram {
 
     /// Sets the read timeout for the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::set_read_timeout`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixDatagram::set_read_timeout`].
     ///
     /// [`std::os::unix::net::UnixDatagram::set_read_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_read_timeout
     #[inline]
@@ -145,7 +149,8 @@ impl UnixDatagram {
 
     /// Sets the write timeout for the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::set_write_timeout`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixDatagram::set_write_timeout`].
     ///
     /// [`std::os::unix::net::UnixDatagram::set_write_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_write_timeout
     #[inline]
@@ -165,7 +170,8 @@ impl UnixDatagram {
 
     /// Returns the write timeout of this socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::write_timeout`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixDatagram::write_timeout`].
     ///
     /// [`std::os::unix::net::UnixDatagram::write_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.write_timeout
     #[inline]
@@ -175,7 +181,8 @@ impl UnixDatagram {
 
     /// Moves the socket into or out of nonblocking mode.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::set_nonblocking`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixDatagram::set_nonblocking`].
     ///
     /// [`std::os::unix::net::UnixDatagram::set_nonblocking`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html#method.set_nonblocking
     #[inline]

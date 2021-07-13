@@ -10,7 +10,8 @@ use winapi::{
     um::{winbase, winnt::FILE_ATTRIBUTE_DIRECTORY},
 };
 
-/// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `open`, but which does not perform
+/// sandboxing.
 pub(crate) fn open_unchecked(
     start: &fs::File,
     path: &Path,

@@ -5,15 +5,15 @@ use crate::fs::{FollowSymlinks, OpenOptionsExt};
 /// This corresponds to [`std::fs::OpenOptions`].
 ///
 /// Note that this `OpenOptions` has no `open` method. To open a file with
-/// an `OptionOptions`, you must first obtain a [`Dir`] containing the path, and
-/// then call [`Dir::open_with`].
+/// an `OptionOptions`, you must first obtain a [`Dir`] containing the path,
+/// and then call [`Dir::open_with`].
 ///
 /// [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
 /// [`Dir::open_with`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_with
 ///
 /// <details>
-/// We need to define our own version because the libstd `OpenOptions` doesn't have
-/// public accessors that we can use.
+/// We need to define our own version because the libstd `OpenOptions` doesn't
+/// have public accessors that we can use.
 /// </details>
 #[derive(Debug, Clone)]
 pub struct OpenOptions {
@@ -142,8 +142,9 @@ impl OpenOptions {
 
     /// Wrapper to allow `follow` to be exposed by the `cap-fs-ext` crate.
     ///
-    /// This is hidden from the main API since this functionality isn't present in `std`.
-    /// Use `cap_fs_ext::OpenOptionsFollowExt` instead of calling this directly.
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsFollowExt` instead of calling
+    /// this directly.
     #[doc(hidden)]
     #[inline]
     pub fn _cap_fs_ext_follow(&mut self, follow: FollowSymlinks) -> &mut Self {
@@ -152,8 +153,9 @@ impl OpenOptions {
 
     /// Wrapper to allow `maybe_dir` to be exposed by the `cap-fs-ext` crate.
     ///
-    /// This is hidden from the main API since this functionality isn't present in `std`.
-    /// Use `cap_fs_ext::OpenOptionsMaybeDirExt` instead of calling this directly.
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsMaybeDirExt` instead of
+    /// calling this directly.
     #[doc(hidden)]
     #[inline]
     pub fn _cap_fs_ext_maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
@@ -199,8 +201,8 @@ impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
         self
     }
 
-    /// To prevent race conditions on Windows, handles for directories must be opened
-    /// without `FILE_SHARE_DELETE`.
+    /// To prevent race conditions on Windows, handles for directories must be
+    /// opened without `FILE_SHARE_DELETE`.
     #[inline]
     fn share_mode(&mut self, val: u32) -> &mut Self {
         self.ext.share_mode(val);

@@ -30,12 +30,13 @@ pub struct TcpListener {
 }
 
 impl TcpListener {
-    /// Constructs a new instance of `Self` from the given `async_std::net::TcpListener`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::net::TcpListener`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::net::TcpListener` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `async_std::net::TcpListener` is not sandboxed and may access any
+    /// address that the host process has access to.
     #[inline]
     pub fn from_std(std: net::TcpListener, _: AmbientAuthority) -> Self {
         Self { std }
@@ -62,7 +63,8 @@ impl TcpListener {
             .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream, ambient_authority()), addr))
     }
 
-    /// Returns an iterator over the connections being received on this listener.
+    /// Returns an iterator over the connections being received on this
+    /// listener.
     ///
     /// This corresponds to [`async_std::net::TcpListener::incoming`].
     #[inline]

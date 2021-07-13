@@ -19,9 +19,9 @@ use std::{ffi::OsString, fmt};
 /// opening or removing the entry directly, which can be more efficient and
 /// convenient.
 ///
-/// Note that there is no `from_std` method, as `async_std::fs::DirEntry` doesn't
-/// provide a way to construct a `DirEntry` without opening directories by
-/// ambient paths.
+/// Note that there is no `from_std` method, as `async_std::fs::DirEntry`
+/// doesn't provide a way to construct a `DirEntry` without opening directories
+/// by ambient paths.
 pub struct DirEntry {
     pub(crate) inner: cap_primitives::fs::DirEntry,
 }

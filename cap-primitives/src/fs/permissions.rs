@@ -9,8 +9,8 @@ use std::{fs, io};
 /// This corresponds to [`std::fs::Permissions`].
 ///
 /// <details>
-/// We need to define our own version because the libstd `Permissions` doesn't have
-/// a public constructor that we can use.
+/// We need to define our own version because the libstd `Permissions` doesn't
+/// have a public constructor that we can use.
 /// </details>
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Permissions {
@@ -21,7 +21,8 @@ pub struct Permissions {
 }
 
 impl Permissions {
-    /// Constructs a new instance of `Self` from the given `std::fs::Permissions`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::fs::Permissions`.
     #[inline]
     pub fn from_std(std: fs::Permissions) -> Self {
         Self {
@@ -59,7 +60,8 @@ impl Permissions {
         Ok(permissions)
     }
 
-    /// Returns `true` if these permissions describe a readonly (unwritable) file.
+    /// Returns `true` if these permissions describe a readonly (unwritable)
+    /// file.
     ///
     /// This corresponds to [`std::fs::Permissions::readonly`].
     #[inline]

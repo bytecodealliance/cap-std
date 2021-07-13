@@ -1,7 +1,8 @@
 use posish::fs::renameat;
 use std::{fs, io, path::Path};
 
-/// *Unsandboxed* function similar to `rename`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `rename`, but which does not perform
+/// sandboxing.
 pub(crate) fn rename_unchecked(
     old_start: &fs::File,
     old_path: &Path,

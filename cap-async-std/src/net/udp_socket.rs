@@ -19,27 +19,29 @@ use {
 ///
 /// This corresponds to [`async_std::net::UdpSocket`].
 ///
-/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods. To
-/// create a `UdpSocket` bound to an address or to send a message to an address,
-/// you must first obtain a [`Pool`] permitting the address, and then call
-/// [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
+/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods.
+/// To create a `UdpSocket` bound to an address or to send a message to an
+/// address, you must first obtain a [`Pool`] permitting the address, and then
+/// call [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
 /// [`Pool::send_to_udp_socket_addr`].
 ///
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::bind_udp_socket`]: struct.Pool.html#method.bind_udp_socket
 /// [`Pool::connect_udp_socket`]: struct.Pool.html#method.connect_udp_socket
-/// [`Pool::send_to_udp_socket_addr`]: struct.Pool.html#method.send_to_udp_socket_addr
+/// [`Pool::send_to_udp_socket_addr`]:
+/// struct.Pool.html#method.send_to_udp_socket_addr
 pub struct UdpSocket {
     pub(crate) std: net::UdpSocket,
 }
 
 impl UdpSocket {
-    /// Constructs a new instance of `Self` from the given `async_std::net::UdpSocket`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::net::UdpSocket`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::net::UdpSocket` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `async_std::net::UdpSocket` is not sandboxed and may access any address
+    /// that the host process has access to.
     #[inline]
     pub fn from_std(std: net::UdpSocket, _: AmbientAuthority) -> Self {
         Self { std }
@@ -55,7 +57,8 @@ impl UdpSocket {
 
     // async_std doesn't have `peek_from`.
 
-    /// Returns the socket address of the remote peer this socket was connected to.
+    /// Returns the socket address of the remote peer this socket was connected
+    /// to.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::peer_addr`].
     #[inline]
@@ -99,7 +102,8 @@ impl UdpSocket {
 
     /// Sets the value of the `IP_MULTICAST_LOOP` option for this socket.
     ///
-    /// This corresponds to [`async_std::net::UdpSocket::set_multicast_loop_v4`].
+    /// This corresponds to
+    /// [`async_std::net::UdpSocket::set_multicast_loop_v4`].
     #[inline]
     pub fn set_multicast_loop_v4(&self, multicast_loop_v4: bool) -> io::Result<()> {
         self.std.set_multicast_loop_v4(multicast_loop_v4)
@@ -115,7 +119,8 @@ impl UdpSocket {
 
     /// Sets the value of the `IP_MULTICAST_TTL` option for this socket.
     ///
-    /// This corresponds to [`async_std::net::UdpSocket::set_multicast_ttl_v4`].
+    /// This corresponds to
+    /// [`async_std::net::UdpSocket::set_multicast_ttl_v4`].
     #[inline]
     pub fn set_multicast_ttl_v4(&self, multicast_ttl_v4: u32) -> io::Result<()> {
         self.std.set_multicast_ttl_v4(multicast_ttl_v4)
@@ -131,7 +136,8 @@ impl UdpSocket {
 
     /// Sets the value of the `IPV6_MULTICAST_LOOP` option for this socket.
     ///
-    /// This corresponds to [`async_std::net::UdpSocket::set_multicast_loop_v6`].
+    /// This corresponds to
+    /// [`async_std::net::UdpSocket::set_multicast_loop_v6`].
     #[inline]
     pub fn set_multicast_loop_v6(&self, multicast_loop_v6: bool) -> io::Result<()> {
         self.std.set_multicast_loop_v6(multicast_loop_v6)
@@ -199,7 +205,8 @@ impl UdpSocket {
 
     // async_std doesn't have `take_error`.
 
-    /// Sends data on the socket to the remote address to which it is connected.
+    /// Sends data on the socket to the remote address to which it is
+    /// connected.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::send`].
     #[inline]
@@ -207,8 +214,8 @@ impl UdpSocket {
         self.std.send(buf).await
     }
 
-    /// Receives a single datagram message on the socket from the remote address to which it is
-    /// connected.
+    /// Receives a single datagram message on the socket from the remote
+    /// address to which it is connected.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::recv`].
     #[inline]

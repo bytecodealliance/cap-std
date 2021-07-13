@@ -9,8 +9,8 @@ use std::{fs, io};
 /// This corresponds to [`std::fs::Metadata`].
 ///
 /// <details>
-/// We need to define our own version because the libstd `Metadata` doesn't have
-/// a public constructor that we can use.
+/// We need to define our own version because the libstd `Metadata` doesn't
+/// have a public constructor that we can use.
 /// </details>
 #[derive(Debug, Clone)]
 pub struct Metadata {
@@ -162,7 +162,8 @@ impl Metadata {
         })
     }
 
-    /// Determine if `self` and `other` refer to the same inode on the same device.
+    /// Determine if `self` and `other` refer to the same inode on the same
+    /// device.
     #[cfg(any(not(windows), windows_by_handle))]
     pub(crate) fn is_same_file(&self, other: &Self) -> bool {
         self.ext.is_same_file(&other.ext)
@@ -389,8 +390,8 @@ impl std::os::windows::fs::MetadataExt for Metadata {
 /// Extension trait to allow `volume_serial_number` etc. to be exposed by
 /// the `cap-fs-ext` crate.
 ///
-/// This is hidden from the main API since this functionality isn't present in `std`.
-/// Use `cap_fs_ext::MetadataExt` instead of calling this directly.
+/// This is hidden from the main API since this functionality isn't present in
+/// `std`. Use `cap_fs_ext::MetadataExt` instead of calling this directly.
 #[cfg(windows)]
 #[doc(hidden)]
 pub trait _WindowsByHandle {

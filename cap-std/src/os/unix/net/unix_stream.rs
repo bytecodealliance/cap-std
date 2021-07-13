@@ -16,9 +16,9 @@ use unsafe_io::OwnsRaw;
 ///
 /// This corresponds to [`std::os::unix::net::UnixStream`].
 ///
-/// Note that this `UnixStream` has no `connect` method. To create a `UnixStream`,
-/// you must first obtain a [`Dir`] containing the path, and then call
-/// [`Dir::connect_unix_stream`].
+/// Note that this `UnixStream` has no `connect` method. To create a
+/// `UnixStream`, you must first obtain a [`Dir`] containing the path, and then
+/// call [`Dir::connect_unix_stream`].
 ///
 /// [`std::os::unix::net::UnixStream`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html
 /// [`Dir`]: struct.Dir.html
@@ -28,12 +28,13 @@ pub struct UnixStream {
 }
 
 impl UnixStream {
-    /// Constructs a new instance of `Self` from the given `std::os::unix::net::UnixStream`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::os::unix::net::UnixStream`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::os::unix::net::UnixStream` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// `std::os::unix::net::UnixStream` is not sandboxed and may access any
+    /// address that the host process has access to.
     #[inline]
     pub fn from_std(std: unix::net::UnixStream, _: AmbientAuthority) -> Self {
         Self { std }
@@ -89,7 +90,8 @@ impl UnixStream {
 
     /// Sets the read timeout for the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::set_read_timeout`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixStream::set_read_timeout`].
     ///
     /// [`std::os::unix::net::UnixStream::set_read_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.set_read_timeout
     #[inline]
@@ -99,7 +101,8 @@ impl UnixStream {
 
     /// Sets the write timeout for the socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::set_write_timeout`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixStream::set_write_timeout`].
     ///
     /// [`std::os::unix::net::UnixStream::set_write_timeout`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.set_write_timeout
     #[inline]
@@ -129,7 +132,8 @@ impl UnixStream {
 
     /// Moves the socket into or out of nonblocking mode.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::set_nonblocking`].
+    /// This corresponds to
+    /// [`std::os::unix::net::UnixStream::set_nonblocking`].
     ///
     /// [`std::os::unix::net::UnixStream::set_nonblocking`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.set_nonblocking
     #[inline]

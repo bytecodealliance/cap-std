@@ -454,8 +454,8 @@ impl DirExt for cap_async_std::fs::Dir {
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         // This operation may race, because it checks the metadata before deleting
-        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
-        // not get it to work.
+        // the symlink. We tried to do this atomically by ReOpenFile with
+        // DELETE_ON_CLOSE but could not get it to work.
         fn delete_symlink_to_dir(dir: &cap_async_std::fs::Dir, path: &Path) -> io::Result<()> {
             use crate::{FollowSymlinks, OpenOptionsFollowExt};
             use cap_std::fs::OpenOptions;
@@ -604,8 +604,8 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         // This operation may race, because it checks the metadata before deleting
-        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
-        // not get it to work.
+        // the symlink. We tried to do this atomically by ReOpenFile with
+        // DELETE_ON_CLOSE but could not get it to work.
         fn delete_symlink_to_dir(dir: &cap_std::fs_utf8::Dir, path: &str) -> io::Result<()> {
             use crate::{FollowSymlinks, OpenOptionsFollowExt};
             use cap_std::fs::OpenOptions;
@@ -760,8 +760,8 @@ impl DirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[inline]
     fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         // This operation may race, because it checks the metadata before deleting
-        // the symlink. We tried to do this atomically by ReOpenFile with DELETE_ON_CLOSE but could
-        // not get it to work.
+        // the symlink. We tried to do this atomically by ReOpenFile with
+        // DELETE_ON_CLOSE but could not get it to work.
         fn delete_symlink_to_dir(dir: &cap_async_std::fs_utf8::Dir, path: &str) -> io::Result<()> {
             use crate::{FollowSymlinks, OpenOptionsFollowExt};
             use cap_std::fs::OpenOptions;

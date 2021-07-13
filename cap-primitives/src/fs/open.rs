@@ -1,12 +1,13 @@
-//! This defines `open`, the primary entrypoint to sandboxed file and directory opening.
+//! This defines `open`, the primary entrypoint to sandboxed file and directory
+//! opening.
 
 #[cfg(racy_asserts)]
 use crate::fs::{file_path, open_unchecked, stat_unchecked, Metadata};
 use crate::fs::{open_impl, OpenOptions};
 use std::{fs, io, path::Path};
 
-/// Perform an `openat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform an `openat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn open(start: &fs::File, path: &Path, options: &OpenOptions) -> io::Result<fs::File> {

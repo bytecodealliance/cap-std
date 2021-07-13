@@ -5,8 +5,8 @@ use std::{
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
 
-/// Like `file.metadata()`, but works with `O_PATH` descriptors on old (pre 3.6)
-/// versions of Linux too.
+/// Like `file.metadata()`, but works with `O_PATH` descriptors on old (pre
+/// 3.6) versions of Linux too.
 pub(super) fn file_metadata(file: &fs::File) -> io::Result<Metadata> {
     // Record whether we've seen an `EBADF` from an `fstat` on an `O_PATH`
     // file descriptor, meaning we're on a Linux that doesn't support it.

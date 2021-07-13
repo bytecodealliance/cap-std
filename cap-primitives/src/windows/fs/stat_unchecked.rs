@@ -10,7 +10,8 @@ use {
     std::os::windows::fs::OpenOptionsExt,
 };
 
-/// *Unsandboxed* function similar to `stat`, but which does not perform sandboxing.
+/// *Unsandboxed* function similar to `stat`, but which does not perform
+/// sandboxing.
 pub(crate) fn stat_unchecked(
     start: &fs::File,
     path: &Path,

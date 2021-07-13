@@ -500,8 +500,8 @@ fn file_with_trailing_slashdot() {
     assert!(tmpdir.open_dir("file/...").is_err());
 }
 
-/// This is just to confirm that Windows really does allow one to open "file/." and
-/// "file/..", and similar, however it doesn't allow "file/" or similar.
+/// This is just to confirm that Windows really does allow one to open "file/."
+/// and "file/..", and similar, however it doesn't allow "file/" or similar.
 #[cfg(windows)]
 #[test]
 fn file_with_trailing_slashdot_ambient() {

@@ -1,7 +1,7 @@
 //! A fully UTF-8 filesystem API modeled after [`cap_async_std::fs`].
 //!
-//! Where `cap_async_std::fs` would use `Path` and `PathBuf`, this `fs_utf8` module
-//! uses `str` and `String`, meaning that all paths are valid UTF-8.
+//! Where `cap_async_std::fs` would use `Path` and `PathBuf`, this `fs_utf8`
+//! module uses `str` and `String`, meaning that all paths are valid UTF-8.
 //!
 //! But wait, POSIX doesn't require filenames to be UTF-8! What happens if
 //! there's a file with a non-UTF-8 name? To address this, this module uses
@@ -14,7 +14,8 @@
 //!
 //! TODO: This whole scheme is still under development.
 //!
-//! If you don't want this, use the regular [`cap_async_std::fs`] module instead.
+//! If you don't want this, use the regular [`cap_async_std::fs`] module
+//! instead.
 //!
 //! [`cap_async_std::fs`]: ../fs/
 //! [ARF strings]: https://crates.io/crates/arf-strings

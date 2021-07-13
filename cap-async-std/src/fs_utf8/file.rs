@@ -40,12 +40,13 @@ pub struct File {
 }
 
 impl File {
-    /// Constructs a new instance of `Self` from the given `async_std::fs::File`.
+    /// Constructs a new instance of `Self` from the given
+    /// `async_std::fs::File`.
     ///
     /// # Ambient Authority
     ///
-    /// `async_std::fs::File` is not sandboxed and may access any path that the host
-    /// process has access to.
+    /// `async_std::fs::File` is not sandboxed and may access any path that the
+    /// host process has access to.
     #[inline]
     pub fn from_std(std: fs::File, ambient_authority: AmbientAuthority) -> Self {
         Self::from_cap_std(crate::fs::File::from_std(std, ambient_authority))
@@ -73,8 +74,8 @@ impl File {
         self.cap_std.sync_all().await
     }
 
-    /// This function is similar to `sync_all`, except that it may not synchronize
-    /// file metadata to a filesystem.
+    /// This function is similar to `sync_all`, except that it may not
+    /// synchronize file metadata to a filesystem.
     ///
     /// This corresponds to [`async_std::fs::File::sync_data`].
     #[inline]
@@ -82,8 +83,8 @@ impl File {
         self.cap_std.sync_data().await
     }
 
-    /// Truncates or extends the underlying file, updating the size of this file
-    /// to become size.
+    /// Truncates or extends the underlying file, updating the size of this
+    /// file to become size.
     ///
     /// This corresponds to [`async_std::fs::File::set_len`].
     #[inline]

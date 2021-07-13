@@ -49,8 +49,9 @@ fn paths_containing_nul() {
     assert_invalid_input("copy2", tmpdir.copy(&dummy_file, &tmpdir, "\0"));
     assert_invalid_input("hard_link1", tmpdir.hard_link("\0", &tmpdir, "a"));
     assert_invalid_input("hard_link2", tmpdir.hard_link(&dummy_file, &tmpdir, "\0"));
-    //fixmeassert_invalid_input("soft_link1", tmpdir.soft_link("\0", &tmpdir, "a"));
-    //fixmeassert_invalid_input("soft_link2", tmpdir.soft_link(&dummy_file, &tmpdir, "\0"));
+    //fixmeassert_invalid_input("soft_link1", tmpdir.soft_link("\0", &tmpdir,
+    // "a")); fixmeassert_invalid_input("soft_link2",
+    // tmpdir.soft_link(&dummy_file, &tmpdir, "\0"));
     assert_invalid_input("read_link", tmpdir.read_link("\0"));
     assert_invalid_input("canonicalize", tmpdir.canonicalize("\0"));
     assert_invalid_input("create_dir", tmpdir.create_dir("\0"));

@@ -37,7 +37,8 @@ fn windows_open_multiple() {
 
     let dir = check!(tmpdir.open_dir("aaa/bbb"));
 
-    // Attempts to remove or rename any component of the open directory should fail.
+    // Attempts to remove or rename any component of the open directory should
+    // fail.
     tmpdir.remove_dir("aaa/bbb").unwrap_err();
     tmpdir.remove_dir("aaa").unwrap_err();
     tmpdir.rename("aaa/bbb", &tmpdir, "aaa/yyy").unwrap_err();
@@ -68,7 +69,8 @@ fn windows_open_tricky() {
     // Now drop `qqq`.
     drop(qqq);
 
-    // Attempts to remove or rename any component of the open directory should fail.
+    // Attempts to remove or rename any component of the open directory should
+    // fail.
     dir.remove_dir("aaa/bbb").unwrap_err();
     dir.remove_dir("aaa").unwrap_err();
     dir.rename("aaa/bbb", &tmpdir, "aaa/yyy").unwrap_err();

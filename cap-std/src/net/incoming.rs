@@ -12,12 +12,13 @@ pub struct Incoming<'a> {
 }
 
 impl<'a> Incoming<'a> {
-    /// Constructs a new instance of `Self` from the given `std::net::Incoming`.
+    /// Constructs a new instance of `Self` from the given
+    /// `std::net::Incoming`.
     ///
     /// # Ambient Authority
     ///
-    /// `std::net::Incoming` is not sandboxed and may access any address that the host
-    /// process has access to.
+    /// `std::net::Incoming` is not sandboxed and may access any address that
+    /// the host process has access to.
     #[inline]
     pub fn from_std(std: net::Incoming<'a>, _: AmbientAuthority) -> Self {
         Self { std }

@@ -53,8 +53,9 @@ macro_rules! error_contains {
     };
 }
 
-// The following is derived from Rust's src/tools/cargo/crates/cargo-test-support/src/lib.rs
-// at revision a78a62fc996ba16f7a111c99520b23f77029f4eb.
+// The following is derived from Rust's
+// src/tools/cargo/crates/cargo-test-support/src/lib.rs at revision
+// a78a62fc996ba16f7a111c99520b23f77029f4eb.
 
 #[cfg(windows)]
 #[allow(dead_code)]

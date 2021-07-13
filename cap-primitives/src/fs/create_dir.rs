@@ -1,4 +1,5 @@
-//! This defines `create_dir`, the primary entrypoint to sandboxed directory creation.
+//! This defines `create_dir`, the primary entrypoint to sandboxed directory
+//! creation.
 
 #[cfg(racy_asserts)]
 use crate::fs::{
@@ -7,8 +8,8 @@ use crate::fs::{
 use crate::fs::{create_dir_impl, DirOptions};
 use std::{fs, io, path::Path};
 
-/// Perform a `mkdirat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `mkdirat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn create_dir(start: &fs::File, path: &Path, options: &DirOptions) -> io::Result<()> {

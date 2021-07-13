@@ -46,7 +46,8 @@ impl Pool {
         self.cap.insert_socket_addr(addr, ambient_authority)
     }
 
-    /// Creates a new `TcpListener` which will be bound to the specified address.
+    /// Creates a new `TcpListener` which will be bound to the specified
+    /// address.
     ///
     /// This corresponds to [`std::net::TcpListener::bind`].
     #[inline]

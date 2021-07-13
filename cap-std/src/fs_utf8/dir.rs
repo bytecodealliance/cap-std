@@ -95,17 +95,19 @@ impl Dir {
         self.cap_std.create_dir(path)
     }
 
-    /// Recursively create a directory and all of its parent components if they are missing.
+    /// Recursively create a directory and all of its parent components if they
+    /// are missing.
     ///
-    /// This corresponds to [`std::fs::create_dir_all`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::fs::create_dir_all`], but only accesses
+    /// paths relative to `self`.
     #[inline]
     pub fn create_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
         self.cap_std.create_dir_all(path)
     }
 
-    /// Creates the specified directory with the options configured in this builder.
+    /// Creates the specified directory with the options configured in this
+    /// builder.
     ///
     /// This corresponds to [`std::fs::DirBuilder::create`].
     #[inline]
@@ -128,19 +130,21 @@ impl Dir {
         self.cap_std.create(path).map(File::from_cap_std)
     }
 
-    /// Returns the canonical form of a path with all intermediate components normalized
-    /// and symbolic links resolved.
+    /// Returns the canonical form of a path with all intermediate components
+    /// normalized and symbolic links resolved.
     ///
-    /// This corresponds to [`std::fs::canonicalize`], but instead of returning an
-    /// absolute path, returns a path relative to the directory represented by `self`.
+    /// This corresponds to [`std::fs::canonicalize`], but instead of returning
+    /// an absolute path, returns a path relative to the directory
+    /// represented by `self`.
     #[inline]
     pub fn canonicalize<P: AsRef<str>>(&self, path: P) -> io::Result<String> {
         let path = from_utf8(path)?;
         self.cap_std.canonicalize(path).and_then(to_utf8)
     }
 
-    /// Copies the contents of one file to another. This function will also copy the permission
-    /// bits of the original file to the destination file.
+    /// Copies the contents of one file to another. This function will also
+    /// copy the permission bits of the original file to the destination
+    /// file.
     ///
     /// This corresponds to [`std::fs::copy`], but only accesses paths
     /// relative to `self`.
@@ -172,7 +176,8 @@ impl Dir {
         self.cap_std.hard_link(src, &dst_dir.cap_std, dst)
     }
 
-    /// Given a path, query the file system to get information about a file, directory, etc.
+    /// Given a path, query the file system to get information about a file,
+    /// directory, etc.
     ///
     /// This corresponds to [`std::fs::metadata`], but only accesses paths
     /// relative to `self`.
@@ -220,8 +225,8 @@ impl Dir {
 
     /// Read the entire contents of a file into a string.
     ///
-    /// This corresponds to [`std::fs::read_to_string`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::fs::read_to_string`], but only accesses
+    /// paths relative to `self`.
     #[inline]
     pub fn read_to_string<P: AsRef<str>>(&self, path: P) -> io::Result<String> {
         let path = from_utf8(path)?;
@@ -238,10 +243,11 @@ impl Dir {
         self.cap_std.remove_dir(path)
     }
 
-    /// Removes a directory at this path, after removing all its contents. Use carefully!
+    /// Removes a directory at this path, after removing all its contents. Use
+    /// carefully!
     ///
-    /// This corresponds to [`std::fs::remove_dir_all`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::fs::remove_dir_all`], but only accesses
+    /// paths relative to `self`.
     #[inline]
     pub fn remove_dir_all<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
         let path = from_utf8(path)?;
@@ -251,19 +257,19 @@ impl Dir {
     /// Remove the directory referenced by `self` and consume `self`.
     ///
     /// Note that even though this implementation works in terms of handles
-    /// as much as possible, removal is not guaranteed to be atomic with respect
-    /// to a concurrent rename of the directory.
+    /// as much as possible, removal is not guaranteed to be atomic with
+    /// respect to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir(self) -> io::Result<()> {
         self.cap_std.remove_open_dir()
     }
 
-    /// Removes the directory referenced by `self`, after removing all its contents, and
-    /// consume `self`. Use carefully!
+    /// Removes the directory referenced by `self`, after removing all its
+    /// contents, and consume `self`. Use carefully!
     ///
     /// Note that even though this implementation works in terms of handles
-    /// as much as possible, removal is not guaranteed to be atomic with respect
-    /// to a concurrent rename of the directory.
+    /// as much as possible, removal is not guaranteed to be atomic with
+    /// respect to a concurrent rename of the directory.
     #[inline]
     pub fn remove_open_dir_all(self) -> io::Result<()> {
         self.cap_std.remove_open_dir_all()
@@ -279,7 +285,8 @@ impl Dir {
         self.cap_std.remove_file(path)
     }
 
-    /// Rename a file or directory to a new name, replacing the original file if to already exists.
+    /// Rename a file or directory to a new name, replacing the original file
+    /// if to already exists.
     ///
     /// This corresponds to [`std::fs::rename`], but only accesses paths
     /// relative to `self`.
@@ -297,9 +304,10 @@ impl Dir {
 
     /// Changes the permissions found on a file or a directory.
     ///
-    /// This corresponds to [`std::fs::set_permissions`], but only accesses paths
-    /// relative to `self`. Also, on some platforms, this function may fail if the
-    /// file or directory cannot be opened for reading or writing first.
+    /// This corresponds to [`std::fs::set_permissions`], but only accesses
+    /// paths relative to `self`. Also, on some platforms, this function
+    /// may fail if the file or directory cannot be opened for reading or
+    /// writing first.
     pub fn set_permissions<P: AsRef<str>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         let path = from_utf8(path)?;
         self.cap_std.set_permissions(path, perm)
@@ -307,8 +315,8 @@ impl Dir {
 
     /// Query the metadata about a file without following symlinks.
     ///
-    /// This corresponds to [`std::fs::symlink_metadata`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::fs::symlink_metadata`], but only accesses
+    /// paths relative to `self`.
     #[inline]
     pub fn symlink_metadata<P: AsRef<str>>(&self, path: P) -> io::Result<Metadata> {
         let path = from_utf8(path)?;
@@ -327,8 +335,8 @@ impl Dir {
 
     /// Creates a new symbolic link on a filesystem.
     ///
-    /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
+    /// paths relative to `self`.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
@@ -341,8 +349,8 @@ impl Dir {
 
     /// Creates a new file symbolic link on a filesystem.
     ///
-    /// This corresponds to [`std::os::windows::fs::symlink_file`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::os::windows::fs::symlink_file`], but only
+    /// accesses paths relative to `self`.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     #[cfg(windows)]
@@ -355,8 +363,8 @@ impl Dir {
 
     /// Creates a new directory symlink on a filesystem.
     ///
-    /// This corresponds to [`std::os::windows::fs::symlink_dir`], but only accesses paths
-    /// relative to `self`.
+    /// This corresponds to [`std::os::windows::fs::symlink_dir`], but only
+    /// accesses paths relative to `self`.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
     #[cfg(windows)]
@@ -369,8 +377,8 @@ impl Dir {
 
     /// Creates a new `UnixListener` bound to the specified socket.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixListener::bind`], but only
-    /// accesses paths relative to `self`.
+    /// This corresponds to [`std::os::unix::net::UnixListener::bind`], but
+    /// only accesses paths relative to `self`.
     ///
     /// XXX: This function is not yet implemented.
     ///
@@ -384,8 +392,8 @@ impl Dir {
 
     /// Connects to the socket named by path.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixStream::connect`], but only
-    /// accesses paths relative to `self`.
+    /// This corresponds to [`std::os::unix::net::UnixStream::connect`], but
+    /// only accesses paths relative to `self`.
     ///
     /// XXX: This function is not yet implemented.
     ///
@@ -399,8 +407,8 @@ impl Dir {
 
     /// Creates a Unix datagram socket bound to the given path.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::bind`], but only
-    /// accesses paths relative to `self`.
+    /// This corresponds to [`std::os::unix::net::UnixDatagram::bind`], but
+    /// only accesses paths relative to `self`.
     ///
     /// XXX: This function is not yet implemented.
     ///
@@ -414,8 +422,8 @@ impl Dir {
 
     /// Connects the socket to the specified address.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::connect`], but only
-    /// accesses paths relative to `self`.
+    /// This corresponds to [`std::os::unix::net::UnixDatagram::connect`], but
+    /// only accesses paths relative to `self`.
     ///
     /// XXX: This function is not yet implemented.
     ///
@@ -433,8 +441,8 @@ impl Dir {
 
     /// Sends data on the socket to the specified address.
     ///
-    /// This corresponds to [`std::os::unix::net::UnixDatagram::send_to`], but only
-    /// accesses paths relative to `self`.
+    /// This corresponds to [`std::os::unix::net::UnixDatagram::send_to`], but
+    /// only accesses paths relative to `self`.
     ///
     /// XXX: This function is not yet implemented.
     ///
@@ -452,8 +460,8 @@ impl Dir {
             .send_to_unix_datagram_addr(unix_datagram, buf, path)
     }
 
-    /// Creates a new `Dir` instance that shares the same underlying file handle as the existing
-    /// `Dir` instance.
+    /// Creates a new `Dir` instance that shares the same underlying file
+    /// handle as the existing `Dir` instance.
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         Ok(Self {
@@ -473,7 +481,8 @@ impl Dir {
         }
     }
 
-    /// Returns `true` if the path exists on disk and is pointing at a regular file.
+    /// Returns `true` if the path exists on disk and is pointing at a regular
+    /// file.
     ///
     /// This corresponds to [`std::path::Path::is_file`], but only
     /// accesses paths relative to `self`.
@@ -487,9 +496,10 @@ impl Dir {
 
     /// Checks if `path` is a directory.
     ///
-    /// This is similar to [`std::path::Path::is_dir`] in that it checks if `path` relative to
-    /// `Dir` is a directory. This function will traverse symbolic links to query information about
-    /// the destination file. In case of broken symbolic links, this will return `false`.
+    /// This is similar to [`std::path::Path::is_dir`] in that it checks if
+    /// `path` relative to `Dir` is a directory. This function will
+    /// traverse symbolic links to query information about the destination
+    /// file. In case of broken symbolic links, this will return `false`.
     #[inline]
     pub fn is_dir<P: AsRef<str>>(&self, path: P) -> bool {
         match from_utf8(path) {
@@ -533,8 +543,8 @@ impl FromFd for Dir {
 
 #[cfg(windows)]
 impl FromRawHandle for Dir {
-    /// To prevent race conditions on Windows, the handle must be opened without
-    /// `FILE_SHARE_DELETE`.
+    /// To prevent race conditions on Windows, the handle must be opened
+    /// without `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
         Self::from_std_file(fs::File::from_raw_handle(handle), ambient_authority())
@@ -543,8 +553,8 @@ impl FromRawHandle for Dir {
 
 #[cfg(windows)]
 impl FromHandle for Dir {
-    /// To prevent race conditions on Windows, the handle must be opened without
-    /// `FILE_SHARE_DELETE`.
+    /// To prevent race conditions on Windows, the handle must be opened
+    /// without `FILE_SHARE_DELETE`.
     #[inline]
     fn from_handle(handle: OwnedHandle) -> Self {
         Self::from_std_file(fs::File::from_handle(handle), ambient_authority())

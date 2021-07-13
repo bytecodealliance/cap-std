@@ -32,7 +32,8 @@ pub(super) fn open_parent<'path, 'borrow>(
 /// Split `path` into parent and basename parts. Return `None` if `path`
 /// is empty.
 ///
-/// This differs from `path.parent()` and `path.file_name()` in several respects:
+/// This differs from `path.parent()` and `path.file_name()` in several
+/// respects:
 ///  - Treat paths ending in `/` or `/.` as implying a directory.
 ///  - Treat the path `.` as a normal component rather than a parent.
 ///  - Append a `.` to a path with a trailing `..` to avoid requiring our

@@ -1,6 +1,7 @@
 use crate::fs::DirOptionsExt;
 
-/// Options and flags which can be used to configure how a directory is created.
+/// Options and flags which can be used to configure how a directory is
+/// created.
 ///
 /// This is to `create_dir` what to `OpenOptions` is to `open`.
 #[derive(Debug, Clone)]

@@ -5,8 +5,8 @@ use crate::fs::{canonicalize, map_result, stat_unchecked};
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
 use std::{fs, io, path::Path};
 
-/// Perform an `fstatat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform an `fstatat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Metadata> {
@@ -54,7 +54,8 @@ fn check_stat(
                     err => panic!("stat failed where canonicalize succeeded: {:?}", err),
                 }
             } else {
-                // TODO: Check that stat in the no-follow case got the right error.
+                // TODO: Check that stat in the no-follow case got the right
+                // error.
             }
         }
 

@@ -1,4 +1,5 @@
-//! This defines `remove_dir`, the primary entrypoint to sandboxed file removal.
+//! This defines `remove_dir`, the primary entrypoint to sandboxed file
+//! removal.
 
 use crate::fs::remove_dir_impl;
 #[cfg(racy_asserts)]
@@ -7,8 +8,8 @@ use crate::fs::{
 };
 use std::{fs, io, path::Path};
 
-/// Perform a `rmdirat`-like operation, ensuring that the resolution of the path
-/// never escapes the directory tree rooted at `start`.
+/// Perform a `rmdirat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn remove_dir(start: &fs::File, path: &Path) -> io::Result<()> {
