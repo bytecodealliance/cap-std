@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-ambient-authority = "0.0.0"
+ambient-authority = "0.0.1"
 rand = "0.8.1"
 
 [features]
