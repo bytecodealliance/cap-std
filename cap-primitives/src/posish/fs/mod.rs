@@ -93,7 +93,7 @@ pub(crate) use is_root_dir::is_root_dir;
 pub(crate) use is_same_file::{is_different_file, is_different_file_metadata, is_same_file};
 pub(crate) use metadata_ext::MetadataExt;
 pub(crate) use open_options_ext::OpenOptionsExt;
-pub(crate) use open_unchecked::open_unchecked;
+pub(crate) use open_unchecked::{open_ambient_impl, open_unchecked};
 pub(crate) use permissions_ext::PermissionsExt;
 pub(crate) use read_dir_inner::ReadDirInner;
 pub(crate) use read_link_unchecked::read_link_unchecked;

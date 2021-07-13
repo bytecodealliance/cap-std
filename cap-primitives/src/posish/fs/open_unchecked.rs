@@ -1,8 +1,11 @@
 use super::compute_oflags;
-use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
-use io_lifetimes::FromFd;
+use crate::{
+    fs::{stat_unchecked, OpenOptions, OpenUncheckedError},
+    AmbientAuthority,
+};
+use io_lifetimes::{AsFilelike, FromFd};
 use posish::{
-    fs::{openat, Mode},
+    fs::{cwd, openat, Mode},
     io,
 };
 use std::{fs, path::Path};
@@ -57,4 +60,14 @@ pub(crate) fn open_unchecked(
         }
         _ => Err(OpenUncheckedError::Other(err.into())),
     }
+}
+
+/// *Unsandboxed* function similar to `open`, but which does not perform sandboxing.
+#[inline]
+pub(crate) fn open_ambient_impl(
+    path: &Path,
+    options: &OpenOptions,
+    _ambient_authority: AmbientAuthority,
+) -> Result<fs::File, OpenUncheckedError> {
+    open_unchecked(&cwd().as_filelike_view::<fs::File>(), path, options)
 }

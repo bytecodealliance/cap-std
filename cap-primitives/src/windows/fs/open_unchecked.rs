@@ -1,5 +1,9 @@
 use super::{get_path::concatenate_or_return_absolute, open_options_to_std};
-use crate::fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
+use crate::{
+    ambient_authority,
+    fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind},
+    AmbientAuthority,
+};
 use std::{fs, io, os::windows::fs::MetadataExt, path::Path};
 use winapi::{
     shared::winerror,
@@ -14,8 +18,18 @@ pub(crate) fn open_unchecked(
 ) -> Result<fs::File, OpenUncheckedError> {
     let full_path =
         concatenate_or_return_absolute(start, path).map_err(OpenUncheckedError::Other)?;
+    open_ambient_impl(&full_path, options, ambient_authority())
+}
+
+/// *Unsandboxed* function similar to `open_unchecked`, but which just operates
+/// on a bare path, rather than starting with a handle.
+pub(crate) fn open_ambient_impl(
+    path: &Path,
+    options: &OpenOptions,
+    _ambient_authority: AmbientAuthority,
+) -> Result<fs::File, OpenUncheckedError> {
     let (opts, manually_trunc) = open_options_to_std(options);
-    match opts.open(full_path) {
+    match opts.open(path) {
         Ok(f) => {
             let enforce_dir = options.dir_required;
             let enforce_nofollow = options.follow == FollowSymlinks::No

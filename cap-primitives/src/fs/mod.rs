@@ -19,6 +19,7 @@ mod is_file_read_write;
 mod maybe_owned_file;
 mod metadata;
 mod open;
+mod open_ambient;
 mod open_dir;
 mod open_options;
 mod open_unchecked_error;
@@ -72,6 +73,7 @@ pub use metadata::Metadata;
 #[cfg(windows)]
 pub use metadata::_WindowsByHandle;
 pub use open::open;
+pub use open_ambient::open_ambient;
 pub use open_dir::*;
 pub use open_options::OpenOptions;
 pub use permissions::Permissions;

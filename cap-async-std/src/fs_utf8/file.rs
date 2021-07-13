@@ -1,4 +1,7 @@
-use crate::fs::{Metadata, Permissions};
+use crate::{
+    fs::{Metadata, OpenOptions, Permissions},
+    fs_utf8::from_utf8,
+};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
@@ -104,6 +107,47 @@ impl File {
     #[inline]
     pub async fn set_permissions(&self, perm: Permissions) -> io::Result<()> {
         self.cap_std.set_permissions(perm).await
+    }
+
+    /// Constructs a new instance of `Self` in read-only mode by opening the
+    /// given path as a file using the host process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub fn open_ambient<P: AsRef<str>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        let path = from_utf8(path)?;
+        Ok(Self::from_cap_std(crate::fs::File::open_ambient(
+            path,
+            ambient_authority,
+        )?))
+    }
+
+    /// Constructs a new instance of `Self` with the options specified by
+    /// `options` by opening the given path as a file using the host process'
+    /// ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub fn open_ambient_with<P: AsRef<str>>(
+        path: P,
+        options: &OpenOptions,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        let path = from_utf8(path)?;
+        Ok(Self::from_cap_std(crate::fs::File::open_ambient_with(
+            path,
+            options,
+            ambient_authority,
+        )?))
     }
 }
 
