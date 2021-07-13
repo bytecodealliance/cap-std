@@ -82,7 +82,7 @@ impl Dir {
         self.open_with(path, OpenOptions::new().read(true))
     }
 
-    /// Opens a file at `path` with the options specified by `self`.
+    /// Opens a file at `path` with the options specified by `options`.
     ///
     /// This corresponds to [`async_std::fs::OpenOptions::open`].
     ///

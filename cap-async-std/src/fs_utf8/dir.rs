@@ -66,7 +66,7 @@ impl Dir {
         self.cap_std.open(path).map(File::from_cap_std)
     }
 
-    /// Opens a file at `path` with the options specified by `self`.
+    /// Opens a file at `path` with the options specified by `options`.
     ///
     /// This corresponds to [`async_std::fs::OpenOptions::open`].
     ///
