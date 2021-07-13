@@ -40,6 +40,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Install musl-tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y musl-tools
+
     # Disable x86_64-pc-windows-msvc, x86_64-pc-windows-gnu,
     # i686-pc-windows-msvc, and i686-pc-windows-gnu for now, since async-std
     # doesn't currently support cross-compiling to Windows.
@@ -115,6 +122,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Install musl-tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y musl-tools
+
     # Disable x86_64-pc-windows-msvc, x86_64-pc-windows-gnu,
     # i686-pc-windows-msvc, i686-pc-windows-gnu for now, and
     # aarch64-pc-windows-msvc, since async-std doesn't currently support
@@ -304,6 +318,13 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Install musl-tools
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y musl-tools
+
     - run: rustup target add x86_64-unknown-linux-musl
     - run: cargo test --target x86_64-unknown-linux-musl --features fs_utf8 --workspace
 
