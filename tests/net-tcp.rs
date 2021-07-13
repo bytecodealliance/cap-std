@@ -49,7 +49,8 @@ fn connect_error() {
             e.kind() == ErrorKind::ConnectionRefused
                 || e.kind() == ErrorKind::InvalidInput
                 || e.kind() == ErrorKind::AddrInUse
-                || e.kind() == ErrorKind::AddrNotAvailable,
+                || e.kind() == ErrorKind::AddrNotAvailable
+                || e.kind() == ErrorKind::TimedOut,
             "bad error: {} {:?}",
             e,
             e.kind()
