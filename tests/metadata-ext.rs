@@ -4,7 +4,8 @@
 mod sys_common;
 
 use cap_fs_ext::{DirExt, MetadataExt};
-use sys_common::{io::tmpdir, symlink_supported};
+use sys_common::io::tmpdir;
+use sys_common::symlink_supported;
 
 #[test]
 fn test_metadata_ext() {

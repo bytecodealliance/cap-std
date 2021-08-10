@@ -6,7 +6,8 @@ use crate::fs::remove_file_impl;
 use crate::fs::{
     manually, map_result, remove_file_unchecked, stat_unchecked, FollowSymlinks, Metadata,
 };
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform a `remove_fileat`-like operation, ensuring that the resolution of
 /// the path never escapes the directory tree rooted at `start`.

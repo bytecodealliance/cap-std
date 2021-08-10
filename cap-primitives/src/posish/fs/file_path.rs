@@ -3,7 +3,8 @@ use crate::fs::file_path_by_searching;
 use posish::io::ttyname;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use std::ffi::OsString;
-use std::{fs, path::PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 pub(crate) fn file_path_by_ttyname_or_seaching(file: &fs::File) -> Option<PathBuf> {
     // If it happens to be a tty, we can look up its name.

@@ -1,7 +1,5 @@
-use crate::{
-    fs::{FileType, Metadata, OpenOptions},
-    fs_utf8::{to_utf8, Dir, File},
-};
+use crate::fs::{FileType, Metadata, OpenOptions};
+use crate::fs_utf8::{to_utf8, Dir, File};
 #[cfg(not(windows))]
 use posish::fs::DirEntryExt;
 use std::{fmt, io};

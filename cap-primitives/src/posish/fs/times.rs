@@ -1,10 +1,11 @@
-use crate::{fs::SystemTimeSpec, time::SystemClock};
+use crate::fs::SystemTimeSpec;
+use crate::time::SystemClock;
 use io_lifetimes::BorrowedFd;
-use posish::{
-    fs::{utimensat, AtFlags, UTIME_NOW, UTIME_OMIT},
-    time::Timespec,
-};
-use std::{convert::TryInto, fs, io, path::Path};
+use posish::fs::{utimensat, AtFlags, UTIME_NOW, UTIME_OMIT};
+use posish::time::Timespec;
+use std::convert::TryInto;
+use std::path::Path;
+use std::{fs, io};
 
 #[allow(clippy::useless_conversion)]
 fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<Timespec> {

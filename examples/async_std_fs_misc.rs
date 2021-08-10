@@ -1,11 +1,10 @@
 // Copied from https://doc.rust-lang.org/rust-by-example/std_misc/fs.html and
 // adapted to use this crate instead.
 
-use async_std::{io, io::prelude::*};
-use cap_async_std::{
-    ambient_authority,
-    fs::{Dir, OpenOptions},
-};
+use async_std::io;
+use async_std::io::prelude::*;
+use cap_async_std::ambient_authority;
+use cap_async_std::fs::{Dir, OpenOptions};
 //use async_std::os::unix;
 use std::path::Path;
 

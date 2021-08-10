@@ -1,13 +1,9 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    fmt, io,
-    os::unix::{
-        self,
-        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    },
-};
+use std::os::unix;
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use std::{fmt, io};
 use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.

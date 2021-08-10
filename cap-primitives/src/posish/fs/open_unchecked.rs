@@ -1,14 +1,11 @@
 use super::compute_oflags;
-use crate::{
-    fs::{stat_unchecked, OpenOptions, OpenUncheckedError},
-    AmbientAuthority,
-};
+use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
+use crate::AmbientAuthority;
 use io_lifetimes::{AsFilelike, FromFd};
-use posish::{
-    fs::{cwd, openat, Mode},
-    io,
-};
-use std::{fs, path::Path};
+use posish::fs::{cwd, openat, Mode};
+use posish::io;
+use std::fs;
+use std::path::Path;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use {crate::fs::ensure_cloexec, io_lifetimes::AsFd};
 

@@ -99,7 +99,8 @@ fn windows_open_tricky() {
 #[test]
 #[cfg(windows)]
 fn windows_open_ambient() {
-    use cap_std::{ambient_authority, fs::Dir};
+    use cap_std::ambient_authority;
+    use cap_std::fs::Dir;
 
     let ambient_dir = tempfile::tempdir().unwrap();
 

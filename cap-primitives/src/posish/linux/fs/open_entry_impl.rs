@@ -1,5 +1,6 @@
 use crate::fs::{manually, open_beneath, OpenOptions};
-use std::{ffi::OsStr, fs, io};
+use std::ffi::OsStr;
+use std::{fs, io};
 
 pub(crate) fn open_entry_impl(
     start: &fs::File,

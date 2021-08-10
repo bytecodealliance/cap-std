@@ -1,6 +1,8 @@
 use super::{internal_open, read_link_one};
 use crate::fs::{open_unchecked, FollowSymlinks, MaybeOwnedFile, OpenOptions, OpenUncheckedError};
-use std::{ffi::OsStr, fs, io, path::PathBuf};
+use std::ffi::OsStr;
+use std::path::PathBuf;
+use std::{fs, io};
 
 pub(crate) fn open_entry(
     start: &fs::File,

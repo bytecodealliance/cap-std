@@ -5,7 +5,8 @@
 use super::file_metadata;
 use crate::fs::{manually, open_beneath, FollowSymlinks, Metadata, OpenOptions};
 use posish::fs::OFlags;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Use `openat2` with `O_PATH` and `fstat`. If that's not available, fallback
 /// to `manually::stat`.

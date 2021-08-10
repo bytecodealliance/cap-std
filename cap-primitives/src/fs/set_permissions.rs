@@ -4,7 +4,8 @@
 #[cfg(racy_asserts)]
 use crate::fs::{map_result, stat, stat_unchecked, FollowSymlinks, Metadata};
 use crate::fs::{set_permissions_impl, Permissions};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform a `chmodat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

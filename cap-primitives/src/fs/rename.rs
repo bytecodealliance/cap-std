@@ -3,7 +3,8 @@
 #[cfg(all(racy_asserts, not(windows)))]
 use crate::fs::append_dir_suffix;
 use crate::fs::rename_impl;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 #[cfg(racy_asserts)]
 use {
     crate::fs::{

@@ -1,24 +1,21 @@
 use crate::fs::{Metadata, OpenOptions, Permissions};
+use async_std::fs;
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use async_std::{
-    fs,
-    io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
-    task::{Context, Poll},
-};
-use cap_primitives::{
-    ambient_authority,
-    fs::{is_file_read_write, open_ambient},
-    AmbientAuthority,
-};
+use async_std::task::{Context, Poll};
+use cap_primitives::fs::{is_file_read_write, open_ambient};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
-use std::{fmt, path::Path, pin::Pin};
+use std::fmt;
+use std::path::Path;
+use std::pin::Pin;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {

@@ -1,10 +1,9 @@
 //! This defines `open_ambient`, for unsandboxed file opening.
 
-use crate::{
-    fs::{open_ambient_impl, OpenOptions},
-    AmbientAuthority,
-};
-use std::{fs, io, path::Path};
+use crate::fs::{open_ambient_impl, OpenOptions};
+use crate::AmbientAuthority;
+use std::path::Path;
+use std::{fs, io};
 
 /// Open a file named by a bare path, using the host process' ambient
 /// authority.

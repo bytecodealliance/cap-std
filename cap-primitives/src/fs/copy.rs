@@ -1,5 +1,6 @@
 use crate::fs::copy_impl;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Copies the contents of one file to another.
 #[inline]

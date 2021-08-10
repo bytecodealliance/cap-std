@@ -1,5 +1,6 @@
 use posish::fs::symlinkat;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `symlink`, but which does not perform
 /// sandboxing.

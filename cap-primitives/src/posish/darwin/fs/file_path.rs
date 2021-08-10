@@ -4,7 +4,8 @@
 
 use crate::posish::fs::file_path_by_ttyname_or_seaching;
 use posish::fs::getpath;
-use std::{fs, path::PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 pub(crate) fn file_path(file: &fs::File) -> Option<PathBuf> {
     if let Ok(path) = getpath(file) {

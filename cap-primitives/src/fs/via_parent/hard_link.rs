@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::{hard_link_unchecked, MaybeOwnedFile};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Implement `hard_link` by `open`ing up the parent component of the path and
 /// then calling `hard_link_unchecked` on the last component.

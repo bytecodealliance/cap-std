@@ -1,11 +1,7 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
-use async_std::{
-    io,
-    os::unix::{
-        self,
-        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    },
-};
+use async_std::io;
+use async_std::os::unix;
+use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;

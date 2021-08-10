@@ -4,10 +4,8 @@
 #![allow(warnings)] // not used on emscripten
 
 use cap_std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6, ToSocketAddrs};
-use std::{
-    env,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::env;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 static PORT: AtomicUsize = AtomicUsize::new(0);
 

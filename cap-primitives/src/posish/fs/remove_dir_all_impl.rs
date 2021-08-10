@@ -2,10 +2,8 @@ use crate::fs::{
     read_dir, read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat, FollowSymlinks,
     ReadDir,
 };
-use std::{
-    fs, io,
-    path::{Component, Path},
-};
+use std::path::{Component, Path};
+use std::{fs, io};
 
 pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<()> {
     // Code adapted from `remove_dir_all` in Rust's

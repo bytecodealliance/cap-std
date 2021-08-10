@@ -10,7 +10,8 @@ use posish::fs::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
     fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
 };
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 fn open_from(start: &fs::File, path: &Path) -> io::Result<(fs::File, fs::Metadata)> {
     let reader = open(start, path, OpenOptions::new().read(true))?;
@@ -78,10 +79,8 @@ pub(crate) fn copy_impl(
     to_start: &fs::File,
     to_path: &Path,
 ) -> io::Result<u64> {
-    use std::{
-        cmp,
-        sync::atomic::{AtomicBool, Ordering},
-    };
+    use std::cmp;
+    use std::sync::atomic::{AtomicBool, Ordering};
 
     // Kernel prior to 4.5 don't have copy_file_range
     // We store the availability in a global to avoid unnecessary syscalls

@@ -1,8 +1,7 @@
-use cap_std::{
-    ambient_authority,
-    fs::{Dir, DirEntry},
-};
-use std::{collections::HashMap, path::Path};
+use cap_std::ambient_authority;
+use cap_std::fs::{Dir, DirEntry};
+use std::collections::HashMap;
+use std::path::Path;
 
 #[test]
 fn test_dir_entries() {

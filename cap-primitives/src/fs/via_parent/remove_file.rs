@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::{remove_file_unchecked, MaybeOwnedFile};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Implement `remove_file` by `open`ing up the parent component of the path
 /// and then calling `remove_file_unchecked` on the last component.

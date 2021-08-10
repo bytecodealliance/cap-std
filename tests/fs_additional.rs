@@ -6,15 +6,11 @@
 mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};
-use std::{
-    io::{self, Read, Write},
-    path::Path,
-    str,
-};
-use sys_common::{
-    io::{tmpdir, TempDir},
-    symlink_supported,
-};
+use std::io::{self, Read, Write};
+use std::path::Path;
+use std::str;
+use sys_common::io::{tmpdir, TempDir};
+use sys_common::symlink_supported;
 
 #[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
@@ -281,7 +277,8 @@ fn follow_dotdot_symlink() {
 
 #[test]
 fn follow_dotdot_symlink_ambient() {
-    use cap_std::{ambient_authority, fs::Dir};
+    use cap_std::ambient_authority;
+    use cap_std::fs::Dir;
     #[cfg(unix)]
     use std::os::unix::fs::symlink as symlink_dir;
     #[cfg(windows)]
@@ -430,7 +427,8 @@ fn check_dot_access() {
 #[cfg(unix)]
 #[test]
 fn check_dot_access_ambient() {
-    use std::{fs, os::unix::fs::DirBuilderExt};
+    use std::fs;
+    use std::os::unix::fs::DirBuilderExt;
 
     let dir = tempfile::tempdir().unwrap();
 
@@ -505,7 +503,8 @@ fn file_with_trailing_slashdot() {
 #[cfg(windows)]
 #[test]
 fn file_with_trailing_slashdot_ambient() {
-    use cap_std::{ambient_authority, fs::Dir};
+    use cap_std::ambient_authority;
+    use cap_std::fs::Dir;
     let dir = tempfile::tempdir().unwrap();
     check!(std::fs::File::create(dir.path().join("file")));
     check!(std::fs::File::open(dir.path().join("file")));
@@ -575,7 +574,8 @@ fn dir_searchable_unreadable() {
 #[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
 #[test]
 fn dir_searchable_unreadable_ambient() {
-    use std::{fs, os::unix::fs::DirBuilderExt};
+    use std::fs;
+    use std::os::unix::fs::DirBuilderExt;
 
     let dir = tempfile::tempdir().unwrap();
 
@@ -648,7 +648,8 @@ fn dir_unsearchable_unreadable() {
 #[cfg(unix)]
 #[test]
 fn dir_unsearchable_unreadable_ambient() {
-    use std::{fs::DirBuilder, os::unix::fs::DirBuilderExt};
+    use std::fs::DirBuilder;
+    use std::os::unix::fs::DirBuilderExt;
 
     let dir = tempfile::tempdir().unwrap();
 

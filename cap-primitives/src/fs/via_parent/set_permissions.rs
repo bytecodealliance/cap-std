@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::{set_permissions_unchecked, MaybeOwnedFile, Permissions};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 #[inline]
 pub(crate) fn set_permissions(start: &fs::File, path: &Path, perm: Permissions) -> io::Result<()> {

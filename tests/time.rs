@@ -1,10 +1,8 @@
 // This file is derived from Rust's library/std/src/time/tests.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
-use cap_std::{
-    ambient_authority,
-    time::{Duration, MonotonicClock, SystemClock},
-};
+use cap_std::ambient_authority;
+use cap_std::time::{Duration, MonotonicClock, SystemClock};
 
 macro_rules! assert_almost_eq {
     ($a:expr, $b:expr) => {{

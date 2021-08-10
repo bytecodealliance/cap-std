@@ -1,7 +1,5 @@
-use std::{
-    ffi::OsStr,
-    path::{Component, PathBuf},
-};
+use std::ffi::OsStr;
+use std::path::{Component, PathBuf};
 
 /// Utility for collecting the canonical path components.
 pub(super) struct CanonicalPath<'path_buf> {

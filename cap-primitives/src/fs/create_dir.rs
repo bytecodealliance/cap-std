@@ -6,7 +6,8 @@ use crate::fs::{
     canonicalize, create_dir_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
 };
 use crate::fs::{create_dir_impl, DirOptions};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform a `mkdirat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

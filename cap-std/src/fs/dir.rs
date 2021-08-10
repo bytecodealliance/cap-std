@@ -1,27 +1,21 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-use cap_primitives::{
-    ambient_authority,
-    fs::{
-        canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
-        read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-        remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks,
-        Permissions,
-    },
-    AmbientAuthority,
+use cap_primitives::fs::{
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
+use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 #[cfg(target_os = "wasi")]
 use posish::fs::OpenOptionsExt;
-use std::{
-    fmt, fs,
-    io::{self, Read, Write},
-    path::{Path, PathBuf},
-};
+use std::io::{self, Read, Write};
+use std::path::{Path, PathBuf};
+use std::{fmt, fs};
 use unsafe_io::OwnsRaw;
 #[cfg(not(windows))]
 use {

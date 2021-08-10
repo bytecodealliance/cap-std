@@ -1,5 +1,6 @@
 use crate::not_found;
-use cap_std::{ambient_authority, fs::Dir, AmbientAuthority};
+use cap_std::fs::Dir;
+use cap_std::{ambient_authority, AmbientAuthority};
 use std::{fs, io};
 
 /// `ProjectDirs` computes the cache, config or data directories for a specific

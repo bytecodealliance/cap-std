@@ -5,7 +5,8 @@
 use crate::fs::open_unchecked;
 use crate::fs::{dir_options, open, open_ambient_dir_impl, readdir_options, FollowSymlinks};
 use ambient_authority::AmbientAuthority;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Open a directory by performing an `openat`-like operation,
 /// ensuring that the resolution of the path never escapes

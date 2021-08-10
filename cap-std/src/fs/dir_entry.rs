@@ -2,7 +2,8 @@ use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
 use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use posish::fs::DirEntryExt;
-use std::{ffi::OsString, fmt, io};
+use std::ffi::OsString;
+use std::{fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.
 ///

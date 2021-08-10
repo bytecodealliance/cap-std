@@ -6,7 +6,9 @@
 //! `cap-std` API.
 
 use cap_directories::{ambient_authority, ProjectDirs};
-use std::{env::args, path::PathBuf, str};
+use std::env::args;
+use std::path::PathBuf;
+use std::str;
 
 fn main() -> anyhow::Result<()> {
     // Parse command-line arguments.

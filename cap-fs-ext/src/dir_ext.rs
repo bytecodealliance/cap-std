@@ -1,13 +1,12 @@
+use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use cap_primitives::fs::symlink;
+use cap_primitives::fs::{open_dir_nofollow, set_times, set_times_nofollow};
 #[cfg(windows)]
 use cap_primitives::fs::{symlink_dir, symlink_file};
-use cap_primitives::{
-    ambient_authority,
-    fs::{open_dir_nofollow, set_times, set_times_nofollow},
-};
 use io_lifetimes::AsFilelike;
-use std::{io, path::Path};
+use std::io;
+use std::path::Path;
 
 pub use cap_primitives::fs::SystemTimeSpec;
 
@@ -301,10 +300,8 @@ impl DirExt for cap_std::fs::Dir {
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::{
-            winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT},
-            winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY},
-        };
+        use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+        use winapi::um::winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY};
         let path = path.as_ref();
 
         let mut opts = OpenOptions::new();

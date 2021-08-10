@@ -3,7 +3,8 @@ mod sys_common;
 
 use cap_fs_ext::DirExt;
 use cap_std::time::{SystemClock, SystemTime};
-use sys_common::{io::tmpdir, symlink_supported};
+use sys_common::io::tmpdir;
+use sys_common::symlink_supported;
 
 fn modified_time(meta: cap_std::fs::Metadata) -> SystemTime {
     meta.modified().unwrap()

@@ -3,11 +3,10 @@
 #[macro_use]
 mod sys_common;
 
-use std::{io, path::Path};
-use sys_common::{
-    io::{tmpdir, TempDir},
-    symlink_supported,
-};
+use std::io;
+use std::path::Path;
+use sys_common::io::{tmpdir, TempDir};
+use sys_common::symlink_supported;
 
 #[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {

@@ -1,14 +1,11 @@
-use crate::{net::Shutdown, os::unix::net::SocketAddr};
+use crate::net::Shutdown;
+use crate::os::unix::net::SocketAddr;
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    fmt, io,
-    os::unix::{
-        self,
-        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    },
-    time::Duration,
-};
+use std::os::unix;
+use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use std::time::Duration;
+use std::{fmt, io};
 use unsafe_io::OwnsRaw;
 
 /// A Unix datagram socket.

@@ -13,11 +13,10 @@ use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
 use io_lifetimes::FromFd;
 use posish::fs::{openat2, Mode, OFlags, RawMode, ResolveFlags};
-use std::{
-    fs, io,
-    path::Path,
-    sync::atomic::{AtomicBool, Ordering::Relaxed},
-};
+use std::path::Path;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::Relaxed;
+use std::{fs, io};
 
 /// Call the `openat2` system call, or use a fallback if that's unavailable.
 pub(crate) fn open_impl(

@@ -1,5 +1,6 @@
 use crate::fs::{manually, OpenOptions};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 use winapi::shared::winerror::ERROR_FILE_NOT_FOUND;
 
 pub(crate) fn open_impl(

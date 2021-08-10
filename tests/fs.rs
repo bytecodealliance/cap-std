@@ -8,23 +8,18 @@ mod sys_common;
 
 use std::io::prelude::*;
 
-use cap_std::{
-    ambient_authority,
-    fs::{self, Dir, OpenOptions},
-};
+use cap_std::ambient_authority;
+use cap_std::fs::{self, Dir, OpenOptions};
+use std::io::{self, ErrorKind, SeekFrom};
+use std::path::{Path, PathBuf};
+use std::str;
 #[cfg(not(racy_asserts))] // racy asserts are racy
 use std::thread;
-use std::{
-    io::{self, ErrorKind, SeekFrom},
-    path::{Path, PathBuf},
-    str,
-};
-use sys_common::{
-    io::{tmpdir, TempDir},
-    symlink_junction,
-};
+use sys_common::io::{tmpdir, TempDir};
+use sys_common::symlink_junction;
 
-use rand::{rngs::StdRng, RngCore, SeedableRng};
+use rand::rngs::StdRng;
+use rand::{RngCore, SeedableRng};
 
 #[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {

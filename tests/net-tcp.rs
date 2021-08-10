@@ -3,15 +3,14 @@
 
 mod net;
 
-use cap_std::{ambient_authority, net::*};
+use cap_std::ambient_authority;
+use cap_std::net::*;
 use net::{next_test_ip4, next_test_ip6};
-use std::{
-    fmt,
-    io::{prelude::*, ErrorKind, IoSlice, IoSliceMut},
-    sync::mpsc::channel,
-    thread,
-    time::{Duration, Instant},
-};
+use std::io::prelude::*;
+use std::io::{ErrorKind, IoSlice, IoSliceMut};
+use std::sync::mpsc::channel;
+use std::time::{Duration, Instant};
+use std::{fmt, thread};
 
 fn each_ip(f: &mut dyn FnMut(SocketAddr)) {
     f(next_test_ip4());

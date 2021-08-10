@@ -1,22 +1,19 @@
-use crate::{
-    fs::{Metadata, OpenOptions, Permissions},
-    fs_utf8::from_utf8,
-};
+use crate::fs::{Metadata, OpenOptions, Permissions};
+use crate::fs_utf8::from_utf8;
+use async_std::fs;
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use async_std::{
-    fs,
-    io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
-    task::{Context, Poll},
-};
+use async_std::task::{Context, Poll};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
-use std::{fmt, pin::Pin};
+use std::fmt;
+use std::pin::Pin;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {

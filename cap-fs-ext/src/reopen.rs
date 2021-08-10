@@ -1,7 +1,5 @@
-use cap_primitives::{
-    ambient_authority,
-    fs::{reopen, OpenOptions},
-};
+use cap_primitives::ambient_authority;
+use cap_primitives::fs::{reopen, OpenOptions};
 #[cfg(any(feature = "std", feature = "async_std"))]
 use io_lifetimes::AsFilelike;
 #[cfg(feature = "async_std")]

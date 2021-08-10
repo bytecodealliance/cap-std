@@ -37,15 +37,12 @@ pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, Seedabl
 ///
 /// This corresponds to [`rand::prelude`].
 pub mod prelude {
+    pub use crate::distributions::Distribution;
     #[cfg(feature = "small_rng")]
     pub use crate::rngs::SmallRng;
-    pub use crate::{
-        distributions::Distribution,
-        random,
-        rngs::{CapRng, StdRng},
-        seq::{IteratorRandom, SliceRandom},
-        thread_rng, CryptoRng, Rng, RngCore, SeedableRng,
-    };
+    pub use crate::rngs::{CapRng, StdRng};
+    pub use crate::seq::{IteratorRandom, SliceRandom};
+    pub use crate::{random, thread_rng, CryptoRng, Rng, RngCore, SeedableRng};
 }
 
 /// Random number generators and adapters.

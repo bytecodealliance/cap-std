@@ -4,7 +4,8 @@ use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
-use std::{fmt, io, net, time::Duration};
+use std::time::Duration;
+use std::{fmt, io, net};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;

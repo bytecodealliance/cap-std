@@ -5,17 +5,15 @@ use crate::fs::{
 };
 use io_lifetimes::AsFd;
 use posish::fs::Dir;
+use std::ffi::OsStr;
+use std::mem::ManuallyDrop;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
 use std::os::wasi::ffi::OsStrExt;
-use std::{
-    ffi::OsStr,
-    fmt, fs, io,
-    mem::ManuallyDrop,
-    path::{Component, Path},
-    sync::{Arc, Mutex},
-};
+use std::path::{Component, Path};
+use std::sync::{Arc, Mutex};
+use std::{fmt, fs, io};
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, RawFd};
 
 pub(crate) struct ReadDirInner {

@@ -1,9 +1,6 @@
 use crate::time::{Duration, SystemTimeError};
-use std::{
-    fmt,
-    ops::{Add, AddAssign, Sub, SubAssign},
-    time,
-};
+use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::{fmt, time};
 
 /// A measurement of the system clock, useful for talking to external entities
 /// like the file system or other processes.

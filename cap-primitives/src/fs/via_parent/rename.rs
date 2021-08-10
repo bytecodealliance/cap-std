@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::{rename_unchecked, strip_dir_suffix, MaybeOwnedFile};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Implement `rename` by `open`ing up the parent component of the path and
 /// then calling `rename_unchecked` on the last component.

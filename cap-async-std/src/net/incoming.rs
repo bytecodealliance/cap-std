@@ -1,11 +1,10 @@
 use crate::net::TcpStream;
-use async_std::{
-    io, net,
-    stream::Stream,
-    task::{Context, Poll},
-};
+use async_std::stream::Stream;
+use async_std::task::{Context, Poll};
+use async_std::{io, net};
 use cap_primitives::{ambient_authority, AmbientAuthority};
-use std::{fmt, pin::Pin};
+use std::fmt;
+use std::pin::Pin;
 
 /// An iterator that infinitely `accept`s connections on a [`TcpListener`].
 ///

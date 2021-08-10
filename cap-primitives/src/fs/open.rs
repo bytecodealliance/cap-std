@@ -4,7 +4,8 @@
 #[cfg(racy_asserts)]
 use crate::fs::{file_path, open_unchecked, stat_unchecked, Metadata};
 use crate::fs::{open_impl, OpenOptions};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform an `openat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

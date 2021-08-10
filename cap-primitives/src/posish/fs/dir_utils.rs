@@ -1,13 +1,16 @@
 use crate::fs::OpenOptions;
 use ambient_authority::AmbientAuthority;
 use posish::fs::OFlags;
+use std::ffi::OsStr;
+use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
 #[cfg(target_os = "wasi")]
 use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
-use std::{ffi::OsStr, fs, io, ops::Deref, path::Path};
+use std::path::Path;
 #[cfg(racy_asserts)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
+use std::{fs, io};
 
 /// Rust's `Path` implicitly strips redundant slashes, however they aren't
 /// redundant in one case: at the end of a path they indicate that a path is

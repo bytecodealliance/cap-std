@@ -3,10 +3,8 @@ use crate::fs::{
 };
 #[cfg(windows_file_type_ext)]
 use std::os::windows::fs::FileTypeExt;
-use std::{
-    fs, io,
-    path::{Component, Path},
-};
+use std::path::{Component, Path};
+use std::{fs, io};
 
 pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<()> {
     // Code derived from `remove_dir_all` in Rust's

@@ -1,5 +1,6 @@
 use crate::fs::remove_dir_all_impl;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Removes a directory and all of its contents.
 #[inline]

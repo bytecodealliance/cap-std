@@ -1,6 +1,7 @@
 use crate::os::unix::net::UnixStream;
 use cap_primitives::{ambient_authority, AmbientAuthority};
-use std::{fmt, io, os::unix};
+use std::os::unix;
+use std::{fmt, io};
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///

@@ -6,7 +6,8 @@ use crate::fs::hard_link_impl;
 use crate::fs::{
     canonicalize, hard_link_unchecked, map_result, stat_unchecked, FollowSymlinks, Metadata,
 };
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform a `linkat`-like operation, ensuring that the resolution of the path
 /// never escapes the directory tree rooted at `start`.

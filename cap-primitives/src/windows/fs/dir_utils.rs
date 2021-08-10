@@ -1,18 +1,13 @@
-use crate::{
-    fs::{errors, OpenOptions},
-    AmbientAuthority,
-};
-use std::{
-    ffi::OsString,
-    fs, io,
-    ops::Deref,
-    os::windows::{
-        ffi::{OsStrExt, OsStringExt},
-        fs::OpenOptionsExt,
-    },
-    path::{Path, PathBuf},
-};
-use winapi::um::{winbase::FILE_FLAG_BACKUP_SEMANTICS, winnt};
+use crate::fs::{errors, OpenOptions};
+use crate::AmbientAuthority;
+use std::ffi::OsString;
+use std::ops::Deref;
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::os::windows::fs::OpenOptionsExt;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
+use winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS;
+use winapi::um::winnt;
 
 /// Rust's `Path` implicitly strips redundant slashes, however they aren't
 /// redundant in one case: at the end of a path they indicate that a path is

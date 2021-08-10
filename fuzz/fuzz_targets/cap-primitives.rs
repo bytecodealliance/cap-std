@@ -4,11 +4,10 @@
 extern crate libfuzzer_sys;
 
 use arbitrary::Arbitrary;
-use cap_primitives::{
-    ambient_authority,
-    fs::{open_ambient_dir, DirOptions, FollowSymlinks, OpenOptions},
-};
-use std::{fs, path::PathBuf};
+use cap_primitives::ambient_authority;
+use cap_primitives::fs::{open_ambient_dir, DirOptions, FollowSymlinks, OpenOptions};
+use std::fs;
+use std::path::PathBuf;
 use tempfile::tempdir;
 
 // TODO: NUL, SP, invalid UTF-8, non-normalized?

@@ -1,6 +1,7 @@
 use crate::fs::DirOptions;
 use posish::fs::{mkdirat, Mode, RawMode};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `create_dir`, but which does not perform
 /// sandboxing.

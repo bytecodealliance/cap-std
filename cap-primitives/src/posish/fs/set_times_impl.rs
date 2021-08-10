@@ -4,7 +4,8 @@
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
 use fs_set_times::SetTimes;
 use posish::io::Error;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 pub(crate) fn set_times_impl(
     start: &fs::File,

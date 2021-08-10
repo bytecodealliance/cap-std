@@ -1,6 +1,8 @@
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
-use cap_primitives::{ambient_authority, net::NO_SOCKET_ADDRS, AmbientAuthority};
-use std::{io, net, time::Duration};
+use cap_primitives::net::NO_SOCKET_ADDRS;
+use cap_primitives::{ambient_authority, AmbientAuthority};
+use std::time::Duration;
+use std::{io, net};
 
 /// A pool of network addresses.
 ///

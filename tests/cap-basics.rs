@@ -1,7 +1,8 @@
 #[macro_use]
 mod sys_common;
 
-use sys_common::{io::tmpdir, symlink_supported};
+use sys_common::io::tmpdir;
+use sys_common::symlink_supported;
 
 #[test]
 fn cap_smoke_test() {

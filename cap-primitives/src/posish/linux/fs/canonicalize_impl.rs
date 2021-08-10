@@ -3,11 +3,9 @@
 use super::procfs::get_path_from_proc_self_fd;
 use crate::fs::{manually, open_beneath, FollowSymlinks, OpenOptions};
 use posish::fs::OFlags;
-use std::{
-    fs, io,
-    os::unix::fs::OpenOptionsExt,
-    path::{Component, Path, PathBuf},
-};
+use std::os::unix::fs::OpenOptionsExt;
+use std::path::{Component, Path, PathBuf};
+use std::{fs, io};
 
 /// Implement `canonicalize` by using readlink on `/proc/self/fd/*`.
 pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<PathBuf> {

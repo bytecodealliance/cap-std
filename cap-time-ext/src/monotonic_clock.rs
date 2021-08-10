@@ -1,6 +1,8 @@
 #[cfg(not(windows))]
 use posish::time::{clock_getres, ClockId};
-use std::{convert::TryInto, time, time::Duration};
+use std::convert::TryInto;
+use std::time;
+use std::time::Duration;
 #[cfg(windows)]
 use {once_cell::sync::Lazy, winx::time::perf_counter_frequency};
 

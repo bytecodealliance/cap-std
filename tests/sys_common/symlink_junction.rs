@@ -3,7 +3,8 @@
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
 use cap_std::fs::Dir;
-use std::{io, path::Path};
+use std::io;
+use std::path::Path;
 
 #[cfg(not(windows))]
 #[allow(dead_code)]
@@ -58,10 +59,10 @@ pub fn cvt(i: winapi::shared::minwindef::BOOL) -> io::Result<winapi::shared::min
 #[allow(dead_code)]
 fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Result<()> {
     use cap_std::fs::OpenOptions;
-    use std::{
-        os::windows::{ffi::OsStrExt, fs::OpenOptionsExt, io::AsRawHandle},
-        ptr,
-    };
+    use std::os::windows::ffi::OsStrExt;
+    use std::os::windows::fs::OpenOptionsExt;
+    use std::os::windows::io::AsRawHandle;
+    use std::ptr;
 
     dir.create_dir(junction)?;
 

@@ -3,7 +3,8 @@
 #[macro_use]
 mod sys_common;
 
-use sys_common::{io::tmpdir, symlink_supported};
+use sys_common::io::tmpdir;
+use sys_common::symlink_supported;
 
 #[test]
 fn windows_symlinks() {
@@ -38,11 +39,10 @@ fn windows_symlinks() {
 
 #[test]
 fn windows_symlinks_ambient() {
-    use cap_std::{ambient_authority, fs::Dir};
-    use std::{
-        fs,
-        os::windows::fs::{symlink_dir, symlink_file},
-    };
+    use cap_std::ambient_authority;
+    use cap_std::fs::Dir;
+    use std::fs;
+    use std::os::windows::fs::{symlink_dir, symlink_file};
 
     if !symlink_supported() {
         return;

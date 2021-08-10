@@ -2,8 +2,10 @@
 mod sys_common;
 
 use cap_fs_ext::DirExt;
-use cap_std::{ambient_authority, fs::Dir};
-use sys_common::{io::tmpdir, symlink_supported};
+use cap_std::ambient_authority;
+use cap_std::fs::Dir;
+use sys_common::io::tmpdir;
+use sys_common::symlink_supported;
 
 #[test]
 fn basic_symlinks() {

@@ -1,19 +1,14 @@
-use crate::{
-    fs::{Metadata, OpenOptions, Permissions},
-    fs_utf8::from_utf8,
-};
+use crate::fs::{Metadata, OpenOptions, Permissions};
+use crate::fs_utf8::from_utf8;
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
+use std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 #[cfg(target_os = "wasi")]
 use std::path::Path;
-use std::{
-    fmt, fs,
-    io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write},
-    process,
-};
+use std::{fmt, fs, process};
 #[cfg(not(windows))]
 use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;

@@ -1,12 +1,11 @@
 use crate::os::unix::net::UnixStream;
-use async_std::{
-    io,
-    os::unix,
-    stream::Stream,
-    task::{Context, Poll},
-};
+use async_std::io;
+use async_std::os::unix;
+use async_std::stream::Stream;
+use async_std::task::{Context, Poll};
 use cap_primitives::{ambient_authority, AmbientAuthority};
-use std::{fmt, pin::Pin};
+use std::fmt;
+use std::pin::Pin;
 
 /// An iterator over incoming connections to a [`UnixListener`].
 ///

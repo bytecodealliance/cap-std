@@ -1,17 +1,16 @@
 use crate::net::{Shutdown, SocketAddr};
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use async_std::net;
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use async_std::{
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    net,
-    task::{Context, Poll},
-};
+use async_std::task::{Context, Poll};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
-use std::{fmt, pin::Pin};
+use std::fmt;
+use std::pin::Pin;
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {

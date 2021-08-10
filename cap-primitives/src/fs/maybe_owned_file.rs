@@ -1,6 +1,8 @@
 use crate::fs::{open_unchecked, OpenOptions};
 use maybe_owned::MaybeOwned;
-use std::{fmt, fs, io, mem, ops::Deref, path::Component};
+use std::ops::Deref;
+use std::path::Component;
+use std::{fmt, fs, io, mem};
 #[cfg(racy_asserts)]
 use {crate::fs::file_path, std::path::PathBuf};
 

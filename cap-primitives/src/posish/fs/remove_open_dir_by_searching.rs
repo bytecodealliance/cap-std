@@ -1,5 +1,6 @@
 use crate::fs::{errors, is_root_dir, read_dir_unchecked, Metadata};
-use std::{fs, io, path::Component};
+use std::path::Component;
+use std::{fs, io};
 
 /// Delete the directory referenced by the given handle by searching for it in
 /// its `..`. This requires search permission in `..`, but that's usually

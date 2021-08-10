@@ -1,14 +1,13 @@
-use super::{get_path::concatenate_or_return_absolute, open_options_to_std};
-use crate::{
-    ambient_authority,
-    fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind},
-    AmbientAuthority,
-};
-use std::{fs, io, os::windows::fs::MetadataExt, path::Path};
-use winapi::{
-    shared::winerror,
-    um::{winbase, winnt::FILE_ATTRIBUTE_DIRECTORY},
-};
+use super::get_path::concatenate_or_return_absolute;
+use super::open_options_to_std;
+use crate::fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
+use crate::{ambient_authority, AmbientAuthority};
+use std::os::windows::fs::MetadataExt;
+use std::path::Path;
+use std::{fs, io};
+use winapi::shared::winerror;
+use winapi::um::winbase;
+use winapi::um::winnt::FILE_ATTRIBUTE_DIRECTORY;
 
 /// *Unsandboxed* function similar to `open`, but which does not perform
 /// sandboxing.

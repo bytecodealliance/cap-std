@@ -3,10 +3,8 @@
 use crate::fs::canonicalize_impl;
 #[cfg(racy_asserts)]
 use crate::fs::{file_path, open, OpenOptions};
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// Canonicalize the given path, ensuring that the resolution of the path never
 /// escapes the directory tree rooted at `start`.

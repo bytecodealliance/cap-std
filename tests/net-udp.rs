@@ -4,14 +4,14 @@
 mod net;
 mod sys_common;
 
-use cap_std::{ambient_authority, net::*};
+use cap_std::ambient_authority;
+use cap_std::net::*;
 use net::{next_test_ip4, next_test_ip6};
-use std::{io::ErrorKind, sync::mpsc::channel};
+use std::io::ErrorKind;
+use std::sync::mpsc::channel;
 //use sys_common::AsInner;
-use std::{
-    thread,
-    time::{Duration, Instant},
-};
+use std::thread;
+use std::time::{Duration, Instant};
 
 fn each_ip(f: &mut dyn FnMut(SocketAddr, SocketAddr)) {
     f(next_test_ip4(), next_test_ip4());

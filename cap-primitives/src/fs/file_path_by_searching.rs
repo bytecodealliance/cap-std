@@ -1,8 +1,6 @@
 use crate::fs::{is_root_dir, open_dir_unchecked, read_dir_unchecked, MaybeOwnedFile, Metadata};
-use std::{
-    fs,
-    path::{Component, PathBuf},
-};
+use std::fs;
+use std::path::{Component, PathBuf};
 
 /// Implementation of `file_path` for directories by opening `..` and searching
 /// for a directory among `..`'s children to find its name.

@@ -1,9 +1,7 @@
 use super::open_parent;
 use crate::fs::{read_link_unchecked, MaybeOwnedFile};
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// Implement `read_link` by `open`ing up the parent component of the path and
 /// then calling `read_link_unchecked` on the last component.

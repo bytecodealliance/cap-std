@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::MaybeOwnedFile;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Implement `symlink` by `open`ing up the parent component of the path and
 /// then calling `symlink_unchecked` on the last component.

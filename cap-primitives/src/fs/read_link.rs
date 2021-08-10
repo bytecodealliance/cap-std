@@ -4,10 +4,8 @@
 use crate::fs::{errors, read_link_impl};
 #[cfg(racy_asserts)]
 use crate::fs::{map_result, read_link_unchecked, stat, FollowSymlinks};
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// Perform a `readlinkat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

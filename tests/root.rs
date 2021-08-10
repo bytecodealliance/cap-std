@@ -1,8 +1,10 @@
 #[macro_use]
 mod sys_common;
 
-use cap_std::{ambient_authority, fs::Dir};
-use std::{fs, path::Component};
+use cap_std::ambient_authority;
+use cap_std::fs::Dir;
+use std::fs;
+use std::path::Component;
 
 #[test]
 fn open_root() {

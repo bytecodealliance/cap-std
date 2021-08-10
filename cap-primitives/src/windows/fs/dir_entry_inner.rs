@@ -1,12 +1,12 @@
 use super::open_options_to_std;
-use crate::{
-    ambient_authority,
-    fs::{
-        open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions,
-        ReadDir, ReadDirInner,
-    },
+use crate::ambient_authority;
+use crate::fs::{
+    open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir,
+    ReadDirInner,
 };
-use std::{ffi::OsString, fmt, fs, io, os::windows::fs::OpenOptionsExt};
+use std::ffi::OsString;
+use std::os::windows::fs::OpenOptionsExt;
+use std::{fmt, fs, io};
 use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
 
 pub(crate) struct DirEntryInner {

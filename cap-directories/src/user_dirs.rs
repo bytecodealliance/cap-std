@@ -1,5 +1,6 @@
 use crate::not_found;
-use cap_std::{fs::Dir, AmbientAuthority};
+use cap_std::fs::Dir;
+use cap_std::AmbientAuthority;
 use std::io;
 
 /// `UserDirs` provides paths of user-facing standard directories, following

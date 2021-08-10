@@ -3,10 +3,8 @@
 
 use super::internal_open;
 use crate::fs::{canonicalize_options, FollowSymlinks, MaybeOwnedFile};
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// Implement `canonicalize` by breaking up the path into components and
 /// resolving each component individually, and resolving symbolic links

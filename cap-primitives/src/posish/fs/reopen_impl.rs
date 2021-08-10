@@ -1,7 +1,5 @@
-use crate::{
-    fs::{open_unchecked, OpenOptions},
-    posish::fs::file_path,
-};
+use crate::fs::{open_unchecked, OpenOptions};
+use crate::posish::fs::file_path;
 use io_lifetimes::AsFilelike;
 use posish::fs::cwd;
 use std::{fs, io};

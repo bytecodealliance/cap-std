@@ -1,4 +1,6 @@
-use std::{borrow::Cow, ffi::OsStr, path::Component};
+use std::borrow::Cow;
+use std::ffi::OsStr;
+use std::path::Component;
 
 /// Like `std::path::Component` except we combine `Prefix` and `RootDir` since
 /// we don't support absolute paths, and `Normal` has a `Cow` instead of a

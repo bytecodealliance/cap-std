@@ -1,18 +1,15 @@
 use crate::fs::OpenOptions;
 use io_lifetimes::AsHandle;
 use std::{fs, io};
-use winapi::{
-    shared::{minwindef::DWORD, winerror::ERROR_INVALID_PARAMETER},
-    um::{
-        winbase::{
-            FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
-            SECURITY_CONTEXT_TRACKING, SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY,
-            SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
-        },
-        winnt::{
-            FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_WRITE_DATA, GENERIC_READ, GENERIC_WRITE,
-        },
-    },
+use winapi::shared::minwindef::DWORD;
+use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
+use winapi::um::winbase::{
+    FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
+    SECURITY_CONTEXT_TRACKING, SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY,
+    SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
+};
+use winapi::um::winnt::{
+    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_WRITE_DATA, GENERIC_READ, GENERIC_WRITE,
 };
 use winx::file::{AccessMode, Flags};
 

@@ -1,12 +1,11 @@
 use super::procfs::set_permissions_through_proc_self_fd;
 use crate::fs::{errors, open, OpenOptions, Permissions};
 use posish::fs::{fchmod, Mode, OFlags, RawMode};
-use std::{
-    fs, io,
-    os::unix::fs::{OpenOptionsExt, PermissionsExt},
-    path::Path,
-    sync::atomic::{AtomicBool, Ordering::Relaxed},
-};
+use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+use std::path::Path;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::Relaxed;
+use std::{fs, io};
 
 pub(crate) fn set_permissions_impl(
     start: &fs::File,

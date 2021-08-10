@@ -14,11 +14,9 @@
 mod sys_common;
 
 use cap_std::fs::{self, File};
-use std::{
-    env,
-    ffi::CString,
-    path::{Path, PathBuf},
-};
+use std::env;
+use std::ffi::CString;
+use std::path::{Path, PathBuf};
 use sys_common::io::tmpdir;
 
 #[test]

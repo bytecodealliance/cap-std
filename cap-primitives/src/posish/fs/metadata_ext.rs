@@ -1,16 +1,12 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::{
-    fs::{FileTypeExt, Metadata, PermissionsExt},
-    time::{Duration, SystemClock, SystemTime},
-};
+use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
+use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use posish::fs::{makedev, Statx};
 use posish::fs::{RawMode, Stat};
-use std::{
-    convert::{TryFrom, TryInto},
-    fs, io,
-};
+use std::convert::{TryFrom, TryInto};
+use std::{fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {

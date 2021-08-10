@@ -1,9 +1,6 @@
 use crate::time::Duration;
-use std::{
-    fmt,
-    ops::{Add, AddAssign, Sub, SubAssign},
-    time,
-};
+use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::{fmt, time};
 
 /// A measurement of a monotonically nondecreasing clock.
 ///

@@ -1,5 +1,6 @@
 use super::procfs::get_path_from_proc_self_fd;
-use std::{fs, path::PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 pub(crate) fn file_path(file: &fs::File) -> Option<PathBuf> {
     use std::os::unix::fs::MetadataExt;

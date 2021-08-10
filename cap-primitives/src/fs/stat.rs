@@ -3,7 +3,8 @@
 #[cfg(racy_asserts)]
 use crate::fs::{canonicalize, map_result, stat_unchecked};
 use crate::fs::{stat_impl, FollowSymlinks, Metadata};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform an `fstatat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

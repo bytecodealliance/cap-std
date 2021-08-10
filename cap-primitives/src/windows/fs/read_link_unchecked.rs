@@ -1,8 +1,6 @@
 use super::get_path::concatenate_or_return_absolute;
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `read_link`, but which does not perform
 /// sandboxing.

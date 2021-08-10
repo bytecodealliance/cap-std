@@ -8,7 +8,8 @@ use crate::fs::symlink_unchecked;
 use crate::fs::{canonicalize, manually, map_result, stat_unchecked, FollowSymlinks, Metadata};
 #[cfg(all(racy_asserts, windows))]
 use crate::fs::{symlink_dir_unchecked, symlink_file_unchecked};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the
 /// path never escapes the directory tree rooted at `start`.

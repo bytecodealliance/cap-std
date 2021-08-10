@@ -1,6 +1,7 @@
 use crate::fs::{FollowSymlinks, Metadata, MetadataExt};
 use posish::fs::{statat, AtFlags};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform
 /// sandboxing.

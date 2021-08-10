@@ -5,7 +5,8 @@
 
 extern crate test;
 
-use std::{fs, path::PathBuf};
+use std::fs;
+use std::path::PathBuf;
 
 #[bench]
 fn nested_directories_open(b: &mut test::Bencher) {

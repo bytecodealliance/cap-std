@@ -1,9 +1,7 @@
+use crate::fs::{OpenOptions, Permissions};
+use crate::fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
-use crate::{
-    fs::{OpenOptions, Permissions},
-    fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir},
-};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};

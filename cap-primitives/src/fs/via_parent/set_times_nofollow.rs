@@ -1,6 +1,7 @@
 use super::open_parent;
 use crate::fs::{set_times_nofollow_unchecked, MaybeOwnedFile, SystemTimeSpec};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 #[inline]
 pub(crate) fn set_times_nofollow(

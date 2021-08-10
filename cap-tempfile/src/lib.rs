@@ -10,7 +10,8 @@
 )]
 
 use cap_std::fs::Dir;
-use std::{env, fmt, fs, io, mem, ops::Deref};
+use std::ops::Deref;
+use std::{env, fmt, fs, io, mem};
 #[cfg(not(target_os = "emscripten"))]
 use uuid::Uuid;
 

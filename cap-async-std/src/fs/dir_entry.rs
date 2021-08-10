@@ -5,7 +5,8 @@ use async_std::os::unix::fs::DirEntryExt;
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::fs::DirEntryExt;
 use cap_primitives::ambient_authority;
-use std::{ffi::OsString, fmt};
+use std::ffi::OsString;
+use std::fmt;
 
 /// Entries returned by the `ReadDir` iterator.
 ///

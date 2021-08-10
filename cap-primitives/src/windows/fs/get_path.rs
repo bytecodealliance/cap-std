@@ -1,9 +1,7 @@
-use std::{
-    ffi::OsString,
-    fs, io,
-    os::windows::ffi::{OsStrExt, OsStringExt},
-    path::{Path, PathBuf},
-};
+use std::ffi::OsString;
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// Calculates system path of `file`.
 ///

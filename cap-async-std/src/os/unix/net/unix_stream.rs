@@ -1,15 +1,13 @@
-use crate::{net::Shutdown, os::unix::net::SocketAddr};
-use async_std::{
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    os::unix::{
-        self,
-        io::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
-    },
-    task::{Context, Poll},
-};
+use crate::net::Shutdown;
+use crate::os::unix::net::SocketAddr;
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use async_std::os::unix;
+use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use async_std::task::{Context, Poll};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{fmt, pin::Pin};
+use std::fmt;
+use std::pin::Pin;
 use unsafe_io::OwnsRaw;
 
 /// A Unix stream socket.

@@ -1,9 +1,8 @@
 use crate::fs::{Metadata, MetadataExt};
 use posish::fs::{statat, AtFlags};
-use std::{
-    fs, io,
-    sync::atomic::{AtomicBool, Ordering::Relaxed},
-};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::Relaxed;
+use std::{fs, io};
 
 /// Like `file.metadata()`, but works with `O_PATH` descriptors on old (pre
 /// 3.6) versions of Linux too.

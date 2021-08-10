@@ -8,12 +8,10 @@ use crate::fs::{
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use posish::fs::OFlags;
-use std::{
-    borrow::Cow,
-    ffi::OsStr,
-    fs, io, mem,
-    path::{Component, Path, PathBuf},
-};
+use std::borrow::Cow;
+use std::ffi::OsStr;
+use std::path::{Component, Path, PathBuf};
+use std::{fs, io, mem};
 #[cfg(windows)]
 use {
     crate::fs::{open_dir_unchecked, path_really_has_trailing_dot, SymlinkKind},

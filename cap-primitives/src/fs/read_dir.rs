@@ -1,5 +1,6 @@
 use crate::fs::{DirEntry, ReadDirInner};
-use std::{fmt, fs, io, path::Path};
+use std::path::Path;
+use std::{fmt, fs, io};
 
 /// Construct a `ReadDir` to iterate over the contents of a directory,
 /// ensuring that the resolution of the path never escapes the directory

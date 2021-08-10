@@ -1,11 +1,11 @@
 use crate::fs::{errors, open, OpenOptions, Permissions};
-use posish::{
-    fs::{fchmod, Mode},
-    io::Error,
-};
+use posish::fs::{fchmod, Mode};
+use posish::io::Error;
+use std::convert::TryInto;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
-use std::{convert::TryInto, fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// This sounds like it should be a job for `fchmodat`, however `fchmodat`
 /// handles symlinks in an incompatible way. It either follows symlinks

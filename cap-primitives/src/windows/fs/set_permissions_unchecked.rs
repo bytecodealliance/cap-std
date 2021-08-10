@@ -1,6 +1,7 @@
 use super::get_path::concatenate_or_return_absolute;
 use crate::fs::Permissions;
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `set_permissions`, but which does not
 /// perform sandboxing.

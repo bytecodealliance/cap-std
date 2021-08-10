@@ -4,20 +4,14 @@ use async_std::os::wasi::{
     fs::OpenOptionsExt,
     io::{AsRawFd, IntoRawFd},
 };
-use async_std::{
-    fs, io,
-    path::{Path, PathBuf},
+use async_std::path::{Path, PathBuf};
+use async_std::{fs, io};
+use cap_primitives::fs::{
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
+    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
-use cap_primitives::{
-    ambient_authority,
-    fs::{
-        canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
-        read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-        remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks,
-        Permissions,
-    },
-    AmbientAuthority,
-};
+use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use io_lifetimes::{AsFilelike, FromFilelike};

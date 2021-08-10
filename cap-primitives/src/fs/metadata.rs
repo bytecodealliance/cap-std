@@ -1,7 +1,5 @@
-use crate::{
-    fs::{FileType, FileTypeExt, MetadataExt, Permissions},
-    time::SystemTime,
-};
+use crate::fs::{FileType, FileTypeExt, MetadataExt, Permissions};
+use crate::time::SystemTime;
 use std::{fs, io};
 
 /// Metadata information about a file.

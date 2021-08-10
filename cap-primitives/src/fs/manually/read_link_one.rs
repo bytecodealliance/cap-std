@@ -1,9 +1,7 @@
 use crate::fs::{errors, read_link_unchecked, MAX_SYMLINK_EXPANSIONS};
-use std::{
-    ffi::OsStr,
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::ffi::OsStr;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 /// This is a wrapper around `read_link_unchecked` which performs a single
 /// symlink expansion on a single path component, and which enforces the

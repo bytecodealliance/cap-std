@@ -1,5 +1,6 @@
 use posish::fs::{linkat, AtFlags};
-use std::{fs, io, path::Path};
+use std::path::Path;
+use std::{fs, io};
 
 /// *Unsandboxed* function similar to `hard_link`, but which does not perform
 /// sandboxing.

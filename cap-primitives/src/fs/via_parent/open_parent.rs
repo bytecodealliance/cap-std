@@ -3,11 +3,9 @@
 /// so that all the `via_parent` functions need to do is make sure they
 /// don't follow symlinks in the basename.
 use crate::fs::{errors, open_dir, path_requires_dir, MaybeOwnedFile};
-use std::{
-    ffi::OsStr,
-    io,
-    path::{Component, Path},
-};
+use std::ffi::OsStr;
+use std::io;
+use std::path::{Component, Path};
 
 /// Open the "parent" of `path`, relative to `start`. The return value on
 /// success is a tuple of the newly opened directory and an `OsStr` referencing

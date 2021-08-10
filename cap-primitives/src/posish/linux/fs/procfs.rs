@@ -10,16 +10,12 @@ use crate::fs::{
     errors, open, read_link_unchecked, set_times_follow_unchecked, OpenOptions, SystemTimeSpec,
 };
 use io_lifetimes::{AsFd, AsFilelike};
-use posish::{
-    fs::{chmodat, Mode, OFlags, RawMode},
-    io::proc_self_fd,
-    path::DecInt,
-};
-use std::{
-    fs, io,
-    os::unix::fs::{OpenOptionsExt, PermissionsExt},
-    path::{Path, PathBuf},
-};
+use posish::fs::{chmodat, Mode, OFlags, RawMode};
+use posish::io::proc_self_fd;
+use posish::path::DecInt;
+use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
     read_link_unchecked(

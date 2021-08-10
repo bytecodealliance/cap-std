@@ -1,11 +1,10 @@
 // Copied from https://doc.rust-lang.org/rust-by-example/std_misc/fs.html and
 // adapted to use this crate instead.
 
-use cap_std::{
-    ambient_authority,
-    fs::{Dir, OpenOptions},
-};
-use std::{io, io::prelude::*};
+use cap_std::ambient_authority;
+use cap_std::fs::{Dir, OpenOptions};
+use std::io;
+use std::io::prelude::*;
 //use std::os::unix;
 use std::path::Path;
 
