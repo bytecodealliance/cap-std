@@ -28,6 +28,14 @@ develops libraries to make it easy to write capability-based code, including:
  - [`cap-rand`], which provides capability-based access to
    [random number generators]
 
+Cap-std features protection against [CWE-22], "Improper Limitation of a
+Pathname to a Restricted Directory ('Path Traversal')", which is #8 in the
+[2021 CWE Top 25 Most Dangerous Software Weaknesses]. It can also be used to
+prevent untrusted input from inducing programs to open "/proc/self/mem" on
+Linux.
+
+[CWE-22]: https://cwe.mitre.org/data/definitions/22.html
+[2021 CWE Top 25 Most Dangerous Software Weaknesses]: https://cwe.mitre.org/top25/archive/2021/2021_cwe_top25.html
 [`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
 [`cap-async-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-async-std/README.md
 [`cap-directories`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-directories/README.md
