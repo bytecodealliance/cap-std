@@ -12,6 +12,10 @@ libfuzzer-sys = "0.4.0"
 arbitrary = { version = "1.0.0", features = ["derive"] }
 tempfile = "3.1.0"
 cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
+# Depend on io-lifetimes with default features, as the fuzzing framework
+# seems to add a dependency on `io_lifetimes::OwnedFd::drop` even when the
+# code itself doesn't have one.
+io-lifetimes = "0.2.3"
 
 [[bin]]
 name = "cap-primitives"
