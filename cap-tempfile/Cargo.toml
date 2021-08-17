@@ -1,6 +1,6 @@
 [package]
 name = "cap-tempfile"
-version = "0.16.4-alpha.0"
+version = "0.17.0"
 description = "Capability-based temporary directories"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
