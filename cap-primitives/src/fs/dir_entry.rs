@@ -1,6 +1,6 @@
 use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions, ReadDir};
 #[cfg(not(windows))]
-use posish::fs::DirEntryExt;
+use rsix::fs::DirEntryExt;
 use std::ffi::OsString;
 use std::{fmt, fs, io};
 

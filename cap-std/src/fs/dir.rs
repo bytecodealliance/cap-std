@@ -12,7 +12,7 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 #[cfg(target_os = "wasi")]
-use posish::fs::OpenOptionsExt;
+use rsix::fs::OpenOptionsExt;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt, fs};
@@ -20,7 +20,7 @@ use unsafe_io::OwnsRaw;
 #[cfg(not(windows))]
 use {
     cap_primitives::fs::symlink,
-    unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 #[cfg(windows)]
 use {

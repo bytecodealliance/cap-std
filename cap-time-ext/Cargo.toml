@@ -17,7 +17,7 @@ cap-primitives = { path = "../cap-primitives", version = "^0.16.4-alpha.0"}
 cap-std = { path = "../cap-std", optional = true, version = "^0.16.4-alpha.0"}
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.16.6"
+rsix = "0.18.0"
 
 [target.'cfg(windows)'.dependencies]
 once_cell = "1.5.2"

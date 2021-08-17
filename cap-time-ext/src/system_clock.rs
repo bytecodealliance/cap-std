@@ -1,7 +1,7 @@
 use std::time::{self, Duration};
 #[cfg(not(windows))]
 use {
-    posish::time::{clock_getres, ClockId},
+    rsix::time::{clock_getres, ClockId},
     std::convert::TryInto,
 };
 

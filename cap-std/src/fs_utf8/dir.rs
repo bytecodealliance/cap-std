@@ -9,7 +9,7 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::{fmt, fs, io};
 #[cfg(not(windows))]
-use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {

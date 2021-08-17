@@ -13,7 +13,7 @@
 )]
 
 #[cfg(not(windows))]
-mod posish;
+mod rsix;
 #[cfg(windows)]
 mod windows;
 

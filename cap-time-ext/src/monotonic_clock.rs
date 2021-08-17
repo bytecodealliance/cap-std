@@ -1,5 +1,5 @@
 #[cfg(not(windows))]
-use posish::time::{clock_getres, ClockId};
+use rsix::time::{clock_getres, ClockId};
 use std::convert::TryInto;
 use std::time;
 use std::time::Duration;

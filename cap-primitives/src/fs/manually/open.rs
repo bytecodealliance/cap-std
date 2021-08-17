@@ -7,7 +7,7 @@ use crate::fs::{
     stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use posish::fs::OFlags;
+use rsix::fs::OFlags;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
@@ -149,9 +149,9 @@ impl<'start> Context<'start> {
             // Android and Emscripten lack `AT_EACCESS`.
             // <https://android.googlesource.com/platform/bionic/+/master/libc/bionic/faccessat.cpp>
             #[cfg(any(target_os = "emscripten", target_os = "android"))]
-            let at_flags = posish::fs::AtFlags::empty();
+            let at_flags = rsix::fs::AtFlags::empty();
             #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
-            let at_flags = posish::fs::AtFlags::EACCESS;
+            let at_flags = rsix::fs::AtFlags::EACCESS;
 
             // Always use `CurDir`, even though this code is used to check
             // permissions for both `.` and `..`, because in both cases we
@@ -160,10 +160,10 @@ impl<'start> Context<'start> {
             // within `self.base`, which should always be the same. And
             // using `.` means we avoid asking the OS to access a `..` path
             // for us.
-            Ok(posish::fs::accessat(
+            Ok(rsix::fs::accessat(
                 &*self.base,
                 Component::CurDir.as_os_str(),
-                posish::fs::Access::EXEC_OK,
+                rsix::fs::Access::EXEC_OK,
                 at_flags,
             )?)
         }

@@ -10,7 +10,7 @@ use std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::{fmt, fs, process};
 #[cfg(not(windows))]
-use unsafe_io::os::posish::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
