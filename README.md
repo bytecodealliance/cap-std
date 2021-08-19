@@ -186,4 +186,29 @@ more information on the technique, see the [`arf-strings` package]. To try it,
 opt in by enabling the `fs_utf8` feature and using `std::fs_utf8` in place of
 `std::fs`.
 
+## Similar crates
+
+`cap-std` provides similar functionality to the [`openat`] crate, with a similar
+`Dir` type with associated functions corresponding to `*at` functions.
+`cap-std`'s `Dir` type performs sandboxing, including for multiple-component
+paths.
+
+`cap-std` has some similar functionality to [`pathrs`] in that it also
+explicitly verifies that `/proc` has actual `/proc` mounted on it and nothing
+mounted on top, and it can also use `openat2`. However, `cap-std` uses
+`RESOLVE_BENEATH`-style resolution where absolute paths are considered errors,
+while `pathrs` uses `RESOLVE_IN_ROOT` where absolute paths are interpreted as
+references to the base file descriptor. And overall, `cap-std` seeks to provide
+a portable `std`-like API which supports Windows in addition to Unix-like
+platforms, while `pathrs` provides a lower-level API that exposes more of the
+underlying `openat2` options and only supports Linux.
+
+[`obnth`] is a new crate which appears to be very similar to `cap_std::fs`.
+It's not mature yet, and it doesn't support Windows. It does support
+`openat2`-like features such as `RESOLVE_NO_XDEV`, `RESOLVE_NO_SYMLINKS`,
+and `RESOLVE_IN_ROOT`, including emulation when `openat2` isn't available.
+
 [`arf-strings` package]: https://github.com/bytecodealliance/arf-strings/
+[`openat`]: https://crates.io/crates/openat
+[`pathrs`]: https://crates.io/crates/pathrs
+[`obnth`]: https://crates.io/crates/obnth
