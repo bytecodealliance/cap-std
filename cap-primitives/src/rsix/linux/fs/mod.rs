@@ -1,5 +1,4 @@
 mod canonicalize_impl;
-mod ensure_cloexec;
 mod file_metadata;
 mod file_path;
 mod open_entry_impl;
@@ -11,7 +10,6 @@ mod stat_impl;
 
 pub(crate) use crate::fs::via_parent::set_times_nofollow as set_times_nofollow_impl;
 pub(crate) use canonicalize_impl::canonicalize_impl;
-pub(crate) use ensure_cloexec::ensure_cloexec;
 pub(crate) use file_path::file_path;
 pub(crate) use open_entry_impl::open_entry_impl;
 pub(crate) use open_impl::{open_beneath, open_impl};

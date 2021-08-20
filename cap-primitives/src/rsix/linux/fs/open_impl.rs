@@ -74,9 +74,6 @@ pub(crate) fn open_beneath(
             ) {
                 Ok(file) => {
                     let file = fs::File::from_into_fd(file);
-                    // Note that we don't bother with `ensure_cloexec` here
-                    // because Linux has supported `O_CLOEXEC` since 2.6.18,
-                    // and `openat2` was introduced in 5.6.
 
                     #[cfg(racy_asserts)]
                     check_open(start, path, options, &file);

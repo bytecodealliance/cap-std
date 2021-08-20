@@ -6,8 +6,6 @@ use rsix::fs::{cwd, openat, Mode};
 use rsix::io;
 use std::fs;
 use std::path::Path;
-#[cfg(any(target_os = "android", target_os = "linux"))]
-use {crate::fs::ensure_cloexec, io_lifetimes::AsFd};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform
 /// sandboxing.
@@ -23,9 +21,6 @@ pub(crate) fn open_unchecked(
 
     let err = match openat(start, path, oflags, mode) {
         Ok(file) => {
-            #[cfg(any(target_os = "android", target_os = "linux"))]
-            ensure_cloexec(file.as_fd()).map_err(OpenUncheckedError::Other)?;
-
             return Ok(fs::File::from_fd(file.into()));
         }
         Err(err) => err,
