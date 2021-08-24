@@ -11,6 +11,7 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
+#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(windows))]
 mod rsix;
