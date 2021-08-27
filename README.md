@@ -107,10 +107,10 @@ There currently are three main ways:
 There are several examples of cap-std in use:
 
  - As a sandbox: For a simple yet complete example of cap-std in action, see
-   [this port of tide-naive-static-files], a simple static-file Web server, to
-   use cap-std to access the static files, where it prevents path resolution
-   from following symlinks outside of the designated root directory. [The diff]
-   shows the kinds of changes needed to use this API.
+   [this port of tide], to use cap-std to access static files, where it
+   prevents path resolution from following symlinks outside of the designated
+   root directory. [The diff] shows the kinds of changes needed to use this
+   API.
 
  - As a general-purpose `Dir` type for working with directories: The io-streams
    crate [uses `cap-tempdir`] to create temporary directories for unit tests.
@@ -127,8 +127,8 @@ There are several examples of cap-std in use:
    providing sandboxing and support for Linux, macOS, Windows, and more.
 
 [uses `cap-tempdir`]: https://github.com/sunfishcode/io-streams/blob/main/tests/tests.rs#L16
-[this port of tide-naive-static-files]: https://github.com/sunfishcode/tide-naive-static-files/
-[The diff]: https://github.com/eignnx/tide-naive-static-files/compare/master...sunfishcode:main
+[this port of tide]: https://github.com/sunfishcode/tide/
+[The diff]: https://github.com/sunfishcode/tide/commit/e431ebbba3ac9d5799ad0c661868b8a4a339a255
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
 [`kv-cli` example]: https://github.com/bytecodealliance/cap-std/blob/main/examples/kv-cli.rs
 [`WASI`]: https://github.com/WebAssembly/WASI/
