@@ -1,4 +1,3 @@
-mod c_str;
 mod copy_impl;
 mod create_dir_unchecked;
 mod dir_entry_inner;
@@ -78,8 +77,6 @@ pub(crate) use crate::fs::{
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 
-#[allow(unused_imports)]
-pub(crate) use c_str::c_str;
 pub(crate) use copy_impl::copy_impl;
 pub(crate) use create_dir_unchecked::create_dir_unchecked;
 pub(crate) use dir_entry_inner::DirEntryInner;

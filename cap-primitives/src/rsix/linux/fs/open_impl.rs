@@ -7,12 +7,13 @@
 //!
 //! On older Linux, fall back to `manually::open`.
 
-use super::super::super::fs::{c_str, compute_oflags};
+use super::super::super::fs::compute_oflags;
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
 use crate::fs::{errors, manually, OpenOptions};
 use io_lifetimes::FromFd;
 use rsix::fs::{openat2, Mode, OFlags, RawMode, ResolveFlags};
+use rsix::path::Arg;
 use std::path::Path;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
@@ -45,21 +46,24 @@ pub(crate) fn open_beneath(
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
     static INVALID: AtomicBool = AtomicBool::new(false);
-    if !INVALID.load(Relaxed) {
-        let oflags = compute_oflags(options)?;
+    if INVALID.load(Relaxed) {
+        // `openat2` is permanently unavailable.
+        return Err(rsix::io::Error::NOSYS.into());
+    }
 
-        // Do two `contains` checks because `TMPFILE` may be represented with
-        // multiple flags and we need to ensure they're all set.
-        let mode = if oflags.contains(OFlags::CREATE) || oflags.contains(OFlags::TMPFILE) {
-            Mode::from_bits((options.ext.mode & 0o7777) as RawMode).unwrap()
-        } else {
-            Mode::empty()
-        };
+    let oflags = compute_oflags(options)?;
 
-        // We know `openat2` needs a `&CStr` internally; to avoid allocating on
-        // each iteration of the loop below, allocate the `CString` now.
-        let path_c_str = c_str(path)?;
+    // Do two `contains` checks because `TMPFILE` may be represented with
+    // multiple flags and we need to ensure they're all set.
+    let mode = if oflags.contains(OFlags::CREATE) || oflags.contains(OFlags::TMPFILE) {
+        Mode::from_bits((options.ext.mode & 0o7777) as RawMode).unwrap()
+    } else {
+        Mode::empty()
+    };
 
+    // We know `openat2` needs a `&CStr` internally; to avoid allocating on
+    // each iteration of the loop below, allocate the `CString` now.
+    path.into_with_c_str(|path_c_str| {
         // `openat2` fails with `EAGAIN` if a rename happens anywhere on the host
         // while it's running, so use a loop to retry it a few times. But not too many
         // times, because there's no limit on how often this can happen. The actual
@@ -67,7 +71,7 @@ pub(crate) fn open_beneath(
         for _ in 0..4 {
             match openat2(
                 start,
-                path_c_str.as_c_str(),
+                path_c_str,
                 oflags,
                 mode,
                 ResolveFlags::BENEATH | ResolveFlags::NO_MAGICLINKS,
@@ -81,8 +85,8 @@ pub(crate) fn open_beneath(
                     return Ok(file);
                 }
                 Err(err) => match err {
+                    // A rename or similar happened. Try again.
                     rsix::io::Error::AGAIN => continue,
-                    rsix::io::Error::XDEV => return Err(errors::escape_attempt()),
 
                     // `EPERM` is used by some `seccomp` sandboxes to indicate
                     // that `openat2` is unimplemented:
@@ -105,10 +109,13 @@ pub(crate) fn open_beneath(
                 },
             }
         }
-    }
 
-    // `openat2` is unavailable, either temporarily or permanently.
-    Err(rsix::io::Error::NOSYS.into())
+        Err(rsix::io::Error::NOSYS.into())
+    })
+    .map_err(|err| match err {
+        rsix::io::Error::XDEV => errors::escape_attempt(),
+        err => err.into(),
+    })
 }
 
 #[cfg(racy_asserts)]
