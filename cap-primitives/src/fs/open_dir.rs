@@ -5,7 +5,7 @@
 use crate::fs::open_unchecked;
 use crate::fs::{dir_options, open, open_ambient_dir_impl, readdir_options, FollowSymlinks};
 use ambient_authority::AmbientAuthority;
-use std::path::Path;
+use std::path::{Component, Path};
 use std::{fs, io};
 
 /// Open a directory by performing an `openat`-like operation,
@@ -57,4 +57,18 @@ pub(crate) fn open_dir_for_reading_unchecked(
 #[inline]
 pub fn open_ambient_dir(path: &Path, ambient_authority: AmbientAuthority) -> io::Result<fs::File> {
     open_ambient_dir_impl(path, ambient_authority)
+}
+
+/// Open the parent directory of a given open directory, using the host
+/// process' ambient authority.
+///
+/// # Ambient Authority
+///
+/// This function accesses a path outside of the `start` directory subtree.
+#[inline]
+pub fn open_parent_dir(
+    start: &fs::File,
+    _ambient_authority: AmbientAuthority,
+) -> io::Result<fs::File> {
+    open_dir_unchecked(start, Component::ParentDir.as_ref())
 }
