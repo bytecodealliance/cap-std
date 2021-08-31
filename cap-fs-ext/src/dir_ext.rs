@@ -1,3 +1,4 @@
+#[cfg(feature = "fs_utf8")]
 use camino::Utf8Path;
 use cap_primitives::ambient_authority;
 #[cfg(not(windows))]

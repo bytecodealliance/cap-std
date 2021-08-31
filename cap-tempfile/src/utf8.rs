@@ -1,22 +1,14 @@
-//! Capability-based temporary directories.
+//! Capability-based temporary directories, with UTF-8 paths.
+//!
+//! TODO: This whole scheme is still under development.
 
-#![deny(missing_docs)]
-#![forbid(unsafe_code)]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
-)]
-#![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
-)]
-
-use cap_std::fs::Dir;
+use camino::Utf8PathBuf;
+use cap_std::fs_utf8::Dir;
+use std::convert::TryInto;
 use std::ops::Deref;
 use std::{env, fmt, fs, io, mem};
 #[cfg(not(target_os = "emscripten"))]
 use uuid::Uuid;
-
-#[cfg(feature = "fs_utf8")]
-pub mod utf8;
 
 #[doc(hidden)]
 pub use cap_std::ambient_authority_known_at_compile_time;
@@ -28,7 +20,7 @@ pub use cap_std::{ambient_authority, AmbientAuthority};
 /// This corresponds to [`tempfile::TempDir`].
 ///
 /// Unlike `tempfile::TempDir`, this API has no `TempDir::path`,
-/// `TempDir::into_path`, or `impl AsRef<Path>`, because absolute paths don't
+/// `TempDir::into_path`, or `impl AsRef<Utf8Path>`, because absolute paths don't
 /// interoperate well with the capability model.
 ///
 /// [`tempfile::TempDir`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html
@@ -48,7 +40,9 @@ impl TempDir {
     /// This function makes use of ambient authority to access temporary
     /// directories.
     pub fn new(ambient_authority: AmbientAuthority) -> io::Result<Self> {
-        let system_tmp = env::temp_dir();
+        let system_tmp: Utf8PathBuf = env::temp_dir()
+            .try_into()
+            .expect("temporary directory path should be valid UTF-8");
         for _ in 0..Self::num_iterations() {
             let name = system_tmp.join(&Self::new_name());
             match fs::create_dir(&name) {
@@ -197,7 +191,8 @@ fn close_tempdir() {
 fn drop_tempdir_in() {
     use crate::ambient_authority;
 
-    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
+    let temp_dir: Utf8PathBuf = env::temp_dir().try_into().unwrap();
+    let dir = Dir::open_ambient_dir(temp_dir, ambient_authority()).unwrap();
     let t = tempdir_in(&dir).unwrap();
     drop(t);
 }
@@ -206,7 +201,8 @@ fn drop_tempdir_in() {
 fn close_tempdir_in() {
     use crate::ambient_authority;
 
-    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
+    let temp_dir: Utf8PathBuf = env::temp_dir().try_into().unwrap();
+    let dir = Dir::open_ambient_dir(temp_dir, ambient_authority()).unwrap();
     let t = tempdir_in(&dir).unwrap();
     t.close().unwrap();
 }
