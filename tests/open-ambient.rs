@@ -3,7 +3,6 @@ mod sys_common;
 
 use cap_std::ambient_authority;
 use cap_std::fs::{Dir, File};
-use std::fs;
 
 #[test]
 fn test_open_ambient() {
