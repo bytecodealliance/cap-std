@@ -15,7 +15,6 @@ fn test_create_dir_ambient() {
     let dir = tempfile::tempdir().unwrap();
     let foo_path = dir.path().join("foo");
     Dir::create_ambient_dir_all(&foo_path, ambient_authority()).unwrap();
-    let _foo_via_std = fs::File::open(&foo_path).unwrap();
     let foo = Dir::open_ambient_dir(&foo_path, ambient_authority()).unwrap();
     let base = foo.open_parent_dir(ambient_authority()).unwrap();
     let _foo_again = base.open_dir("foo").unwrap();
