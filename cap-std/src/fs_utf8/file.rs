@@ -1,5 +1,6 @@
 use crate::fs::{Metadata, OpenOptions, Permissions};
 use crate::fs_utf8::from_utf8;
+use camino::Utf8Path;
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
@@ -125,7 +126,7 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient<P: AsRef<str>>(
+    pub fn open_ambient<P: AsRef<Utf8Path>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
@@ -145,7 +146,7 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn open_ambient_with<P: AsRef<str>>(
+    pub fn open_ambient_with<P: AsRef<Utf8Path>>(
         path: P,
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,
@@ -506,13 +507,16 @@ impl std::os::wasi::fs::FileExt for File {
     }
 
     #[inline]
-    fn create_directory<P: AsRef<str>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
+    fn create_directory<P: AsRef<Utf8Path>>(
+        &self,
+        dir: P,
+    ) -> std::result::Result<(), std::io::Error> {
         let path = from_utf8(path)?;
         self.cap_std.create_directory(dir)
     }
 
     #[inline]
-    fn read_link<P: AsRef<str>>(
+    fn read_link<P: AsRef<Utf8Path>>(
         &self,
         path: P,
     ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
@@ -521,7 +525,7 @@ impl std::os::wasi::fs::FileExt for File {
     }
 
     #[inline]
-    fn metadata_at<P: AsRef<str>>(
+    fn metadata_at<P: AsRef<Utf8Path>>(
         &self,
         lookup_flags: u32,
         path: P,
@@ -531,13 +535,16 @@ impl std::os::wasi::fs::FileExt for File {
     }
 
     #[inline]
-    fn remove_file<P: AsRef<str>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_file<P: AsRef<Utf8Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
         let path = from_utf8(path)?;
         self.cap_std.remove_file(path)
     }
 
     #[inline]
-    fn remove_directory<P: AsRef<str>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_directory<P: AsRef<Utf8Path>>(
+        &self,
+        path: P,
+    ) -> std::result::Result<(), std::io::Error> {
         let path = from_utf8(path)?;
         self.cap_std.remove_directory(path)
     }

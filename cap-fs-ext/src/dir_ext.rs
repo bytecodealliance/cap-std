@@ -1,3 +1,4 @@
+use camino::Utf8Path;
 use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use cap_primitives::fs::symlink;
@@ -225,21 +226,21 @@ pub trait DirExtUtf8 {
     /// This corresponds to [`filetime::set_file_atime`].
     ///
     /// [`filetime::set_file_atime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_atime.html
-    fn set_atime<P: AsRef<str>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()>;
+    fn set_atime<P: AsRef<Utf8Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last modification time for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_mtime`].
     ///
     /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_mtime.html
-    fn set_mtime<P: AsRef<str>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()>;
+    fn set_mtime<P: AsRef<Utf8Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()>;
 
     /// Set the last access and modification times for a file on a filesystem.
     ///
     /// This corresponds to [`filetime::set_file_times`].
     ///
     /// [`filetime::set_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_file_times.html
-    fn set_times<P: AsRef<str>>(
+    fn set_times<P: AsRef<Utf8Path>>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -252,7 +253,7 @@ pub trait DirExtUtf8 {
     /// This corresponds to [`filetime::set_symlink_file_times`].
     ///
     /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_symlink_file_times.html
-    fn set_symlink_times<P: AsRef<str>>(
+    fn set_symlink_times<P: AsRef<Utf8Path>>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -266,7 +267,7 @@ pub trait DirExtUtf8 {
     /// atomic.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
+    fn symlink<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(&self, src: P, dst: Q) -> io::Result<()>;
 
     /// Creates a new file symbolic link on a filesystem.
     ///
@@ -275,7 +276,11 @@ pub trait DirExtUtf8 {
     /// guaranteed to fail if the target is not a file.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
-    fn symlink_file<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
+    fn symlink_file<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()>;
 
     /// Creates a new directory symbolic link on a filesystem.
     ///
@@ -284,11 +289,12 @@ pub trait DirExtUtf8 {
     /// guaranteed to fail if the target is not a directory.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
-    fn symlink_dir<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()>;
+    fn symlink_dir<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(&self, src: P, dst: Q)
+        -> io::Result<()>;
 
     /// Similar to `cap_std::fs::Dir::open_dir`, but fails if the path names a
     /// symlink.
-    fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self>
+    fn open_dir_nofollow<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
 
@@ -297,7 +303,7 @@ pub trait DirExtUtf8 {
     /// This is similar to [`std::fs::remove_file`], except that it also works
     /// on symlinks to directories on Windows, similar to how `unlink` works
     /// on symlinks to directories on Posix-ish platforms.
-    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()>;
+    fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()>;
 }
 
 /// `fs_utf8` version of `DirExt`.
@@ -311,7 +317,7 @@ pub trait AsyncDirExtUtf8 {
     /// This corresponds to [`filetime::set_file_atime`].
     ///
     /// [`filetime::set_file_atime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_atime.html
-    async fn set_atime<P: AsRef<str> + Send>(
+    async fn set_atime<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: SystemTimeSpec,
@@ -322,7 +328,7 @@ pub trait AsyncDirExtUtf8 {
     /// This corresponds to [`filetime::set_file_mtime`].
     ///
     /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_mtime.html
-    async fn set_mtime<P: AsRef<str> + Send>(
+    async fn set_mtime<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         mtime: SystemTimeSpec,
@@ -333,7 +339,7 @@ pub trait AsyncDirExtUtf8 {
     /// This corresponds to [`filetime::set_file_times`].
     ///
     /// [`filetime::set_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_file_times.html
-    async fn set_times<P: AsRef<str> + Send>(
+    async fn set_times<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -346,7 +352,7 @@ pub trait AsyncDirExtUtf8 {
     /// This corresponds to [`filetime::set_symlink_file_times`].
     ///
     /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_symlink_file_times.html
-    async fn set_symlink_times<P: AsRef<str> + Send>(
+    async fn set_symlink_times<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -360,7 +366,7 @@ pub trait AsyncDirExtUtf8 {
     /// to be atomic.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    async fn symlink<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -373,7 +379,7 @@ pub trait AsyncDirExtUtf8 {
     /// guaranteed to fail if the target is not a file.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
-    async fn symlink_file<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_file<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -386,7 +392,7 @@ pub trait AsyncDirExtUtf8 {
     /// guaranteed to fail if the target is not a directory.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
-    async fn symlink_dir<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_dir<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -394,7 +400,7 @@ pub trait AsyncDirExtUtf8 {
 
     /// Similar to `cap_std::fs::Dir::open_dir`, but fails if the path names a
     /// symlink.
-    async fn open_dir_nofollow<P: AsRef<str> + Send>(&self, path: P) -> io::Result<Self>
+    async fn open_dir_nofollow<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<Self>
     where
         Self: Sized;
 
@@ -403,7 +409,7 @@ pub trait AsyncDirExtUtf8 {
     /// Removal of symlinks has different behavior under Windows - if a symlink
     /// points to a directory, it cannot be removed with the `remove_file`
     /// operation. This method will remove files and all symlinks.
-    async fn remove_file_or_symlink<P: AsRef<str> + Send>(&self, path: P) -> io::Result<()>;
+    async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()>;
 }
 
 #[cfg(feature = "std")]
@@ -857,7 +863,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
 #[cfg(all(feature = "std", feature = "fs_utf8"))]
 impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[inline]
-    fn set_atime<P: AsRef<str>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
+    fn set_atime<P: AsRef<Utf8Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
         set_times(
             &self.as_filelike_view::<std::fs::File>(),
@@ -868,7 +874,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     }
 
     #[inline]
-    fn set_mtime<P: AsRef<str>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
+    fn set_mtime<P: AsRef<Utf8Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
         let path = from_utf8(path)?;
         set_times(
             &self.as_filelike_view::<std::fs::File>(),
@@ -879,7 +885,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     }
 
     #[inline]
-    fn set_times<P: AsRef<str>>(
+    fn set_times<P: AsRef<Utf8Path>>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -895,7 +901,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     }
 
     #[inline]
-    fn set_symlink_times<P: AsRef<str>>(
+    fn set_symlink_times<P: AsRef<Utf8Path>>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -912,25 +918,33 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         Self::symlink(self, src, dst)
     }
 
     #[cfg(not(windows))]
     #[inline]
-    fn symlink_file<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink_file<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
         Self::symlink(self, src, dst)
     }
 
     #[cfg(not(windows))]
     #[inline]
-    fn symlink_dir<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink_dir<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
         Self::symlink(self, src, dst)
     }
 
     #[cfg(windows)]
     #[inline]
-    fn symlink<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(&self, src: P, dst: Q) -> io::Result<()> {
         if self.metadata(src.as_ref())?.is_dir() {
             Self::symlink_dir(self, src, dst)
         } else {
@@ -940,18 +954,26 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[cfg(windows)]
     #[inline]
-    fn symlink_file<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink_file<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
         Self::symlink_file(self, src, dst)
     }
 
     #[cfg(windows)]
     #[inline]
-    fn symlink_dir<P: AsRef<str>, Q: AsRef<str>>(&self, src: P, dst: Q) -> io::Result<()> {
+    fn symlink_dir<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        src: P,
+        dst: Q,
+    ) -> io::Result<()> {
         Self::symlink_dir(self, src, dst)
     }
 
     #[inline]
-    fn open_dir_nofollow<P: AsRef<str>>(&self, path: P) -> io::Result<Self> {
+    fn open_dir_nofollow<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(
             &self.as_filelike_view::<std::fs::File>(),
             path.as_ref().as_ref(),
@@ -963,13 +985,13 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+    fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
         self.remove_file(path.as_ref())
     }
 
     #[cfg(windows)]
     #[inline]
-    fn remove_file_or_symlink<P: AsRef<str>>(&self, path: P) -> io::Result<()> {
+    fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
         use crate::{FollowSymlinks, OpenOptionsFollowExt};
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
@@ -1007,7 +1029,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 #[async_trait]
 impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     #[inline]
-    async fn set_atime<P: AsRef<str> + Send>(
+    async fn set_atime<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: SystemTimeSpec,
@@ -1026,7 +1048,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     }
 
     #[inline]
-    async fn set_mtime<P: AsRef<str> + Send>(
+    async fn set_mtime<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         mtime: SystemTimeSpec,
@@ -1045,7 +1067,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     }
 
     #[inline]
-    async fn set_times<P: AsRef<str> + Send>(
+    async fn set_times<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -1065,7 +1087,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     }
 
     #[inline]
-    async fn set_symlink_times<P: AsRef<str> + Send>(
+    async fn set_symlink_times<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -1086,7 +1108,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1100,7 +1122,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink_file<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_file<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1110,7 +1132,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink_dir<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_dir<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1120,7 +1142,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1154,7 +1176,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink_file<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_file<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1168,7 +1190,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink_dir<P: AsRef<str> + Send, Q: AsRef<str> + Send>(
+    async fn symlink_dir<P: AsRef<Utf8Path> + Send, Q: AsRef<Utf8Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -1181,7 +1203,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     }
 
     #[inline]
-    async fn open_dir_nofollow<P: AsRef<str> + Send>(&self, path: P) -> io::Result<Self> {
+    async fn open_dir_nofollow<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<Self> {
         let path = from_utf8(path)?;
         let clone = self.clone();
         spawn_blocking(move || {
@@ -1195,13 +1217,13 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn remove_file_or_symlink<P: AsRef<str> + Send>(&self, path: P) -> io::Result<()> {
+    async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()> {
         self.remove_file(path).await
     }
 
     #[cfg(windows)]
     #[inline]
-    async fn remove_file_or_symlink<P: AsRef<str> + Send>(&self, path: P) -> io::Result<()> {
+    async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()> {
         use crate::{FollowSymlinks, OpenOptionsFollowExt};
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
@@ -1236,7 +1258,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 }
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
-fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
+fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<std::path::PathBuf> {
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]
@@ -1244,12 +1266,12 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<std::path::PathBuf> {
         #[cfg(target_os = "wasi")]
         use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
 
-        let string = arf_strings::str_to_host(path.as_ref())?;
+        let string = arf_strings::str_to_host(path.as_ref().as_str())?;
         OsString::from_vec(string.into_bytes())
     };
 
     #[cfg(windows)]
-    let path = arf_strings::str_to_host(path.as_ref())?;
+    let path = arf_strings::str_to_host(path.as_ref().as_str())?;
 
     Ok(path.into())
 }

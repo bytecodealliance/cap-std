@@ -7,6 +7,7 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::task::{Context, Poll};
+use camino::Utf8Path;
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
@@ -115,7 +116,7 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub async fn open_ambient<P: AsRef<str>>(
+    pub async fn open_ambient<P: AsRef<Utf8Path>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
@@ -134,7 +135,7 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub async fn open_ambient_with<P: AsRef<str>>(
+    pub async fn open_ambient_with<P: AsRef<Utf8Path>>(
         path: P,
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,

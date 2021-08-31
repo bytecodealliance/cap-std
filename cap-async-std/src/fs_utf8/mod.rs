@@ -1,7 +1,8 @@
 //! A fully UTF-8 filesystem API modeled after [`cap_async_std::fs`].
 //!
 //! Where `cap_async_std::fs` would use `Path` and `PathBuf`, this `fs_utf8`
-//! module uses `str` and `String`, meaning that all paths are valid UTF-8.
+//! module uses [`Utf8Path`] and [`Utf8PathBuf`], meaning that all paths are
+//! valid UTF-8.
 //!
 //! But wait, POSIX doesn't require filenames to be UTF-8! What happens if
 //! there's a file with a non-UTF-8 name? To address this, this module uses
@@ -30,10 +31,12 @@ pub use dir_entry::DirEntry;
 pub use file::File;
 pub use read_dir::ReadDir;
 
+use camino::{Utf8Path, Utf8PathBuf};
+
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
-fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
+fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]
@@ -41,28 +44,30 @@ fn from_utf8<P: AsRef<str>>(path: P) -> std::io::Result<async_std::path::PathBuf
         #[cfg(target_os = "wasi")]
         use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
 
-        let string = arf_strings::str_to_host(path.as_ref())?;
+        let string = arf_strings::str_to_host(path.as_ref().as_str())?;
         OsString::from_vec(string.into_bytes())
     };
 
     #[cfg(windows)]
-    let path = arf_strings::str_to_host(path.as_ref())?;
+    let path = arf_strings::str_to_host(path.as_ref().as_str())?;
 
     Ok(path.into())
 }
 
-fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<String> {
+fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
     // For now, for WASI use the same logic as other OS's, but
     // in the future, the idea is we could avoid this.
     let osstr = path.as_ref().as_os_str();
 
     #[cfg(not(windows))]
     {
-        arf_strings::host_os_str_to_str(osstr).map(std::borrow::Cow::into_owned)
+        arf_strings::host_os_str_to_str(osstr)
+            .map(std::borrow::Cow::into_owned)
+            .map(Into::into)
     }
 
     #[cfg(windows)]
     {
-        arf_strings::host_to_str(osstr)
+        arf_strings::host_to_str(osstr).map(Into::into)
     }
 }
