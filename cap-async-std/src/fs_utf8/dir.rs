@@ -552,6 +552,39 @@ impl Dir {
             .await
             .map(Self::from_cap_std)
     }
+
+    /// Constructs a new instance of `Self` by opening the parent directory
+    /// (aka "..") of `self`, using the host process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function accesses a directory outside of the `self` subtree.
+    #[inline]
+    pub async fn open_parent_dir<P: AsRef<str>>(
+        &self,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        self.cap_std
+            .open_parent_dir(ambient_authority)
+            .await
+            .map(Self::from_cap_std)
+    }
+
+    /// Recursively create a directory and all of its parent components if they
+    /// are missing, using the host process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub async fn create_ambient_dir_all<P: AsRef<str>>(
+        path: P,
+        _ambient_authority: AmbientAuthority,
+    ) -> io::Result<()> {
+        let path = from_utf8(path)?;
+        fs::create_dir_all(path).await
+    }
 }
 
 #[cfg(not(windows))]

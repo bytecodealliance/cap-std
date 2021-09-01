@@ -8,8 +8,8 @@ use async_std::path::{Path, PathBuf};
 use async_std::task::spawn_blocking;
 use async_std::{fs, io};
 use cap_primitives::fs::{
-    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, read_base_dir,
-    read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
+    canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, open_parent_dir,
+    read_base_dir, read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use cap_primitives::{ambient_authority, AmbientAuthority};
@@ -774,6 +774,42 @@ impl Dir {
         spawn_blocking(move || open_ambient_dir(path.as_ref(), ambient_authority))
             .await
             .map(|f| Self::from_std_file(f.into(), ambient_authority))
+    }
+
+    /// Constructs a new instance of `Self` by opening the parent directory
+    /// (aka "..") of `self`, using the host process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function accesses a directory outside of the `self` subtree.
+    #[inline]
+    pub async fn open_parent_dir(&self, ambient_authority: AmbientAuthority) -> io::Result<Self> {
+        let clone = self.clone();
+        let dir = spawn_blocking(move || {
+            open_parent_dir(
+                &*clone.as_filelike_view::<std::fs::File>(),
+                ambient_authority,
+            )
+        })
+        .await?
+        .into();
+        Ok(Self::from_std_file(dir, ambient_authority))
+    }
+
+    /// Recursively create a directory and all of its parent components if they
+    /// are missing, using the host process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub async fn create_ambient_dir_all<P: AsRef<Path>>(
+        path: P,
+        _ambient_authority: AmbientAuthority,
+    ) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        fs::create_dir_all(path).await
     }
 }
 
