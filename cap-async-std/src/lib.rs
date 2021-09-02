@@ -43,8 +43,6 @@ pub mod fs_utf8;
 pub mod net;
 pub mod os;
 pub mod time;
-// For now, re-export `path`; see
-// <https://github.com/bytecodealliance/cap-std/issues/88>
 pub use async_std::path;
 #[doc(hidden)]
 pub use cap_primitives::ambient_authority_known_at_compile_time;
