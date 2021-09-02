@@ -21,13 +21,14 @@ cap-primitives = { path = "../cap-primitives", version = "^0.18.1-alpha.0"}
 ipnet = "2.3.0"
 unsafe-io = "0.9.1"
 io-lifetimes = { version = "0.3.0", default-features = false }
+camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
 rsix = "0.20.0"
 
 [features]
 default = []
-fs_utf8 = ["arf-strings"]
+fs_utf8 = ["arf-strings", "camino"]
 
 [badges]
 maintenance = { status = "actively-developed" }

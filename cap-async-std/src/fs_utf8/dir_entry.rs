@@ -87,7 +87,7 @@ impl DirEntry {
     pub fn file_name(&self) -> String {
         // Unwrap because we can assume that paths coming from the OS don't
         // have embedded NULs.
-        to_utf8(self.cap_std.file_name()).unwrap()
+        to_utf8(self.cap_std.file_name()).unwrap().into()
     }
 }
 
