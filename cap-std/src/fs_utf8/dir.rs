@@ -571,7 +571,7 @@ impl Dir {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub fn create_ambient_dir_all<P: AsRef<str>>(
+    pub fn create_ambient_dir_all<P: AsRef<Utf8Path>>(
         path: P,
         _ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {

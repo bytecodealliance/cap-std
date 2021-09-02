@@ -3,6 +3,8 @@
 //
 // This is the contents of the `tests` module, ported to use `cap_std`.
 
+#![cfg(feature = "fs_utf8")]
+
 #[macro_use]
 mod sys_common;
 
