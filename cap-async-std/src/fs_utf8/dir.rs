@@ -571,7 +571,7 @@ impl Dir {
     ///
     /// This function accesses a directory outside of the `self` subtree.
     #[inline]
-    pub async fn open_parent_dir<P: AsRef<str>>(
+    pub async fn open_parent_dir<P: AsRef<Utf8Path>>(
         &self,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
@@ -589,7 +589,7 @@ impl Dir {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub async fn create_ambient_dir_all<P: AsRef<str>>(
+    pub async fn create_ambient_dir_all<P: AsRef<Utf8Path>>(
         path: P,
         _ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {

@@ -554,7 +554,7 @@ impl Dir {
     ///
     /// This function accesses a directory outside of the `self` subtree.
     #[inline]
-    pub fn open_parent_dir<P: AsRef<str>>(
+    pub fn open_parent_dir<P: AsRef<Utf8Path>>(
         &self,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
