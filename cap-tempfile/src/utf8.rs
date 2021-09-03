@@ -20,8 +20,8 @@ pub use cap_std::{ambient_authority, AmbientAuthority};
 /// This corresponds to [`tempfile::TempDir`].
 ///
 /// Unlike `tempfile::TempDir`, this API has no `TempDir::path`,
-/// `TempDir::into_path`, or `impl AsRef<Utf8Path>`, because absolute paths don't
-/// interoperate well with the capability model.
+/// `TempDir::into_path`, or `impl AsRef<Utf8Path>`, because absolute paths
+/// don't interoperate well with the capability model.
 ///
 /// [`tempfile::TempDir`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html
 pub struct TempDir {
