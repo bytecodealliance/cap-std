@@ -20,12 +20,12 @@ ambient-authority = "0.0.1"
 arbitrary = { version = "1.0.0", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
 maybe-owned = "0.3.4"
-fs-set-times = "0.10.0"
+fs-set-times = "0.11.0"
 unsafe-io = "0.9.1"
 io-lifetimes = { version = "0.3.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rsix = "0.21.0"
+rsix = "0.22.4"
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 once_cell = "1.4.1"
