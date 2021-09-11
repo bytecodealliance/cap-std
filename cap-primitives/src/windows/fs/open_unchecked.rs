@@ -26,8 +26,9 @@ pub(crate) fn open_unchecked(
 pub(crate) fn open_ambient_impl(
     path: &Path,
     options: &OpenOptions,
-    _ambient_authority: AmbientAuthority,
+    ambient_authority: AmbientAuthority,
 ) -> Result<fs::File, OpenUncheckedError> {
+    let _ = ambient_authority;
     let (opts, manually_trunc) = open_options_to_std(options);
     match opts.open(path) {
         Ok(f) => {

@@ -806,8 +806,9 @@ impl Dir {
     #[inline]
     pub async fn create_ambient_dir_all<P: AsRef<Path>>(
         path: P,
-        _ambient_authority: AmbientAuthority,
+        ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
+        let _ = ambient_authority;
         let path = path.as_ref().to_path_buf();
         fs::create_dir_all(path).await
     }
