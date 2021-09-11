@@ -603,8 +603,9 @@ impl Dir {
     #[inline]
     pub fn create_ambient_dir_all<P: AsRef<Path>>(
         path: P,
-        _ambient_authority: AmbientAuthority,
+        ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
+        let _ = ambient_authority;
         fs::create_dir_all(path)
     }
 }

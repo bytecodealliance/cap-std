@@ -61,7 +61,8 @@ pub(crate) fn open_unchecked(
 pub(crate) fn open_ambient_impl(
     path: &Path,
     options: &OpenOptions,
-    _ambient_authority: AmbientAuthority,
+    ambient_authority: AmbientAuthority,
 ) -> Result<fs::File, OpenUncheckedError> {
+    let _ = ambient_authority;
     open_unchecked(&cwd().as_filelike_view::<fs::File>(), path, options)
 }

@@ -68,7 +68,8 @@ pub fn open_ambient_dir(path: &Path, ambient_authority: AmbientAuthority) -> io:
 #[inline]
 pub fn open_parent_dir(
     start: &fs::File,
-    _ambient_authority: AmbientAuthority,
+    ambient_authority: AmbientAuthority,
 ) -> io::Result<fs::File> {
+    let _ = ambient_authority;
     open_dir_unchecked(start, Component::ParentDir.as_ref())
 }

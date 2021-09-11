@@ -573,8 +573,9 @@ impl Dir {
     #[inline]
     pub fn create_ambient_dir_all<P: AsRef<Utf8Path>>(
         path: P,
-        _ambient_authority: AmbientAuthority,
+        ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
+        let _ = ambient_authority;
         let path = from_utf8(path)?;
         fs::create_dir_all(path)
     }
