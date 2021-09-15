@@ -16,7 +16,7 @@ edition = "2018"
 rustc_version = "0.4.0"
 
 [dependencies]
-arf-strings = { version = "0.4.0", optional = true }
+arf-strings = { version = "0.5.0", optional = true }
 cap-primitives = { path = "../cap-primitives", version = "^0.19.1-alpha.0"}
 ipnet = "2.3.0"
 unsafe-io = "0.9.1"
@@ -24,7 +24,7 @@ io-lifetimes = { version = "0.3.0", default-features = false }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
-rsix = "0.22.4"
+rsix = "0.23.0"
 
 [features]
 default = []
