@@ -181,11 +181,14 @@ cases, though it's not yet very sophisticated.
 
 ## What is `cap_std::fs_utf8`?
 
-It's an experiment in what an API with UTF-8 filesystem paths (but which still
-allow you to access any file with any byte-sequence name) might look like. For
-more information on the technique, see the [`arf-strings` package]. To try it,
-opt in by enabling the `fs_utf8` feature and using `std::fs_utf8` in place of
-`std::fs`.
+It's similar to `cap_std::fs`, but uses [`camino`] for its `Path` types, so
+paths are always valid UTF-8. To use it, opt in by enabling the `fs_utf8`
+feature and using `std::fs_utf8` in place of `std::fs`.
+
+There's also an experimental extension to `fs_utf8` which allows losslessly
+encoding arbitrary host byte sequences within UTF-8 strings, using the
+[`arf-strings`] technique. To try this experiment, opt in by enabling the
+`arf_strings` feature.
 
 ## Similar crates
 
@@ -209,7 +212,8 @@ It's not mature yet, and it doesn't support Windows. It does support
 `openat2`-like features such as `RESOLVE_NO_XDEV`, `RESOLVE_NO_SYMLINKS`,
 and `RESOLVE_IN_ROOT`, including emulation when `openat2` isn't available.
 
-[`arf-strings` package]: https://github.com/bytecodealliance/arf-strings/
+[`arf-strings`]: https://github.com/bytecodealliance/arf-strings/
 [`openat`]: https://crates.io/crates/openat
 [`pathrs`]: https://crates.io/crates/pathrs
 [`obnth`]: https://crates.io/crates/obnth
+[`camino`]: https://crates.io/crates/camino

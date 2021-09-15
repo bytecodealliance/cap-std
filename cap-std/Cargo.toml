@@ -28,7 +28,8 @@ rsix = "0.22.4"
 
 [features]
 default = []
-fs_utf8 = ["arf-strings", "camino"]
+fs_utf8 = ["camino"]
+arf_strings = ["fs_utf8", "arf-strings"]
 
 [badges]
 maintenance = { status = "actively-developed" }

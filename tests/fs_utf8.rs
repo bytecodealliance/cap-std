@@ -473,7 +473,7 @@ fn file_test_directoryinfo_readdir() {
     let files = check!(tmpdir.read_dir(dir));
     let mut mem = [0; 4];
     for f in files {
-        let f = f.unwrap().file_name();
+        let f = f.unwrap().file_name().unwrap();
         {
             check!(check!(tmpdir.open(&f)).read(&mut mem));
             let read_str = str::from_utf8(&mem).unwrap();
@@ -1302,7 +1302,7 @@ fn dir_entry_methods() {
     tmpdir.create("b").unwrap();
 
     for file in tmpdir.read_dir(".").unwrap().map(|f| f.unwrap()) {
-        let fname = file.file_name();
+        let fname = file.file_name().unwrap();
         match fname.as_str() {
             "a" => {
                 assert!(file.file_type().unwrap().is_dir());
@@ -1454,4 +1454,39 @@ fn symlink_hard_link() {
     assert!(check!(tmpdir.symlink_metadata("hard_link"))
         .file_type()
         .is_symlink());
+}
+
+/// Test creating files with invalid names and reading their parent directories.
+#[test]
+fn test_invalid_utf8() {
+    use camino::Utf8Path;
+    use std::ffi::OsStr;
+    #[cfg(unix)]
+    use std::os::unix::ffi::OsStrExt;
+    #[cfg(target_os = "wasi")]
+    use std::os::wasi::ffi::OsStrExt;
+
+    let dir = tempfile::tempdir().unwrap();
+    let invalid_path = dir.path().join(OsStr::from_bytes(b"invalid\xffbyte"));
+
+    let _ = std::fs::File::create(invalid_path).unwrap();
+
+    let cap_dir = cap_std::fs_utf8::Dir::open_ambient_dir(
+        Utf8Path::from_path(dir.path()).unwrap(),
+        cap_std::ambient_authority(),
+    )
+    .unwrap();
+
+    for entry in cap_dir.entries().unwrap() {
+        let entry = entry.unwrap();
+        #[cfg(feature = "arf_strings")]
+        {
+            let name: String = entry.file_name().unwrap();
+            let _ = cap_dir.open(name).unwrap();
+        }
+        #[cfg(not(feature = "arf_strings"))]
+        {
+            let _ = entry.file_name().unwrap_err();
+        }
+    }
 }
