@@ -1481,7 +1481,7 @@ fn test_invalid_utf8() {
 
     // On some OS's, it's not possible to create files with invalid paths.
     // If it is, test that we do the right thing with them.
-    if let Some(_) = std::fs::File::create(invalid_path) {
+    if let Ok(_) = std::fs::File::create(invalid_path) {
         let cap_dir = cap_std::fs_utf8::Dir::open_ambient_dir(
             Utf8Path::from_path(dir.path()).unwrap(),
             cap_std::ambient_authority(),
