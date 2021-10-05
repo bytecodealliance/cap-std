@@ -76,7 +76,7 @@ fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
         Ok(Utf8Path::from_path(path.as_ref())
             .ok_or_else(|| {
                 std::io::Error::new(
-                    std::io::Error::InvalidData,
+                    std::io::ErrorKind::InvalidData,
                     "filesystem path is not valid UTF-8",
                 )
             })?
