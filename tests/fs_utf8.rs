@@ -1460,11 +1460,16 @@ fn symlink_hard_link() {
 #[test]
 fn test_invalid_utf8() {
     use camino::Utf8Path;
+    #[cfg(not(windows))]
     use std::ffi::OsStr;
+    #[cfg(windows)]
+    use std::ffi::OsString;
     #[cfg(unix)]
     use std::os::unix::ffi::OsStrExt;
     #[cfg(target_os = "wasi")]
     use std::os::wasi::ffi::OsStrExt;
+    #[cfg(windows)]
+    use std::os::windows::ffi::OsStringExt;
 
     let dir = tempfile::tempdir().unwrap();
     #[cfg(not(windows))]
