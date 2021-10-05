@@ -1479,24 +1479,26 @@ fn test_invalid_utf8() {
         0x69, 0x6e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0xd800, 0x62, 0x79, 0x74, 0x65,
     ]));
 
-    let _ = std::fs::File::create(invalid_path).unwrap();
+    // On some OS's, it's not possible to create files with invalid paths.
+    // If it is, test that we do the right thing with them.
+    if let Some(_) = std::fs::File::create(invalid_path) {
+        let cap_dir = cap_std::fs_utf8::Dir::open_ambient_dir(
+            Utf8Path::from_path(dir.path()).unwrap(),
+            cap_std::ambient_authority(),
+        )
+        .unwrap();
 
-    let cap_dir = cap_std::fs_utf8::Dir::open_ambient_dir(
-        Utf8Path::from_path(dir.path()).unwrap(),
-        cap_std::ambient_authority(),
-    )
-    .unwrap();
-
-    for entry in cap_dir.entries().unwrap() {
-        let entry = entry.unwrap();
-        #[cfg(feature = "arf_strings")]
-        {
-            let name: String = entry.file_name().unwrap();
-            let _ = cap_dir.open(name).unwrap();
-        }
-        #[cfg(not(feature = "arf_strings"))]
-        {
-            let _ = entry.file_name().unwrap_err();
+        for entry in cap_dir.entries().unwrap() {
+            let entry = entry.unwrap();
+            #[cfg(feature = "arf_strings")]
+            {
+                let name: String = entry.file_name().unwrap();
+                let _ = cap_dir.open(name).unwrap();
+            }
+            #[cfg(not(feature = "arf_strings"))]
+            {
+                let _ = entry.file_name().unwrap_err();
+            }
         }
     }
 }
