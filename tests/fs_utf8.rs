@@ -1467,7 +1467,12 @@ fn test_invalid_utf8() {
     use std::os::wasi::ffi::OsStrExt;
 
     let dir = tempfile::tempdir().unwrap();
+    #[cfg(not(windows))]
     let invalid_path = dir.path().join(OsStr::from_bytes(b"invalid\xffbyte"));
+    #[cfg(windows)]
+    let invalid_path = dir.path().join(OsString::from_wide(&[
+        0x69, 0x6e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0xd800, 0x62, 0x79, 0x74, 0x65,
+    ]));
 
     let _ = std::fs::File::create(invalid_path).unwrap();
 
