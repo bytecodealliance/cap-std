@@ -1323,8 +1323,8 @@ fn dir_entry_debug() {
     tmpdir.create("b").unwrap();
     let mut read_dir = tmpdir.read_dir(".").unwrap();
     let dir_entry = read_dir.next().unwrap().unwrap();
-    let actual = format!("Ok({:?})", dir_entry);
-    let expected = format!("DirEntry({:?})", dir_entry.file_name());
+    let actual = format!("{:?}", dir_entry);
+    let expected = format!("DirEntry({:?})", dir_entry.file_name().unwrap());
     assert_eq!(actual, expected);
 }
 
