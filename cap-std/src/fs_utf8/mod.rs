@@ -63,9 +63,23 @@ fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<std::path::PathBuf>
 
 fn to_utf8<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
     #[cfg(not(feature = "arf_strings"))]
+    #[cfg(not(windows))]
     {
         Ok(Utf8Path::from_path(path.as_ref())
             .ok_or_else(|| ::rsix::io::Error::ILSEQ)?
+            .to_path_buf())
+    }
+
+    #[cfg(not(feature = "arf_strings"))]
+    #[cfg(windows)]
+    {
+        Ok(Utf8Path::from_path(path.as_ref())
+            .ok_or_else(|| {
+                std::io::Error::new(
+                    std::io::Error::InvalidData,
+                    "filesystem path is not valid UTF-8",
+                )
+            })?
             .to_path_buf())
     }
 
