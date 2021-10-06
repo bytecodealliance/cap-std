@@ -360,6 +360,7 @@ jobs:
   fuzz_targets:
     name: Fuzz Targets
     runs-on: ubuntu-latest
+    if: ${{ false }} # disable pending https://github.com/rust-fuzz/cargo-fuzz/issues/276
     steps:
     - uses: actions/checkout@v2
       with:
