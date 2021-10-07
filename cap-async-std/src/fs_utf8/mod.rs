@@ -37,37 +37,53 @@ use camino::{Utf8Path, Utf8PathBuf};
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
 fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
-    #[cfg(not(windows))]
-    let path = {
-        #[cfg(unix)]
-        use std::{ffi::OsString, os::unix::ffi::OsStringExt};
-        #[cfg(target_os = "wasi")]
-        use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
+    #[cfg(not(feature = "arf_strings"))]
+    {
+        Ok(path.as_ref().as_std_path())
+    }
 
-        let string = arf_strings::str_to_host(path.as_ref().as_str())?;
-        OsString::from_vec(string.into_bytes())
-    };
+    #[cfg(feature = "arf_strings")]
+    {
+        #[cfg(not(windows))]
+        let path = {
+            #[cfg(unix)]
+            use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+            #[cfg(target_os = "wasi")]
+            use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
 
-    #[cfg(windows)]
-    let path = arf_strings::str_to_host(path.as_ref().as_str())?;
+            let string = arf_strings::str_to_host(path.as_ref().as_str())?;
+            OsString::from_vec(string.into_bytes())
+        };
 
-    Ok(path.into())
+        #[cfg(windows)]
+        let path = arf_strings::str_to_host(path.as_ref().as_str())?;
+
+        Ok(path.into())
+    }
 }
 
 fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
-    // For now, for WASI use the same logic as other OS's, but
-    // in the future, the idea is we could avoid this.
-    let osstr = path.as_ref().as_os_str();
-
-    #[cfg(not(windows))]
+    #[cfg(not(feature = "arf_strings"))]
     {
-        arf_strings::host_os_str_to_str(osstr)
-            .map(std::borrow::Cow::into_owned)
-            .map(Into::into)
+        Ok(Utf8Path::from_path(path.as_ref()))
     }
 
-    #[cfg(windows)]
+    #[cfg(feature = "arf_strings")]
     {
-        arf_strings::host_to_str(osstr).map(Into::into)
+        // For now, for WASI use the same logic as other OS's, but
+        // in the future, the idea is we could avoid this.
+        let osstr = path.as_ref().as_os_str();
+
+        #[cfg(not(windows))]
+        {
+            arf_strings::host_os_str_to_str(osstr)
+                .map(std::borrow::Cow::into_owned)
+                .map(Into::into)
+        }
+
+        #[cfg(windows)]
+        {
+            arf_strings::host_to_str(osstr).map(Into::into)
+        }
     }
 }

@@ -1260,19 +1260,27 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<std::path::PathBuf> {
-    #[cfg(not(windows))]
-    let path = {
-        #[cfg(unix)]
-        use std::{ffi::OsString, os::unix::ffi::OsStringExt};
-        #[cfg(target_os = "wasi")]
-        use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
+    #[cfg(not(feature = "arf_strings"))]
+    {
+        Ok(path.as_ref().as_std_path().to_path_buf())
+    }
 
-        let string = arf_strings::str_to_host(path.as_ref().as_str())?;
-        OsString::from_vec(string.into_bytes())
-    };
+    #[cfg(feature = "arf_strings")]
+    {
+        #[cfg(not(windows))]
+        let path = {
+            #[cfg(unix)]
+            use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+            #[cfg(target_os = "wasi")]
+            use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
 
-    #[cfg(windows)]
-    let path = arf_strings::str_to_host(path.as_ref().as_str())?;
+            let string = arf_strings::str_to_host(path.as_ref().as_str())?;
+            OsString::from_vec(string.into_bytes())
+        };
 
-    Ok(path.into())
+        #[cfg(windows)]
+        let path = arf_strings::str_to_host(path.as_ref().as_str())?;
+
+        Ok(path.into())
+    }
 }

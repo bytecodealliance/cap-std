@@ -473,7 +473,7 @@ fn file_test_directoryinfo_readdir() {
     let files = check!(tmpdir.read_dir(dir));
     let mut mem = [0; 4];
     for f in files {
-        let f = f.unwrap().file_name();
+        let f = f.unwrap().file_name().unwrap();
         {
             check!(check!(tmpdir.open(&f)).read(&mut mem));
             let read_str = str::from_utf8(&mem).unwrap();
@@ -1302,7 +1302,7 @@ fn dir_entry_methods() {
     tmpdir.create("b").unwrap();
 
     for file in tmpdir.read_dir(".").unwrap().map(|f| f.unwrap()) {
-        let fname = file.file_name();
+        let fname = file.file_name().unwrap();
         match fname.as_str() {
             "a" => {
                 assert!(file.file_type().unwrap().is_dir());
@@ -1324,7 +1324,7 @@ fn dir_entry_debug() {
     let mut read_dir = tmpdir.read_dir(".").unwrap();
     let dir_entry = read_dir.next().unwrap().unwrap();
     let actual = format!("{:?}", dir_entry);
-    let expected = format!("DirEntry({:?})", dir_entry.file_name());
+    let expected = format!("DirEntry({:?})", dir_entry.file_name().unwrap());
     assert_eq!(actual, expected);
 }
 
@@ -1454,4 +1454,51 @@ fn symlink_hard_link() {
     assert!(check!(tmpdir.symlink_metadata("hard_link"))
         .file_type()
         .is_symlink());
+}
+
+/// Test creating files with invalid names and reading their parent directories.
+#[test]
+fn test_invalid_utf8() {
+    use camino::Utf8Path;
+    #[cfg(not(windows))]
+    use std::ffi::OsStr;
+    #[cfg(windows)]
+    use std::ffi::OsString;
+    #[cfg(unix)]
+    use std::os::unix::ffi::OsStrExt;
+    #[cfg(target_os = "wasi")]
+    use std::os::wasi::ffi::OsStrExt;
+    #[cfg(windows)]
+    use std::os::windows::ffi::OsStringExt;
+
+    let dir = tempfile::tempdir().unwrap();
+    #[cfg(not(windows))]
+    let invalid_path = dir.path().join(OsStr::from_bytes(b"invalid\xffbyte"));
+    #[cfg(windows)]
+    let invalid_path = dir.path().join(OsString::from_wide(&[
+        0x69, 0x6e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0xd800, 0x62, 0x79, 0x74, 0x65,
+    ]));
+
+    // On some OS's, it's not possible to create files with invalid paths.
+    // If it is, test that we do the right thing with them.
+    if let Ok(_) = std::fs::File::create(invalid_path) {
+        let cap_dir = cap_std::fs_utf8::Dir::open_ambient_dir(
+            Utf8Path::from_path(dir.path()).unwrap(),
+            cap_std::ambient_authority(),
+        )
+        .unwrap();
+
+        for entry in cap_dir.entries().unwrap() {
+            let entry = entry.unwrap();
+            #[cfg(feature = "arf_strings")]
+            {
+                let name: String = entry.file_name().unwrap();
+                let _ = cap_dir.open(name).unwrap();
+            }
+            #[cfg(not(feature = "arf_strings"))]
+            {
+                let _ = entry.file_name().unwrap_err();
+            }
+        }
+    }
 }

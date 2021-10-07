@@ -80,12 +80,16 @@ impl DirEntry {
     /// Returns the bare file name of this directory entry without any other
     /// leading path component.
     ///
+    /// This function returns an `Err` in the case that the file name isn't
+    /// encodable as UTF-8.
+    ///
+    /// If the `arf_strings` feature is enabled, unencodable names are
+    /// translated to UTF-8 using `arf-strings`.
+    ///
     /// This corresponds to [`std::fs::DirEntry::file_name`].
     #[inline]
-    pub fn file_name(&self) -> String {
-        // Unwrap because we can assume that paths coming from the OS don't
-        // have embedded NULs.
-        to_utf8(self.cap_std.file_name()).unwrap().into()
+    pub fn file_name(&self) -> io::Result<String> {
+        Ok(to_utf8(self.cap_std.file_name())?.into())
     }
 }
 

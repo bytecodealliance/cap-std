@@ -28,10 +28,12 @@ camino = { version = "1.0.5", optional = true }
 
 [features]
 default = ["std"]
-fs_utf8 = ["arf-strings", "cap-std/fs_utf8", "camino"]
+fs_utf8 = ["cap-std/fs_utf8", "camino"]
+arf_strings = ["cap-std/arf_strings", "fs_utf8", "arf-strings"]
 std = ["cap-std"]
 async_std = ["cap-async-std", "async-std", "io-lifetimes/async-std", "async-trait"]
-async_std_fs_utf8 = ["arf-strings", "cap-async-std/fs_utf8", "camino"]
+async_std_fs_utf8 = ["cap-async-std/fs_utf8", "camino"]
+async_std_arf_strings = ["cap-async-std/arf_strings", "async_std_fs_utf8", "arf-strings"]
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.3.9"
