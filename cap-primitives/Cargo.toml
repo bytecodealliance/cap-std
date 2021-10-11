@@ -27,9 +27,6 @@ io-lifetimes = { version = "0.3.0", default-features = false }
 [target.'cfg(not(windows))'.dependencies]
 rsix = "0.23.0"
 
-[target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
-once_cell = "1.4.1"
-
 [target.'cfg(target_os = "macos")'.dependencies]
 errno = "0.2.7"
 
