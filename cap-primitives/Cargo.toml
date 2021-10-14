@@ -25,7 +25,7 @@ unsafe-io = "0.9.1"
 io-lifetimes = { version = "0.3.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rsix = "0.23.0"
+rsix = { version = "0.24.0", features = ["procfs"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 errno = "0.2.7"
