@@ -58,9 +58,6 @@ async_std_arf_strings = [
     "cap-fs-ext/async_std_arf_strings"
 ]
 
-[badges]
-maintenance = { status = "actively-developed" }
-
 [workspace]
 members = [
   "cap-async-std",

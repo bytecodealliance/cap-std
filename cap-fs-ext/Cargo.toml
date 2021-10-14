@@ -40,6 +40,3 @@ winapi = "0.3.9"
 
 [dev-dependencies]
 cap-tempfile = { path = "../cap-tempfile" }
-
-[badges]
-maintenance = { status = "actively-developed" }

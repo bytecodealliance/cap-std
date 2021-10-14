@@ -27,6 +27,3 @@ winapi = "0.3.9"
 default = []
 fs_utf8 = ["cap-std/fs_utf8", "camino"]
 arf_strings = ["cap-std/arf_strings"]
-
-[badges]
-maintenance = { status = "actively-developed" }

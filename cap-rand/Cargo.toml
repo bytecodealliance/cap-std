@@ -19,6 +19,3 @@ rand = "0.8.1"
 [features]
 default = []
 small_rng = ["rand/small_rng"]
-
-[badges]
-maintenance = { status = "actively-developed" }

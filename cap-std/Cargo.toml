@@ -30,6 +30,3 @@ rsix = "0.24.0"
 default = []
 fs_utf8 = ["camino"]
 arf_strings = ["fs_utf8", "arf-strings"]
-
-[badges]
-maintenance = { status = "actively-developed" }
