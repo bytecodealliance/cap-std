@@ -1456,7 +1456,8 @@ fn symlink_hard_link() {
         .is_symlink());
 }
 
-/// Test creating files with invalid names and reading their parent directories.
+/// Test creating files with invalid names and reading their parent
+/// directories.
 #[test]
 fn test_invalid_utf8() {
     use camino::Utf8Path;
