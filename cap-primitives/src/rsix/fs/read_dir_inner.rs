@@ -79,7 +79,7 @@ impl ReadDirInner {
 
     #[allow(unsafe_code)]
     fn as_file_view(&self) -> ManuallyDrop<fs::File> {
-        // Safety: `self.rsix` owns the file desctiptor. We just hold a
+        // Safety: `self.rsix` owns the file descriptor. We just hold a
         // copy outside so that we can read it without taking a lock.
         ManuallyDrop::new(unsafe { fs::File::from_raw_fd(self.raw_fd) })
     }
