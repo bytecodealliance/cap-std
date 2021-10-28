@@ -4,13 +4,17 @@ use rsix::io::ttyname;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use std::ffi::OsString;
 use std::fs;
+#[cfg(unix)]
+use std::os::unix::ffi::OsStringExt;
+#[cfg(target_os = "wasi")]
+use std::os::wasi::ffi::OsStringExt;
 use std::path::PathBuf;
 
 pub(crate) fn file_path_by_ttyname_or_seaching(file: &fs::File) -> Option<PathBuf> {
     // If it happens to be a tty, we can look up its name.
     #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-    if let Ok(name) = ttyname(file, OsString::new()) {
-        return Some(name.into());
+    if let Ok(name) = ttyname(file, Vec::new()) {
+        return Some(OsString::from_vec(name.into_bytes()).into());
     }
 
     file_path_by_searching(file)

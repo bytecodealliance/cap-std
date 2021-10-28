@@ -20,7 +20,7 @@ use std::{fs, io};
 pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf> {
     read_link_unchecked(
         &proc_self_fd()?.as_filelike_view::<fs::File>(),
-        &DecInt::from_fd(file),
+        DecInt::from_fd(file).as_ref(),
         PathBuf::new(),
     )
 }
@@ -63,7 +63,7 @@ pub(crate) fn set_times_through_proc_self_fd(
     // isn't a symlink.
     set_times_follow_unchecked(
         proc_self_fd()?.as_fd(),
-        &DecInt::from_fd(&opath),
+        DecInt::from_fd(&opath).as_ref(),
         atime,
         mtime,
     )
