@@ -6,6 +6,7 @@ use crate::fs::DirOptionsExt;
 /// This is to `create_dir` what to `OpenOptions` is to `open`.
 #[derive(Debug, Clone)]
 pub struct DirOptions {
+    #[allow(dead_code)]
     pub(crate) ext: DirOptionsExt,
 }
 

@@ -7,9 +7,13 @@ use std::{fs, io};
 #[derive(Debug, Clone)]
 pub(crate) struct MetadataExt {
     file_attributes: u32,
+    #[cfg(windows_by_handle)]
     creation_time: u64,
+    #[cfg(windows_by_handle)]
     last_access_time: u64,
+    #[cfg(windows_by_handle)]
     last_write_time: u64,
+    #[cfg(windows_by_handle)]
     file_size: u64,
     volume_serial_number: Option<u32>,
     number_of_links: Option<u32>,
@@ -103,9 +107,13 @@ impl MetadataExt {
         use std::os::windows::fs::MetadataExt;
         Self {
             file_attributes: std.file_attributes(),
+            #[cfg(windows_by_handle)]
             creation_time: std.creation_time(),
+            #[cfg(windows_by_handle)]
             last_access_time: std.last_access_time(),
+            #[cfg(windows_by_handle)]
             last_write_time: std.last_write_time(),
+            #[cfg(windows_by_handle)]
             file_size: std.file_size(),
             volume_serial_number,
             number_of_links,
