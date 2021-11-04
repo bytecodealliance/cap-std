@@ -229,7 +229,7 @@ fn open_dir_nofollow() {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(tmpdir.open_dir(&name));
             // On Windows, a trailing dot is stripped early.
-            if cfg!(not(windows)) || suffix != &"/." {
+            if cfg!(not(windows)) || suffix != "/." {
                 check!(tmpdir.open_dir_nofollow(&name));
             } else {
                 assert!(tmpdir.open_dir_nofollow(&name).is_err());
@@ -238,7 +238,7 @@ fn open_dir_nofollow() {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(tmpdir.open_dir(&name));
                 // On Windows, a trailing dot is stripped early.
-                if cfg!(not(windows)) || suffix != &"/." {
+                if cfg!(not(windows)) || suffix != "/." {
                     check!(tmpdir.open_dir_nofollow(&name));
                 } else {
                     assert!(tmpdir.open_dir_nofollow(&name).is_err());

@@ -839,7 +839,7 @@ fn symlink_noexist() {
 
     // Use a relative path for testing. Symlinks get normalized by Windows,
     // so we may not get the same path back for absolute paths
-    check!(symlink_file(&"foo", &tmpdir, "bar"));
+    check!(symlink_file("foo", &tmpdir, "bar"));
     assert_eq!(check!(tmpdir.read_link("bar")).to_str().unwrap(), "foo");
 }
 
@@ -868,7 +868,7 @@ fn read_link() {
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_file(&"foo", &tmpdir, &link));
+    check!(symlink_file("foo", &tmpdir, &link));
     assert_eq!(check!(tmpdir.read_link(&link)).to_str().unwrap(), "foo");
 }
 
