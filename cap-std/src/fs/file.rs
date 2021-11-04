@@ -2,6 +2,8 @@ use crate::fs::{Metadata, OpenOptions, Permissions};
 use cap_primitives::fs::{is_file_read_write, open_ambient};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
+use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
@@ -10,13 +12,10 @@ use std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::path::Path;
 use std::{fmt, fs, process};
-#[cfg(not(windows))]
-use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open file on a filesystem.
@@ -288,9 +287,6 @@ impl IntoRawHandleOrSocket for File {
         self.std.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `File` wraps a `fs::File` which owns its handle.
-unsafe impl OwnsRaw for File {}
 
 impl Read for File {
     #[inline]

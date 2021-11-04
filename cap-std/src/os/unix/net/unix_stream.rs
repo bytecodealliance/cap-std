@@ -7,7 +7,6 @@ use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::os::unix;
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::time::Duration;
-use unsafe_io::OwnsRaw;
 
 /// A Unix stream socket.
 ///
@@ -200,9 +199,6 @@ impl IntoFd for UnixStream {
         self.std.into_fd()
     }
 }
-
-// Safety: `UnixStream` wraps a `net::UnixStream` which owns its handle.
-unsafe impl OwnsRaw for UnixStream {}
 
 impl Read for UnixStream {
     #[inline]

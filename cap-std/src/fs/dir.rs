@@ -12,21 +12,20 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 #[cfg(target_os = "wasi")]
-use rsix::fs::OpenOptionsExt;
+use rustix::fs::OpenOptionsExt;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt, fs};
-use unsafe_io::OwnsRaw;
 #[cfg(not(windows))]
 use {
     cap_primitives::fs::symlink,
-    unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
+    io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 #[cfg(windows)]
 use {
     cap_primitives::fs::{symlink_dir, symlink_file},
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open directory on a filesystem.
@@ -723,9 +722,6 @@ impl IntoRawHandleOrSocket for Dir {
         self.std_file.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `Dir` wraps a `fs::File` which owns its handle.
-unsafe impl OwnsRaw for Dir {}
 
 /// Indicates how large a buffer to pre-allocate before reading the entire
 /// file.

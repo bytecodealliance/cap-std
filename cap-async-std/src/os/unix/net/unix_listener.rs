@@ -5,7 +5,6 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
-use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
 ///
@@ -123,9 +122,6 @@ impl IntoFd for UnixListener {
 }
 
 // async_std's `IntoStream` is unstable.
-
-// Safety: `UnixListener` wraps a `net::UnixListener` which owns its handle.
-unsafe impl OwnsRaw for UnixListener {}
 
 impl fmt::Debug for UnixListener {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

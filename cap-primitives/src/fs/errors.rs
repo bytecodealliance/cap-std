@@ -1,7 +1,7 @@
 use std::io;
 
 #[cfg(not(windows))]
-pub(crate) use crate::rsix::fs::errors::*;
+pub(crate) use crate::rustix::fs::errors::*;
 #[cfg(windows)]
 pub(crate) use crate::windows::fs::errors::*;
 

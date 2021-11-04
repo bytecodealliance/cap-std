@@ -8,11 +8,10 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
 use std::fmt;
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A TCP socket server, listening for connections.
@@ -196,9 +195,6 @@ impl IntoRawHandleOrSocket for TcpListener {
         self.std.into_raw_handle_or_socket()
     }
 }
-
-/// Safety: `TcpListener` wraps a `net::TcpListener` which owns its handle.
-unsafe impl OwnsRaw for TcpListener {}
 
 impl fmt::Debug for TcpListener {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

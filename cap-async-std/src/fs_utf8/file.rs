@@ -15,11 +15,10 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::fmt;
 use std::pin::Pin;
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open file on a filesystem.
@@ -258,9 +257,6 @@ impl IntoRawHandleOrSocket for File {
         self.cap_std.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `File` wraps a `fs::File` which owns its handle.
-unsafe impl OwnsRaw for File {}
 
 impl Read for File {
     #[inline]

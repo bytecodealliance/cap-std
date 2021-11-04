@@ -1,7 +1,7 @@
 #[cfg(any(unix, target_os = "vxworks"))]
 use crate::fs::PermissionsExt;
 #[cfg(unix)]
-use rsix::fs::RawMode;
+use rustix::fs::RawMode;
 use std::{fs, io};
 
 /// Representation of the various permissions on a file.

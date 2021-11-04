@@ -14,7 +14,7 @@
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(windows))]
-mod rsix;
+mod rustix;
 #[cfg(windows)]
 mod windows;
 
