@@ -31,15 +31,15 @@ pub use dir_entry::DirEntry;
 pub use file::File;
 pub use read_dir::ReadDir;
 
-use camino::{Utf8Path, Utf8PathBuf};
-
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
+
+use camino::{Utf8Path, Utf8PathBuf};
 
 fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
     #[cfg(not(feature = "arf_strings"))]
     {
-        Ok(path.as_ref().as_std_path())
+        Ok(path.as_ref().as_std_path().to_path_buf().into())
     }
 
     #[cfg(feature = "arf_strings")]
@@ -64,8 +64,24 @@ fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<async_std::path::Pa
 
 fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
     #[cfg(not(feature = "arf_strings"))]
+    #[cfg(not(windows))]
     {
-        Ok(Utf8Path::from_path(path.as_ref()))
+        Ok(Utf8Path::from_path(path.as_ref().into())
+            .ok_or_else(|| ::rustix::io::Error::ILSEQ)?
+            .to_path_buf())
+    }
+
+    #[cfg(not(feature = "arf_strings"))]
+    #[cfg(windows)]
+    {
+        Ok(Utf8Path::from_path(path.as_ref().into())
+            .ok_or_else(|| {
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "filesystem path is not valid UTF-8",
+                )
+            })?
+            .to_path_buf())
     }
 
     #[cfg(feature = "arf_strings")]
