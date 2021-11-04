@@ -20,12 +20,12 @@ ambient-authority = "0.0.1"
 arbitrary = { version = "1.0.0", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
 maybe-owned = "0.3.4"
-fs-set-times = "0.12.0"
-unsafe-io = "0.9.1"
-io-lifetimes = { version = "0.3.0", default-features = false }
+fs-set-times = "0.13.0"
+unsafe-io = "0.10.0"
+io-lifetimes = { version = "0.3.2", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rsix = { version = "0.25.0", features = ["procfs"] }
+rustix = { version = "0.26.0", features = ["procfs"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 errno = { version = "0.2.8", default-features = false }

@@ -1,7 +1,7 @@
 use crate::fs::{FileType, Metadata, OpenOptions};
 use crate::fs_utf8::{to_utf8, Dir, File};
 #[cfg(not(windows))]
-use rsix::fs::DirEntryExt;
+use rustix::fs::DirEntryExt;
 use std::{fmt, io};
 
 /// Entries returned by the `ReadDir` iterator.

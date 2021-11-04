@@ -7,7 +7,7 @@ use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket
 use std::time::Duration;
 use std::{fmt, io, net};
 #[cfg(not(windows))]
-use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
