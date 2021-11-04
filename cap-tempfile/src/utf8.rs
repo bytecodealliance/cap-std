@@ -4,7 +4,6 @@
 
 use camino::Utf8PathBuf;
 use cap_std::fs_utf8::Dir;
-use std::convert::TryInto;
 use std::ops::Deref;
 use std::{env, fmt, fs, io, mem};
 #[cfg(not(target_os = "emscripten"))]

@@ -3,7 +3,7 @@ fn main() {
         .expect("query rustc release channel")
         .channel
     {
-        for feature in &[
+        for feature in [
             "can_vector",         // https://github.com/rust-lang/rust/issues/69941
             "clamp",              // https://github.com/rust-lang/rust/issues/44095
             "extend_one",         // https://github.com/rust-lang/rust/issues/72631

@@ -10,7 +10,7 @@ license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["app_dirs", "path", "folder", "xdg", "basedir"]
 categories = ["filesystem"]
 repository = "https://github.com/bytecodealliance/cap-std"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 cap-std = { path = "../cap-std", version = "^0.20.1-alpha.0"}

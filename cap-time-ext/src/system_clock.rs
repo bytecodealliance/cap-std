@@ -1,9 +1,6 @@
-use std::time::{self, Duration};
 #[cfg(not(windows))]
-use {
-    rustix::time::{clock_getres, ClockId},
-    std::convert::TryInto,
-};
+use rustix::time::{clock_getres, ClockId};
+use std::time::{self, Duration};
 
 /// Extension trait for `cap_std::time::SystemClock`.
 pub trait SystemClockExt {

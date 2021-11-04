@@ -166,7 +166,7 @@ fn open_dir_nofollow() {
     check!(tmpdir.open_dir_nofollow("dir"));
 
     // Check various ways of spelling `dir/../symlink_dir`.
-    for dir_name in &["dir", "symlink_dir"] {
+    for dir_name in ["dir", "symlink_dir"] {
         let name = format!("{}/../symlink_dir", dir_name);
         check!(tmpdir.open_dir(&name));
         assert!(tmpdir.open_dir_nofollow(&name).is_err());
@@ -174,12 +174,12 @@ fn open_dir_nofollow() {
 
     // Check various paths which end with a symlink (even though the symlink
     // expansion may end with `/` or a non-symlink).
-    for suffix in &[""] {
-        for symlink_dir in &["symlink_dot"] {
+    for suffix in [""] {
+        for symlink_dir in ["symlink_dot"] {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(tmpdir.open_dir(&name));
             assert!(tmpdir.open_dir_nofollow(&name).is_err());
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(tmpdir.open_dir(&name));
                 assert!(tmpdir.open_dir_nofollow(&name).is_err());
@@ -189,8 +189,8 @@ fn open_dir_nofollow() {
 
     // Check more paths which end with a symlink. On Windows, these fail due to
     // the symlink-to-path-ending-in-trailing-slash error.
-    for suffix in &[""] {
-        for symlink_dir in &[
+    for suffix in [""] {
+        for symlink_dir in [
             "symlink_dir_slashdotdot",
             "symlink_dir_slashdot",
             "symlink_dir_slash",
@@ -207,7 +207,7 @@ fn open_dir_nofollow() {
                 check!(tmpdir.open_dir(&name));
             }
             assert!(tmpdir.open_dir_nofollow(&name).is_err());
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
@@ -224,8 +224,8 @@ fn open_dir_nofollow() {
 
     // Check those same paths, but with various suffixes appended, so that
     // `open_dir_nofollow` can open them.
-    for suffix in &["/", "/.", "/./"] {
-        for symlink_dir in &["symlink_dir", "symlink_dot"] {
+    for suffix in ["/", "/.", "/./"] {
+        for symlink_dir in ["symlink_dir", "symlink_dot"] {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(tmpdir.open_dir(&name));
             // On Windows, a trailing dot is stripped early.
@@ -234,7 +234,7 @@ fn open_dir_nofollow() {
             } else {
                 assert!(tmpdir.open_dir_nofollow(&name).is_err());
             }
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(tmpdir.open_dir(&name));
                 // On Windows, a trailing dot is stripped early.
@@ -250,8 +250,8 @@ fn open_dir_nofollow() {
     // Check those same paths, but with various suffixes appended. On
     // Windows, these fail due to the symlink-to-path-ending-in-trailing-slash
     // error.
-    for suffix in &["/", "/.", "/./"] {
-        for symlink_dir in &[
+    for suffix in ["/", "/.", "/./"] {
+        for symlink_dir in [
             "symlink_dir_slash",
             "symlink_dir_slashdot",
             "symlink_dir_slashdotdot",
@@ -269,7 +269,7 @@ fn open_dir_nofollow() {
                 check!(tmpdir.open_dir(&name));
                 check!(tmpdir.open_dir_nofollow(&name));
             }
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
@@ -286,7 +286,7 @@ fn open_dir_nofollow() {
     }
 
     // Check various ways of spelling `.`.
-    for cur_dir in &["dir/..", "dir/../", ".", "./"] {
+    for cur_dir in ["dir/..", "dir/../", ".", "./"] {
         check!(tmpdir.open_dir(cur_dir));
         check!(tmpdir.open_dir_nofollow(cur_dir));
     }
@@ -405,7 +405,7 @@ fn open_dir_nofollow_ambient() {
     ));
 
     // Check various ways of spelling `dir/../symlink_dir`.
-    for dir_name in &["dir", "symlink_dir"] {
+    for dir_name in ["dir", "symlink_dir"] {
         let name = format!("{}/../symlink_dir", dir_name);
         check!(Dir::open_ambient_dir(
             dir.path().join(&name),
@@ -415,14 +415,14 @@ fn open_dir_nofollow_ambient() {
 
     // Check various paths which end with a symlink (even though the symlink
     // expansion may end with `/` or a non-symlink).
-    for suffix in &[""] {
-        for symlink_dir in &["symlink_dot"] {
+    for suffix in [""] {
+        for symlink_dir in ["symlink_dot"] {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(Dir::open_ambient_dir(
                 dir.path().join(&name),
                 ambient_authority()
             ));
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(Dir::open_ambient_dir(
                     dir.path().join(&name),
@@ -434,8 +434,8 @@ fn open_dir_nofollow_ambient() {
 
     // Check more paths which end with a symlink. On Windows, these fail due to
     // the symlink-to-path-ending-in-trailing-slash error.
-    for suffix in &[""] {
-        for symlink_dir in &[
+    for suffix in [""] {
+        for symlink_dir in [
             "symlink_dir_slashdotdot",
             "symlink_dir_slashdot",
             "symlink_dir_slash",
@@ -457,7 +457,7 @@ fn open_dir_nofollow_ambient() {
                     ambient_authority()
                 ));
             }
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
@@ -478,14 +478,14 @@ fn open_dir_nofollow_ambient() {
     }
 
     // Check those same paths, but with various suffixes appended.
-    for suffix in &["/", "/.", "/./"] {
-        for symlink_dir in &["symlink_dir", "symlink_dot"] {
+    for suffix in ["/", "/.", "/./"] {
+        for symlink_dir in ["symlink_dir", "symlink_dot"] {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(Dir::open_ambient_dir(
                 dir.path().join(&name),
                 ambient_authority()
             ));
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(Dir::open_ambient_dir(
                     dir.path().join(&name),
@@ -498,8 +498,8 @@ fn open_dir_nofollow_ambient() {
     // Check those same paths, but with various suffixes appended. On
     // Windows, these fail due to the
     // symlink-to-path-ending-in-trailing-slash error.
-    for suffix in &["/", "/.", "/./"] {
-        for symlink_dir in &[
+    for suffix in ["/", "/.", "/./"] {
+        for symlink_dir in [
             "symlink_dir_slash",
             "symlink_dir_slashdot",
             "symlink_dir_slashdotdot",
@@ -521,7 +521,7 @@ fn open_dir_nofollow_ambient() {
                     ambient_authority()
                 ));
             }
-            for dir_name in &["dir", "symlink_dir"] {
+            for dir_name in ["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 #[cfg(windows)]
                 {
@@ -542,7 +542,7 @@ fn open_dir_nofollow_ambient() {
     }
 
     // Check various ways of spelling `.`.
-    for cur_dir in &["dir/..", "dir/../", ".", "./"] {
+    for cur_dir in ["dir/..", "dir/../", ".", "./"] {
         check!(Dir::open_ambient_dir(
             dir.path().join(cur_dir),
             ambient_authority()

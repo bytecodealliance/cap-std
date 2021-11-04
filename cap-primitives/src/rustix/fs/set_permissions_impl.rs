@@ -1,7 +1,6 @@
 use crate::fs::{errors, open, OpenOptions, Permissions};
 use rustix::fs::{fchmod, Mode};
 use rustix::io::Error;
-use std::convert::TryInto;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
