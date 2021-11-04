@@ -11,11 +11,10 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
 use std::fmt;
 use std::pin::Pin;
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A TCP stream between a local and a remote socket.
@@ -237,9 +236,6 @@ impl IntoRawHandleOrSocket for TcpStream {
         self.std.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `TcpStream` wraps a `net::TcpStream` which owns its handle.
-unsafe impl OwnsRaw for TcpStream {}
 
 impl Read for TcpStream {
     #[inline]

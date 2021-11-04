@@ -1,19 +1,18 @@
 use crate::net::{Shutdown, SocketAddr};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
+use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::time::Duration;
 use std::{fmt, net};
-#[cfg(not(windows))]
-use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A TCP stream between a local and a remote socket.
@@ -277,9 +276,6 @@ impl IntoRawHandleOrSocket for TcpStream {
         self.std.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `TcpStream` wraps a `net::TcpStream` which owns its handle.
-unsafe impl OwnsRaw for TcpStream {}
 
 impl Read for TcpStream {
     #[inline]

@@ -2,7 +2,7 @@
 macro_rules! assert_same_file {
     ($left:expr, $right:expr) => ({
         let (left, right) = (&($left), &($right));
-        if crate::rsix::fs::is_different_file(left, right).unwrap() {
+        if crate::rustix::fs::is_different_file(left, right).unwrap() {
             panic!("assertion failed: left is a different file from right\n  left: `{:?}`,\n right: `{:?}`",
                    left, right);
         }
@@ -12,7 +12,7 @@ macro_rules! assert_same_file {
     });
     ($left:expr, $right:expr, $($msg_args:tt)+) => ({
         let (left, right) = (&($left), &($right));
-        if crate::rsix::fs::is_different_file(left, right).unwrap() {
+        if crate::rustix::fs::is_different_file(left, right).unwrap() {
             panic!("assertion failed: left is a different file from right\n  left: `{:?}`,\n right: `{:?}`: {}",
                    left, right, format_args!($($msg_args)+));
         }
@@ -23,7 +23,7 @@ macro_rules! assert_same_file {
 macro_rules! assert_same_file_metadata {
     ($left:expr, $right:expr) => ({
         let (left, right) = (&($left), &($right));
-        if crate::rsix::fs::is_different_file_metadata(left, right).unwrap() {
+        if crate::rustix::fs::is_different_file_metadata(left, right).unwrap() {
             panic!("assertion failed: left is a different file from right\n  left: `{:?}`,\n right: `{:?}`",
                    left, right);
         }
@@ -33,7 +33,7 @@ macro_rules! assert_same_file_metadata {
     });
     ($left:expr, $right:expr, $($msg_args:tt)+) => ({
         let (left, right) = (&($left), &($right));
-        if crate::rsix::fs::is_different_file_metadata(left, right).unwrap() {
+        if crate::rustix::fs::is_different_file_metadata(left, right).unwrap() {
             panic!("assertion failed: left is a different file from right\n  left: `{:?}`,\n right: `{:?}`: {}",
                    left, right, format_args!($($msg_args)+));
         }
@@ -45,7 +45,7 @@ macro_rules! assert_same_file_metadata {
 macro_rules! assert_different_file {
     ($left:expr, $right:expr) => ({
         let (left, right) = (&($left), &($right));
-        if !crate::rsix::fs::is_different_file(left, right).unwrap() {
+        if !crate::rustix::fs::is_different_file(left, right).unwrap() {
             panic!("assertion failed: left is the same file as right\n  left: `{:?}`,\n right: `{:?}`",
                    left, right);
         }
@@ -55,7 +55,7 @@ macro_rules! assert_different_file {
     });
     ($left:expr, $right:expr, $($msg_args:tt)+) => ({
         let (left, right) = (&($left), &($right));
-        if !crate::rsix::fs::is_different_file(left, right).unwrap() {
+        if !crate::rustix::fs::is_different_file(left, right).unwrap() {
             panic!("assertion failed: left is the same file as right\n  left: `{:?}`,\n right: `{:?}`: {}",
                    left, right, format_args!($($msg_args)+));
         }
@@ -67,7 +67,7 @@ macro_rules! assert_different_file {
 macro_rules! assert_different_metadata {
     ($left:expr, $right:expr) => ({
         let (left, right) = (&($left), &($right));
-        if !crate::rsix::fs::is_different_file_metadata(left, right).unwrap() {
+        if !crate::rustix::fs::is_different_file_metadata(left, right).unwrap() {
             panic!("assertion failed: left is the same file as right\n  left: `{:?}`,\n right: `{:?}`",
                    left, right);
         }
@@ -77,7 +77,7 @@ macro_rules! assert_different_metadata {
     });
     ($left:expr, $right:expr, $($msg_args:tt)+) => ({
         let (left, right) = (&($left), &($right));
-        if !crate::rsix::fs::is_different_file_metadata(left, right).unwrap() {
+        if !crate::rustix::fs::is_different_file_metadata(left, right).unwrap() {
             panic!("assertion failed: left is the same file as right\n  left: `{:?}`,\n right: `{:?}`: {}",
                    left, right, format_args!($($msg_args)+));
         }

@@ -5,17 +5,16 @@ use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use camino::{Utf8Path, Utf8PathBuf};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
+use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+#[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::{fmt, fs, io};
-#[cfg(not(windows))]
-use unsafe_io::os::rsix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use unsafe_io::OwnsRaw;
 #[cfg(windows)]
 use {
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open directory on a filesystem.
@@ -696,9 +695,6 @@ impl IntoRawHandleOrSocket for Dir {
         self.cap_std.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `Dir` wraps a `fs::File` which owns its handle.
-unsafe impl OwnsRaw for Dir {}
 
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

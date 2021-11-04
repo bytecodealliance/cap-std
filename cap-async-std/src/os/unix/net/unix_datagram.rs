@@ -6,7 +6,6 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
-use unsafe_io::OwnsRaw;
 
 /// A Unix datagram socket.
 ///
@@ -196,9 +195,6 @@ impl IntoFd for UnixDatagram {
         self.std.into_fd()
     }
 }
-
-// Safety: `UnixDatagram` wraps a `net::UnixDatagram` which owns its handle.
-unsafe impl OwnsRaw for UnixDatagram {}
 
 impl fmt::Debug for UnixDatagram {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -6,7 +6,6 @@ use std::os::unix;
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::time::Duration;
 use std::{fmt, io};
-use unsafe_io::OwnsRaw;
 
 /// A Unix datagram socket.
 ///
@@ -252,9 +251,6 @@ impl IntoFd for UnixDatagram {
         self.std.into_fd()
     }
 }
-
-// Safety: `UnixDatagram` wraps a `net::UnixDatagram` which owns its handle.
-unsafe impl OwnsRaw for UnixDatagram {}
 
 impl fmt::Debug for UnixDatagram {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

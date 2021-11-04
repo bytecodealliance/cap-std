@@ -4,7 +4,6 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::os::unix;
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::{fmt, io};
-use unsafe_io::OwnsRaw;
 
 /// A structure representing a Unix domain socket server.
 ///
@@ -144,9 +143,6 @@ impl IntoFd for UnixListener {
         self.std.into_fd()
     }
 }
-
-// Safety: `UnixListener` wraps a `net::UnixListener` which owns its handle.
-unsafe impl OwnsRaw for UnixListener {}
 
 impl<'a> IntoIterator for &'a UnixListener {
     type IntoIter = Incoming<'a>;

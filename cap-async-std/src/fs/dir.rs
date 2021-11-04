@@ -19,7 +19,6 @@ use io_lifetimes::{AsFilelike, FromFilelike};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::fmt;
-use unsafe_io::OwnsRaw;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -30,7 +29,7 @@ use {
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{symlink_dir, symlink_file},
-    unsafe_io::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
 };
 
 /// A reference to an open directory on a filesystem.
@@ -927,9 +926,6 @@ impl IntoRawHandleOrSocket for Dir {
         self.std_file.into_raw_handle_or_socket()
     }
 }
-
-// Safety: `Dir` wraps a `fs::File` which owns its handle.
-unsafe impl OwnsRaw for Dir {}
 
 /// Indicates how large a buffer to pre-allocate before reading the entire
 /// file.

@@ -8,7 +8,6 @@ use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
 use std::pin::Pin;
-use unsafe_io::OwnsRaw;
 
 /// A Unix stream socket.
 ///
@@ -144,9 +143,6 @@ impl IntoFd for UnixStream {
         self.std.into_fd()
     }
 }
-
-// Safety: `UnixStream` wraps a `net::UnixStream` which owns its handle.
-unsafe impl OwnsRaw for UnixStream {}
 
 impl Read for UnixStream {
     #[inline]

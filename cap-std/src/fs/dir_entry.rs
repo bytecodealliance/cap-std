@@ -1,7 +1,7 @@
 use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
 use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
-use rsix::fs::DirEntryExt;
+use rustix::fs::DirEntryExt;
 use std::ffi::OsString;
 use std::{fmt, io};
 

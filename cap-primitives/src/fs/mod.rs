@@ -49,7 +49,7 @@ pub(crate) use file_path_by_searching::file_path_by_searching;
 pub(crate) use open_unchecked_error::*;
 
 #[cfg(not(windows))]
-pub(crate) use super::rsix::fs::*;
+pub(crate) use super::rustix::fs::*;
 #[cfg(windows)]
 pub(crate) use super::windows::fs::*;
 

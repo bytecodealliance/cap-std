@@ -1,7 +1,7 @@
 use std::time::{self, Duration};
 #[cfg(not(windows))]
 use {
-    rsix::time::{clock_getres, ClockId},
+    rustix::time::{clock_getres, ClockId},
     std::convert::TryInto,
 };
 
