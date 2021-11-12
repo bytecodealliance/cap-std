@@ -7,6 +7,7 @@ fn main() {
             "can_vector",         // https://github.com/rust-lang/rust/issues/69941
             "clamp",              // https://github.com/rust-lang/rust/issues/44095
             "extend_one",         // https://github.com/rust-lang/rust/issues/72631
+            "io_error_more",      // https://github.com/rust-lang/rust/issues/86442
             "pattern",            // https://github.com/rust-lang/rust/issues/27721
             "seek_convenience",   // https://github.com/rust-lang/rust/issues/59359
             "shrink_to",          // https://github.com/rust-lang/rust/issues/56431
