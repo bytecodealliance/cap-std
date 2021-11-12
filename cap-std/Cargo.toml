@@ -17,7 +17,7 @@ rustc_version = "0.4.0"
 
 [dependencies]
 arf-strings = { version = "0.6.1", optional = true }
-cap-primitives = { path = "../cap-primitives", version = "^0.20.1-alpha.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.21.0"}
 ipnet = "2.3.0"
 io-extras = "0.11.2"
 io-lifetimes = { version = "0.3.2", default-features = false }
