@@ -19,7 +19,7 @@ rustc_version = "0.4.0"
 [dev-dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
 anyhow = "1.0.37"
-cap-async-std = { path = "cap-async-std", version = "^0.20.1-alpha.0"}
+cap-async-std = { path = "cap-async-std", version = "^0.21.0"}
 cap-fs-ext = { path = "cap-fs-ext", version = "^0.20.1-alpha.0"}
 cap-directories = { path = "cap-directories", version = "^0.20.1-alpha.0"}
 cap-std = { path = "cap-std", version = "^0.20.1-alpha.0"}
