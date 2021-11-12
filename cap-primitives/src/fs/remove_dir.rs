@@ -110,13 +110,17 @@ fn check_remove_dir(
     }
 
     match stat_after {
-        Ok(_unchecked_metadata) => match &result {
+        Ok(unchecked_metadata) => match &result {
             Ok(()) => panic!(
                 "file still exists after remove_dir start='{:?}', path='{}'",
                 start,
                 path.display()
             ),
             Err(e) => match e.kind() {
+                #[cfg(io_error_more)]
+                io::ErrorKind::NotADirectory => assert!(!unchecked_metadata.is_dir()),
+                #[cfg(io_error_more)]
+                io::ErrorKind::DirectoryNotEmpty => (),
                 io::ErrorKind::PermissionDenied
                 | io::ErrorKind::InvalidInput // `remove_dir(".")` apparently returns `EINVAL`
                 | io::ErrorKind::Other => (),        // directory not empty, among other things

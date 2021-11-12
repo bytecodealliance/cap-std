@@ -12,6 +12,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
+#![cfg_attr(io_error_more, feature(io_error_more))]
 
 #[cfg(not(windows))]
 mod rustix;

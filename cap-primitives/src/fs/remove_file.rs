@@ -103,7 +103,10 @@ fn check_remove_file(
             path.display()
         ),
         (Err(e), Ok(unchecked_metadata)) => match e.kind() {
+            #[cfg(io_error_more)]
+            io::ErrorKind::IsADirectory => assert!(unchecked_metadata.is_dir()),
             io::ErrorKind::PermissionDenied => (),
+            #[cfg(not(io_error_more))]
             io::ErrorKind::Other if unchecked_metadata.is_dir() => (),
             _ => panic!(
                 "unexpected error removing file start='{:?}', path='{}': {:?}",
