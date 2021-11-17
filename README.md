@@ -129,7 +129,7 @@ There are several examples of cap-std in use:
 
 [uses `cap-tempdir`]: https://github.com/sunfishcode/io-streams/blob/main/tests/tests.rs#L16
 [this port of tide]: https://github.com/sunfishcode/tide/
-[The diff]: https://github.com/sunfishcode/tide/commit/e431ebbba3ac9d5799ad0c661868b8a4a339a255
+[The diff]: https://github.com/sunfishcode/tide/commit/d1980a7d30e745aef11c567ef1b2d98dac7baf63
 [`Dir::open_ambient_dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html#method.open_ambient_dir
 [`kv-cli` example]: https://github.com/bytecodealliance/cap-std/blob/main/examples/kv-cli.rs
 [`WASI`]: https://github.com/WebAssembly/WASI/
