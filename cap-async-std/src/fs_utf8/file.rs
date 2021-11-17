@@ -8,7 +8,7 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::task::{Context, Poll};
 use camino::Utf8Path;
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -40,13 +40,11 @@ impl File {
     /// Constructs a new instance of `Self` from the given
     /// `async_std::fs::File`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `async_std::fs::File` is not sandboxed and may access any path that the
-    /// host process has access to.
+    /// This grants access the resources the `async_std::fs::File` instance
+    /// already has access to.
     #[inline]
-    pub fn from_std(std: fs::File, ambient_authority: AmbientAuthority) -> Self {
-        Self::from_cap_std(crate::fs::File::from_std(std, ambient_authority))
+    pub fn from_std(std: fs::File) -> Self {
+        Self::from_cap_std(crate::fs::File::from_std(std))
     }
 
     /// Constructs a new instance of `Self` from the given `cap_std::fs::File`.
@@ -150,7 +148,7 @@ impl File {
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(fs::File::from_raw_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_raw_fd(fd))
     }
 }
 
@@ -158,7 +156,7 @@ impl FromRawFd for File {
 impl FromFd for File {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(fs::File::from_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_fd(fd))
     }
 }
 
@@ -166,7 +164,7 @@ impl FromFd for File {
 impl FromRawHandle for File {
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std(fs::File::from_raw_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_raw_handle(handle))
     }
 }
 
@@ -174,7 +172,7 @@ impl FromRawHandle for File {
 impl FromHandle for File {
     #[inline]
     fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std(fs::File::from_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_handle(handle))
     }
 }
 

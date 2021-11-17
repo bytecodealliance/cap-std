@@ -4,7 +4,6 @@ use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use async_std::os::unix;
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::task::{Context, Poll};
-use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
 use std::pin::Pin;
@@ -29,12 +28,11 @@ impl UnixStream {
     /// Constructs a new instance of `Self` from the given
     /// `async_std::os::unix::net::UnixStream`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `async_std::os::unix::net::UnixStream` is not sandboxed and may access
-    /// any address that the host process has access to.
+    /// This grants access the resources the
+    /// `async_std::os::unix::net::UnixStream` instance already has access
+    /// to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixStream, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: unix::net::UnixStream) -> Self {
         Self { std }
     }
 
@@ -47,12 +45,7 @@ impl UnixStream {
     /// [`async_std::os::unix::net::UnixStream::pair`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixStream::pair().map(|(a, b)| {
-            (
-                Self::from_std(a, ambient_authority()),
-                Self::from_std(b, ambient_authority()),
-            )
-        })
+        unix::net::UnixStream::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
     }
 
     // async_std doesn't have `try_clone`.
@@ -105,14 +98,14 @@ impl UnixStream {
 impl FromRawFd for UnixStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_raw_fd(fd), ambient_authority())
+        Self::from_std(unix::net::UnixStream::from_raw_fd(fd))
     }
 }
 
 impl FromFd for UnixStream {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_fd(fd), ambient_authority())
+        Self::from_std(unix::net::UnixStream::from_fd(fd))
     }
 }
 

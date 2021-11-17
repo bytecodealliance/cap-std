@@ -2,7 +2,6 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(unix)]
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
-use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -37,12 +36,10 @@ impl UdpSocket {
     /// Constructs a new instance of `Self` from the given
     /// `async_std::net::UdpSocket`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `async_std::net::UdpSocket` is not sandboxed and may access any address
-    /// that the host process has access to.
+    /// This grants access the resources the `async_std::net::UdpSocket`
+    /// instance already has access to.
     #[inline]
-    pub fn from_std(std: net::UdpSocket, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: net::UdpSocket) -> Self {
         Self { std }
     }
 
@@ -231,7 +228,7 @@ impl UdpSocket {
 impl FromRawFd for UdpSocket {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_fd(fd), ambient_authority())
+        Self::from_std(net::UdpSocket::from_raw_fd(fd))
     }
 }
 
@@ -239,7 +236,7 @@ impl FromRawFd for UdpSocket {
 impl FromFd for UdpSocket {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::UdpSocket::from_fd(fd), ambient_authority())
+        Self::from_std(net::UdpSocket::from_fd(fd))
     }
 }
 
@@ -247,7 +244,7 @@ impl FromFd for UdpSocket {
 impl FromRawSocket for UdpSocket {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_raw_socket(socket), ambient_authority())
+        Self::from_std(net::UdpSocket::from_raw_socket(socket))
     }
 }
 
@@ -255,7 +252,7 @@ impl FromRawSocket for UdpSocket {
 impl FromSocket for UdpSocket {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_socket(socket), ambient_authority())
+        Self::from_std(net::UdpSocket::from_socket(socket))
     }
 }
 

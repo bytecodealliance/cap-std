@@ -1,6 +1,5 @@
 #[cfg(feature = "fs_utf8")]
 use camino::Utf8Path;
-use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use cap_primitives::fs::symlink;
 use cap_primitives::fs::{open_dir_nofollow, set_times, set_times_nofollow};
@@ -520,7 +519,7 @@ impl DirExt for cap_std::fs::Dir {
     #[inline]
     fn open_dir_nofollow<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         match open_dir_nofollow(&self.as_filelike_view::<std::fs::File>(), path.as_ref()) {
-            Ok(file) => Ok(Self::from_std_file(file, ambient_authority())),
+            Ok(file) => Ok(Self::from_std_file(file)),
             Err(e) => Err(e),
         }
     }
@@ -806,7 +805,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
         let clone = self.clone();
         spawn_blocking(move || {
             match open_dir_nofollow(&clone.as_filelike_view::<std::fs::File>(), path.as_ref()) {
-                Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
+                Ok(file) => Ok(Self::from_std_file(file.into())),
                 Err(e) => Err(e),
             }
         })
@@ -979,7 +978,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
             &self.as_filelike_view::<std::fs::File>(),
             path.as_ref().as_ref(),
         ) {
-            Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
+            Ok(file) => Ok(Self::from_std_file(file.into())),
             Err(e) => Err(e),
         }
     }
@@ -1209,7 +1208,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         let clone = self.clone();
         spawn_blocking(move || {
             match open_dir_nofollow(&clone.as_filelike_view::<std::fs::File>(), path.as_ref()) {
-                Ok(file) => Ok(Self::from_std_file(file.into(), ambient_authority())),
+                Ok(file) => Ok(Self::from_std_file(file.into())),
                 Err(e) => Err(e),
             }
         })

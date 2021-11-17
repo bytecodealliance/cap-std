@@ -1,12 +1,12 @@
 use crate::net::{TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use async_std::{io, net};
 use cap_primitives::net::NO_SOCKET_ADDRS;
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 
 /// A pool of network addresses.
 ///
-/// This does not directly correspond to anything in `std`, however its methods
-/// correspond to the several functions in [`std::net`].
+/// This does not directly correspond to anything in `async_std`, however its
+/// methods correspond to the several functions in [`async_std::net`].
 #[derive(Clone)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
@@ -60,9 +60,7 @@ impl Pool {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr).await {
-                Ok(tcp_listener) => {
-                    return Ok(TcpListener::from_std(tcp_listener, ambient_authority()))
-                }
+                Ok(tcp_listener) => return Ok(TcpListener::from_std(tcp_listener)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -84,7 +82,7 @@ impl Pool {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpStream::connect(addr).await {
-                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream, ambient_authority())),
+                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -107,7 +105,7 @@ impl Pool {
         for addr in addrs {
             self.cap.check_addr(&addr)?;
             match net::UdpSocket::bind(addr).await {
-                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket, ambient_authority())),
+                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket)),
                 Err(e) => last_err = Some(e),
             }
         }

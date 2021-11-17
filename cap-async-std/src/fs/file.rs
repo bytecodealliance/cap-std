@@ -7,7 +7,7 @@ use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::task::{spawn_blocking, Context, Poll};
 use cap_primitives::fs::{is_file_read_write, open_ambient};
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
@@ -42,12 +42,10 @@ impl File {
     /// Constructs a new instance of `Self` from the given
     /// `async_std::fs::File`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `async_std::fs::File` is not sandboxed and may access any path that the
-    /// host process has access to.
+    /// This grants access the resources the `async_std::fs::File` instance
+    /// already has access to.
     #[inline]
-    pub fn from_std(std: fs::File, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: fs::File) -> Self {
         Self { std }
     }
 
@@ -128,7 +126,7 @@ impl File {
             )
         })
         .await
-        .map(|f| Self::from_std(f.into(), ambient_authority))
+        .map(|f| Self::from_std(f.into()))
     }
 
     /// Constructs a new instance of `Self` with the options specified by
@@ -149,7 +147,7 @@ impl File {
         let options = options.clone();
         spawn_blocking(move || open_ambient(path.as_ref(), &options, ambient_authority))
             .await
-            .map(|f| Self::from_std(f.into(), ambient_authority))
+            .map(|f| Self::from_std(f.into()))
     }
 }
 
@@ -187,7 +185,7 @@ fn permissions_into_std(
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(fs::File::from_raw_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_raw_fd(fd))
     }
 }
 
@@ -195,7 +193,7 @@ impl FromRawFd for File {
 impl FromFd for File {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(fs::File::from_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_fd(fd))
     }
 }
 
@@ -203,7 +201,7 @@ impl FromFd for File {
 impl FromRawHandle for File {
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std(fs::File::from_raw_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_raw_handle(handle))
     }
 }
 
@@ -211,7 +209,7 @@ impl FromRawHandle for File {
 impl FromHandle for File {
     #[inline]
     fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std(fs::File::from_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_handle(handle))
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::net::{Shutdown, SocketAddr};
-use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(windows))]
@@ -33,12 +32,10 @@ impl TcpStream {
     /// Constructs a new instance of `Self` from the given
     /// `std::net::TcpStream`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `std::net::TcpStream` is not sandboxed and may access any address that
-    /// the host process has access to.
+    /// This grants access the resources the `std::net::TcpStream` instance
+    /// already has access to.
     #[inline]
-    pub fn from_std(std: net::TcpStream, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: net::TcpStream) -> Self {
         Self { std }
     }
 
@@ -72,7 +69,7 @@ impl TcpStream {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let tcp_stream = self.std.try_clone()?;
-        Ok(Self::from_std(tcp_stream, ambient_authority()))
+        Ok(Self::from_std(tcp_stream))
     }
 
     /// Sets the read timeout to the timeout specified.
@@ -169,7 +166,7 @@ impl TcpStream {
 impl FromRawFd for TcpStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::TcpStream::from_raw_fd(fd), ambient_authority())
+        Self::from_std(net::TcpStream::from_raw_fd(fd))
     }
 }
 
@@ -177,7 +174,7 @@ impl FromRawFd for TcpStream {
 impl FromFd for TcpStream {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::TcpStream::from_fd(fd), ambient_authority())
+        Self::from_std(net::TcpStream::from_fd(fd))
     }
 }
 
@@ -185,7 +182,7 @@ impl FromFd for TcpStream {
 impl FromRawSocket for TcpStream {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(net::TcpStream::from_raw_socket(socket), ambient_authority())
+        Self::from_std(net::TcpStream::from_raw_socket(socket))
     }
 }
 
@@ -193,7 +190,7 @@ impl FromRawSocket for TcpStream {
 impl FromSocket for TcpStream {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::TcpStream::from_socket(socket), ambient_authority())
+        Self::from_std(net::TcpStream::from_socket(socket))
     }
 }
 
