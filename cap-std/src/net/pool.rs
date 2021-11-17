@@ -1,6 +1,6 @@
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use cap_primitives::net::NO_SOCKET_ADDRS;
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 use std::time::Duration;
 use std::{io, net};
 
@@ -61,9 +61,7 @@ impl Pool {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpListener::bind(addr) {
-                Ok(tcp_listener) => {
-                    return Ok(TcpListener::from_std(tcp_listener, ambient_authority()))
-                }
+                Ok(tcp_listener) => return Ok(TcpListener::from_std(tcp_listener)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -85,7 +83,7 @@ impl Pool {
             self.cap.check_addr(&addr)?;
             // TODO: when compiling for WASI, use WASI-specific methods instead
             match net::TcpStream::connect(addr) {
-                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream, ambient_authority())),
+                Ok(tcp_stream) => return Ok(TcpStream::from_std(tcp_stream)),
                 Err(e) => last_err = Some(e),
             }
         }
@@ -106,7 +104,7 @@ impl Pool {
     ) -> io::Result<TcpStream> {
         self.cap.check_addr(addr)?;
         let tcp_stream = net::TcpStream::connect_timeout(addr, timeout)?;
-        Ok(TcpStream::from_std(tcp_stream, ambient_authority()))
+        Ok(TcpStream::from_std(tcp_stream))
     }
 
     /// Creates a UDP socket from the given address.
@@ -120,7 +118,7 @@ impl Pool {
         for addr in addrs {
             self.cap.check_addr(&addr)?;
             match net::UdpSocket::bind(addr) {
-                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket, ambient_authority())),
+                Ok(udp_socket) => return Ok(UdpSocket::from_std(udp_socket)),
                 Err(e) => last_err = Some(e),
             }
         }

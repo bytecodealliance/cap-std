@@ -2,7 +2,6 @@ use crate::net::TcpStream;
 use async_std::stream::Stream;
 use async_std::task::{Context, Poll};
 use async_std::{io, net};
-use cap_primitives::{ambient_authority, AmbientAuthority};
 use std::fmt;
 use std::pin::Pin;
 
@@ -19,12 +18,10 @@ impl<'a> Incoming<'a> {
     /// Constructs a new instance of `Self` from the given
     /// `async_std::net::Incoming`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `async_std::net::Incoming` is not sandboxed and may access any address
-    /// that the host process has access to.
+    /// This grants access the resources the `async_std::net::Incoming`
+    /// instance already has access to.
     #[inline]
-    pub fn from_std(std: net::Incoming<'a>, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: net::Incoming<'a>) -> Self {
         Self { std }
     }
 }
@@ -37,7 +34,7 @@ impl<'a> Stream for Incoming<'a> {
         Stream::poll_next(Pin::new(&mut self.std), cx).map(|poll| {
             poll.map(|result| {
                 let tcp_stream = result?;
-                Ok(TcpStream::from_std(tcp_stream, ambient_authority()))
+                Ok(TcpStream::from_std(tcp_stream))
             })
         })
     }

@@ -1,6 +1,6 @@
 use crate::fs::{Metadata, OpenOptions, Permissions};
 use cap_primitives::fs::{is_file_read_write, open_ambient};
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(windows))]
@@ -36,12 +36,10 @@ pub struct File {
 impl File {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
-    /// # Ambient Authority
-    ///
-    /// [`std::fs::File`] is not sandboxed and may access any path that the
-    /// host process has access to.
+    /// This grants access the resources the `std::fs::File` instance already
+    /// has access to.
     #[inline]
-    pub fn from_std(std: fs::File, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: fs::File) -> Self {
         Self { std }
     }
 
@@ -101,7 +99,7 @@ impl File {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let file = self.std.try_clone()?;
-        Ok(Self::from_std(file, ambient_authority()))
+        Ok(Self::from_std(file))
     }
 
     /// Changes the permissions on the underlying file.
@@ -130,7 +128,7 @@ impl File {
             &OpenOptions::new().read(true),
             ambient_authority,
         )?;
-        Ok(Self::from_std(std, ambient_authority))
+        Ok(Self::from_std(std))
     }
 
     /// Constructs a new instance of `Self` with the options specified by
@@ -148,7 +146,7 @@ impl File {
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
         let std = open_ambient(path.as_ref(), options, ambient_authority)?;
-        Ok(Self::from_std(std, ambient_authority))
+        Ok(Self::from_std(std))
     }
 }
 
@@ -180,7 +178,7 @@ fn permissions_into_std(_file: &fs::File, permissions: Permissions) -> io::Resul
 impl FromRawFd for File {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(fs::File::from_raw_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_raw_fd(fd))
     }
 }
 
@@ -188,7 +186,7 @@ impl FromRawFd for File {
 impl FromFd for File {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(fs::File::from_fd(fd), ambient_authority())
+        Self::from_std(fs::File::from_fd(fd))
     }
 }
 
@@ -196,7 +194,7 @@ impl FromFd for File {
 impl FromRawHandle for File {
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std(fs::File::from_raw_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_raw_handle(handle))
     }
 }
 
@@ -204,7 +202,7 @@ impl FromRawHandle for File {
 impl FromHandle for File {
     #[inline]
     fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std(fs::File::from_handle(handle), ambient_authority())
+        Self::from_std(fs::File::from_handle(handle))
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::net::{Incoming, SocketAddr, TcpStream};
-use cap_primitives::{ambient_authority, AmbientAuthority};
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(windows))]
@@ -31,12 +30,10 @@ impl TcpListener {
     /// Constructs a new instance of `Self` from the given
     /// `std::net::TcpListener`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `std::net::TcpListener` is not sandboxed and may access any address
-    /// that the host process has access to.
+    /// This grants access the resources the `std::net::TcpListener` instance
+    /// already has access to.
     #[inline]
-    pub fn from_std(std: net::TcpListener, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: net::TcpListener) -> Self {
         Self { std }
     }
 
@@ -54,7 +51,7 @@ impl TcpListener {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let tcp_listener = self.std.try_clone()?;
-        Ok(Self::from_std(tcp_listener, ambient_authority()))
+        Ok(Self::from_std(tcp_listener))
     }
 
     /// Accept a new incoming connection from this listener.
@@ -64,7 +61,7 @@ impl TcpListener {
     pub fn accept(&self) -> io::Result<(TcpStream, SocketAddr)> {
         self.std
             .accept()
-            .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream, ambient_authority()), addr))
+            .map(|(tcp_stream, addr)| (TcpStream::from_std(tcp_stream), addr))
     }
 
     /// Returns an iterator over the connections being received on this
@@ -74,7 +71,7 @@ impl TcpListener {
     #[inline]
     pub fn incoming(&self) -> Incoming {
         let incoming = self.std.incoming();
-        Incoming::from_std(incoming, ambient_authority())
+        Incoming::from_std(incoming)
     }
 
     /// Sets the value for the `IP_TTL` option on this socket.
@@ -114,7 +111,7 @@ impl TcpListener {
 impl FromRawFd for TcpListener {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(net::TcpListener::from_raw_fd(fd), ambient_authority())
+        Self::from_std(net::TcpListener::from_raw_fd(fd))
     }
 }
 
@@ -122,7 +119,7 @@ impl FromRawFd for TcpListener {
 impl FromFd for TcpListener {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::TcpListener::from_fd(fd), ambient_authority())
+        Self::from_std(net::TcpListener::from_fd(fd))
     }
 }
 
@@ -130,10 +127,7 @@ impl FromFd for TcpListener {
 impl FromRawSocket for TcpListener {
     #[inline]
     unsafe fn from_raw_socket(socket: RawSocket) -> Self {
-        Self::from_std(
-            net::TcpListener::from_raw_socket(socket),
-            ambient_authority(),
-        )
+        Self::from_std(net::TcpListener::from_raw_socket(socket))
     }
 }
 
@@ -141,7 +135,7 @@ impl FromRawSocket for TcpListener {
 impl FromSocket for TcpListener {
     #[inline]
     fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::TcpListener::from_socket(socket), ambient_authority())
+        Self::from_std(net::TcpListener::from_socket(socket))
     }
 }
 

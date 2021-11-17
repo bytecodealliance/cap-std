@@ -4,7 +4,6 @@ use async_std::io;
 use async_std::os::unix::fs::DirEntryExt;
 #[cfg(target_os = "wasi")]
 use async_std::os::wasi::fs::DirEntryExt;
-use cap_primitives::ambient_authority;
 use std::ffi::OsString;
 use std::fmt;
 
@@ -34,21 +33,21 @@ impl DirEntry {
     #[inline]
     pub fn open(&self) -> io::Result<File> {
         let file = self.inner.open()?.into();
-        Ok(File::from_std(file, ambient_authority()))
+        Ok(File::from_std(file))
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
         let file = self.inner.open_with(options)?.into();
-        Ok(File::from_std(file, ambient_authority()))
+        Ok(File::from_std(file))
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
         let file = self.inner.open_dir()?.into();
-        Ok(Dir::from_std_file(file, ambient_authority()))
+        Ok(Dir::from_std_file(file))
     }
 
     /// Removes the file from its filesystem.

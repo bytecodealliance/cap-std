@@ -6,7 +6,7 @@ use cap_primitives::fs::{
     read_base_dir, read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
-use cap_primitives::{ambient_authority, AmbientAuthority};
+use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -48,12 +48,10 @@ impl Dir {
     /// To prevent race conditions on Windows, the file must be opened without
     /// `FILE_SHARE_DELETE`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `std::fs::File` is not sandboxed and may access any path that the host
-    /// process has access to.
+    /// This grants access the resources the `std::fs::File` instance already
+    /// has access to.
     #[inline]
-    pub fn from_std_file(std_file: fs::File, _: AmbientAuthority) -> Self {
+    pub fn from_std_file(std_file: fs::File) -> Self {
         Self { std_file }
     }
 
@@ -87,21 +85,21 @@ impl Dir {
     #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let dir = open(&self.std_file, path, options)?;
-        Ok(File::from_std(dir, ambient_authority()))
+        Ok(File::from_std(dir))
     }
 
     #[cfg(target_os = "wasi")]
     #[inline]
     fn _open_with(&self, path: &Path, options: &OpenOptions) -> io::Result<File> {
         let dir = options.open_at(&self.std_file, path)?;
-        Ok(File::from_std(dir, ambient_authority()))
+        Ok(File::from_std(dir))
     }
 
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         let dir = open_dir(&self.std_file, path.as_ref())?;
-        Ok(Self::from_std_file(dir, ambient_authority()))
+        Ok(Self::from_std_file(dir))
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -531,7 +529,7 @@ impl Dir {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let dir = self.std_file.try_clone()?;
-        Ok(Self::from_std_file(dir, ambient_authority()))
+        Ok(Self::from_std_file(dir))
     }
 
     /// Returns `true` if the path points at an existing entity.
@@ -577,7 +575,7 @@ impl Dir {
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
         let dir = open_ambient_dir(path.as_ref(), ambient_authority)?;
-        Ok(Self::from_std_file(dir, ambient_authority))
+        Ok(Self::from_std_file(dir))
     }
 
     /// Constructs a new instance of `Self` by opening the parent directory
@@ -589,7 +587,7 @@ impl Dir {
     #[inline]
     pub fn open_parent_dir(&self, ambient_authority: AmbientAuthority) -> io::Result<Self> {
         let dir = open_parent_dir(&self.std_file, ambient_authority)?;
-        Ok(Self::from_std_file(dir, ambient_authority))
+        Ok(Self::from_std_file(dir))
     }
 
     /// Recursively create a directory and all of its parent components if they
@@ -613,7 +611,7 @@ impl Dir {
 impl FromRawFd for Dir {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std_file(fs::File::from_raw_fd(fd), ambient_authority())
+        Self::from_std_file(fs::File::from_raw_fd(fd))
     }
 }
 
@@ -621,7 +619,7 @@ impl FromRawFd for Dir {
 impl FromFd for Dir {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std_file(fs::File::from_fd(fd), ambient_authority())
+        Self::from_std_file(fs::File::from_fd(fd))
     }
 }
 
@@ -631,7 +629,7 @@ impl FromRawHandle for Dir {
     /// without `FILE_SHARE_DELETE`.
     #[inline]
     unsafe fn from_raw_handle(handle: RawHandle) -> Self {
-        Self::from_std_file(fs::File::from_raw_handle(handle), ambient_authority())
+        Self::from_std_file(fs::File::from_raw_handle(handle))
     }
 }
 
@@ -639,7 +637,7 @@ impl FromRawHandle for Dir {
 impl FromHandle for Dir {
     #[inline]
     fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std_file(fs::File::from_handle(handle), ambient_authority())
+        Self::from_std_file(fs::File::from_handle(handle))
     }
 }
 

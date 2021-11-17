@@ -1,6 +1,5 @@
 use crate::net::Shutdown;
 use crate::os::unix::net::SocketAddr;
-use cap_primitives::{ambient_authority, AmbientAuthority};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt;
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
@@ -27,12 +26,10 @@ impl UnixStream {
     /// Constructs a new instance of `Self` from the given
     /// `std::os::unix::net::UnixStream`.
     ///
-    /// # Ambient Authority
-    ///
-    /// `std::os::unix::net::UnixStream` is not sandboxed and may access any
-    /// address that the host process has access to.
+    /// This grants access the resources the `std::os::unix::net::UnixStream`
+    /// instance already has access to.
     #[inline]
-    pub fn from_std(std: unix::net::UnixStream, _: AmbientAuthority) -> Self {
+    pub fn from_std(std: unix::net::UnixStream) -> Self {
         Self { std }
     }
 
@@ -45,12 +42,7 @@ impl UnixStream {
     /// [`std::os::unix::net::UnixStream::pair`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixStream.html#method.pair
     #[inline]
     pub fn pair() -> io::Result<(Self, Self)> {
-        unix::net::UnixStream::pair().map(|(a, b)| {
-            (
-                Self::from_std(a, ambient_authority()),
-                Self::from_std(b, ambient_authority()),
-            )
-        })
+        unix::net::UnixStream::pair().map(|(a, b)| (Self::from_std(a), Self::from_std(b)))
     }
 
     /// Creates a new independently owned handle to the underlying socket.
@@ -61,7 +53,7 @@ impl UnixStream {
     #[inline]
     pub fn try_clone(&self) -> io::Result<Self> {
         let unix_stream = self.std.try_clone()?;
-        Ok(Self::from_std(unix_stream, ambient_authority()))
+        Ok(Self::from_std(unix_stream))
     }
 
     /// Returns the socket address of the local half of this connection.
@@ -161,14 +153,14 @@ impl UnixStream {
 impl FromRawFd for UnixStream {
     #[inline]
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_raw_fd(fd), ambient_authority())
+        Self::from_std(unix::net::UnixStream::from_raw_fd(fd))
     }
 }
 
 impl FromFd for UnixStream {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_fd(fd), ambient_authority())
+        Self::from_std(unix::net::UnixStream::from_fd(fd))
     }
 }
 

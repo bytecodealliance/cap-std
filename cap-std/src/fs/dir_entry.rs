@@ -1,5 +1,4 @@
 use crate::fs::{Dir, File, FileType, Metadata, OpenOptions};
-use cap_primitives::ambient_authority;
 #[cfg(not(windows))]
 use rustix::fs::DirEntryExt;
 use std::ffi::OsString;
@@ -29,21 +28,21 @@ impl DirEntry {
     #[inline]
     pub fn open(&self) -> io::Result<File> {
         let file = self.inner.open()?;
-        Ok(File::from_std(file, ambient_authority()))
+        Ok(File::from_std(file))
     }
 
     /// Open the file with the given options.
     #[inline]
     pub fn open_with(&self, options: &OpenOptions) -> io::Result<File> {
         let file = self.inner.open_with(options)?;
-        Ok(File::from_std(file, ambient_authority()))
+        Ok(File::from_std(file))
     }
 
     /// Open the entry as a directory.
     #[inline]
     pub fn open_dir(&self) -> io::Result<Dir> {
         let dir = self.inner.open_dir()?;
-        Ok(Dir::from_std_file(dir, ambient_authority()))
+        Ok(Dir::from_std_file(dir))
     }
 
     /// Removes the file from its filesystem.
