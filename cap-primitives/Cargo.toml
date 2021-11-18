@@ -34,6 +34,6 @@ errno = { version = "0.2.8", default-features = false }
 errno = { version = "0.2.8", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.29.0"
+winx = "0.30.0"
 winapi = "0.3.9"
 winapi-util = "0.1.5"
