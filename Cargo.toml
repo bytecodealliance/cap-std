@@ -13,9 +13,6 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 publish = false
 
-[build-dependencies]
-rustc_version = "0.4.0"
-
 [dev-dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
 anyhow = "1.0.37"
