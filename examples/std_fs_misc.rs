@@ -101,6 +101,6 @@ fn main() {
     use cap_std::ambient_authority;
     let mut cwd = Dir::open_ambient_dir(".", ambient_authority()).expect("!");
 
-    file_stuff(&cwd);
+    file_stuff(&mut cwd);
 }
 
