@@ -1,7 +1,6 @@
 // Copied from https://doc.rust-lang.org/rust-by-example/std_misc/fs.html and
 // adapted to use this crate instead.
 
-use cap_std::ambient_authority;
 use cap_std::fs::{Dir, OpenOptions};
 use std::io;
 use std::io::prelude::*;
@@ -33,9 +32,7 @@ fn touch(dir: &mut Dir, path: &Path) -> io::Result<()> {
     }
 }
 
-fn main() {
-    let mut cwd = Dir::open_ambient_dir(".", ambient_authority()).expect("!");
-
+fn file_stuff(cwd: &mut Dir) {
     println!("`mkdir a`");
 
     // Create a directory, returns `io::Result<()>`
@@ -99,3 +96,11 @@ fn main() {
         println!("! {:?}", why.kind());
     });
 }
+
+fn main() {
+    use cap_std::ambient_authority;
+    let mut cwd = Dir::open_ambient_dir(".", ambient_authority()).expect("!");
+    
+    file_stuff(&cwd);
+}
+
