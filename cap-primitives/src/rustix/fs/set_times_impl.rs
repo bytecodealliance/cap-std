@@ -23,7 +23,7 @@ pub(crate) fn set_times_impl(
             )
         }
         Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCES) | Some(Error::ISDIR) => (),
+            Some(Error::ACCESS) | Some(Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -37,7 +37,7 @@ pub(crate) fn set_times_impl(
             )
         }
         Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCES) => (),
+            Some(Error::ACCESS) => (),
             _ => return Err(err),
         },
     }
