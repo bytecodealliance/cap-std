@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 arf-strings = { version = "0.6.3", optional = true }
-cap-primitives = { path = "../cap-primitives", version = "^0.21.2-alpha.0"}
+cap-primitives = { path = "../cap-primitives", version = "^0.22.0"}
 ipnet = "2.3.0"
 io-extras = "0.12.0"
 io-lifetimes = { version = "0.4.0", default-features = false }
