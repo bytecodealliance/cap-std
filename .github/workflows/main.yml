@@ -354,7 +354,6 @@ jobs:
   fuzz_targets:
     name: Fuzz Targets
     runs-on: ubuntu-latest
-    if: ${{ false }} # disable pending https://github.com/rust-fuzz/cargo-fuzz/issues/276
     steps:
     - uses: actions/checkout@v2
       with:
@@ -362,7 +361,7 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: nightly
-    - run: cargo install cargo-fuzz --vers "^0.8"
+    - run: cargo install cargo-fuzz --vers "^0.11"
     - run: cargo fetch
       working-directory: ./fuzz
     - run: cargo fuzz build --dev
