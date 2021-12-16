@@ -24,7 +24,7 @@ pub(crate) fn set_permissions_impl(
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
         Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCES) => (),
+            Some(Error::ACCESS) => (),
             _ => return Err(err),
         },
     }
@@ -33,7 +33,7 @@ pub(crate) fn set_permissions_impl(
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
         Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCES) | Some(Error::ISDIR) => (),
+            Some(Error::ACCESS) | Some(Error::ISDIR) => (),
             _ => return Err(err),
         },
     }

@@ -23,7 +23,7 @@ pub(crate) fn set_times_impl(
             )
         }
         Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCES) | Some(rustix::io::Error::ISDIR) => (),
+            Some(rustix::io::Error::ACCESS) | Some(rustix::io::Error::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -37,7 +37,7 @@ pub(crate) fn set_times_impl(
             )
         }
         Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCES) => (),
+            Some(rustix::io::Error::ACCESS) => (),
             _ => return Err(err),
         },
     }
