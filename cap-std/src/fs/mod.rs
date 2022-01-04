@@ -32,10 +32,5 @@ pub use dir_entry::DirEntry;
 pub use file::File;
 pub use read_dir::ReadDir;
 
-// Re-export things from `cap_primitives` that we can use as-is.
-#[cfg(not(target_os = "wasi"))]
+// Re-export types from `cap_primitives`.
 pub use cap_primitives::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
-
-// Re-export things from `std` that we can use as-is.
-#[cfg(target_os = "wasi")]
-pub use std::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};

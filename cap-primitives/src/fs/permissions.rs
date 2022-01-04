@@ -1,4 +1,4 @@
-#[cfg(any(unix, target_os = "vxworks"))]
+#[cfg(not(windows))]
 use crate::fs::PermissionsExt;
 #[cfg(unix)]
 use rustix::fs::RawMode;
@@ -50,6 +50,15 @@ impl Permissions {
     fn _into_std(self, _file: &fs::File) -> io::Result<fs::Permissions> {
         use std::os::unix::fs::PermissionsExt;
         Ok(fs::Permissions::from_mode(self.ext.mode()))
+    }
+
+    #[cfg(target_os = "wasi")]
+    #[inline]
+    #[allow(clippy::unnecessary_wraps)]
+    fn _into_std(self, file: &fs::File) -> io::Result<fs::Permissions> {
+        let mut permissions = file.metadata()?.permissions();
+        permissions.set_readonly(self.readonly());
+        Ok(permissions)
     }
 
     #[cfg(windows)]

@@ -25,6 +25,7 @@ fn open_from(start: &fs::File, path: &Path) -> io::Result<(fs::File, fs::Metadat
     Ok((reader, metadata))
 }
 
+#[cfg(not(target_os = "wasi"))]
 fn open_to_and_set_permissions(
     start: &fs::File,
     path: &Path,
@@ -51,6 +52,25 @@ fn open_to_and_set_permissions(
         // pipes/FIFOs or device nodes.
         writer.set_permissions(perm)?;
     }
+    Ok((writer, writer_metadata))
+}
+
+#[cfg(target_os = "wasi")]
+fn open_to_and_set_permissions(
+    start: &fs::File,
+    path: &Path,
+    reader_metadata: fs::Metadata,
+) -> io::Result<(fs::File, fs::Metadata)> {
+    let writer = open(
+        start,
+        path,
+        OpenOptions::new()
+            // create the file with the correct mode right away
+            .write(true)
+            .create(true)
+            .truncate(true),
+    )?;
+    let writer_metadata = writer.metadata()?;
     Ok((writer, writer_metadata))
 }
 

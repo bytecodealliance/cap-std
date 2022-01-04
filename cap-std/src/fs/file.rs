@@ -8,8 +8,6 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
 use std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
-#[cfg(target_os = "wasi")]
-use std::path::Path;
 use std::path::Path;
 use std::{fmt, fs, process};
 #[cfg(windows)]
@@ -150,28 +148,14 @@ impl File {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
 #[inline]
 fn metadata_from(file: &fs::File) -> io::Result<Metadata> {
     Metadata::from_file(file)
 }
 
-#[cfg(target_os = "wasi")]
-#[inline]
-fn metadata_from(file: &fs::File) -> io::Result<Metadata> {
-    file.metadata()
-}
-
-#[cfg(not(target_os = "wasi"))]
 #[inline]
 fn permissions_into_std(file: &fs::File, permissions: Permissions) -> io::Result<fs::Permissions> {
     permissions.into_std(file)
-}
-
-#[cfg(target_os = "wasi")]
-#[inline]
-fn permissions_into_std(_file: &fs::File, permissions: Permissions) -> io::Result<fs::Permissions> {
-    permissions
 }
 
 #[cfg(not(windows))]
@@ -479,13 +463,23 @@ impl std::os::unix::fs::FileExt for File {
 #[cfg(target_os = "wasi")]
 impl std::os::wasi::fs::FileExt for File {
     #[inline]
-    fn read_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
+    fn read_at(&self, bufs: &mut [u8], offset: u64) -> io::Result<usize> {
         self.std.read_at(bufs, offset)
     }
 
     #[inline]
-    fn write_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+    fn write_at(&self, bufs: &[u8], offset: u64) -> io::Result<usize> {
         self.std.write_at(bufs, offset)
+    }
+
+    #[inline]
+    fn read_vectored_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
+        self.std.read_vectored_at(bufs, offset)
+    }
+
+    #[inline]
+    fn write_vectored_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+        self.std.write_vectored_at(bufs, offset)
     }
 
     #[inline]

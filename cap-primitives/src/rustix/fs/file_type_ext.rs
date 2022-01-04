@@ -44,12 +44,16 @@ impl FileTypeExt {
             FileType::ext(Self::BlockDevice)
         } else if std.is_char_device() {
             FileType::ext(Self::CharDevice)
-        } else if std.is_fifo() {
-            FileType::ext(Self::Fifo)
-        } else if std.is_socket() {
-            FileType::ext(Self::Socket)
         } else {
-            FileType::unknown()
+            #[cfg(not(target_os = "wasi"))]
+            if std.is_fifo() {
+                return FileType::ext(Self::Fifo);
+            }
+            if std.is_socket() {
+                FileType::ext(Self::Socket)
+            } else {
+                FileType::unknown()
+            }
         }
     }
 

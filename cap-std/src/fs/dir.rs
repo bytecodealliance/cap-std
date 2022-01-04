@@ -1,10 +1,12 @@
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
+#[cfg(not(target_os = "wasi"))]
+use cap_primitives::fs::set_permissions;
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, open_parent_dir,
     read_base_dir, read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-    remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
+    remove_open_dir_all, rename, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
@@ -125,6 +127,7 @@ impl Dir {
     /// builder.
     ///
     /// This corresponds to [`std::fs::DirBuilder::create`].
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     pub fn create_dir_with<P: AsRef<Path>>(
         &self,
@@ -234,7 +237,7 @@ impl Dir {
     /// This corresponds to [`std::fs::metadata`], but only accesses paths
     /// relative to `self`.
     #[inline]
-    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
+    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<cap_primitives::fs::Metadata> {
         stat(&self.std_file, path.as_ref(), FollowSymlinks::Yes)
     }
 
@@ -364,6 +367,7 @@ impl Dir {
     /// paths relative to `self`. Also, on some platforms, this function
     /// may fail if the file or directory cannot be opened for reading or
     /// writing first.
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     pub fn set_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions) -> io::Result<()> {
         set_permissions(&self.std_file, path.as_ref(), perm)

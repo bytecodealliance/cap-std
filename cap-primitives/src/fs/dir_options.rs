@@ -1,3 +1,4 @@
+#[cfg(not(target_os = "wasi"))]
 use crate::fs::DirOptionsExt;
 
 /// Options and flags which can be used to configure how a directory is
@@ -6,6 +7,7 @@ use crate::fs::DirOptionsExt;
 /// This is to `create_dir` what to `OpenOptions` is to `open`.
 #[derive(Debug, Clone)]
 pub struct DirOptions {
+    #[cfg(not(target_os = "wasi"))]
     #[allow(dead_code)]
     pub(crate) ext: DirOptionsExt,
 }
@@ -16,6 +18,7 @@ impl DirOptions {
     #[inline]
     pub const fn new() -> Self {
         Self {
+            #[cfg(not(target_os = "wasi"))]
             ext: DirOptionsExt::new(),
         }
     }

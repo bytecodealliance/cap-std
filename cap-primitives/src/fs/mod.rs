@@ -32,6 +32,7 @@ mod remove_file;
 mod remove_open_dir;
 mod rename;
 mod reopen;
+#[cfg(not(target_os = "wasi"))]
 mod set_permissions;
 mod set_times;
 mod stat;
@@ -85,6 +86,7 @@ pub use remove_file::remove_file;
 pub use remove_open_dir::{remove_open_dir, remove_open_dir_all};
 pub use rename::rename;
 pub use reopen::reopen;
+#[cfg(not(target_os = "wasi"))]
 pub use set_permissions::set_permissions;
 pub use set_times::{set_times, set_times_nofollow};
 pub use stat::stat;

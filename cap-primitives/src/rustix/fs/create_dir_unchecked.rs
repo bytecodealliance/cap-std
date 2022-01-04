@@ -10,9 +10,10 @@ pub(crate) fn create_dir_unchecked(
     path: &Path,
     options: &DirOptions,
 ) -> io::Result<()> {
-    Ok(mkdirat(
-        start,
-        path,
-        Mode::from_bits(options.ext.mode as RawMode).unwrap(),
-    )?)
+    #[cfg(not(target_os = "wasi"))]
+    let raw_mode = options.ext.mode as RawMode;
+    #[cfg(target_os = "wasi")]
+    let raw_mode = 0;
+
+    Ok(mkdirat(start, path, Mode::from_bits(raw_mode).unwrap())?)
 }
