@@ -110,6 +110,7 @@ impl Dir {
     /// builder.
     ///
     /// This corresponds to [`std::fs::DirBuilder::create`].
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     pub fn create_dir_with<P: AsRef<Utf8Path>>(
         &self,
@@ -308,6 +309,7 @@ impl Dir {
     /// paths relative to `self`. Also, on some platforms, this function
     /// may fail if the file or directory cannot be opened for reading or
     /// writing first.
+    #[cfg(not(target_os = "wasi"))]
     pub fn set_permissions<P: AsRef<Utf8Path>>(
         &self,
         path: P,
