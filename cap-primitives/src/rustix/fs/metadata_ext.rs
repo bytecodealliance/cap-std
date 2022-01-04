@@ -1,6 +1,7 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
+use crate::fs::PermissionsExt;
+use crate::fs::{FileTypeExt, Metadata};
 use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use rustix::fs::{makedev, Statx};
@@ -12,20 +13,38 @@ use std::{fs, io};
 pub(crate) struct MetadataExt {
     dev: u64,
     ino: u64,
+    #[cfg(not(target_os = "wasi"))]
     mode: u32,
     nlink: u64,
+    #[cfg(not(target_os = "wasi"))]
     uid: u32,
+    #[cfg(not(target_os = "wasi"))]
     gid: u32,
+    #[cfg(not(target_os = "wasi"))]
     rdev: u64,
     size: u64,
+    #[cfg(not(target_os = "wasi"))]
     atime: i64,
+    #[cfg(not(target_os = "wasi"))]
     atime_nsec: i64,
+    #[cfg(not(target_os = "wasi"))]
     mtime: i64,
+    #[cfg(not(target_os = "wasi"))]
     mtime_nsec: i64,
+    #[cfg(not(target_os = "wasi"))]
     ctime: i64,
+    #[cfg(not(target_os = "wasi"))]
     ctime_nsec: i64,
+    #[cfg(not(target_os = "wasi"))]
     blksize: u64,
+    #[cfg(not(target_os = "wasi"))]
     blocks: u64,
+    #[cfg(target_os = "wasi")]
+    atim: u64,
+    #[cfg(target_os = "wasi")]
+    mtim: u64,
+    #[cfg(target_os = "wasi")]
+    ctim: u64,
 }
 
 impl MetadataExt {
@@ -46,20 +65,38 @@ impl MetadataExt {
         Self {
             dev: std.dev(),
             ino: std.ino(),
+            #[cfg(not(target_os = "wasi"))]
             mode: std.mode(),
             nlink: std.nlink(),
+            #[cfg(not(target_os = "wasi"))]
             uid: std.uid(),
+            #[cfg(not(target_os = "wasi"))]
             gid: std.gid(),
+            #[cfg(not(target_os = "wasi"))]
             rdev: std.rdev(),
             size: std.size(),
+            #[cfg(not(target_os = "wasi"))]
             atime: std.atime(),
+            #[cfg(not(target_os = "wasi"))]
             atime_nsec: std.atime_nsec(),
+            #[cfg(not(target_os = "wasi"))]
             mtime: std.mtime(),
+            #[cfg(not(target_os = "wasi"))]
             mtime_nsec: std.mtime_nsec(),
+            #[cfg(not(target_os = "wasi"))]
             ctime: std.ctime(),
+            #[cfg(not(target_os = "wasi"))]
             ctime_nsec: std.ctime_nsec(),
+            #[cfg(not(target_os = "wasi"))]
             blksize: std.blksize(),
+            #[cfg(not(target_os = "wasi"))]
             blocks: std.blocks(),
+            #[cfg(target_os = "wasi")]
+            atim: std.atim(),
+            #[cfg(target_os = "wasi")]
+            mtim: std.mtim(),
+            #[cfg(target_os = "wasi")]
+            ctim: std.ctim(),
         }
     }
 
@@ -69,14 +106,17 @@ impl MetadataExt {
         Metadata {
             file_type: FileTypeExt::from_raw_mode(stat.st_mode as RawMode),
             len: u64::try_from(stat.st_size).unwrap(),
+            #[cfg(not(target_os = "wasi"))]
             permissions: PermissionsExt::from_raw_mode(stat.st_mode as RawMode),
+            #[cfg(target_os = "wasi")]
+            permissions: PermissionsExt::default(),
 
-            #[cfg(not(target_os = "netbsd"))]
+            #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
             modified: system_time_from_rustix(
                 stat.st_mtime.try_into().unwrap(),
                 stat.st_mtime_nsec as _,
             ),
-            #[cfg(not(target_os = "netbsd"))]
+            #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
             accessed: system_time_from_rustix(
                 stat.st_atime.try_into().unwrap(),
                 stat.st_atime_nsec as _,
@@ -92,6 +132,11 @@ impl MetadataExt {
                 stat.st_atime.try_into().unwrap(),
                 stat.st_atimensec as _,
             ),
+
+            #[cfg(target_os = "wasi")]
+            modified: system_time_from_rustix(stat.st_mtim.tv_sec, stat.st_mtim.tv_nsec as _),
+            #[cfg(target_os = "wasi")]
+            accessed: system_time_from_rustix(stat.st_atim.tv_sec, stat.st_atim.tv_nsec as _),
 
             #[cfg(any(
                 target_os = "freebsd",
@@ -123,29 +168,53 @@ impl MetadataExt {
             ext: Self {
                 dev: u64::try_from(stat.st_dev).unwrap(),
                 ino: stat.st_ino.into(),
+                #[cfg(not(target_os = "wasi"))]
                 mode: u32::from(stat.st_mode),
                 nlink: u64::from(stat.st_nlink),
+                #[cfg(not(target_os = "wasi"))]
                 uid: stat.st_uid,
+                #[cfg(not(target_os = "wasi"))]
                 gid: stat.st_gid,
+                #[cfg(not(target_os = "wasi"))]
                 rdev: u64::try_from(stat.st_rdev).unwrap(),
                 size: u64::try_from(stat.st_size).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 atime: i64::try_from(stat.st_atime).unwrap(),
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
                 atime_nsec: stat.st_atime_nsec as _,
                 #[cfg(target_os = "netbsd")]
                 atime_nsec: stat.st_atimensec as _,
+                #[cfg(not(target_os = "wasi"))]
                 mtime: i64::try_from(stat.st_mtime).unwrap(),
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
                 mtime_nsec: stat.st_mtime_nsec as _,
                 #[cfg(target_os = "netbsd")]
                 mtime_nsec: stat.st_mtimensec as _,
+                #[cfg(not(target_os = "wasi"))]
                 ctime: i64::try_from(stat.st_ctime).unwrap(),
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
                 ctime_nsec: stat.st_ctime_nsec as _,
                 #[cfg(target_os = "netbsd")]
                 ctime_nsec: stat.st_ctimensec as _,
+                #[cfg(not(target_os = "wasi"))]
                 blksize: u64::try_from(stat.st_blksize).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 blocks: u64::try_from(stat.st_blocks).unwrap(),
+                #[cfg(target_os = "wasi")]
+                atim: u64::try_from(
+                    stat.st_atim.tv_sec as u64 * 1000000000 + stat.st_atim.tv_nsec as u64,
+                )
+                .unwrap(),
+                #[cfg(target_os = "wasi")]
+                mtim: u64::try_from(
+                    stat.st_mtim.tv_sec as u64 * 1000000000 + stat.st_mtim.tv_nsec as u64,
+                )
+                .unwrap(),
+                #[cfg(target_os = "wasi")]
+                ctim: u64::try_from(
+                    stat.st_ctim.tv_sec as u64 * 1000000000 + stat.st_ctim.tv_nsec as u64,
+                )
+                .unwrap(),
             },
         }
     }
@@ -207,6 +276,7 @@ impl rustix::fs::MetadataExt for MetadataExt {
         self.ino
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn mode(&self) -> u32 {
         self.mode
@@ -217,16 +287,19 @@ impl rustix::fs::MetadataExt for MetadataExt {
         self.nlink
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn uid(&self) -> u32 {
         self.uid
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn gid(&self) -> u32 {
         self.gid
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn rdev(&self) -> u64 {
         self.rdev
@@ -237,43 +310,66 @@ impl rustix::fs::MetadataExt for MetadataExt {
         self.size
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn atime(&self) -> i64 {
         self.atime
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn atime_nsec(&self) -> i64 {
         self.atime_nsec
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn mtime(&self) -> i64 {
         self.mtime
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn mtime_nsec(&self) -> i64 {
         self.mtime_nsec
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn ctime(&self) -> i64 {
         self.ctime
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn ctime_nsec(&self) -> i64 {
         self.ctime_nsec
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn blksize(&self) -> u64 {
         self.blksize
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn blocks(&self) -> u64 {
         self.blocks
+    }
+
+    #[cfg(target_os = "wasi")]
+    fn atim(&self) -> u64 {
+        self.atim
+    }
+
+    #[cfg(target_os = "wasi")]
+    fn mtim(&self) -> u64 {
+        self.mtim
+    }
+
+    #[cfg(target_os = "wasi")]
+    fn ctim(&self) -> u64 {
+        self.ctim
     }
 }

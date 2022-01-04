@@ -6,7 +6,7 @@ use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
+use std::os::wasi::ffi::OsStrExt;
 use std::path::Path;
 #[cfg(racy_asserts)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
@@ -104,10 +104,13 @@ pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Res
     // `O_DIRECTORY` manually.
     let flags = OFlags::DIRECTORY | target_o_path();
 
-    fs::OpenOptions::new()
-        .read(true)
-        .custom_flags(flags.bits() as i32)
-        .open(&path)
+    let mut options = fs::OpenOptions::new();
+    options.read(true);
+
+    #[cfg(not(target_os = "wasi"))]
+    options.custom_flags(flags.bits() as i32);
+
+    options.open(&path)
 }
 
 /// Use `O_PATH` on platforms which have it, or none otherwise.
@@ -131,6 +134,7 @@ pub(crate) const fn target_o_path() -> OFlags {
         target_os = "macos",
         target_os = "netbsd",
         target_os = "openbsd",
+        target_os = "wasi",
     ))]
     {
         OFlags::empty()

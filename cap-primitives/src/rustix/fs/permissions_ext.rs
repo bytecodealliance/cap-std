@@ -4,9 +4,11 @@ use std::fs;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct PermissionsExt {
+    #[cfg(not(target_os = "wasi"))]
     mode: RawMode,
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl PermissionsExt {
     /// Constructs a new instance of `Self` from the given
     /// [`std::fs::Permissions`].
@@ -49,6 +51,7 @@ impl PermissionsExt {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl std::os::unix::fs::PermissionsExt for PermissionsExt {
     fn mode(&self) -> u32 {
         self.mode as u32
@@ -62,5 +65,12 @@ impl std::os::unix::fs::PermissionsExt for PermissionsExt {
         Self {
             mode: mode as RawMode & 0o7777,
         }
+    }
+}
+
+#[cfg(target_os = "wasi")]
+impl PermissionsExt {
+    pub(crate) fn default() -> Permissions {
+        Permissions { readonly: false }
     }
 }

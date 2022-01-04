@@ -6,8 +6,6 @@ use std::ffi::OsString;
 use std::fs;
 #[cfg(unix)]
 use std::os::unix::ffi::OsStringExt;
-#[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStringExt;
 use std::path::PathBuf;
 
 pub(crate) fn file_path_by_ttyname_or_seaching(file: &fs::File) -> Option<PathBuf> {

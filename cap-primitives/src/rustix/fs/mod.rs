@@ -1,6 +1,7 @@
 mod copy_impl;
 mod create_dir_unchecked;
 mod dir_entry_inner;
+#[cfg(not(target_os = "wasi"))]
 mod dir_options_ext;
 mod dir_utils;
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
@@ -23,7 +24,7 @@ mod remove_file_unchecked;
 mod remove_open_dir_by_searching;
 mod rename_unchecked;
 mod reopen_impl;
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 mod set_permissions_impl;
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 mod set_times_impl;
@@ -62,8 +63,10 @@ pub(super) use file_path::file_path_by_ttyname_or_seaching;
     target_os = "ios"
 )))]
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
+pub(crate) use set_permissions_impl::set_permissions_impl;
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
-pub(crate) use {set_permissions_impl::set_permissions_impl, set_times_impl::set_times_impl};
+pub(crate) use set_times_impl::set_times_impl;
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
@@ -80,6 +83,7 @@ pub(crate) use crate::fs::{
 pub(crate) use copy_impl::copy_impl;
 pub(crate) use create_dir_unchecked::create_dir_unchecked;
 pub(crate) use dir_entry_inner::DirEntryInner;
+#[cfg(not(target_os = "wasi"))]
 pub(crate) use dir_options_ext::DirOptionsExt;
 pub(crate) use dir_utils::*;
 pub(crate) use file_type_ext::FileTypeExt;

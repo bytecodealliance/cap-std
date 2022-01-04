@@ -259,6 +259,44 @@ impl std::os::unix::fs::MetadataExt for Metadata {
     }
 }
 
+#[cfg(target_os = "wasi")]
+impl std::os::wasi::fs::MetadataExt for Metadata {
+    #[inline]
+    fn dev(&self) -> u64 {
+        self.ext.dev()
+    }
+
+    #[inline]
+    fn ino(&self) -> u64 {
+        self.ext.ino()
+    }
+
+    #[inline]
+    fn nlink(&self) -> u64 {
+        self.ext.nlink()
+    }
+
+    #[inline]
+    fn size(&self) -> u64 {
+        self.ext.size()
+    }
+
+    #[inline]
+    fn atim(&self) -> u64 {
+        self.ext.atim()
+    }
+
+    #[inline]
+    fn mtim(&self) -> u64 {
+        self.ext.mtim()
+    }
+
+    #[inline]
+    fn ctim(&self) -> u64 {
+        self.ext.ctim()
+    }
+}
+
 #[cfg(target_os = "vxworks")]
 impl std::os::vxworks::fs::MetadataExt for Metadata {
     #[inline]
