@@ -462,13 +462,23 @@ impl std::os::unix::fs::FileExt for File {
 #[cfg(target_os = "wasi")]
 impl std::os::wasi::fs::FileExt for File {
     #[inline]
-    fn read_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
-        self.cap_std.read_at(bufs, offset)
+    fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
+        self.cap_std.read_at(buf, offset)
     }
 
     #[inline]
-    fn write_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-        self.cap_std.write_at(bufs, offset)
+    fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
+        self.cap_std.write_at(buf, offset)
+    }
+
+    #[inline]
+    fn read_vectored_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
+        self.cap_std.read_vectored_at(bufs, offset)
+    }
+
+    #[inline]
+    fn write_vectored_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
+        self.cap_std.write_vectored_at(bufs, offset)
     }
 
     #[inline]
@@ -501,45 +511,39 @@ impl std::os::wasi::fs::FileExt for File {
     }
 
     #[inline]
-    fn create_directory<P: AsRef<Utf8Path>>(
-        &self,
-        dir: P,
-    ) -> std::result::Result<(), std::io::Error> {
-        let path = from_utf8(path)?;
-        self.cap_std.create_directory(dir)
+    fn create_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        let path = path.as_ref();
+        self.cap_std.create_directory(path)
     }
 
     #[inline]
-    fn read_link<P: AsRef<Utf8Path>>(
+    fn read_link<P: AsRef<Path>>(
         &self,
         path: P,
     ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
-        let path = from_utf8(path)?;
+        let path = path.as_ref();
         self.cap_std.read_link(path)
     }
 
     #[inline]
-    fn metadata_at<P: AsRef<Utf8Path>>(
+    fn metadata_at<P: AsRef<Path>>(
         &self,
         lookup_flags: u32,
         path: P,
     ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
-        let path = from_utf8(path)?;
+        let path = path.as_ref();
         self.cap_std.metadata_at(lookup_flags, path)
     }
 
     #[inline]
-    fn remove_file<P: AsRef<Utf8Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
-        let path = from_utf8(path)?;
+    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        let path = path.as_ref();
         self.cap_std.remove_file(path)
     }
 
     #[inline]
-    fn remove_directory<P: AsRef<Utf8Path>>(
-        &self,
-        path: P,
-    ) -> std::result::Result<(), std::io::Error> {
-        let path = from_utf8(path)?;
+    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+        let path = path.as_ref();
         self.cap_std.remove_directory(path)
     }
 }
