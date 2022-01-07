@@ -609,6 +609,20 @@ impl Dir {
         let _ = ambient_authority;
         fs::create_dir_all(path)
     }
+
+    /// Construct a new instance of `Self` from existing directory file descriptor.
+    ///
+    /// This can be useful when interacting with other libraries and or C/C++ code
+    /// which has invoked `openat(..., O_DIRECTORY)` external to this crate.
+    #[cfg(not(windows))]
+    pub fn reopen_dir(fd: BorrowedFd) -> io::Result<Self> {
+        use io_lifetimes::AsFilelike;
+        cap_primitives::fs::open_dir(
+            &fd.as_filelike_view::<std::fs::File>(),
+            std::path::Component::CurDir.as_ref(),
+        )
+        .map(Self::from_std_file)
+    }
 }
 
 #[cfg(not(windows))]

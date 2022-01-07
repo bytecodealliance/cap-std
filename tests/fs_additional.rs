@@ -847,3 +847,13 @@ fn maybe_dir() {
     // Opening directories works on all platforms with `maybe_dir`.
     check!(tmpdir.open_with("dir", OpenOptions::new().read(true).maybe_dir(true)));
 }
+
+#[test]
+#[cfg(not(windows))]
+fn reopen_fd() {
+    use rustix::fd::AsFd;
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("subdir"));
+    let tmpdir2 = check!(cap_std::fs::Dir::reopen_dir(tmpdir.as_fd()));
+    assert!(tmpdir2.exists("subdir"));
+}
