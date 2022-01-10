@@ -168,7 +168,7 @@ impl<'start> Context<'start> {
             )?)
         }
         #[cfg(windows)]
-        open_dir_unchecked(&self.base, Component::CurDir.as_os_str().as_ref()).map(|_| ())
+        open_dir_unchecked(&self.base, Component::CurDir.as_ref()).map(|_| ())
     }
 
     /// Handle a "." path component.
@@ -440,7 +440,7 @@ pub(super) fn internal_open<'start>(
         }
         ctx.base = MaybeOwnedFile::owned(open_unchecked(
             &ctx.base,
-            Component::CurDir.as_os_str().as_ref(),
+            Component::CurDir.as_ref(),
             options,
         )?);
     }
