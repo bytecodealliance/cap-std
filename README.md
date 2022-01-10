@@ -195,10 +195,11 @@ encoding arbitrary host byte sequences within UTF-8 strings, using the
 `cap-std` provides similar functionality to the [`openat`] crate, with a similar
 `Dir` type with associated functions corresponding to `*at` functions.
 `cap-std`'s `Dir` type performs sandboxing, including for multiple-component
-paths.
+paths. And `cap-std` supports symlinks as long as they remain within the
+sandbox, while `openat` doesn't support following symlinks.
 
 `cap-std` has some similar functionality to [`pathrs`] in that it also
-explicitly verifies that `/proc` has actual `/proc` mounted on it and nothing
+explicitly verifies that `/proc` has actual `procfs` mounted on it and nothing
 mounted on top, and it can also use `openat2`. However, `cap-std` uses
 `RESOLVE_BENEATH`-style resolution where absolute paths are considered errors,
 while `pathrs` uses `RESOLVE_IN_ROOT` where absolute paths are interpreted as
