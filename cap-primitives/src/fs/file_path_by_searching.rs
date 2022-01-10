@@ -13,7 +13,7 @@ pub(crate) fn file_path_by_searching(file: &fs::File) -> Option<PathBuf> {
     // Iterate with `..` until we reach the root directory.
     'next_component: loop {
         // Open `..`.
-        let mut iter = read_dir_unchecked(&base, Component::ParentDir.as_os_str().as_ref()).ok()?;
+        let mut iter = read_dir_unchecked(&base, Component::ParentDir.as_ref()).ok()?;
         let metadata = Metadata::from_file(&*base).ok()?;
 
         // Search the children until we find one with matching metadata, and
@@ -24,7 +24,7 @@ pub(crate) fn file_path_by_searching(file: &fs::File) -> Option<PathBuf> {
                 // Found a match. Record the name and continue to the next component.
                 components.push(child.file_name());
                 base = MaybeOwnedFile::owned_noassert(
-                    open_dir_unchecked(&base, Component::ParentDir.as_os_str().as_ref()).ok()?,
+                    open_dir_unchecked(&base, Component::ParentDir.as_ref()).ok()?,
                 );
                 continue 'next_component;
             }

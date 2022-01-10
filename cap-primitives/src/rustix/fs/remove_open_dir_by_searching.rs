@@ -7,7 +7,7 @@ use std::{fs, io};
 /// available.
 pub(crate) fn remove_open_dir_by_searching(dir: fs::File) -> io::Result<()> {
     let metadata = Metadata::from_file(&dir)?;
-    let mut iter = read_dir_unchecked(&dir, Component::ParentDir.as_os_str().as_ref())?;
+    let mut iter = read_dir_unchecked(&dir, Component::ParentDir.as_ref())?;
     while let Some(child) = iter.next() {
         let child = child?;
         if child.is_same_file(&metadata)? {

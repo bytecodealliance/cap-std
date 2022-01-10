@@ -23,7 +23,7 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
 }
 
 pub(crate) fn remove_open_dir_all_impl(dir: fs::File) -> io::Result<()> {
-    remove_dir_all_recursive(&dir, Component::CurDir.as_os_str().as_ref())?;
+    remove_dir_all_recursive(&dir, Component::CurDir.as_ref())?;
     remove_open_dir(dir)
 }
 
