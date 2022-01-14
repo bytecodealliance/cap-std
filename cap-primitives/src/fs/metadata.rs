@@ -105,6 +105,14 @@ impl Metadata {
         self.file_type.is_file()
     }
 
+    /// Returns `true` if this metadata is for a symbolic link.
+    ///
+    /// This corresponds to [`std::fs::Metadata::is_symlink`].
+    #[inline]
+    pub fn is_symlink(&self) -> bool {
+        self.file_type.is_symlink()
+    }
+
     /// Returns the size of the file, in bytes, this metadata is for.
     ///
     /// This corresponds to [`std::fs::Metadata::len`].

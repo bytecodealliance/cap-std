@@ -24,6 +24,7 @@ cap-tempfile = { path = "cap-tempfile", version = "^0.22.2-alpha.0"}
 rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
+libc = "0.2.100"
 
 [target.'cfg(not(windows))'.dev-dependencies]
 rustix = "0.31.0"

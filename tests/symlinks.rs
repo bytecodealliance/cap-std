@@ -17,6 +17,12 @@ fn basic_symlinks() {
 
     check!(tmpdir.create("file"));
     check!(tmpdir.create_dir("dir"));
+    assert!(check!(tmpdir.metadata("file")).is_file());
+    assert!(!check!(tmpdir.metadata("file")).is_dir());
+    assert!(check!(tmpdir.metadata("dir")).is_dir());
+    assert!(!check!(tmpdir.metadata("dir")).is_file());
+    assert!(!check!(tmpdir.metadata("file")).is_symlink());
+    assert!(!check!(tmpdir.metadata("dir")).is_symlink());
 
     check!(tmpdir.symlink_file("file", "file_symlink_file"));
     check!(tmpdir.symlink_dir("dir", "dir_symlink_dir"));
@@ -27,6 +33,29 @@ fn basic_symlinks() {
     assert!(check!(tmpdir.metadata("dir_symlink_dir")).is_dir());
     assert!(check!(tmpdir.metadata("file_symlink")).is_file());
     assert!(check!(tmpdir.metadata("dir_symlink")).is_dir());
+
+    assert!(!check!(tmpdir.metadata("file_symlink_file")).is_symlink());
+    assert!(!check!(tmpdir.metadata("dir_symlink_dir")).is_symlink());
+    assert!(!check!(tmpdir.metadata("file_symlink")).is_symlink());
+    assert!(!check!(tmpdir.metadata("dir_symlink")).is_symlink());
+
+    assert!(check!(tmpdir.symlink_metadata("file_symlink_file")).is_symlink());
+    assert!(check!(tmpdir.symlink_metadata("dir_symlink_dir")).is_symlink());
+    assert!(check!(tmpdir.symlink_metadata("file_symlink")).is_symlink());
+    assert!(check!(tmpdir.symlink_metadata("dir_symlink")).is_symlink());
+
+    assert!(!check!(tmpdir.metadata("file_symlink_file"))
+        .file_type()
+        .is_symlink());
+    assert!(!check!(tmpdir.metadata("dir_symlink_dir"))
+        .file_type()
+        .is_symlink());
+    assert!(!check!(tmpdir.metadata("file_symlink"))
+        .file_type()
+        .is_symlink());
+    assert!(!check!(tmpdir.metadata("dir_symlink"))
+        .file_type()
+        .is_symlink());
 
     assert!(check!(tmpdir.symlink_metadata("file_symlink_file"))
         .file_type()

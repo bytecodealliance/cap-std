@@ -1,15 +1,19 @@
-// This file is derived from Rust's library/std/src/fs.rs at revision
-// 108e90ca78f052c0c1c49c42a22c85620be19712.
-//
-// This is the contents of the `tests` module, ported to use `cap_std`.
+// This file is derived from Rust's library/std/src/fs/tests.rs at revision
+// e4b1d5841494d6eb7f4944c91a057e16b0f0a9ea.
 
 #[macro_use]
 mod sys_common;
+#[macro_use]
+mod sys;
 
 use std::io::prelude::*;
 
+#[cfg(target_os = "macos")]
+use crate::sys::weak::weak;
 use cap_std::ambient_authority;
 use cap_std::fs::{self, Dir, OpenOptions};
+#[cfg(target_os = "macos")]
+use libc::{c_char, c_int};
 use std::io::{self, ErrorKind, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::str;
@@ -59,11 +63,21 @@ pub fn got_symlink_permission(tmpdir: &TempDir) -> bool {
     let link = "some_hopefully_unique_link_name";
 
     match symlink_file(r"nonexisting_target", tmpdir, link) {
-        Ok(_) => true,
         // ERROR_PRIVILEGE_NOT_HELD = 1314
         Err(ref err) if err.raw_os_error() == Some(1314) => false,
-        Err(_) => true,
+        Ok(_) | Err(_) => true,
     }
+}
+
+#[cfg(target_os = "macos")]
+fn able_to_not_follow_symlinks_while_hard_linking() -> bool {
+    weak!(fn linkat(c_int, *const c_char, c_int, *const c_char, c_int) -> c_int);
+    linkat.get().is_some()
+}
+
+#[cfg(not(target_os = "macos"))]
+fn able_to_not_follow_symlinks_while_hard_linking() -> bool {
+    return true;
 }
 
 #[test]
@@ -838,7 +852,7 @@ fn symlink_noexist() {
     };
 
     // Use a relative path for testing. Symlinks get normalized by Windows,
-    // so we may not get the same path back for absolute paths
+    // so we might not get the same path back for absolute paths
     check!(symlink_file(&"foo", &tmpdir, "bar"));
     assert_eq!(check!(tmpdir.read_link("bar")).to_str().unwrap(), "foo");
 }
@@ -1386,8 +1400,15 @@ fn metadata_access_times() {
         // Not always available
         match (a.created(), b.created()) {
             (Ok(t1), Ok(t2)) => assert!(t1 <= t2),
+            #[cfg(not(io_error_more))]
             (Err(e1), Err(e2))
                 if e1.kind() == ErrorKind::Other && e2.kind() == ErrorKind::Other => {}
+            #[cfg(io_error_more)]
+            (Err(e1), Err(e2))
+                if e1.kind() == ErrorKind::Uncategorized
+                    && e2.kind() == ErrorKind::Uncategorized
+                    || e1.kind() == ErrorKind::Unsupported
+                        && e2.kind() == ErrorKind::Unsupported => {}
             (a, b) => panic!(
                 "creation time must be always supported or not supported: {:?} {:?}",
                 a, b,
@@ -1401,6 +1422,9 @@ fn metadata_access_times() {
 fn symlink_hard_link() {
     let tmpdir = tmpdir();
     if !got_symlink_permission(&tmpdir) {
+        return;
+    }
+    if !able_to_not_follow_symlinks_while_hard_linking() {
         return;
     }
 
@@ -1452,4 +1476,42 @@ fn symlink_hard_link() {
     assert!(check!(tmpdir.symlink_metadata("hard_link"))
         .file_type()
         .is_symlink());
+}
+
+/// Ensure `fs::create_dir` works on Windows with longer paths.
+#[test]
+#[cfg(windows)]
+fn create_dir_long_paths() {
+    use crate::ffi::OsStr;
+    use crate::iter;
+    use crate::os::windows::ffi::OsStrExt;
+    const PATH_LEN: usize = 247;
+
+    let tmpdir = tmpdir();
+    let mut path = PathBuf::new();
+    path.push("a");
+    let mut path = path.into_os_string();
+
+    let utf16_len = path.encode_wide().count();
+    if utf16_len >= PATH_LEN {
+        // Skip the test in the unlikely event the local user has a long temp directory
+        // path. This should not affect CI.
+        return;
+    }
+    // Increase the length of the path.
+    path.extend(iter::repeat(OsStr::new("a")).take(PATH_LEN - utf16_len));
+
+    // This should succeed.
+    tmpdir.create_dir(&path).unwrap();
+
+    // This will fail if the path isn't converted to verbatim.
+    path.push("a");
+    tmpdir.create_dir(&path).unwrap();
+
+    // #90940: Ensure an empty path returns the "Not Found" error.
+    let path = Path::new("");
+    assert_eq!(
+        tmpdir.canonicalize(path).unwrap_err().kind(),
+        crate::io::ErrorKind::NotFound
+    );
 }
