@@ -1,6 +1,7 @@
 // This file is derived from Rust's library/std/src/fs/tests.rs at revision
 // e4b1d5841494d6eb7f4944c91a057e16b0f0a9ea.
 
+#![cfg_attr(io_error_uncategorized, feature(io_error_uncategorized))]
 #![cfg(feature = "fs_utf8")]
 
 #[macro_use]
