@@ -1482,9 +1482,9 @@ fn symlink_hard_link() {
 #[test]
 #[cfg(windows)]
 fn create_dir_long_paths() {
-    use crate::ffi::OsStr;
-    use crate::iter;
-    use crate::os::windows::ffi::OsStrExt;
+    use std::ffi::OsStr;
+    use std::iter;
+    use std::os::windows::ffi::OsStrExt;
     const PATH_LEN: usize = 247;
 
     let tmpdir = tmpdir();
@@ -1512,6 +1512,6 @@ fn create_dir_long_paths() {
     let path = Path::new("");
     assert_eq!(
         tmpdir.canonicalize(path).unwrap_err().kind(),
-        crate::io::ErrorKind::NotFound
+        std::io::ErrorKind::NotFound
     );
 }
