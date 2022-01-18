@@ -149,6 +149,15 @@ impl File {
             .await
             .map(|f| Self::from_std(f.into()))
     }
+
+    /// Returns a new `OpenOptions` object.
+    ///
+    /// This corresponds to [`async_std::fs::File::options`].
+    #[must_use]
+    #[inline]
+    pub fn options() -> OpenOptions {
+        OpenOptions::new()
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]

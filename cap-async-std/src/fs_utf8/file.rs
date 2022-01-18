@@ -142,6 +142,15 @@ impl File {
             .await
             .map(Self::from_cap_std)
     }
+
+    /// Returns a new `OpenOptions` object.
+    ///
+    /// This corresponds to [`async_std::fs::File::options`].
+    #[must_use]
+    #[inline]
+    pub fn options() -> OpenOptions {
+        OpenOptions::new()
+    }
 }
 
 #[cfg(not(windows))]

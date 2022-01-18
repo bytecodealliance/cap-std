@@ -146,6 +146,15 @@ impl File {
         let std = open_ambient(path.as_ref(), options, ambient_authority)?;
         Ok(Self::from_std(std))
     }
+
+    /// Returns a new `OpenOptions` object.
+    ///
+    /// This corresponds to [`std::fs::File::options`].
+    #[must_use]
+    #[inline]
+    pub fn options() -> OpenOptions {
+        OpenOptions::new()
+    }
 }
 
 #[inline]
