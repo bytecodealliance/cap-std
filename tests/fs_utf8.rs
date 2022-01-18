@@ -1504,11 +1504,15 @@ fn create_dir_long_paths() {
     path.extend(iter::repeat(OsStr::new("a")).take(PATH_LEN - utf16_len));
 
     // This should succeed.
-    tmpdir.create_dir(&path).unwrap();
+    tmpdir
+        .create_dir(&PathBuf::from_path_buf(path.clone().into()).unwrap())
+        .unwrap();
 
     // This will fail if the path isn't converted to verbatim.
     path.push("a");
-    tmpdir.create_dir(&path).unwrap();
+    tmpdir
+        .create_dir(&PathBuf::from_path_buf(path.clone().into()).unwrap())
+        .unwrap();
 
     // #90940: Ensure an empty path returns the "Not Found" error.
     let path = Path::new("");
