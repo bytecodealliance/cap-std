@@ -13,6 +13,7 @@
 )]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 #![cfg_attr(io_error_more, feature(io_error_more))]
+#![cfg_attr(io_error_uncategorized, feature(io_error_uncategorized))]
 
 #[cfg(not(windows))]
 mod rustix;

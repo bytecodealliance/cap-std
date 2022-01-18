@@ -6,6 +6,7 @@ fn main() {
                                                  // https://doc.rust-lang.org/unstable-book/library-features/windows-file-type-ext.html
     use_feature_or_nothing("windows_file_type_ext");
     use_feature_or_nothing("io_error_more"); // https://github.com/rust-lang/rust/issues/86442
+    use_feature_or_nothing("io_error_uncategorized");
 
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
