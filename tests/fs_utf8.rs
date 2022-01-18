@@ -1402,10 +1402,10 @@ fn metadata_access_times() {
         // Not always available
         match (a.created(), b.created()) {
             (Ok(t1), Ok(t2)) => assert!(t1 <= t2),
-            #[cfg(not(io_error_more))]
+            #[cfg(not(io_error_uncategorized))]
             (Err(e1), Err(e2))
                 if e1.kind() == ErrorKind::Other && e2.kind() == ErrorKind::Other => {}
-            #[cfg(io_error_more)]
+            #[cfg(io_error_uncategorized)]
             (Err(e1), Err(e2))
                 if e1.kind() == ErrorKind::Uncategorized
                     && e2.kind() == ErrorKind::Uncategorized

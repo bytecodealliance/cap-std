@@ -6,6 +6,7 @@ fn main() {
     use_feature_or_nothing("clamp"); // https://github.com/rust-lang/rust/issues/44095
     use_feature_or_nothing("extend_one"); // https://github.com/rust-lang/rust/issues/72631
     use_feature_or_nothing("io_error_more"); // https://github.com/rust-lang/rust/issues/86442
+    use_feature_or_nothing("io_error_uncategorized");
     use_feature_or_nothing("pattern"); // https://github.com/rust-lang/rust/issues/27721
     use_feature_or_nothing("seek_convenience"); // https://github.com/rust-lang/rust/issues/59359
     use_feature_or_nothing("shrink_to"); // https://github.com/rust-lang/rust/issues/56431
