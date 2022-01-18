@@ -67,3 +67,5 @@ fn pool_example(pool: &Pool) -> io::Result<()> {
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`cap_std::net`]: https://docs.rs/cap-std/latest/cap_std/net/index.html
 [`cap_std::time`]: https://docs.rs/cap-std/latest/cap_std/time/index.html
+[`Pool`]: https://docs.rs/cap-std/latest/cap_std/net/struct.Pool.html
+[`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
