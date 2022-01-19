@@ -49,11 +49,11 @@ impl FileTypeExt {
             if std.is_fifo() {
                 return FileType::ext(Self::Fifo);
             }
+            #[cfg(not(target_os = "wasi"))]
             if std.is_socket() {
-                FileType::ext(Self::Socket)
-            } else {
-                FileType::unknown()
+                return FileType::ext(Self::Socket);
             }
+            FileType::unknown()
         }
     }
 
@@ -65,9 +65,11 @@ impl FileTypeExt {
             rustix::fs::FileType::RegularFile => FileType::file(),
             rustix::fs::FileType::Directory => FileType::dir(),
             rustix::fs::FileType::Symlink => FileType::ext(Self::symlink()),
+            #[cfg(not(target_os = "wasi"))]
             rustix::fs::FileType::Fifo => FileType::ext(Self::fifo()),
             rustix::fs::FileType::CharacterDevice => FileType::ext(Self::char_device()),
             rustix::fs::FileType::BlockDevice => FileType::ext(Self::block_device()),
+            #[cfg(not(target_os = "wasi"))]
             rustix::fs::FileType::Socket => FileType::ext(Self::socket()),
             _ => FileType::unknown(),
         }
