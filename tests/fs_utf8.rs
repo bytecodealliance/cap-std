@@ -20,8 +20,10 @@ use cap_std::fs_utf8::{self as fs, Dir, OpenOptions};
 use libc::{c_char, c_int};
 use std::io::{self, ErrorKind, SeekFrom};
 use std::str;
+use std::sync::Arc;
 #[cfg(not(racy_asserts))] // racy asserts are racy
 use std::thread;
+use std::time::{Duration, Instant};
 use sys_common::io::{tmpdir_utf8 as tmpdir, TempDirUtf8 as TempDir};
 use sys_common::symlink_junction_utf8 as symlink_junction;
 
@@ -622,6 +624,21 @@ fn recursive_rmdir_of_symlink() {
 }
 
 #[test]
+fn recursive_rmdir_of_file_fails() {
+    // test we do not delete a directly specified file.
+    let tmpdir = tmpdir();
+    let canary = "do_not_delete";
+    check!(check!(tmpdir.create(canary)).write(b"foo"));
+    let result = tmpdir.remove_dir_all(canary);
+    #[cfg(unix)]
+    error!(result, "Not a directory");
+    #[cfg(windows)]
+    error!(result, 267); // ERROR_DIRECTORY - The directory name is invalid.
+    assert!(result.is_err());
+    assert!(tmpdir.exists(canary));
+}
+
+#[test]
 // only Windows makes a distinction between file and directory symlinks.
 #[cfg(windows)]
 fn recursive_rmdir_of_file_symlink() {
@@ -637,6 +654,60 @@ fn recursive_rmdir_of_file_symlink() {
     match tmpdir.remove_dir_all(&f2) {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
+    }
+}
+
+#[test]
+#[ignore] // takes too much time
+fn recursive_rmdir_toctou() {
+    // Test for time-of-check to time-of-use issues.
+    //
+    // Scenario:
+    // The attacker wants to get directory contents deleted, to which he does not have access.
+    // He has a way to get a privileged Rust binary call `std::fs::remove_dir_all()` on a
+    // directory he controls, e.g. in his home directory.
+    //
+    // The POC sets up the `attack_dest/attack_file` which the attacker wants to have deleted.
+    // The attacker repeatedly creates a directory and replaces it with a symlink from
+    // `victim_del` to `attack_dest` while the victim code calls `std::fs::remove_dir_all()`
+    // on `victim_del`. After a few seconds the attack has succeeded and
+    // `attack_dest/attack_file` is deleted.
+    let tmpdir = tmpdir();
+    let victim_del_path = "victim_del";
+    let victim_del_path_clone = victim_del_path.clone();
+
+    // setup dest
+    let attack_dest_dir = "attack_dest";
+    let attack_dest_dir = Path::new(attack_dest_dir);
+    tmpdir.create_dir(attack_dest_dir).unwrap();
+    let attack_dest_file = "attack_dest/attack_file";
+    tmpdir.create(attack_dest_file).unwrap();
+
+    let drop_canary_arc = Arc::new(());
+    let drop_canary_weak = Arc::downgrade(&drop_canary_arc);
+
+    eprintln!("x: {:?}", &victim_del_path);
+
+    // victim just continuously removes `victim_del`
+    let tmpdir_clone = tmpdir.try_clone().unwrap();
+    let _t = thread::spawn(move || {
+        while drop_canary_weak.upgrade().is_some() {
+            let _ = tmpdir_clone.remove_dir_all(victim_del_path_clone);
+        }
+    });
+
+    // attacker (could of course be in a separate process)
+    let start_time = Instant::now();
+    while Instant::now().duration_since(start_time) < Duration::from_secs(1000) {
+        if !tmpdir.exists(attack_dest_file) {
+            panic!(
+                "Victim deleted symlinked file outside of victim_del. Attack succeeded in {:?}.",
+                Instant::now().duration_since(start_time)
+            );
+        }
+        let _ = tmpdir.create_dir(victim_del_path);
+        let _ = tmpdir.remove_dir(victim_del_path);
+        let _ = symlink_dir(attack_dest_dir, &tmpdir, victim_del_path);
     }
 }
 

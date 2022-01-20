@@ -22,8 +22,8 @@ pub(crate) struct ReadDirInner {
 }
 
 impl ReadDirInner {
-    pub(crate) fn new(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let dir = Dir::from(open_dir_for_reading(start, path)?)?;
+    pub(crate) fn new(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Self> {
+        let dir = Dir::from(open_dir_for_reading(start, path, follow)?)?;
         Ok(Self {
             raw_fd: dir.as_fd().as_raw_fd(),
             rustix: Arc::new(Mutex::new(dir)),
@@ -38,6 +38,7 @@ impl ReadDirInner {
         let dir = Dir::from(open_dir_for_reading_unchecked(
             start,
             Component::CurDir.as_ref(),
+            FollowSymlinks::No,
         )?)?;
         Ok(Self {
             raw_fd: dir.as_fd().as_raw_fd(),
@@ -45,8 +46,12 @@ impl ReadDirInner {
         })
     }
 
-    pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let dir = open_dir_for_reading_unchecked(start, path)?;
+    pub(crate) fn new_unchecked(
+        start: &fs::File,
+        path: &Path,
+        follow: FollowSymlinks,
+    ) -> io::Result<Self> {
+        let dir = open_dir_for_reading_unchecked(start, path, follow)?;
         Ok(Self {
             raw_fd: dir.as_fd().as_raw_fd(),
             rustix: Arc::new(Mutex::new(Dir::from(dir)?)),
@@ -73,8 +78,12 @@ impl ReadDirInner {
         Metadata::from_file(&self.as_file_view())
     }
 
-    pub(super) fn read_dir(&self, file_name: &OsStr) -> io::Result<ReadDir> {
-        read_dir_unchecked(&self.as_file_view(), file_name.as_ref())
+    pub(super) fn read_dir(
+        &self,
+        file_name: &OsStr,
+        follow: FollowSymlinks,
+    ) -> io::Result<ReadDir> {
+        read_dir_unchecked(&self.as_file_view(), file_name.as_ref(), follow)
     }
 
     #[allow(unsafe_code)]

@@ -1,6 +1,6 @@
 use crate::fs::{
-    read_dir, read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat, FollowSymlinks,
-    ReadDir,
+    read_dir_nofollow, read_dir_unchecked, remove_dir, remove_file, remove_open_dir, stat,
+    FollowSymlinks, ReadDir,
 };
 use std::path::{Component, Path};
 use std::{fs, io};
@@ -13,13 +13,17 @@ pub(crate) fn remove_dir_all_impl(start: &fs::File, path: &Path) -> io::Result<(
     if filetype.is_symlink() {
         remove_file(start, path)
     } else {
-        remove_dir_all_recursive(read_dir(start, path)?)?;
+        remove_dir_all_recursive(read_dir_nofollow(start, path)?)?;
         remove_dir(start, path)
     }
 }
 
 pub(crate) fn remove_open_dir_all_impl(dir: fs::File) -> io::Result<()> {
-    remove_dir_all_recursive(read_dir_unchecked(&dir, Component::CurDir.as_ref())?)?;
+    remove_dir_all_recursive(read_dir_unchecked(
+        &dir,
+        Component::CurDir.as_ref(),
+        FollowSymlinks::No,
+    )?)?;
     remove_open_dir(dir)
 }
 
@@ -27,7 +31,7 @@ fn remove_dir_all_recursive(children: ReadDir) -> io::Result<()> {
     for child in children {
         let child = child?;
         if child.file_type()?.is_dir() {
-            remove_dir_all_recursive(child.read_dir()?)?;
+            remove_dir_all_recursive(child.inner.read_dir(FollowSymlinks::No)?)?;
             child.remove_dir()?;
         } else {
             child.remove_file()?;

@@ -54,7 +54,8 @@ pub(crate) use super::rustix::fs::*;
 #[cfg(windows)]
 pub(crate) use super::windows::fs::*;
 
-pub(crate) use read_dir::read_dir_unchecked;
+#[cfg(not(windows))]
+pub(crate) use read_dir::{read_dir_nofollow, read_dir_unchecked};
 
 pub use canonicalize::canonicalize;
 pub use copy::copy;
