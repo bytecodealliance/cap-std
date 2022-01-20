@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use crate::fs::DirOptions;
 use std::path::Path;
 use std::{fs, io};
@@ -13,6 +13,6 @@ pub(crate) fn create_dir_unchecked(
     path: &Path,
     _options: &DirOptions,
 ) -> io::Result<()> {
-    let out_path = concatenate_or_return_absolute(start, path)?;
+    let out_path = concatenate(start, path)?;
     fs::create_dir(out_path)
 }

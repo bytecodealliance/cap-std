@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use std::path::Path;
 use std::{fs, io};
 
@@ -10,7 +10,7 @@ pub(crate) fn rename_unchecked(
     new_start: &fs::File,
     new_path: &Path,
 ) -> io::Result<()> {
-    let old_full_path = concatenate_or_return_absolute(old_start, old_path)?;
-    let new_full_path = concatenate_or_return_absolute(new_start, new_path)?;
+    let old_full_path = concatenate(old_start, old_path)?;
+    let new_full_path = concatenate(new_start, new_path)?;
     fs::rename(old_full_path, new_full_path)
 }

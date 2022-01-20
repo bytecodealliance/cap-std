@@ -1,5 +1,5 @@
 #[cfg(windows_by_handle)]
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use crate::fs::{FollowSymlinks, Metadata};
 use std::path::Path;
 use std::{fs, io};
@@ -22,7 +22,7 @@ pub(crate) fn stat_unchecked(
     // has everything.
     #[cfg(windows_by_handle)]
     {
-        let full_path = concatenate_or_return_absolute(start, path)?;
+        let full_path = concatenate(start, path)?;
         match follow {
             FollowSymlinks::Yes => fs::metadata(full_path),
             FollowSymlinks::No => fs::symlink_metadata(full_path),

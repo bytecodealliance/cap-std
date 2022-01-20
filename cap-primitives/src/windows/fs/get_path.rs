@@ -24,13 +24,8 @@ pub(crate) fn get_path(file: &fs::File) -> io::Result<PathBuf> {
 }
 
 /// Convenience function for calling `get_path` and concatenating the result
-/// with `path`. This function also checks if `path` is absolute in which case,
-/// it emulates POSIX and returns the absolute path unmodified instead.
-pub(super) fn concatenate_or_return_absolute(file: &fs::File, path: &Path) -> io::Result<PathBuf> {
-    if path.is_absolute() {
-        return Ok(path.into());
-    }
-
+/// with `path`.
+pub(super) fn concatenate(file: &fs::File, path: &Path) -> io::Result<PathBuf> {
     let file_path = get_path(file)?;
     Ok(file_path.join(path))
 }
