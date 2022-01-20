@@ -1,7 +1,7 @@
 use crate::fs::SystemTimeSpec;
 use crate::time::SystemClock;
 use io_lifetimes::BorrowedFd;
-use rustix::fs::{utimensat, AtFlags, UTIME_NOW, UTIME_OMIT};
+use rustix::fs::{utimensat, AtFlags, Timestamps, UTIME_NOW, UTIME_OMIT};
 use rustix::time::Timespec;
 use std::convert::TryInto;
 use std::path::Path;
@@ -40,7 +40,10 @@ pub(crate) fn set_times_nofollow_unchecked(
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
-    let times = [to_timespec(atime)?, to_timespec(mtime)?];
+    let times = Timestamps {
+        last_access: to_timespec(atime)?,
+        last_modification: to_timespec(mtime)?,
+    };
     Ok(utimensat(start, path, &times, AtFlags::SYMLINK_NOFOLLOW)?)
 }
 
@@ -51,6 +54,9 @@ pub(crate) fn set_times_follow_unchecked(
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
-    let times = [to_timespec(atime)?, to_timespec(mtime)?];
+    let times = Timestamps {
+        last_access: to_timespec(atime)?,
+        last_modification: to_timespec(mtime)?,
+    };
     Ok(utimensat(&start, path, &times, AtFlags::empty())?)
 }

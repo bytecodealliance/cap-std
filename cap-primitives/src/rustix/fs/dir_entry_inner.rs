@@ -45,7 +45,9 @@ impl DirEntryInner {
             rustix::fs::FileType::Directory => FileType::dir(),
             rustix::fs::FileType::RegularFile => FileType::file(),
             rustix::fs::FileType::Symlink => FileType::ext(FileTypeExt::symlink()),
+            #[cfg(not(target_os = "wasi"))]
             rustix::fs::FileType::Fifo => FileType::ext(FileTypeExt::fifo()),
+            #[cfg(not(target_os = "wasi"))]
             rustix::fs::FileType::Socket => FileType::ext(FileTypeExt::socket()),
             rustix::fs::FileType::CharacterDevice => FileType::ext(FileTypeExt::char_device()),
             rustix::fs::FileType::BlockDevice => FileType::ext(FileTypeExt::block_device()),
