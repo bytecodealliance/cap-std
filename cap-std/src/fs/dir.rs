@@ -29,6 +29,7 @@ use {
     io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
+use io_lifetimes::AsFilelike;
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -614,11 +615,9 @@ impl Dir {
     ///
     /// This can be useful when interacting with other libraries and or C/C++ code
     /// which has invoked `openat(..., O_DIRECTORY)` external to this crate.
-    #[cfg(not(windows))]
-    pub fn reopen_dir(fd: BorrowedFd) -> io::Result<Self> {
-        use io_lifetimes::AsFilelike;
+    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
         cap_primitives::fs::open_dir(
-            &fd.as_filelike_view::<std::fs::File>(),
+            &dir.as_filelike_view::<std::fs::File>(),
             std::path::Component::CurDir.as_ref(),
         )
         .map(Self::from_std_file)
