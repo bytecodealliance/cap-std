@@ -15,7 +15,10 @@
 //!
 //! TODO: This whole scheme is still under development.
 //!
-//! If you don't want this, use the regular [`cap_std::fs`] module instead.
+//! To use this module, enable the `fs_utf8` cargo feature.
+//!
+//! If you don't want to restrict paths to UTF-8, use the regular
+//! [`cap_std::fs`] module instead.
 //!
 //! [`cap_std::fs`]: ../fs/
 //! [ARF strings]: https://crates.io/crates/arf-strings
