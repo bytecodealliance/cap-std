@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use crate::fs::{open_dir, DirEntryInner, FollowSymlinks};
 use std::path::{Component, Path};
 use std::{fmt, fs, io};
@@ -23,7 +23,7 @@ impl ReadDirInner {
     }
 
     pub(crate) fn new_unchecked(start: &fs::File, path: &Path) -> io::Result<Self> {
-        let full_path = concatenate_or_return_absolute(start, path)?;
+        let full_path = concatenate(start, path)?;
         Ok(Self {
             std: fs::read_dir(full_path)?,
         })

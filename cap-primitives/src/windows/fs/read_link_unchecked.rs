@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
@@ -9,6 +9,6 @@ pub(crate) fn read_link_unchecked(
     path: &Path,
     _reuse: PathBuf,
 ) -> io::Result<PathBuf> {
-    let full_path = concatenate_or_return_absolute(start, path)?;
+    let full_path = concatenate(start, path)?;
     fs::read_link(full_path)
 }

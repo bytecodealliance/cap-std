@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use super::open_options_to_std;
 use crate::fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
 use crate::{ambient_authority, AmbientAuthority};
@@ -16,8 +16,7 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> Result<fs::File, OpenUncheckedError> {
-    let full_path =
-        concatenate_or_return_absolute(start, path).map_err(OpenUncheckedError::Other)?;
+    let full_path = concatenate(start, path).map_err(OpenUncheckedError::Other)?;
     open_ambient_impl(&full_path, options, ambient_authority())
 }
 

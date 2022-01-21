@@ -1,4 +1,5 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::get_path;
+use crate::fs::{open, OpenOptions};
 use std::path::Path;
 use std::{fs, io};
 
@@ -8,7 +9,11 @@ pub(crate) fn copy_impl(
     to_start: &fs::File,
     to_path: &Path,
 ) -> io::Result<u64> {
-    let from_full_path = concatenate_or_return_absolute(from_start, from_path)?;
-    let to_full_path = concatenate_or_return_absolute(to_start, to_path)?;
-    fs::copy(from_full_path, to_full_path)
+    let from = open(from_start, from_path, OpenOptions::new().read(true))?;
+    let to = open(
+        to_start,
+        to_path,
+        OpenOptions::new().create(true).truncate(true).write(true),
+    )?;
+    fs::copy(get_path(&from)?, get_path(&to)?)
 }

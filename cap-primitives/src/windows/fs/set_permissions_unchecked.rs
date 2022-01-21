@@ -1,4 +1,4 @@
-use super::get_path::concatenate_or_return_absolute;
+use super::get_path::concatenate;
 use crate::fs::Permissions;
 use std::path::Path;
 use std::{fs, io};
@@ -16,6 +16,6 @@ pub(crate) fn set_permissions_unchecked(
     //
     // [Windows' documentation]: https://docs.microsoft.com/en-us/windows/win32/fileio/symbolic-link-effects-on-file-systems-functions#setfileattributes
     // [Rust's documentation]: https://doc.rust-lang.org/std/fs/fn.set_permissions.html#platform-specific-behavior
-    let out_path = concatenate_or_return_absolute(start, path)?;
+    let out_path = concatenate(start, path)?;
     fs::set_permissions(out_path, perm.into_std(start)?)
 }
