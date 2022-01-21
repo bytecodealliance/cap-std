@@ -220,7 +220,7 @@ fn close_outer() {
     #[cfg(windows)]
     assert!(matches!(
         t.close().unwrap_err().raw_os_error(),
-        (winapi::shared::winerror::ERROR_SHARING_VIOLATION as i32)
+        Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION as i32)
             | Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY as i32)
     ));
     #[cfg(not(windows))]
