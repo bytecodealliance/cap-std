@@ -9,6 +9,7 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use cap_primitives::AmbientAuthority;
+use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -614,11 +615,9 @@ impl Dir {
     ///
     /// This can be useful when interacting with other libraries and or C/C++ code
     /// which has invoked `openat(..., O_DIRECTORY)` external to this crate.
-    #[cfg(not(windows))]
-    pub fn reopen_dir(fd: BorrowedFd) -> io::Result<Self> {
-        use io_lifetimes::AsFilelike;
+    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
         cap_primitives::fs::open_dir(
-            &fd.as_filelike_view::<std::fs::File>(),
+            &dir.as_filelike_view::<std::fs::File>(),
             std::path::Component::CurDir.as_ref(),
         )
         .map(Self::from_std_file)

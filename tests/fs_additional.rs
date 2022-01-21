@@ -851,9 +851,9 @@ fn maybe_dir() {
 #[test]
 #[cfg(not(windows))]
 fn reopen_fd() {
-    use rustix::fd::AsFd;
+    use io_lifetimes::AsFilelike;
     let tmpdir = tmpdir();
     check!(tmpdir.create_dir("subdir"));
-    let tmpdir2 = check!(cap_std::fs::Dir::reopen_dir(tmpdir.as_fd()));
+    let tmpdir2 = check!(cap_std::fs::Dir::reopen_dir(&tmpdir.as_filelike()));
     assert!(tmpdir2.exists("subdir"));
 }
