@@ -9,6 +9,7 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use cap_primitives::AmbientAuthority;
+use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -29,7 +30,6 @@ use {
     io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
-use io_lifetimes::AsFilelike;
 
 /// A reference to an open directory on a filesystem.
 ///
