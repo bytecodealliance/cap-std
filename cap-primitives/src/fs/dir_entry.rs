@@ -1,4 +1,6 @@
-use crate::fs::{dir_options, DirEntryInner, FileType, Metadata, OpenOptions, ReadDir};
+use crate::fs::{
+    dir_options, DirEntryInner, FileType, FollowSymlinks, Metadata, OpenOptions, ReadDir,
+};
 #[cfg(not(windows))]
 use rustix::fs::DirEntryExt;
 use std::ffi::OsString;
@@ -57,7 +59,7 @@ impl DirEntry {
     /// Returns an iterator over the entries within the subdirectory.
     #[inline]
     pub fn read_dir(&self) -> io::Result<ReadDir> {
-        self.inner.read_dir()
+        self.inner.read_dir(FollowSymlinks::Yes)
     }
 
     /// Returns the metadata for the file that this entry points at.

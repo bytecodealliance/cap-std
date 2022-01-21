@@ -1,4 +1,4 @@
-use crate::fs::{DirEntry, ReadDirInner};
+use crate::fs::{DirEntry, FollowSymlinks, ReadDirInner};
 use std::path::Path;
 use std::{fmt, fs, io};
 
@@ -8,7 +8,16 @@ use std::{fmt, fs, io};
 #[inline]
 pub fn read_dir(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
     Ok(ReadDir {
-        inner: ReadDirInner::new(start, path)?,
+        inner: ReadDirInner::new(start, path, FollowSymlinks::Yes)?,
+    })
+}
+
+/// Like `read_dir`, but fails if `path` names a symlink.
+#[inline]
+#[cfg(not(windows))]
+pub(crate) fn read_dir_nofollow(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
+    Ok(ReadDir {
+        inner: ReadDirInner::new(start, path, FollowSymlinks::No)?,
     })
 }
 
@@ -23,9 +32,14 @@ pub fn read_base_dir(start: &fs::File) -> io::Result<ReadDir> {
 
 /// Like `read_dir`, but doesn't perform sandboxing.
 #[inline]
-pub(crate) fn read_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<ReadDir> {
+#[cfg(not(windows))]
+pub(crate) fn read_dir_unchecked(
+    start: &fs::File,
+    path: &Path,
+    follow: FollowSymlinks,
+) -> io::Result<ReadDir> {
     Ok(ReadDir {
-        inner: ReadDirInner::new_unchecked(start, path)?,
+        inner: ReadDirInner::new_unchecked(start, path, follow)?,
     })
 }
 

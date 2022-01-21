@@ -18,9 +18,14 @@ pub fn open_dir(start: &fs::File, path: &Path) -> io::Result<fs::File> {
 
 /// Like `open_dir`, but additionally request the ability to read the directory
 /// entries.
+#[cfg(not(windows))]
 #[inline]
-pub fn open_dir_for_reading(start: &fs::File, path: &Path) -> io::Result<fs::File> {
-    open(start, path, &readdir_options())
+pub(crate) fn open_dir_for_reading(
+    start: &fs::File,
+    path: &Path,
+    follow: FollowSymlinks,
+) -> io::Result<fs::File> {
+    open(start, path, readdir_options().follow(follow))
 }
 
 /// Similar to `open_dir`, but fails if the path names a symlink.
@@ -43,8 +48,9 @@ pub(crate) fn open_dir_unchecked(start: &fs::File, path: &Path) -> io::Result<fs
 pub(crate) fn open_dir_for_reading_unchecked(
     start: &fs::File,
     path: &Path,
+    follow: FollowSymlinks,
 ) -> io::Result<fs::File> {
-    open_unchecked(start, path, &readdir_options()).map_err(Into::into)
+    open_unchecked(start, path, readdir_options().follow(follow)).map_err(Into::into)
 }
 
 /// Open a directory named by a bare path, using the host process' ambient

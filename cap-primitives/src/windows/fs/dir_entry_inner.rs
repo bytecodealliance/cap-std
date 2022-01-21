@@ -68,7 +68,12 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub(crate) fn read_dir(&self) -> io::Result<ReadDir> {
+    pub(crate) fn read_dir(&self, follow: FollowSymlinks) -> io::Result<ReadDir> {
+        assert_eq!(
+            follow,
+            FollowSymlinks::Yes,
+            "`read_dir` without following symlinks is not implemented yet"
+        );
         let std = fs::read_dir(self.std.path())?;
         let inner = ReadDirInner::from_std(std);
         Ok(ReadDir { inner })

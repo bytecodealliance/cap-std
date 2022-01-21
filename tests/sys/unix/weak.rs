@@ -84,8 +84,11 @@ impl<F> ExternWeak<F> {
 #[macro_export]
 macro_rules! dlsym {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
+        dlsym!(fn $name($($t),*) -> $ret, stringify!($name));
+    );
+    (fn $name:ident($($t:ty),*) -> $ret:ty, $sym:expr) => (
         static DLSYM: $crate::sys::weak::DlsymWeak<unsafe extern "C" fn($($t),*) -> $ret> =
-            $crate::sys::weak::DlsymWeak::new(concat!(stringify!($name), '\0'));
+            $crate::sys::weak::DlsymWeak::new(concat!($sym, '\0'));
         let $name = &DLSYM;
     )
 }

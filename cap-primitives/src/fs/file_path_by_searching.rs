@@ -1,4 +1,6 @@
-use crate::fs::{is_root_dir, open_dir_unchecked, read_dir_unchecked, MaybeOwnedFile, Metadata};
+use crate::fs::{
+    is_root_dir, open_dir_unchecked, read_dir_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata,
+};
 use std::fs;
 use std::path::{Component, PathBuf};
 
@@ -13,7 +15,8 @@ pub(crate) fn file_path_by_searching(file: &fs::File) -> Option<PathBuf> {
     // Iterate with `..` until we reach the root directory.
     'next_component: loop {
         // Open `..`.
-        let mut iter = read_dir_unchecked(&base, Component::ParentDir.as_ref()).ok()?;
+        let mut iter =
+            read_dir_unchecked(&base, Component::ParentDir.as_ref(), FollowSymlinks::No).ok()?;
         let metadata = Metadata::from_file(&*base).ok()?;
 
         // Search the children until we find one with matching metadata, and

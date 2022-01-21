@@ -218,10 +218,11 @@ fn close_outer() {
     let t = tempdir(ambient_authority()).unwrap();
     let _s = tempdir_in(&t).unwrap();
     #[cfg(windows)]
-    assert_eq!(
-        t.close().unwrap_err().raw_os_error(),
-        Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION as i32)
-    );
+    assert!(matches!(
+        t.close().unwrap_err().raw_os_error().map(|err| err as _),
+        Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION)
+            | Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY)
+    ));
     #[cfg(not(windows))]
     t.close().unwrap();
 }

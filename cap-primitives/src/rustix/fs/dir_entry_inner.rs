@@ -1,4 +1,6 @@
-use crate::fs::{FileType, FileTypeExt, Metadata, OpenOptions, ReadDir, ReadDirInner};
+use crate::fs::{
+    FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir, ReadDirInner,
+};
 use rustix::fs::DirEntry;
 use std::ffi::{OsStr, OsString};
 #[cfg(unix)]
@@ -29,8 +31,8 @@ impl DirEntryInner {
     }
 
     #[inline]
-    pub(crate) fn read_dir(&self) -> io::Result<ReadDir> {
-        self.read_dir.read_dir(self.file_name_bytes())
+    pub(crate) fn read_dir(&self, follow: FollowSymlinks) -> io::Result<ReadDir> {
+        self.read_dir.read_dir(self.file_name_bytes(), follow)
     }
 
     #[inline]
