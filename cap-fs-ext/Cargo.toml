@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 arf-strings = { version = "0.6.3", optional = true }
-cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.22.2-alpha.0"}
+cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.23.0"}
 cap-std = { path = "../cap-std", optional = true, version = "^0.22.2-alpha.0"}
 cap-primitives = { path = "../cap-primitives", version = "^0.23.0"}
 io-lifetimes = { version = "0.4.0", default-features = false }
