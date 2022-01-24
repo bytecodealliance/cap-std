@@ -13,7 +13,8 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [package.metadata.docs.rs]
-rustdoc-args = ["--all-features", "--cfg=doc_cfg"]
+all-features = true
+rustdoc-args = ["--cfg=doc_cfg"]
 
 [dependencies]
 arf-strings = { version = "0.6.3", optional = true }
