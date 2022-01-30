@@ -29,6 +29,11 @@ develops libraries to make it easy to write capability-based code, including:
  - [`cap-rand`], which provides capability-based access to
    [random number generators]
 
+There is also a [`cap-std-ext`](https://crates.io/crates/cap-std-ext) crate available
+which is maintained independently, and includes further extension APIs for
+both filesystem APIs (including atomic create/replace on Linux specifically)
+and passing file descriptors to child processes.
+
 Cap-std features protection against [CWE-22], "Improper Limitation of a
 Pathname to a Restricted Directory ('Path Traversal')", which is #8 in the
 [2021 CWE Top 25 Most Dangerous Software Weaknesses]. It can also be used to
