@@ -12,6 +12,7 @@ categories = ["filesystem", "network-programming"]
 repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 publish = false
+exclude = ["/.*"]
 
 [dev-dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
