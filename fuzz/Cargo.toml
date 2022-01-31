@@ -15,7 +15,7 @@ cap-primitives = { path = "../cap-primitives", features = ["arbitrary"] }
 # Depend on io-lifetimes with default features, as the fuzzing framework
 # seems to add a dependency on `io_lifetimes::OwnedFd::drop` even when the
 # code itself doesn't have one.
-io-lifetimes = "0.4.0"
+io-lifetimes = "0.5.1"
 
 [[bin]]
 name = "cap-primitives"

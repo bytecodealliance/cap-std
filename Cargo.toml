@@ -25,10 +25,10 @@ rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
 libc = "0.2.100"
-io-lifetimes = "0.4.4"
+io-lifetimes = "0.5.1"
 
 [target.'cfg(not(windows))'.dev-dependencies]
-rustix = "0.32.0"
+rustix = "0.33.0"
 
 [target.'cfg(windows)'.dev-dependencies]
 # nt_version uses internal Windows APIs, however we're only using it
