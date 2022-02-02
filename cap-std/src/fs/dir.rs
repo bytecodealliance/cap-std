@@ -395,17 +395,37 @@ impl Dir {
 
     /// Creates a new symbolic link on a filesystem.
     ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
+    ///
     /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
     /// paths relative to `self`.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
-    pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink(src.as_ref(), &self.std_file, dst.as_ref())
+    pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+        symlink(original.as_ref(), &self.std_file, link.as_ref())
     }
 
     /// Creates a new file symbolic link on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_file`], but only
     /// accesses paths relative to `self`.
@@ -413,11 +433,21 @@ impl Dir {
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_file(src.as_ref(), &self.std_file, dst.as_ref())
+    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+        symlink_file(original.as_ref(), &self.std_file, link.as_ref())
     }
 
     /// Creates a new directory symlink on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_dir`], but only
     /// accesses paths relative to `self`.
@@ -425,8 +455,8 @@ impl Dir {
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        symlink_dir(src.as_ref(), &self.std_file, dst.as_ref())
+    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+        symlink_dir(original.as_ref(), &self.std_file, link.as_ref())
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.

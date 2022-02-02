@@ -535,27 +535,47 @@ impl Dir {
 
     /// Creates a new symbolic link on a filesystem.
     ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
+    ///
     /// This corresponds to [`async_std::os::unix::fs::symlink`], but only
     /// accesses paths relative to `self`.
     ///
     /// [`async_std::os::unix::fs::symlink`]: https://docs.rs/async-std/latest/async_std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
-    pub async fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, src: P, dst: Q) -> io::Result<()> {
-        let src = src.as_ref().to_path_buf();
-        let dst = dst.as_ref().to_path_buf();
+    pub async fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+        let original = original.as_ref().to_path_buf();
+        let link = link.as_ref().to_path_buf();
         let clone = self.clone();
         spawn_blocking(move || {
             symlink(
-                src.as_ref(),
+                original.as_ref(),
                 &clone.as_filelike_view::<std::fs::File>(),
-                dst.as_ref(),
+                link.as_ref(),
             )
         })
         .await
     }
 
     /// Creates a new file symbolic link on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`async_std::os::windows::fs::symlink_file`], but
     /// only accesses paths relative to `self`.
@@ -565,23 +585,33 @@ impl Dir {
     #[inline]
     pub async fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
         &self,
-        src: P,
-        dst: Q,
+        original: P,
+        link: Q,
     ) -> io::Result<()> {
-        let src = src.as_ref().to_path_buf();
-        let dst = dst.as_ref().to_path_buf();
+        let original = original.as_ref().to_path_buf();
+        let link = link.as_ref().to_path_buf();
         let clone = self.clone();
         spawn_blocking(move || {
             symlink_file(
-                src.as_ref(),
+                original.as_ref(),
                 &clone.as_filelike_view::<std::fs::File>(),
-                dst.as_ref(),
+                link.as_ref(),
             )
         })
         .await
     }
 
     /// Creates a new directory symlink on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`async_std::os::windows::fs::symlink_dir`], but
     /// only accesses paths relative to `self`.
@@ -591,17 +621,17 @@ impl Dir {
     #[inline]
     pub async fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(
         &self,
-        src: P,
-        dst: Q,
+        original: P,
+        link: Q,
     ) -> io::Result<()> {
-        let src = src.as_ref().to_path_buf();
-        let dst = dst.as_ref().to_path_buf();
+        let original = original.as_ref().to_path_buf();
+        let link = link.as_ref().to_path_buf();
         let clone = self.clone();
         spawn_blocking(move || {
             symlink_dir(
-                src.as_ref(),
+                original.as_ref(),
                 &clone.as_filelike_view::<std::fs::File>(),
-                dst.as_ref(),
+                link.as_ref(),
             )
         })
         .await

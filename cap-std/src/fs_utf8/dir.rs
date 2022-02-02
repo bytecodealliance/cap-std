@@ -345,6 +345,16 @@ impl Dir {
 
     /// Creates a new symbolic link on a filesystem.
     ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
+    ///
     /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
     /// paths relative to `self`.
     ///
@@ -353,15 +363,25 @@ impl Dir {
     #[inline]
     pub fn symlink<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
         &self,
-        src: P,
-        dst: Q,
+        original: P,
+        link: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
-        self.cap_std.symlink(src, dst)
+        let original = from_utf8(original)?;
+        let link = from_utf8(link)?;
+        self.cap_std.symlink(original, link)
     }
 
     /// Creates a new file symbolic link on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_file`], but only
     /// accesses paths relative to `self`.
@@ -371,15 +391,25 @@ impl Dir {
     #[inline]
     pub fn symlink_file<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
         &self,
-        src: P,
-        dst: Q,
+        original: P,
+        link: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
-        self.cap_std.symlink_file(src, dst)
+        let original = from_utf8(original)?;
+        let link = from_utf8(link)?;
+        self.cap_std.symlink_file(original, link)
     }
 
     /// Creates a new directory symlink on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
     ///
     /// This corresponds to [`std::os::windows::fs::symlink_dir`], but only
     /// accesses paths relative to `self`.
@@ -389,12 +419,12 @@ impl Dir {
     #[inline]
     pub fn symlink_dir<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
         &self,
-        src: P,
-        dst: Q,
+        original: P,
+        link: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
-        self.cap_std.symlink_dir(src, dst)
+        let original = from_utf8(original)?;
+        let link = from_utf8(link)?;
+        self.cap_std.symlink_dir(original, link)
     }
 
     /// Creates a new `UnixListener` bound to the specified socket.
