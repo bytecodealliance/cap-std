@@ -433,7 +433,11 @@ impl Dir {
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+    pub fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        original: P,
+        link: Q,
+    ) -> io::Result<()> {
         symlink_file(original.as_ref(), &self.std_file, link.as_ref())
     }
 
@@ -455,7 +459,11 @@ impl Dir {
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
     #[cfg(windows)]
     #[inline]
-    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+    pub fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        original: P,
+        link: Q,
+    ) -> io::Result<()> {
         symlink_dir(original.as_ref(), &self.std_file, link.as_ref())
     }
 

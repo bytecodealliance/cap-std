@@ -551,7 +551,11 @@ impl Dir {
     /// [`async_std::os::unix::fs::symlink`]: https://docs.rs/async-std/latest/async_std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
-    pub async fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
+    pub async fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        original: P,
+        link: Q,
+    ) -> io::Result<()> {
         let original = original.as_ref().to_path_buf();
         let link = link.as_ref().to_path_buf();
         let clone = self.clone();
