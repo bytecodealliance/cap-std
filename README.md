@@ -220,6 +220,24 @@ It's not mature yet, and it doesn't support Windows. It does support
 `openat2`-like features such as `RESOLVE_NO_XDEV`, `RESOLVE_NO_SYMLINKS`,
 and `RESOLVE_IN_ROOT`, including emulation when `openat2` isn't available.
 
+### Why use `RESOLVE_IN_ROOT`?
+
+Capability-based security is all about *granularity*. We want to encourage
+applications and users to think about having separate handles for directories
+they need, so that they're isolated from each other, rather than in terms of
+having "root directories" containing multiple unrelated resources.
+
+Also, some applications have "well known" absolute path strings present, such
+as "/etc/resolv.conf", and could accidentally use them within `Dir` methods.
+`RESOLVE_BENEATH` catches such errors early, rather than taking chances with
+user content inside the `Dir`.
+
+And, `RESOLVE_BENEATH` handles symlinks within a `Dir` consistently. Accessing
+a symlink to an absolute path within a `Dir` is always an error. With
+`RESOLVE_IN_ROOT`, a symlink to an absolute path in a `Dir` may succeed, and
+potentially resolve to something different than it would when resolved through
+the process filesystem namespace.
+
 [`arf-strings`]: https://github.com/bytecodealliance/arf-strings/
 [`openat`]: https://crates.io/crates/openat
 [`pathrs`]: https://crates.io/crates/pathrs
