@@ -205,21 +205,42 @@ sandbox, while `openat` doesn't support following symlinks.
 
 `cap-std` has some similar functionality to [`pathrs`] in that it also
 explicitly verifies that `/proc` has actual `procfs` mounted on it and nothing
-mounted on top, and it can also use `openat2`. However, `cap-std` uses
-`RESOLVE_BENEATH`-style resolution where absolute paths are considered errors,
-while `pathrs` uses `RESOLVE_IN_ROOT` where absolute paths are interpreted as
-references to the base file descriptor. And overall, `cap-std` seeks to provide
-a portable `std`-like API which supports Windows in addition to Unix-like
-platforms, while `pathrs` provides a lower-level API that exposes more of the
-underlying `openat2` options and only supports Linux.
+mounted on top, and it can also use `openat2`. And it has some similar
+functionality to [`unix_fd`]. However, `cap-std` uses `RESOLVE_BENEATH`-style
+resolution where absolute paths are considered errors, while `pathrs` and
+`unix_fd` use `RESOLVE_IN_ROOT`-style resolution, where absolute paths are
+interpreted as references to the base file descriptor. And overall, `cap-std`
+seeks to provide a portable `std`-like API which supports Windows in addition
+to Unix-like platforms, while `pathrs` provides a lower-level API that exposes
+more of the underlying `openat2` options and only supports Linux, and `unix_fd`
+is specific to Unix-like platforms.
 
 [`obnth`] is a new crate which appears to be very similar to `cap_std::fs`.
 It's not mature yet, and it doesn't support Windows. It does support
 `openat2`-like features such as `RESOLVE_NO_XDEV`, `RESOLVE_NO_SYMLINKS`,
 and `RESOLVE_IN_ROOT`, including emulation when `openat2` isn't available.
 
+### Why use `RESOLVE_BENEATH`?
+
+Capability-based security is all about *granularity*. We want to encourage
+applications and users to think about having separate handles for directories
+they need, so that they're isolated from each other, rather than in terms of
+having "root directories" containing multiple unrelated resources.
+
+Also, some applications have "well known" absolute path strings present, such
+as "/etc/resolv.conf", and could accidentally use them within `Dir` methods.
+`RESOLVE_BENEATH` catches such errors early, rather than taking chances with
+user content inside the `Dir`.
+
+And, `RESOLVE_BENEATH` handles symlinks within a `Dir` consistently. Accessing
+a symlink to an absolute path within a `Dir` is always an error. With
+`RESOLVE_IN_ROOT`, a symlink to an absolute path in a `Dir` may succeed, and
+potentially resolve to something different than it would when resolved through
+the process filesystem namespace.
+
 [`arf-strings`]: https://github.com/bytecodealliance/arf-strings/
 [`openat`]: https://crates.io/crates/openat
 [`pathrs`]: https://crates.io/crates/pathrs
 [`obnth`]: https://crates.io/crates/obnth
 [`camino`]: https://crates.io/crates/camino
+[`unix_fd`]: https://crates.io/crates/unix_fd
