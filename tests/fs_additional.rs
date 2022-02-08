@@ -192,6 +192,21 @@ fn optionally_recursive_mkdir() {
 }
 
 #[test]
+fn try_exists() {
+    let tmpdir = tmpdir();
+    assert_eq!(tmpdir.try_exists("somefile").unwrap(), false);
+    let dir = Path::new("d1/d2");
+    let parent = dir.parent().unwrap();
+    assert_eq!(tmpdir.try_exists(parent).unwrap(), false);
+    assert_eq!(tmpdir.try_exists(dir).unwrap(), false);
+    check!(tmpdir.create_dir(parent));
+    assert_eq!(tmpdir.try_exists(parent).unwrap(), true);
+    assert_eq!(tmpdir.try_exists(dir).unwrap(), false);
+    check!(tmpdir.create_dir(dir));
+    assert_eq!(tmpdir.try_exists(dir).unwrap(), true);
+}
+
+#[test]
 fn optionally_nonrecursive_mkdir() {
     let tmpdir = tmpdir();
     let dir = "d1/d2";

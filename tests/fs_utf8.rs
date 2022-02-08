@@ -458,8 +458,10 @@ fn file_test_fileinfo_check_exists_before_and_after_file_creation() {
     let file = "fileinfo_check_exists_b_and_a.txt";
     check!(check!(tmpdir.create(file)).write(b"foo"));
     assert!(tmpdir.exists(file));
+    assert!(tmpdir.try_exists(file).unwrap());
     check!(tmpdir.remove_file(file));
     assert!(!tmpdir.exists(file));
+    assert!(!tmpdir.try_exists(file).unwrap());
 }
 
 #[test]

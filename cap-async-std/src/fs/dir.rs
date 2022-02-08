@@ -754,6 +754,21 @@ impl Dir {
         self.metadata(path).await.is_ok()
     }
 
+    /// Returns `true` if the path points at an existing entity.
+    ///
+    /// This is an asynchronous version of [`std::fs::try_exists`], and also only
+    /// accesses paths relative to `self`.
+    ///
+    /// NOTE: This API is not yet part of `async_std`.
+    #[inline]
+    pub async fn try_exists<P: AsRef<Path>>(&self, path: P) -> io::Result<bool> {
+        match self.metadata(path.as_ref()).await {
+            Ok(_) => Ok(true),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(false),
+            Err(e) => Err(e),
+        }
+    }
+
     /// Returns `true` if the path exists on disk and is pointing at a regular
     /// file.
     ///

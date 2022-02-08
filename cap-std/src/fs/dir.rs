@@ -584,6 +584,24 @@ impl Dir {
         self.metadata(path).is_ok()
     }
 
+    /// Returns `true` if the path points at an existing entity.
+    ///
+    /// This corresponds to [`std::fs::try_exists`], but only
+    /// accesses paths relative to `self`.
+    ///
+    /// # API correspondence with `std`
+    ///
+    /// This API is not yet stable in `std`, but is likely to be.  For more
+    /// information, see the [tracker issue](https://github.com/rust-lang/rust/issues/83186).
+    #[inline]
+    pub fn try_exists<P: AsRef<Path>>(&self, path: P) -> io::Result<bool> {
+        match self.metadata(path) {
+            Ok(_) => Ok(true),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(false),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Returns `true` if the path exists on disk and is pointing at a regular
     /// file.
     ///
