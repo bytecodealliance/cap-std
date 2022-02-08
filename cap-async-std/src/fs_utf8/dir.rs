@@ -546,6 +546,15 @@ impl Dir {
         }
     }
 
+    /// Returns `true` if the path points at an existing entity.
+    ///
+    /// This corresponds to [`async_std::path::Path::exists`], but only
+    /// accesses paths relative to `self`.
+    #[inline]
+    pub async fn try_exists<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<bool> {
+        self.cap_std.try_exists(from_utf8(path)?).await
+    }
+
     /// Returns `true` if the path exists on disk and is pointing at a regular
     /// file.
     ///
