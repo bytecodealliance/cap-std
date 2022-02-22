@@ -78,8 +78,14 @@ fn instant_math_is_associative() {
     assert_eq!((now + offset) - now, (now - now) + offset);
 }
 
+// Ignore this test for now. As of rust-lang/rust#89926, Rust no longer panics
+// on this test.
+//
+// TODO: Once our MSRV no longer contains the old behavior, we should update
+// to the latest version of this test.
 #[test]
 #[should_panic]
+#[ignore]
 fn instant_duration_since_panic() {
     let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
