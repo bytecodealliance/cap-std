@@ -86,9 +86,12 @@ fn instant_duration_since_panic() {
     dbg!(&a);
     dbg!(Duration::new(1, 0));
     dbg!(a - Duration::new(1, 0));
+    dbg!((a - Duration::new(1, 0)) >= a);
+    dbg!((a - Duration::new(1, 0)) <= a);
     dbg!((a - Duration::new(1, 0)).checked_duration_since(a));
-    dbg!((a - Duration::new(1, 0)).saturating_duration_since(a));
+    dbg!(a.checked_duration_since(a - Duration::new(1, 0)));
     dbg!((a - Duration::new(1, 0)).duration_since(a));
+    dbg!(a.duration_since(a - Duration::new(1, 0)));
     (a - Duration::new(1, 0)).duration_since(a);
 }
 
