@@ -80,6 +80,24 @@ fn instant_math_is_associative() {
 
 #[test]
 #[should_panic]
+fn std_instant_duration_since_panic() {
+    let a = std::time::Instant::now();
+
+    dbg!(&a);
+    dbg!(Duration::new(1, 0));
+    dbg!(a - Duration::new(1, 0));
+    dbg!((a - Duration::new(1, 0)) >= a);
+    dbg!((a - Duration::new(1, 0)) <= a);
+    dbg!((a - Duration::new(1, 0)).checked_duration_since(a));
+    dbg!(a.checked_duration_since(a - Duration::new(1, 0)));
+    dbg!((a - Duration::new(1, 0)).duration_since(a));
+    dbg!(a.duration_since(a - Duration::new(1, 0)));
+
+    let _ = (a - Duration::new(1, 0)).duration_since(a);
+}
+
+#[test]
+#[should_panic]
 fn instant_duration_since_panic() {
     let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
