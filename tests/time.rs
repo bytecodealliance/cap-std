@@ -83,6 +83,9 @@ fn instant_math_is_associative() {
 fn instant_duration_since_panic() {
     let clock = MonotonicClock::new(ambient_authority());
     let a = clock.now();
+    dbg!(&a);
+    dbg!(Duration::new(1, 0));
+    dbg!(a - Duration::new(1, 0));
     (a - Duration::new(1, 0)).duration_since(a);
 }
 
