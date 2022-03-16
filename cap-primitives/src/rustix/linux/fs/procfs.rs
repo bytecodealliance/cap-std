@@ -25,6 +25,12 @@ pub(crate) fn get_path_from_proc_self_fd(file: &fs::File) -> io::Result<PathBuf>
     )
 }
 
+/// Linux's `fchmodat` doesn't support `AT_NOFOLLOW_SYMLINK`, so we can't trust
+/// that it won't follow a symlink outside the sandbox. As an alternative, the
+/// symlinks in Linux's /proc/self/fd/* aren't ordinary symlinks, they're
+/// "magic links", which are more transparent, to the point of allowing chmod
+/// to work. So we open the file with `O_PATH` and then do `fchmodat` on the
+/// corresponding /proc/self/fd/* link.
 pub(crate) fn set_permissions_through_proc_self_fd(
     start: &fs::File,
     path: &Path,
