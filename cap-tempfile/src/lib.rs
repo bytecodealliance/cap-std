@@ -18,6 +18,9 @@ use uuid::Uuid;
 #[cfg(feature = "fs_utf8")]
 pub mod utf8;
 
+mod tempfile;
+pub use tempfile::*;
+
 #[doc(hidden)]
 pub use cap_std::ambient_authority_known_at_compile_time;
 pub use cap_std::{ambient_authority, AmbientAuthority};
@@ -104,7 +107,7 @@ impl TempDir {
         mem::take(&mut self.dir).unwrap().remove_open_dir_all()
     }
 
-    fn new_name() -> String {
+    pub(crate) fn new_name() -> String {
         #[cfg(not(target_os = "emscripten"))]
         {
             Uuid::new_v4().to_string()
@@ -120,7 +123,7 @@ impl TempDir {
         }
     }
 
-    const fn num_iterations() -> i32 {
+    pub(crate) const fn num_iterations() -> i32 {
         i32::MAX
     }
 
@@ -175,6 +178,28 @@ pub fn tempdir(ambient_authority: AmbientAuthority) -> io::Result<TempDir> {
 /// [`tempfile::tempdir_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir_in.html
 pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
     TempDir::new_in(dir)
+}
+
+/// Call f repeatedly, passing a randomly generated temporary name.
+/// An error matching the `err` will be ignored.
+/// This will repeat until a maximum number of attempts is reached.
+/// On success, the result of the function call along with the provided name is returned.
+pub(crate) fn retry_with_name_ignoring<F, T>(
+    err: std::io::ErrorKind,
+    mut f: F,
+) -> io::Result<(T, String)>
+where
+    F: FnMut(&str) -> io::Result<T>,
+{
+    for _ in 0..TempDir::num_iterations() {
+        let name = TempDir::new_name();
+        match f(name.as_str()) {
+            Ok(r) => return Ok((r, name)),
+            Err(e) if e.kind() == err => continue,
+            Err(e) => return Err(e),
+        }
+    }
+    return Err(std::io::Error::new(err, "too many temporary files exist"));
 }
 
 #[test]
