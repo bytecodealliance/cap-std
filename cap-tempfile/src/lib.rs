@@ -177,61 +177,66 @@ pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
     TempDir::new_in(dir)
 }
 
-#[test]
-fn drop_tempdir() {
-    use crate::ambient_authority;
+#[cfg(test)]
+mod test {
+    use super::*;
 
-    let t = tempdir(ambient_authority()).unwrap();
-    drop(t)
-}
+    #[test]
+    fn drop_tempdir() {
+        use crate::ambient_authority;
 
-#[test]
-fn close_tempdir() {
-    use crate::ambient_authority;
+        let t = tempdir(ambient_authority()).unwrap();
+        drop(t)
+    }
 
-    let t = tempdir(ambient_authority()).unwrap();
-    t.close().unwrap();
-}
+    #[test]
+    fn close_tempdir() {
+        use crate::ambient_authority;
 
-#[test]
-fn drop_tempdir_in() {
-    use crate::ambient_authority;
+        let t = tempdir(ambient_authority()).unwrap();
+        t.close().unwrap();
+    }
 
-    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
-    let t = tempdir_in(&dir).unwrap();
-    drop(t);
-}
+    #[test]
+    fn drop_tempdir_in() {
+        use crate::ambient_authority;
 
-#[test]
-fn close_tempdir_in() {
-    use crate::ambient_authority;
+        let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
+        let t = tempdir_in(&dir).unwrap();
+        drop(t);
+    }
 
-    let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
-    let t = tempdir_in(&dir).unwrap();
-    t.close().unwrap();
-}
+    #[test]
+    fn close_tempdir_in() {
+        use crate::ambient_authority;
 
-#[test]
-fn close_outer() {
-    use crate::ambient_authority;
+        let dir = Dir::open_ambient_dir(env::temp_dir(), ambient_authority()).unwrap();
+        let t = tempdir_in(&dir).unwrap();
+        t.close().unwrap();
+    }
 
-    let t = tempdir(ambient_authority()).unwrap();
-    let _s = tempdir_in(&t).unwrap();
-    #[cfg(windows)]
-    assert!(matches!(
-        t.close().unwrap_err().raw_os_error().map(|err| err as _),
-        Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION)
-            | Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY)
-    ));
-    #[cfg(not(windows))]
-    t.close().unwrap();
-}
+    #[test]
+    fn close_outer() {
+        use crate::ambient_authority;
 
-#[test]
-fn close_inner() {
-    use crate::ambient_authority;
+        let t = tempdir(ambient_authority()).unwrap();
+        let _s = tempdir_in(&t).unwrap();
+        #[cfg(windows)]
+        assert!(matches!(
+            t.close().unwrap_err().raw_os_error().map(|err| err as _),
+            Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION)
+                | Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY)
+        ));
+        #[cfg(not(windows))]
+        t.close().unwrap();
+    }
 
-    let t = tempdir(ambient_authority()).unwrap();
-    let s = tempdir_in(&t).unwrap();
-    s.close().unwrap();
+    #[test]
+    fn close_inner() {
+        use crate::ambient_authority;
+
+        let t = tempdir(ambient_authority()).unwrap();
+        let s = tempdir_in(&t).unwrap();
+        s.close().unwrap();
+    }
 }
