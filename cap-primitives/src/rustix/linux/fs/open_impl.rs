@@ -29,7 +29,7 @@ pub(crate) fn open_impl(
 
     // If that returned `ENOSYS`, use a fallback strategy.
     if let Err(err) = &result {
-        if Some(rustix::io::Error::NOSYS.raw_os_error()) == err.raw_os_error() {
+        if Some(rustix::io::Errno::NOSYS.raw_os_error()) == err.raw_os_error() {
             return manually::open(start, path, options);
         }
     }
@@ -48,7 +48,7 @@ pub(crate) fn open_beneath(
     static INVALID: AtomicBool = AtomicBool::new(false);
     if INVALID.load(Relaxed) {
         // `openat2` is permanently unavailable.
-        return Err(rustix::io::Error::NOSYS.into());
+        return Err(rustix::io::Errno::NOSYS.into());
     }
 
     let oflags = compute_oflags(options)?;
@@ -71,7 +71,7 @@ pub(crate) fn open_beneath(
         if !CHECKED.load(Relaxed) {
             if !openat2_supported() {
                 INVALID.store(true, Relaxed);
-                return Err(rustix::io::Error::NOSYS.into());
+                return Err(rustix::io::Errno::NOSYS.into());
             }
 
             CHECKED.store(true, Relaxed);
@@ -103,7 +103,7 @@ pub(crate) fn open_beneath(
                 }
                 Err(err) => match err {
                     // A rename or similar happened. Try again.
-                    rustix::io::Error::AGAIN => continue,
+                    rustix::io::Errno::AGAIN => continue,
 
                     // `EPERM` is used by some `seccomp` sandboxes to indicate
                     // that `openat2` is unimplemented:
@@ -113,11 +113,11 @@ pub(crate) fn open_beneath(
                     // or a file seal prevented the operation, and it's complex
                     // to detect those cases, so exit the loop and use the
                     // fallback.
-                    rustix::io::Error::PERM => break,
+                    rustix::io::Errno::PERM => break,
 
                     // `ENOSYS` means `openat2` is permanently unavailable;
                     // mark it so and exit the loop.
-                    rustix::io::Error::NOSYS => {
+                    rustix::io::Errno::NOSYS => {
                         INVALID.store(true, Relaxed);
                         break;
                     }
@@ -127,10 +127,10 @@ pub(crate) fn open_beneath(
             }
         }
 
-        Err(rustix::io::Error::NOSYS.into())
+        Err(rustix::io::Errno::NOSYS.into())
     })
     .map_err(|err| match err {
-        rustix::io::Error::XDEV => errors::escape_attempt(),
+        rustix::io::Errno::XDEV => errors::escape_attempt(),
         err => err.into(),
     })
 }

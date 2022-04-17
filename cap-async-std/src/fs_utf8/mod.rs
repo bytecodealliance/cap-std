@@ -55,7 +55,7 @@ fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8Path
     #[cfg(not(windows))]
     {
         Ok(Utf8Path::from_path(path.as_ref().into())
-            .ok_or_else(|| ::rustix::io::Error::ILSEQ)?
+            .ok_or_else(|| ::rustix::io::Errno::ILSEQ)?
             .to_path_buf())
     }
 

@@ -24,7 +24,7 @@ rand = "0.8.1"
 winapi = "0.3.9"
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.33.0", features = ["procfs"] }
+rustix = { version = "0.35.6", features = ["procfs"] }
 
 [features]
 default = []

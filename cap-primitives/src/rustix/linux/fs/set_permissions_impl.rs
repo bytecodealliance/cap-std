@@ -28,8 +28,8 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCESS) => (),
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
+            Some(rustix::io::Errno::ACCESS) => (),
             _ => return Err(err),
         },
     }
@@ -37,8 +37,8 @@ pub(crate) fn set_permissions_impl(
     // Next try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCESS) | Some(rustix::io::Error::ISDIR) => (),
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
+            Some(rustix::io::Errno::ACCESS) | Some(rustix::io::Errno::ISDIR) => (),
             _ => return Err(err),
         },
     }

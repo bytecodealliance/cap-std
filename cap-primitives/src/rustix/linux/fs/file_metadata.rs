@@ -14,9 +14,9 @@ pub(super) fn file_metadata(file: &fs::File) -> io::Result<Metadata> {
     if !FSTAT_PATH_BADF.load(Relaxed) {
         match Metadata::from_file(file) {
             Ok(metadata) => return Ok(metadata),
-            Err(err) => match rustix::io::Error::from_io_error(&err) {
+            Err(err) => match rustix::io::Errno::from_io_error(&err) {
                 // Before Linux 3.6, `fstat` with `O_PATH` returned `EBADF`.
-                Some(rustix::io::Error::BADF) => FSTAT_PATH_BADF.store(true, Relaxed),
+                Some(rustix::io::Errno::BADF) => FSTAT_PATH_BADF.store(true, Relaxed),
                 _ => return Err(err),
             },
         }

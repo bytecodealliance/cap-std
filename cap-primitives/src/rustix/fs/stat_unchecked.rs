@@ -49,14 +49,14 @@ pub(crate) fn stat_unchecked(
                     }
                     return Ok(MetadataExt::from_rustix_statx(statx));
                 }
-                Err(rustix::io::Error::NOSYS) => STATX_STATE.store(1, Ordering::Relaxed),
-                Err(rustix::io::Error::PERM) if state == 0 => {
+                Err(rustix::io::Errno::NOSYS) => STATX_STATE.store(1, Ordering::Relaxed),
+                Err(rustix::io::Errno::PERM) if state == 0 => {
                     // This is an unlikely case, as `statx` doesn't normally
                     // return `PERM` errors. One way this can happen is when
                     // running on old versions of seccomp/Docker. If `statx` on
                     // the current working directory returns a similar error,
                     // then stop using `statx`.
-                    if let Err(rustix::io::Error::PERM) = statx(
+                    if let Err(rustix::io::Errno::PERM) = statx(
                         rustix::fs::cwd(),
                         "",
                         AtFlags::EMPTY_PATH,
@@ -64,7 +64,7 @@ pub(crate) fn stat_unchecked(
                     ) {
                         STATX_STATE.store(1, Ordering::Relaxed);
                     } else {
-                        return Err(rustix::io::Error::PERM.into());
+                        return Err(rustix::io::Errno::PERM.into());
                     }
                 }
                 Err(e) => return Err(e.into()),

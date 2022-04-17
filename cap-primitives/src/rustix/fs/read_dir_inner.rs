@@ -4,8 +4,9 @@ use crate::fs::{
     Metadata, OpenOptions, ReadDir,
 };
 use io_extras::os::rustix::{AsRawFd, FromRawFd, RawFd};
-use io_lifetimes::AsFd;
+use io_lifetimes::{AsFd, IntoFd};
 use rustix::fs::Dir;
+use rustix::io::OwnedFd;
 use std::ffi::OsStr;
 use std::mem::ManuallyDrop;
 #[cfg(unix)]
@@ -18,15 +19,20 @@ use std::{fmt, fs, io};
 
 pub(crate) struct ReadDirInner {
     raw_fd: RawFd,
-    rustix: Arc<Mutex<Dir>>,
+
+    // `Dir` doesn't implement `AsFd`, because libc `fdopendir` has UB if the
+    // file descriptor is used in almost any way, so we hold a separate
+    // `OwnedFd` that we can do `as_fd()` on.
+    rustix: Arc<Mutex<(Dir, OwnedFd)>>,
 }
 
 impl ReadDirInner {
     pub(crate) fn new(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io::Result<Self> {
-        let dir = Dir::from(open_dir_for_reading(start, path, follow)?)?;
+        let fd = open_dir_for_reading(start, path, follow)?;
+        let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
-            raw_fd: dir.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new(dir)),
+            raw_fd: fd.as_fd().as_raw_fd(),
+            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
         })
     }
 
@@ -35,14 +41,12 @@ impl ReadDirInner {
         // `dup` since in that case the resulting file descriptor would share
         // a current position with the original, and `read_dir` calls after
         // the first `read_dir` call wouldn't start from the beginning.
-        let dir = Dir::from(open_dir_for_reading_unchecked(
-            start,
-            Component::CurDir.as_ref(),
-            FollowSymlinks::No,
-        )?)?;
+        let fd =
+            open_dir_for_reading_unchecked(start, Component::CurDir.as_ref(), FollowSymlinks::No)?;
+        let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
-            raw_fd: dir.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new(dir)),
+            raw_fd: fd.as_fd().as_raw_fd(),
+            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
         })
     }
 
@@ -51,10 +55,11 @@ impl ReadDirInner {
         path: &Path,
         follow: FollowSymlinks,
     ) -> io::Result<Self> {
-        let dir = open_dir_for_reading_unchecked(start, path, follow)?;
+        let fd = open_dir_for_reading_unchecked(start, path, follow)?;
+        let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
-            raw_fd: dir.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new(Dir::from(dir)?)),
+            raw_fd: fd.as_fd().as_raw_fd(),
+            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
         })
     }
 
@@ -99,7 +104,7 @@ impl Iterator for ReadDirInner {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let entry = match self.rustix.lock().unwrap().read()? {
+            let entry = match self.rustix.lock().unwrap().0.read()? {
                 Ok(entry) => entry,
                 Err(e) => return Some(Err(e.into())),
             };

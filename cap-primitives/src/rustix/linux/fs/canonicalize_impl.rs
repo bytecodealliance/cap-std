@@ -53,10 +53,10 @@ pub(crate) fn canonicalize_impl(start: &fs::File, path: &Path) -> io::Result<Pat
                 }
             }
         }
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(rustix::io::Error::NOSYS) => (),
+            Some(rustix::io::Errno::NOSYS) => (),
             _ => return Err(err),
         },
     }

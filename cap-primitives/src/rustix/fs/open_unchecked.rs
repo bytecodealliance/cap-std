@@ -32,18 +32,18 @@ pub(crate) fn open_unchecked(
         // `ELOOP` is the POSIX standard and most widely used error code to
         // indicate that a symlink was found when `O_NOFOLLOW` was set.
         #[cfg(not(any(target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd")))]
-        io::Error::LOOP => Err(OpenUncheckedError::Symlink(err.into(), ())),
+        io::Errno::LOOP => Err(OpenUncheckedError::Symlink(err.into(), ())),
 
         // FreeBSD and similar (but not Darwin) use `EMLINK`.
         #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))]
-        io::Error::MLINK => Err(OpenUncheckedError::Symlink(err.into(), ())),
+        io::Errno::MLINK => Err(OpenUncheckedError::Symlink(err.into(), ())),
 
         // NetBSD uses `EFTYPE`.
         #[cfg(any(target_os = "netbsd"))]
-        io::Error::FTYPE => Err(OpenUncheckedError::Symlink(err.into(), ())),
+        io::Errno::FTYPE => Err(OpenUncheckedError::Symlink(err.into(), ())),
 
-        io::Error::NOENT => Err(OpenUncheckedError::NotFound(err.into())),
-        io::Error::NOTDIR => {
+        io::Errno::NOENT => Err(OpenUncheckedError::NotFound(err.into())),
+        io::Errno::NOTDIR => {
             if options.dir_required
                 && stat_unchecked(start, path, options.follow)
                     .map(|m| m.file_type().is_symlink())

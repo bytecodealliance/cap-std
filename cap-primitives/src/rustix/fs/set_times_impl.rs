@@ -3,7 +3,7 @@
 
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
 use fs_set_times::SetTimes;
-use rustix::io::Error;
+use rustix::io::Errno;
 use std::path::Path;
 use std::{fs, io};
 
@@ -22,8 +22,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCESS) | Some(Error::ISDIR) => (),
+        Err(err) => match Errno::from_io_error(&err) {
+            Some(Errno::ACCESS) | Some(Errno::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -36,8 +36,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCESS) => (),
+        Err(err) => match Errno::from_io_error(&err) {
+            Some(Errno::ACCESS) => (),
             _ => return Err(err),
         },
     }
@@ -51,5 +51,5 @@ pub(crate) fn set_times_impl(
     //    instead of the file we're trying to get to.
     //
     // So neither does what we need.
-    Err(Error::NOTSUP.into())
+    Err(Errno::NOTSUP.into())
 }
