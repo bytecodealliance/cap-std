@@ -14,3 +14,5 @@
 
 The `cap-rand` crate provides a capability-based interface to random number
 generators via the [`rand`] crate.
+
+[`rand`]: https://crates.io/crates/rand
