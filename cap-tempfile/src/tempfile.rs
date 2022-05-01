@@ -2,6 +2,7 @@
 
 use cap_std::fs::{Dir, File};
 use std::ffi::OsStr;
+use std::fmt::Debug;
 use std::io::{self, Write};
 use std::io::{Read, Seek};
 
@@ -38,6 +39,14 @@ pub struct TempFile<'d> {
     dir: &'d Dir,
     fd: File,
     name: Option<String>,
+}
+
+impl<'d> Debug for TempFile<'d> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Manual Debug implementation to omit the file reference and name so
+        // we don't leak the path, the same as `cap_std::fs::File`.
+        f.debug_struct("TempFile").field("dir", &self.dir).finish()
+    }
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
