@@ -29,12 +29,17 @@ use std::io::{Read, Seek};
 /// # File permissions
 ///
 /// Unlike the tempfile crate, the default [`TempFile::new`] will use the same permissions as [`File::create_new`] in
-/// the Rust standard library.  On Unix for example, this is `0o666` modified by `umask`.
-/// The rationale for this is to make it more ergonomic and natural to use this API to atomically create new files
-/// and replace existing ones.
+/// the Rust standard library.  Concretely on Unix systems for example this can (depending on `umask`) result in
+/// files that are readable by all users.  The rationale for this is to make it more ergonomic and natural to use this API to
+/// atomically create new files and replace existing ones.  Many cases that want "private" files will
+/// prefer [`TempFile::new_anonymous`] to have the file not be accessible at all outside the current process.
 ///
+/// To fully control the permissions of the resulting file, you can use [`File::set_permissions`].
+///
+/// [`tempfile::tempfile`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile.html
 /// [`tempfile::NamedTempFile`]: https://docs.rs/tempfile/latest/tempfile/struct.NamedTempFile.html
 /// [`File::create_new`]: https://doc.rust-lang.org/std/fs/struct.OpenOptions.html#method.create_new
+/// [`File::set_permissions`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.File.html#method.set_permissions
 pub struct TempFile<'d> {
     dir: &'d Dir,
     fd: File,
