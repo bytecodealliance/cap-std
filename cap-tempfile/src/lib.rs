@@ -1,4 +1,4 @@
-//! Capability-based temporary directories.
+//! Capability-based temporary directories and files.
 
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
