@@ -29,3 +29,4 @@ rustix = "0.33.0"
 default = []
 fs_utf8 = ["camino"]
 arf_strings = ["fs_utf8", "arf-strings"]
+tokio1 = ["async-std/tokio1"]
