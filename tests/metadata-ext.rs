@@ -83,37 +83,3 @@ fn test_metadata_ext() {
         );
     }
 }
-
-#[test]
-fn test_metadata_ext_created() {
-    let tmpdir = tmpdir();
-    check!(tmpdir.create_dir("dir"));
-    let dir = check!(tmpdir.open_dir("dir"));
-    let file = check!(dir.create("file"));
-
-    let cap_std_dir = check!(dir.dir_metadata());
-    let cap_std_file = check!(file.metadata());
-    let cap_std_dir_entry = {
-        let mut entries = check!(dir.entries());
-        let entry = check!(entries.next().unwrap());
-        assert_eq!(entry.file_name(), "file");
-        assert!(entries.next().is_none(), "unexpected dir entry");
-        check!(entry.metadata())
-    };
-
-    let std_dir = check!(dir.into_std_file().metadata());
-    let std_file = check!(file.into_std().metadata());
-
-    // If the standard library supports file creation times, then cap-std
-    // should too.
-    if let Ok(expected) = std_dir.created() {
-        println!("std::fs supports file created times");
-        assert_eq!(expected, check!(cap_std_dir.created()).into_std());
-    } else {
-        println!("std::fs doesn't support file created times");
-    }
-    if let Ok(expected) = std_file.created() {
-        assert_eq!(expected, check!(cap_std_file.created()).into_std());
-        assert_eq!(expected, check!(cap_std_dir_entry.created()).into_std());
-    }
-}
