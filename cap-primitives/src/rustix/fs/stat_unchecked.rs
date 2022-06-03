@@ -23,8 +23,8 @@ pub(crate) fn stat_unchecked(
         FollowSymlinks::No => AtFlags::SYMLINK_NOFOLLOW,
     };
 
-    // stax is preferred on Linux because it can return creation times. Linux
-    // kernels prior to 4.11 don't have statx and return ENOSYS. We store the
+    // `statx` is preferred on Linux because it can return creation times. Linux
+    // kernels prior to 4.11 don't have `statx` and return `ENOSYS`. We store the
     // availability in a global to avoid unnecessary syscalls.
     #[cfg(all(target_os = "linux", target_env = "gnu"))]
     static HAS_STATX: AtomicBool = AtomicBool::new(true);
