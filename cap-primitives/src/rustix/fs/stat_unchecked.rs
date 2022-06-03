@@ -37,10 +37,10 @@ pub(crate) fn stat_unchecked(
             atflags,
             StatxFlags::BASIC_STATS | StatxFlags::BTIME,
         );
-        if let Err(rustix::io::Error::NOSYS) = statx_result {
-            HAS_STATX.store(false, Ordering::Relaxed);
-        } else {
-            return Ok(statx_result.map(MetadataExt::from_rustix_statx)?);
+        match statx_result {
+            Ok(statx) => return Ok(MetadataExt::from_rustix_statx(statx)),
+            Err(rustix::io::Error::NOSYS) => HAS_STATX.store(false, Ordering::Relaxed),
+            Err(e) => return Err(e.into()),
         }
     }
 
