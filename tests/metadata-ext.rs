@@ -87,51 +87,33 @@ fn test_metadata_ext() {
 #[test]
 fn test_metadata_ext_created() {
     let tmpdir = tmpdir();
-    let a = check!(tmpdir.create("a"));
-    let a_metadata = check!(a.metadata());
+    check!(tmpdir.create_dir("dir"));
+    let dir = check!(tmpdir.open_dir("dir"));
+    let file = check!(dir.create("file"));
 
-    let modified = check!(a_metadata.modified());
-    let tolerance = std::time::Duration::from_secs(10);
-    let expected = (modified - tolerance)..(modified + tolerance);
+    let cap_std_dir = check!(dir.dir_metadata());
+    let cap_std_file = check!(file.metadata());
+    let cap_std_dir_entry = {
+        let mut entries = check!(dir.entries());
+        let entry = check!(entries.next().unwrap());
+        assert_eq!(entry.file_name(), "file");
+        assert!(entries.next().is_none(), "unexpected dir entry");
+        check!(entry.metadata())
+    };
+
+    let std_dir = check!(dir.into_std_file().metadata());
+    let std_file = check!(file.into_std().metadata());
 
     // If the standard library supports file creation times, then cap-std
     // should too.
-    let std_supports_created = matches!(
-        a.into_std().metadata(),
-        Ok(m) if m.created().is_ok(),
-    );
-
-    if std_supports_created {
-        let created = check!(a_metadata.created());
-        assert!(
-            expected.contains(&created),
-            "expected File creation time near {:#?} but got {:#?}",
-            modified,
-            created,
-        );
-
-        let tmpdir_metadata = check!(tmpdir.dir_metadata());
-        let created = check!(tmpdir_metadata.created());
-        assert!(
-            expected.contains(&created),
-            "expected Dir creation time near {:#?} but got {:#?}",
-            modified,
-            created,
-        );
-
-        let mut entries = check!(tmpdir.entries());
-        if let Some(a) = entries.next() {
-            let a = check!(a);
-            assert_eq!(a.file_name(), "a");
-            let metadata = check!(a.metadata());
-            let created = check!(metadata.created());
-            assert!(
-                expected.contains(&created),
-                "expected DirEntry creation time near {:#?} but got {:#?}",
-                modified,
-                created,
-            );
-        }
-        assert!(entries.next().is_none(), "unexpected dir entry");
+    if let Ok(expected) = std_dir.created() {
+        println!("std::fs supports file created times");
+        assert_eq!(expected, check!(cap_std_dir.created()).into_std());
+    } else {
+        println!("std::fs doesn't support file created times");
+    }
+    if let Ok(expected) = std_file.created() {
+        assert_eq!(expected, check!(cap_std_file.created()).into_std());
+        assert_eq!(expected, check!(cap_std_dir_entry.created()).into_std());
     }
 }
