@@ -910,7 +910,8 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     assert_eq!(std.file_type().is_dir(), cap.file_type().is_dir());
     assert_eq!(std.file_type().is_file(), cap.file_type().is_file());
     assert_eq!(std.file_type().is_symlink(), cap.file_type().is_symlink());
-    if cfg!(unix) {
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::FileTypeExt;
         assert_eq!(
             std.file_type().is_block_device(),
@@ -927,7 +928,8 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     assert_eq!(std.len(), cap.len());
 
     assert_eq!(std.permissions().readonly(), cap.permissions().readonly());
-    if cfg!(unix) {
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::PermissionsExt;
         // The standard library returns file format bits with `mode()`, whereas
         // cap-std currently doesn't.
@@ -956,7 +958,8 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
         assert_eq!(expected, check!(cap.created()).into_std());
     }
 
-    if cfg!(unix) {
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::MetadataExt;
         assert_eq!(std.dev(), cap.dev());
         assert_eq!(std.ino(), cap.ino());
