@@ -3,6 +3,9 @@
 use crate::fs::PermissionsExt;
 use crate::fs::{FileTypeExt, Metadata};
 use crate::time::{Duration, SystemClock, SystemTime};
+// TODO: update all these to
+// #[cfg(any(target_os = "android", target_os = "linux"))]
+// once we're on restix >= v0.34.3.
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use rustix::fs::{makedev, Statx};
 use rustix::fs::{RawMode, Stat};
@@ -222,7 +225,6 @@ impl MetadataExt {
     /// Constructs a new instance of `Metadata` from the given `Statx`.
     #[cfg(all(target_os = "linux", target_env = "gnu"))]
     #[inline]
-    #[allow(dead_code)] // TODO: use `statx` when possible.
     pub(crate) fn from_rustix_statx(statx: Statx) -> Metadata {
         Metadata {
             file_type: FileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),

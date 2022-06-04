@@ -872,3 +872,117 @@ fn reopen_fd() {
     let tmpdir2 = check!(cap_std::fs::Dir::reopen_dir(&tmpdir.as_filelike()));
     assert!(tmpdir2.exists("subdir"));
 }
+
+#[test]
+fn metadata_vs_std_fs() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create_dir("dir"));
+    let dir = check!(tmpdir.open_dir("dir"));
+    let file = check!(dir.create("file"));
+
+    let cap_std_dir = check!(dir.dir_metadata());
+    let cap_std_file = check!(file.metadata());
+    let cap_std_dir_entry = {
+        let mut entries = check!(dir.entries());
+        let entry = check!(entries.next().unwrap());
+        assert_eq!(entry.file_name(), "file");
+        assert!(entries.next().is_none(), "unexpected dir entry");
+        check!(entry.metadata())
+    };
+
+    let std_dir = check!(dir.into_std_file().metadata());
+    let std_file = check!(file.into_std().metadata());
+
+    match std_dir.created() {
+        Ok(_) => println!("std::fs supports file created times"),
+        Err(e) => println!("std::fs doesn't support file created times: {}", e),
+    }
+
+    check_metadata(&std_dir, &cap_std_dir);
+    check_metadata(&std_file, &cap_std_file);
+    check_metadata(&std_file, &cap_std_dir_entry);
+}
+
+fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
+    assert_eq!(std.is_dir(), cap.is_dir());
+    assert_eq!(std.is_file(), cap.is_file());
+    assert_eq!(std.is_symlink(), cap.is_symlink());
+    assert_eq!(std.file_type().is_dir(), cap.file_type().is_dir());
+    assert_eq!(std.file_type().is_file(), cap.file_type().is_file());
+    assert_eq!(std.file_type().is_symlink(), cap.file_type().is_symlink());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::FileTypeExt;
+        assert_eq!(
+            std.file_type().is_block_device(),
+            cap.file_type().is_block_device()
+        );
+        assert_eq!(
+            std.file_type().is_char_device(),
+            cap.file_type().is_char_device()
+        );
+        assert_eq!(std.file_type().is_fifo(), cap.file_type().is_fifo());
+        assert_eq!(std.file_type().is_socket(), cap.file_type().is_socket());
+    }
+
+    assert_eq!(std.len(), cap.len());
+
+    assert_eq!(std.permissions().readonly(), cap.permissions().readonly());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        // The standard library returns file format bits with `mode()`, whereas
+        // cap-std currently doesn't.
+        assert_eq!(std.permissions().mode() & 0o7777, cap.permissions().mode());
+    }
+
+    // If the standard library supports file modified/accessed/created times,
+    // then cap-std should too.
+    if let Ok(expected) = std.modified() {
+        assert_eq!(expected, check!(cap.modified()).into_std());
+    }
+    // The access times might be a little different due to either our own
+    // or concurrent accesses.
+    const ACCESS_TOLERANCE_SEC: u32 = 60;
+    if let Ok(expected) = std.accessed() {
+        let access_tolerance = std::time::Duration::from_secs(ACCESS_TOLERANCE_SEC.into());
+        assert!(
+            ((expected - access_tolerance)..(expected + access_tolerance))
+                .contains(&check!(cap.accessed()).into_std()),
+            "std accessed {:#?}, cap accessed {:#?}",
+            expected,
+            cap.accessed()
+        );
+    }
+    if let Ok(expected) = std.created() {
+        assert_eq!(expected, check!(cap.created()).into_std());
+    }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        assert_eq!(std.dev(), cap.dev());
+        assert_eq!(std.ino(), cap.ino());
+        assert_eq!(std.mode(), cap.mode());
+        assert_eq!(std.nlink(), cap.nlink());
+        assert_eq!(std.uid(), cap.uid());
+        assert_eq!(std.gid(), cap.gid());
+        assert_eq!(std.rdev(), cap.rdev());
+        assert_eq!(std.size(), cap.size());
+        assert!(
+            ((std.atime() - i64::from(ACCESS_TOLERANCE_SEC))
+                ..(std.atime() + i64::from(ACCESS_TOLERANCE_SEC)))
+                .contains(&cap.atime()),
+            "std atime {}, cap atime {}",
+            std.atime(),
+            cap.atime()
+        );
+        assert!((0..1_000_000_000).contains(&cap.atime_nsec()));
+        assert_eq!(std.mtime(), cap.mtime());
+        assert_eq!(std.mtime_nsec(), cap.mtime_nsec());
+        assert_eq!(std.ctime(), cap.ctime());
+        assert_eq!(std.ctime_nsec(), cap.ctime_nsec());
+        assert_eq!(std.blksize(), cap.blksize());
+        assert_eq!(std.blocks(), cap.blocks());
+    }
+}

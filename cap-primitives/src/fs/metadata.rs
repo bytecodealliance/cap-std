@@ -48,35 +48,13 @@ impl Metadata {
 
     #[inline]
     fn from_parts(std: fs::Metadata, ext: MetadataExt, file_type: FileType) -> Self {
-        // TODO: Initialize `created` on Linux with `std.created().ok()` once we
-        // make use of `statx`.
         Self {
             file_type,
             len: std.len(),
             permissions: Permissions::from_std(std.permissions()),
             modified: std.modified().ok().map(SystemTime::from_std),
             accessed: std.accessed().ok().map(SystemTime::from_std),
-
-            #[cfg(any(
-                target_os = "freebsd",
-                target_os = "openbsd",
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "netbsd",
-                windows,
-            ))]
             created: std.created().ok().map(SystemTime::from_std),
-
-            #[cfg(not(any(
-                target_os = "freebsd",
-                target_os = "openbsd",
-                target_os = "macos",
-                target_os = "ios",
-                target_os = "netbsd",
-                windows,
-            )))]
-            created: None,
-
             ext,
         }
     }
