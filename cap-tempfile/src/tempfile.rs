@@ -67,9 +67,10 @@ fn new_tempfile_linux(d: &Dir) -> io::Result<Option<File>> {
     match rustix::fs::openat(d, ".", oflags, mode) {
         Ok(r) => return Ok(Some(File::from_fd(r.into()))),
         // See https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81
-        Err(rustix::io::Error::OPNOTSUPP | rustix::io::Error::ISDIR | rustix::io::Error::NOENT) => {
-            Ok(None)
-        }
+        // TODO: With newer Rust versions, this could be simplied to only write `Err` once.
+        Err(rustix::io::Error::OPNOTSUPP)
+        | Err(rustix::io::Error::ISDIR)
+        | Err(rustix::io::Error::NOENT) => Ok(None),
         Err(e) => {
             return Err(e.into());
         }
