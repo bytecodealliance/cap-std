@@ -21,6 +21,9 @@ fs-set-times = "0.17.0"
 io-extras = "0.15.0"
 io-lifetimes = { version = "0.7.0", default-features = false }
 
+[dev-dependencies]
+cap-tempfile = { path = "../cap-tempfile" }
+
 [target.'cfg(not(windows))'.dependencies]
 rustix = { version = "0.35.6", features = ["fs", "process", "procfs", "termios", "time"] }
 
