@@ -22,7 +22,7 @@ io-extras = "0.15.0"
 io-lifetimes = { version = "0.7.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.35.6", features = ["fs", "procfs", "termios", "time"] }
+rustix = { version = "0.35.6", features = ["fs", "process", "procfs", "termios", "time"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 errno = { version = "0.2.8", default-features = false }
