@@ -120,7 +120,7 @@ pub(crate) fn copy_impl(
             let copy_result = copy_file_range(&reader, None, &writer, None, bytes_to_copy);
             if let Err(copy_err) = copy_result {
                 match copy_err {
-                    rustix::io::Error::NOSYS | rustix::io::Error::PERM => {
+                    rustix::io::Errno::NOSYS | rustix::io::Errno::PERM => {
                         HAS_COPY_FILE_RANGE.store(false, Ordering::Relaxed);
                     }
                     _ => {}
@@ -128,16 +128,16 @@ pub(crate) fn copy_impl(
             }
             copy_result
         } else {
-            Err(rustix::io::Error::NOSYS.into())
+            Err(rustix::io::Errno::NOSYS.into())
         };
         match copy_result {
             Ok(ret) => written += ret as u64,
             Err(err) => {
                 match err {
-                    rustix::io::Error::NOSYS
-                    | rustix::io::Error::XDEV
-                    | rustix::io::Error::INVAL
-                    | rustix::io::Error::PERM => {
+                    rustix::io::Errno::NOSYS
+                    | rustix::io::Errno::XDEV
+                    | rustix::io::Errno::INVAL
+                    | rustix::io::Errno::PERM => {
                         // Try fallback io::copy if either:
                         // - Kernel version is < 4.5 (ENOSYS)
                         // - Files are mounted on different fs (EXDEV)
@@ -193,10 +193,10 @@ pub(crate) fn copy_impl(
                 // destination already exists, or if the source and destination
                 // are on different devices. In all these cases `fcopyfile`
                 // should succeed.
-                rustix::io::Error::NOTSUP | rustix::io::Error::EXIST | rustix::io::Error::XDEV => {
+                rustix::io::Errno::NOTSUP | rustix::io::Errno::EXIST | rustix::io::Errno::XDEV => {
                     ()
                 }
-                rustix::io::Error::NOSYS => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
+                rustix::io::Errno::NOSYS => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
                 _ => return Err(err.into()),
             },
         }

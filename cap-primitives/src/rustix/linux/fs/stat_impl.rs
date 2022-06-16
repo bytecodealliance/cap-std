@@ -32,10 +32,10 @@ pub(crate) fn stat_impl(
     // If that worked, call `fstat`.
     match result {
         Ok(file) => file_metadata(&file),
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
             // `ENOSYS` from `open_beneath` means `openat2` is unavailable
             // and we should use a fallback.
-            Some(rustix::io::Error::NOSYS) => manually::stat(start, path, follow),
+            Some(rustix::io::Errno::NOSYS) => manually::stat(start, path, follow),
             _ => Err(err),
         },
     }

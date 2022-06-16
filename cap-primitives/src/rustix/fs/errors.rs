@@ -2,25 +2,25 @@ use std::io;
 
 #[cold]
 pub(crate) fn invalid_flags() -> io::Error {
-    rustix::io::Error::INVAL.into()
+    rustix::io::Errno::INVAL.into()
 }
 
 #[cold]
 pub(crate) fn no_such_file_or_directory() -> io::Error {
-    rustix::io::Error::NOENT.into()
+    rustix::io::Errno::NOENT.into()
 }
 
 #[cold]
 pub(crate) fn is_directory() -> io::Error {
-    rustix::io::Error::ISDIR.into()
+    rustix::io::Errno::ISDIR.into()
 }
 
 #[cold]
 pub(crate) fn is_not_directory() -> io::Error {
-    rustix::io::Error::NOTDIR.into()
+    rustix::io::Errno::NOTDIR.into()
 }
 
 #[cold]
 pub(crate) fn too_many_symlinks() -> io::Error {
-    rustix::io::Error::LOOP.into()
+    rustix::io::Errno::LOOP.into()
 }

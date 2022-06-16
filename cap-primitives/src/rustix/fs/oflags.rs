@@ -40,7 +40,7 @@ pub(crate) fn get_access_mode(options: &OpenOptions) -> io::Result<OFlags> {
         (true, true, false) => Ok(OFlags::RDWR),
         (false, _, true) => Ok(OFlags::WRONLY | OFlags::APPEND),
         (true, _, true) => Ok(OFlags::RDWR | OFlags::APPEND),
-        (false, false, false) => Err(rustix::io::Error::INVAL.into()),
+        (false, false, false) => Err(rustix::io::Errno::INVAL.into()),
     }
 }
 
@@ -49,12 +49,12 @@ pub(crate) fn get_creation_mode(options: &OpenOptions) -> io::Result<OFlags> {
         (true, false) => {}
         (false, false) => {
             if options.truncate || options.create || options.create_new {
-                return Err(rustix::io::Error::INVAL.into());
+                return Err(rustix::io::Errno::INVAL.into());
             }
         }
         (_, true) => {
             if options.truncate && !options.create_new {
-                return Err(rustix::io::Error::INVAL.into());
+                return Err(rustix::io::Errno::INVAL.into());
             }
         }
     }

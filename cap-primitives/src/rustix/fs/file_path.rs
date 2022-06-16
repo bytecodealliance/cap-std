@@ -1,6 +1,6 @@
 use crate::fs::file_path_by_searching;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
-use rustix::io::ttyname;
+use rustix::termios::ttyname;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use std::ffi::OsString;
 use std::fs;

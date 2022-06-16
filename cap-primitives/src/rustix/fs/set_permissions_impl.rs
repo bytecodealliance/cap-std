@@ -1,6 +1,6 @@
 use crate::fs::{errors, open, OpenOptions, Permissions};
 use rustix::fs::{fchmod, Mode};
-use rustix::io::Error;
+use rustix::io::Errno;
 use std::convert::TryInto;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -23,8 +23,8 @@ pub(crate) fn set_permissions_impl(
     // access, so first try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCESS) => (),
+        Err(err) => match Errno::from_io_error(&err) {
+            Some(Errno::ACCESS) => (),
             _ => return Err(err),
         },
     }
@@ -32,14 +32,14 @@ pub(crate) fn set_permissions_impl(
     // Next try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => return set_file_permissions(&file, std_perm),
-        Err(err) => match Error::from_io_error(&err) {
-            Some(Error::ACCESS) | Some(Error::ISDIR) => (),
+        Err(err) => match Errno::from_io_error(&err) {
+            Some(Errno::ACCESS) | Some(Errno::ISDIR) => (),
             _ => return Err(err),
         },
     }
 
     // If neither of those worked, we're out of luck.
-    Err(Error::NOTSUP.into())
+    Err(Errno::NOTSUP.into())
 }
 
 pub(crate) fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {

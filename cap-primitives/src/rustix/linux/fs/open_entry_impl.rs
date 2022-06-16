@@ -11,8 +11,8 @@ pub(crate) fn open_entry_impl(
 
     match result {
         Ok(file) => Ok(file),
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::NOSYS) => manually::open_entry(start, path, options),
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
+            Some(rustix::io::Errno::NOSYS) => manually::open_entry(start, path, options),
             _ => Err(err),
         },
     }

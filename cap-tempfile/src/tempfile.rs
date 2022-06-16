@@ -68,9 +68,9 @@ fn new_tempfile_linux(d: &Dir) -> io::Result<Option<File>> {
         Ok(r) => return Ok(Some(File::from_fd(r.into()))),
         // See https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81
         // TODO: With newer Rust versions, this could be simplied to only write `Err` once.
-        Err(rustix::io::Error::OPNOTSUPP)
-        | Err(rustix::io::Error::ISDIR)
-        | Err(rustix::io::Error::NOENT) => Ok(None),
+        Err(rustix::io::Errno::OPNOTSUPP)
+        | Err(rustix::io::Errno::ISDIR)
+        | Err(rustix::io::Errno::NOENT) => Ok(None),
         Err(e) => {
             return Err(e.into());
         }

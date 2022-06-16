@@ -22,8 +22,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCESS) | Some(rustix::io::Error::ISDIR) => (),
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
+            Some(rustix::io::Errno::ACCESS) | Some(rustix::io::Errno::ISDIR) => (),
             _ => return Err(err),
         },
     }
@@ -36,8 +36,8 @@ pub(crate) fn set_times_impl(
                 mtime.map(SystemTimeSpec::into_std),
             )
         }
-        Err(err) => match rustix::io::Error::from_io_error(&err) {
-            Some(rustix::io::Error::ACCESS) => (),
+        Err(err) => match rustix::io::Errno::from_io_error(&err) {
+            Some(rustix::io::Errno::ACCESS) => (),
             _ => return Err(err),
         },
     }
