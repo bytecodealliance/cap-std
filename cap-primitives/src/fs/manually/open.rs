@@ -15,7 +15,7 @@ use std::{fs, io, mem};
 #[cfg(windows)]
 use {
     crate::fs::{open_dir_unchecked, path_really_has_trailing_dot, SymlinkKind},
-    winapi::um::winnt::FILE_ATTRIBUTE_DIRECTORY,
+    windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_DIRECTORY,
 };
 
 /// Implement `open` by breaking up the path into components, resolving each

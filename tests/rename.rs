@@ -20,7 +20,7 @@ fn no_such_file_or_directory() -> String {
 }
 #[cfg(windows)]
 fn no_such_file_or_directory() -> String {
-    std::io::Error::from_raw_os_error(winapi::shared::winerror::ERROR_FILE_NOT_FOUND as i32)
+    std::io::Error::from_raw_os_error(windows_sys::Win32::Foundation::ERROR_FILE_NOT_FOUND as i32)
         .to_string()
 }
 

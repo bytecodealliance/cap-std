@@ -537,8 +537,10 @@ impl DirExt for cap_std::fs::Dir {
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
-        use winapi::um::winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY};
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        use windows_sys::Win32::System::SystemServices::DELETE;
         let path = path.as_ref();
 
         let mut opts = OpenOptions::new();
@@ -831,8 +833,10 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
-        use winapi::um::winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY};
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        use windows_sys::Win32::System::SystemServices::DELETE;
         let path = path.as_ref();
 
         let mut opts = OpenOptions::new();
@@ -996,8 +1000,10 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
-        use winapi::um::winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY};
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        use windows_sys::Win32::System::SystemServices::DELETE;
         let path = path.as_ref();
 
         let mut opts = OpenOptions::new();
@@ -1228,8 +1234,10 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
-        use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
-        use winapi::um::winnt::{DELETE, FILE_ATTRIBUTE_DIRECTORY};
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        use windows_sys::Win32::System::SystemServices::DELETE;
         let path = path.as_ref();
 
         let mut opts = OpenOptions::new();

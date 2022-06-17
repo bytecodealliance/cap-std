@@ -245,8 +245,8 @@ fn close_outer() {
     #[cfg(windows)]
     assert!(matches!(
         t.close().unwrap_err().raw_os_error().map(|err| err as _),
-        Some(winapi::shared::winerror::ERROR_SHARING_VIOLATION)
-            | Some(winapi::shared::winerror::ERROR_DIR_NOT_EMPTY)
+        Some(windows_sys::Win32::Foundation::ERROR_SHARING_VIOLATION)
+            | Some(windows_sys::Win32::Foundation::ERROR_DIR_NOT_EMPTY)
     ));
     #[cfg(not(windows))]
     t.close().unwrap();

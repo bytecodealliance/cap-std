@@ -1,4 +1,6 @@
-use winapi::um::{winbase, winnt};
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, SECURITY_SQOS_PRESENT,
+};
 
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
@@ -13,7 +15,7 @@ impl OpenOptionsExt {
     pub(crate) const fn new() -> Self {
         Self {
             access_mode: None,
-            share_mode: winnt::FILE_SHARE_READ | winnt::FILE_SHARE_WRITE | winnt::FILE_SHARE_DELETE,
+            share_mode: FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
             custom_flags: 0,
             attributes: 0,
             security_qos_flags: 0,
@@ -41,7 +43,7 @@ impl OpenOptionsExt {
     }
 
     pub(crate) fn security_qos_flags(&mut self, flags: u32) -> &mut Self {
-        self.security_qos_flags = flags | winbase::SECURITY_SQOS_PRESENT;
+        self.security_qos_flags = flags | SECURITY_SQOS_PRESENT;
         self
     }
 }

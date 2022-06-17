@@ -32,5 +32,12 @@ errno = { version = "0.2.8", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 winx = "0.33.0"
-winapi = "0.3.9"
 winapi-util = "0.1.5"
+
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.36.0"
+features = [
+    "Win32_Storage_FileSystem",
+    "Win32_Foundation",
+    "Win32_System_SystemServices",
+]

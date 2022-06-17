@@ -1,16 +1,13 @@
 use crate::fs::OpenOptions;
 use io_lifetimes::AsHandle;
 use std::{fs, io};
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::winerror::ERROR_INVALID_PARAMETER;
-use winapi::um::winbase::{
+use windows_sys::Win32::Foundation::ERROR_INVALID_PARAMETER;
+use windows_sys::Win32::Storage::FileSystem::{
     FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
-    SECURITY_CONTEXT_TRACKING, SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY,
-    SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
+    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_WRITE_DATA, SECURITY_CONTEXT_TRACKING,
+    SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY, SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
 };
-use winapi::um::winnt::{
-    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_WRITE_DATA, GENERIC_READ, GENERIC_WRITE,
-};
+use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
 use winx::file::{AccessMode, Flags};
 
 /// Implementation of `reopen`.
@@ -86,7 +83,7 @@ pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<
     winx::file::reopen_file(file.as_handle(), new_access_mode, flags)
 }
 
-fn get_access_mode(options: &OpenOptions) -> io::Result<DWORD> {
+fn get_access_mode(options: &OpenOptions) -> io::Result<u32> {
     match (
         options.read,
         options.write,
@@ -105,7 +102,7 @@ fn get_access_mode(options: &OpenOptions) -> io::Result<DWORD> {
     }
 }
 
-fn get_flags_and_attributes(options: &OpenOptions) -> DWORD {
+fn get_flags_and_attributes(options: &OpenOptions) -> u32 {
     options.ext.custom_flags
         | options.ext.attributes
         | options.ext.security_qos_flags

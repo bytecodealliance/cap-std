@@ -1,7 +1,9 @@
 use crate::fs::{FollowSymlinks, OpenOptions};
 use std::fs;
 use std::os::windows::fs::OpenOptionsExt;
-use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+};
 
 /// Translate the given `cap_std` into `std` options. Also return a bool
 /// indicating that the `trunc` flag was requested but could not be set,
