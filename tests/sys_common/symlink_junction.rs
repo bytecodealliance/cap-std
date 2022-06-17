@@ -9,6 +9,8 @@
 //
 // [windows-sys bug filed]: https://github.com/microsoft/windows-rs/issues/1823>
 // [winapi doc]: https://docs.rs/winapi/latest/winapi/um/winnt/constant.MAXIMUM_REPARSE_DATA_BUFFER_SIZE.html
+#[cfg(windows)]
+#[allow(dead_code)]
 pub const MAXIMUM_REPARSE_DATA_BUFFER_SIZE: u32 = 16 * 1024; // 16_384u32
 
 #[cfg(feature = "fs_utf8")]
