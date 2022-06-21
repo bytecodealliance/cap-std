@@ -18,8 +18,8 @@ use {
 /// This corresponds to [`async_std::net::UdpSocket`].
 ///
 /// This `UdpSocket` has no `bind`, `connect`, or `send_to` methods. To create a
-/// `UdpSocket` bound to an address or to send a message to an address, you must
-/// first obtain a [`Pool`] permitting the address, and then call
+/// `UdpSocket` bound to an address or to send a message to an address, first
+/// obtain a [`Pool`] permitting the address, and then call
 /// [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
 /// [`Pool::send_to_udp_socket_addr`].
 ///

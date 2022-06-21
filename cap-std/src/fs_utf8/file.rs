@@ -23,8 +23,8 @@ use {
 /// This corresponds to [`std::fs::File`].
 ///
 /// This `File` has no `open` or `create` methods. To open or create a file,
-/// you must first obtain a [`Dir`] containing the path, and then call
-/// [`Dir::open`] or [`Dir::create`].
+/// first obtain a [`Dir`] containing the path, and then call [`Dir::open`] or
+/// [`Dir::create`].
 ///
 /// [`Dir`]: crate::fs::Dir
 /// [`Dir::open`]: crate::fs::Dir::open

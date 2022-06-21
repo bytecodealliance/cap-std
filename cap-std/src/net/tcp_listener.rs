@@ -17,7 +17,7 @@ use {
 /// This corresponds to [`std::net::TcpListener`].
 ///
 /// This `TcpListener` has no `bind` method. To bind it to a socket address,
-/// you must first obtain a [`Pool`] permitting the address, and then call
+/// first obtain a [`Pool`] permitting the address, and then call
 /// [`Pool::bind_tcp_listener`].
 ///
 /// [`Pool`]: struct.Pool.html
