@@ -43,7 +43,10 @@ pub mod fs_utf8;
 pub mod net;
 pub mod os;
 pub mod time;
-pub use async_std::path;
 #[doc(hidden)]
 pub use cap_primitives::ambient_authority_known_at_compile_time;
 pub use cap_primitives::{ambient_authority, AmbientAuthority};
+
+// Re-export `async_std` to make it easy for users to depend on the same
+// version we do, because we use its types in our public API.
+pub use async_std;

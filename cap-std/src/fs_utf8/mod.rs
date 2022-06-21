@@ -24,6 +24,10 @@ pub use read_dir::ReadDir;
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
+// Re-export `camino` to make it easy for users to depend on the same
+// version we do, because we use its types in our public API.
+pub use camino;
+
 use camino::{Utf8Path, Utf8PathBuf};
 
 fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<std::path::PathBuf> {
