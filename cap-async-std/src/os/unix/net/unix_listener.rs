@@ -9,9 +9,9 @@ use std::fmt;
 ///
 /// This corresponds to [`async_std::os::unix::net::UnixListener`].
 ///
-/// Note that this `UnixListener` has no `bind` method. To bind it to a socket
-/// address, you must first obtain a [`Dir`] containing the path, and
-/// then call [`Dir::bind_unix_listener`].
+/// This `UnixListener` has no `bind` method. To bind it to a socket address,
+/// you must first obtain a [`Dir`] containing the path, and then call
+/// [`Dir::bind_unix_listener`].
 ///
 /// [`async_std::os::unix::net::UnixListener`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html
 /// [`Dir`]: struct.Dir.html

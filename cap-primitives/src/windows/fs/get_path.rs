@@ -5,9 +5,9 @@ use std::{fs, io};
 
 /// Calculates system path of `file`.
 ///
-/// Note that this function will automatically strip the extended
-/// prefix from the resultant path to allow for joining this resultant
-/// path with relative components.
+/// This function will automatically strip the extended prefix from the
+/// resultant path to allow for joining this resultant path with relative
+/// components.
 pub(crate) fn get_path(file: &fs::File) -> io::Result<PathBuf> {
     // get system path to the handle
     let path = winx::file::get_file_path(file)?;

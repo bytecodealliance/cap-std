@@ -8,9 +8,9 @@ use std::{fmt, io};
 ///
 /// This corresponds to [`std::os::unix::net::UnixListener`].
 ///
-/// Note that this `UnixListener` has no `bind` method. To bind it to a socket
-/// address, you must first obtain a [`Dir`] containing the path, and
-/// then call [`Dir::bind_unix_listener`].
+/// This `UnixListener` has no `bind` method. To bind it to a socket address,
+/// you must first obtain a [`Dir`] containing the path, and then call
+/// [`Dir::bind_unix_listener`].
 ///
 /// [`std::os::unix::net::UnixListener`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixListener.html
 /// [`Dir`]: struct.Dir.html

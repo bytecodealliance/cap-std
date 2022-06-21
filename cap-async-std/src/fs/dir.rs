@@ -415,9 +415,9 @@ impl Dir {
 
     /// Remove the directory referenced by `self` and consume `self`.
     ///
-    /// Note that even though this implementation works in terms of handles
-    /// as much as possible, removal is not guaranteed to be atomic with
-    /// respect to a concurrent rename of the directory.
+    /// Even though this implementation works in terms of handles as much as
+    /// possible, removal is not guaranteed to be atomic with respect to a
+    /// concurrent rename of the directory.
     #[inline]
     pub async fn remove_open_dir(self) -> io::Result<()> {
         let file = std::fs::File::from_into_filelike(self.std_file);
@@ -427,9 +427,9 @@ impl Dir {
     /// Removes the directory referenced by `self`, after removing all its
     /// contents, and consume `self`. Use carefully!
     ///
-    /// Note that even though this implementation works in terms of handles
-    /// as much as possible, removal is not guaranteed to be atomic with
-    /// respect to a concurrent rename of the directory.
+    /// Even though this implementation works in terms of handles as much as
+    /// possible, removal is not guaranteed to be atomic with respect to a
+    /// concurrent rename of the directory.
     #[inline]
     pub async fn remove_open_dir_all(self) -> io::Result<()> {
         let file = std::fs::File::from_into_filelike(self.std_file);

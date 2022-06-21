@@ -5,9 +5,8 @@ use std::{fmt, io};
 ///
 /// This corresponds to [`std::fs::ReadDir`].
 ///
-/// Note that there is no `from_std` method, as `std::fs::ReadDir` doesn't
-/// provide a way to construct a `ReadDir` without opening directories by
-/// ambient paths.
+/// There is no `from_std` method, as `std::fs::ReadDir` doesn't provide a way
+/// to construct a `ReadDir` without opening directories by ambient paths.
 pub struct ReadDir {
     pub(crate) inner: cap_primitives::fs::ReadDir,
 }
