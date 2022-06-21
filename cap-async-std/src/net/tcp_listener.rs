@@ -17,9 +17,9 @@ use {
 ///
 /// This corresponds to [`async_std::net::TcpListener`].
 ///
-/// Note that this `TcpListener` has no `bind` method. To bind it to a socket
-/// address, you must first obtain a [`Pool`] permitting the address, and
-/// then call [`Pool::bind_tcp_listener`].
+/// This `TcpListener` has no `bind` method. To bind it to a socket address,
+/// you must first obtain a [`Pool`] permitting the address, and then call
+/// [`Pool::bind_tcp_listener`].
 ///
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::bind_tcp_listener`]: struct.Pool.html#method.bind_tcp_listener

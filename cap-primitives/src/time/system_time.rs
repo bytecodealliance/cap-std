@@ -7,9 +7,9 @@ use std::{fmt, time};
 ///
 /// This corresponds to [`std::time::SystemTime`].
 ///
-/// Note that this `SystemTime` has no `now`, `elapsed` methods. To obtain the
-/// current time or measure the duration to the current time, you must first
-/// obtain a [`SystemClock`], and then call [`SystemClock::now`] or
+/// This `SystemTime` has no `now`, `elapsed` methods. To obtain the current
+/// time or measure the duration to the current time, you must first obtain a
+/// [`SystemClock`], and then call [`SystemClock::now`] or
 /// [`SystemClock::elapsed`] instead. The `UNIX_EPOCH` constant is at
 /// [`SystemClock::UNIX_EPOCH`].
 ///

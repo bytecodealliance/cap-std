@@ -17,10 +17,10 @@ use {
 ///
 /// This corresponds to [`std::net::UdpSocket`].
 ///
-/// Note that this `UdpSocket` has no `bind`, `connect`, or `send_to` methods.
-/// To create a `UdpSocket` bound to an address or to send a message to an
-/// address, you must first obtain a [`Pool`] permitting the address, and then
-/// call [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
+/// This `UdpSocket` has no `bind`, `connect`, or `send_to` methods.  To create a
+/// `UdpSocket` bound to an address or to send a message to an address, you must
+/// first obtain a [`Pool`] permitting the address, and then call
+/// [`Pool::bind_udp_socket`], or [`Pool::connect_udp_socket`], or
 /// [`Pool::send_to_udp_socket_addr`].
 ///
 /// [`Pool`]: struct.Pool.html

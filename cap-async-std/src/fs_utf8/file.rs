@@ -25,8 +25,8 @@ use {
 ///
 /// This corresponds to [`async_std::fs::File`].
 ///
-/// Note that this `File` has no `open` or `create` methods. To open or create
-/// a file, you must first obtain a [`Dir`] containing the path, and then call
+/// This `File` has no `open` or `create` methods. To open or create a file,
+/// you must first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open`] or [`Dir::create`].
 ///
 /// [`Dir`]: crate::fs::Dir

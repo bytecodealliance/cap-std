@@ -6,9 +6,9 @@ use std::{fmt, time};
 ///
 /// This corresponds to [`std::time::Instant`].
 ///
-/// Note that this `Instant` has no `now` or `elapsed` methods. To obtain the
-/// current time or measure the duration to the current time, you must first
-/// obtain a [`MonotonicClock`], and then call [`MonotonicClock::now`] or
+/// This `Instant` has no `now` or `elapsed` methods. To obtain the current
+/// time or measure the duration to the current time, you must first obtain a
+/// [`MonotonicClock`], and then call [`MonotonicClock::now`] or
 /// [`MonotonicClock::elapsed`] instead.
 ///
 /// [`MonotonicClock`]: crate::time::MonotonicClock

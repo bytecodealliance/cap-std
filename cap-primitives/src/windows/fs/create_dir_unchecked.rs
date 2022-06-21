@@ -6,8 +6,8 @@ use std::{fs, io};
 /// *Unsandboxed* function similar to `create_dir`, but which does not perform
 /// sandboxing.
 ///
-/// Note that Windows doesn't have any extra flags in `DirOptions`, so the
-/// `options` parameter is ignored.
+/// Windows doesn't have any extra flags in `DirOptions`, so the `options`
+/// parameter is ignored.
 pub(crate) fn create_dir_unchecked(
     start: &fs::File,
     path: &Path,

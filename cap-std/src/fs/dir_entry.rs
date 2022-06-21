@@ -16,9 +16,8 @@ use std::{fmt, io};
 /// opening or removing the entry directly, which can be more efficient and
 /// convenient.
 ///
-/// Note that there is no `from_std` method, as `std::fs::DirEntry` doesn't
-/// provide a way to construct a `DirEntry` without opening directories by
-/// ambient paths.
+/// There is no `from_std` method, as `std::fs::DirEntry` doesn't provide a
+/// way to construct a `DirEntry` without opening directories by ambient paths.
 pub struct DirEntry {
     pub(crate) inner: cap_primitives::fs::DirEntry,
 }
