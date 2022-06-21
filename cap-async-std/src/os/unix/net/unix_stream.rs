@@ -12,8 +12,8 @@ use std::pin::Pin;
 ///
 /// This corresponds to [`async_std::os::unix::net::UnixStream`].
 ///
-/// This `UnixStream` has no `connect` method. To create a `UnixStream`, you
-/// must first obtain a [`Dir`] containing the path, and then call
+/// This `UnixStream` has no `connect` method. To create a `UnixStream`, first
+/// obtain a [`Dir`] containing the path, and then call
 /// [`Dir::connect_unix_stream`].
 ///
 /// [`async_std::os::unix::net::UnixStream`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html

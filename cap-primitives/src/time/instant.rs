@@ -7,7 +7,7 @@ use std::{fmt, time};
 /// This corresponds to [`std::time::Instant`].
 ///
 /// This `Instant` has no `now` or `elapsed` methods. To obtain the current
-/// time or measure the duration to the current time, you must first obtain a
+/// time or measure the duration to the current time, first obtain a
 /// [`MonotonicClock`], and then call [`MonotonicClock::now`] or
 /// [`MonotonicClock::elapsed`] instead.
 ///

@@ -20,8 +20,8 @@ use {
 ///
 /// This corresponds to [`async_std::net::TcpStream`].
 ///
-/// This `TcpStream` has no `connect` method. To create a `TcpStream`, you must
-/// first obtain a [`Pool`] permitting the address, and then call
+/// This `TcpStream` has no `connect` method. To create a `TcpStream`, first
+/// obtain a [`Pool`] permitting the address, and then call
 /// [`Pool::connect_tcp_stream`].
 ///
 /// [`Pool`]: struct.Pool.html
