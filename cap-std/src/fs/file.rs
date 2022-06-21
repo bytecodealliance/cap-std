@@ -47,15 +47,6 @@ impl File {
         self.std
     }
 
-    /// Returns a new [`OpenOptions`] object.
-    ///
-    /// This corresponds to [`std::fs::File::with_options`].
-    #[inline]
-    #[cfg(with_options)]
-    pub fn with_options() -> OpenOptions {
-        OpenOptions::new()
-    }
-
     /// Attempts to sync all OS-internal metadata to disk.
     ///
     /// This corresponds to [`std::fs::File::sync_all`].

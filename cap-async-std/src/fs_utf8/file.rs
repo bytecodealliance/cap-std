@@ -59,8 +59,6 @@ impl File {
         self.cap_std.into_std()
     }
 
-    // async_std doesn't have `with_options`.
-
     /// Attempts to sync all OS-internal metadata to disk.
     ///
     /// This corresponds to [`async_std::fs::File::sync_all`].
