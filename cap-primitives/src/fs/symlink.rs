@@ -30,6 +30,7 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
     write_symlink_impl(old_path, new_start, new_path)
 }
 
+#[cfg(not(windows))]
 fn write_symlink_impl(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
     use crate::fs::symlink_impl;
 
