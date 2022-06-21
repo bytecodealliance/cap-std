@@ -591,7 +591,7 @@ impl Dir {
     ///
     /// # API correspondence with `std`
     ///
-    /// This API is not yet stable in `std`, but is likely to be.  For more
+    /// This API is not yet stable in `std`, but is likely to be. For more
     /// information, see the [tracker issue](https://github.com/rust-lang/rust/issues/83186).
     #[inline]
     pub fn try_exists<P: AsRef<Path>>(&self, path: P) -> io::Result<bool> {

@@ -183,28 +183,36 @@ impl std::os::wasi::fs::OpenOptionsExt for OpenOptions {
     fn lookup_flags(&mut self, _: u32) -> &mut Self {
         todo!()
     }
+
     fn directory(&mut self, dir_required: bool) -> &mut Self {
         self.dir_required = dir_required;
         self
     }
+
     fn dsync(&mut self, _: bool) -> &mut Self {
         todo!()
     }
+
     fn nonblock(&mut self, _: bool) -> &mut Self {
         todo!()
     }
+
     fn rsync(&mut self, _: bool) -> &mut Self {
         todo!()
     }
+
     fn sync(&mut self, _: bool) -> &mut Self {
         todo!()
     }
+
     fn fs_rights_base(&mut self, _: u64) -> &mut Self {
         todo!()
     }
+
     fn fs_rights_inheriting(&mut self, _: u64) -> &mut Self {
         todo!()
     }
+
     fn open_at<P>(&self, dirfd: &std::fs::File, path: P) -> Result<std::fs::File, std::io::Error>
     where
         P: AsRef<std::path::Path>,

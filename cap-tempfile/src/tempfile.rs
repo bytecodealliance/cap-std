@@ -3,8 +3,7 @@
 use cap_std::fs::{Dir, File};
 use std::ffi::OsStr;
 use std::fmt::Debug;
-use std::io::{self, Write};
-use std::io::{Read, Seek};
+use std::io::{self, Read, Seek, Write};
 
 /// A file in a directory that is by default deleted when it goes out
 /// of scope, but may also be written persistently.
@@ -182,6 +181,7 @@ impl<'d> Write for TempFile<'d> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.as_file_mut().write(buf)
     }
+
     #[inline]
     fn flush(&mut self) -> io::Result<()> {
         self.as_file_mut().flush()
@@ -245,8 +245,7 @@ mod test {
         // Test that we created with the right permissions
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
-            use rustix::fs::MetadataExt;
-            use rustix::fs::Mode;
+            use rustix::fs::{MetadataExt, Mode};
             let umask = get_process_umask()?;
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
