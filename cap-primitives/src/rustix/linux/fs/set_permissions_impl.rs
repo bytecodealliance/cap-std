@@ -1,5 +1,5 @@
 use super::procfs::set_permissions_through_proc_self_fd;
-use crate::fs::{errors, open, OpenOptions, Permissions};
+use crate::fs::{open, OpenOptions, Permissions};
 use rustix::fs::{fchmod, Mode, RawMode};
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
@@ -48,6 +48,8 @@ pub(crate) fn set_permissions_impl(
 }
 
 fn set_file_permissions(file: &fs::File, perm: fs::Permissions) -> io::Result<()> {
-    let mode = Mode::from_bits(perm.mode() as RawMode).ok_or_else(errors::invalid_flags)?;
+    // Use `from_bits_truncate` for compatibility with std, which allows
+    // non-permission bits to propagate through.
+    let mode = Mode::from_bits_truncate(perm.mode() as RawMode);
     Ok(fchmod(file, mode)?)
 }
