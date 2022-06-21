@@ -104,7 +104,8 @@ impl Iterator for ReadDirInner {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let entry = match self.rustix.lock().unwrap().0.read()? {
+            let entry = self.rustix.lock().unwrap().0.read()?;
+            let entry = match entry {
                 Ok(entry) => entry,
                 Err(e) => return Some(Err(e.into())),
             };
