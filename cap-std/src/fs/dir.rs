@@ -667,10 +667,12 @@ impl Dir {
         fs::create_dir_all(path)
     }
 
-    /// Construct a new instance of `Self` from existing directory file descriptor.
+    /// Construct a new instance of `Self` from existing directory file
+    /// descriptor.
     ///
-    /// This can be useful when interacting with other libraries and or C/C++ code
-    /// which has invoked `openat(..., O_DIRECTORY)` external to this crate.
+    /// This can be useful when interacting with other libraries and or C/C++
+    /// code which has invoked `openat(..., O_DIRECTORY)` external to this
+    /// crate.
     pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
         cap_primitives::fs::open_dir(
             &dir.as_filelike_view::<std::fs::File>(),

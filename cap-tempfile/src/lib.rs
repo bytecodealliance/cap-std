@@ -183,7 +183,8 @@ pub fn tempdir_in(dir: &Dir) -> io::Result<TempDir> {
 /// Call f repeatedly, passing a randomly generated temporary name.
 /// An error matching the `err` will be ignored.
 /// This will repeat until a maximum number of attempts is reached.
-/// On success, the result of the function call along with the provided name is returned.
+/// On success, the result of the function call along with the provided name is
+/// returned.
 pub(crate) fn retry_with_name_ignoring<F, T>(
     err: std::io::ErrorKind,
     mut f: F,

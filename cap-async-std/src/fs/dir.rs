@@ -756,8 +756,8 @@ impl Dir {
 
     /// Returns `true` if the path points at an existing entity.
     ///
-    /// This is an asynchronous version of [`std::fs::try_exists`], and also only
-    /// accesses paths relative to `self`.
+    /// This is an asynchronous version of [`std::fs::try_exists`], and also
+    /// only accesses paths relative to `self`.
     ///
     /// NOTE: This API is not yet part of `async_std`.
     #[inline]
