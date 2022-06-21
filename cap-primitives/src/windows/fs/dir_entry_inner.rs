@@ -7,7 +7,9 @@ use crate::fs::{
 use std::ffi::OsString;
 use std::os::windows::fs::OpenOptionsExt;
 use std::{fmt, fs, io};
-use winapi::um::winbase::{FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT};
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+};
 
 pub(crate) struct DirEntryInner {
     std: fs::DirEntry,

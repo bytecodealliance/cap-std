@@ -2,6 +2,17 @@
 // library/std/src/sys/windows/fs.rs at revision
 // 108e90ca78f052c0c1c49c42a22c85620be19712.
 
+// TODO: Replace this definition of `MAXIMUM_REPARSE_DATA_BUFFER_SIZE`
+// once windows-sys has it.
+//  - [windows-sys bug filed]
+//  - [winapi doc]
+//
+// [windows-sys bug filed]: https://github.com/microsoft/windows-rs/issues/1823>
+// [winapi doc]: https://docs.rs/winapi/latest/winapi/um/winnt/constant.MAXIMUM_REPARSE_DATA_BUFFER_SIZE.html
+#[cfg(windows)]
+#[allow(dead_code)]
+pub const MAXIMUM_REPARSE_DATA_BUFFER_SIZE: u32 = 16 * 1024; // 16_384u32
+
 #[cfg(feature = "fs_utf8")]
 use camino::Utf8Path;
 use cap_std::fs::Dir;
@@ -55,18 +66,20 @@ pub fn symlink_junction_utf8<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
 #[allow(non_snake_case)]
 #[repr(C)]
 pub struct REPARSE_MOUNTPOINT_DATA_BUFFER {
-    pub ReparseTag: winapi::shared::minwindef::DWORD,
-    pub ReparseDataLength: winapi::shared::minwindef::DWORD,
-    pub Reserved: winapi::shared::minwindef::WORD,
-    pub ReparseTargetLength: winapi::shared::minwindef::WORD,
-    pub ReparseTargetMaximumLength: winapi::shared::minwindef::WORD,
-    pub Reserved1: winapi::shared::minwindef::WORD,
-    pub ReparseTarget: winapi::um::winnt::WCHAR,
+    pub ReparseTag: u32,
+    pub ReparseDataLength: u32,
+    pub Reserved: u16,
+    pub ReparseTargetLength: u16,
+    pub ReparseTargetMaximumLength: u16,
+    pub Reserved1: u16,
+    pub ReparseTarget: libc::wchar_t,
 }
 
 #[cfg(windows)]
 #[allow(dead_code)]
-pub fn cvt(i: winapi::shared::minwindef::BOOL) -> io::Result<winapi::shared::minwindef::BOOL> {
+pub fn cvt(
+    i: windows_sys::Win32::Foundation::BOOL,
+) -> io::Result<windows_sys::Win32::Foundation::BOOL> {
     if i == 0 {
         Err(io::Error::last_os_error())
     } else {
@@ -93,16 +106,16 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
     let mut opts = OpenOptions::new();
     opts.write(true);
     opts.custom_flags(
-        winapi::um::winbase::FILE_FLAG_OPEN_REPARSE_POINT
-            | winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS,
+        windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT
+            | windows_sys::Win32::Storage::FileSystem::FILE_FLAG_BACKUP_SEMANTICS,
     );
     let f = dir.open_with(junction, &opts)?;
     let h = f.as_raw_handle();
 
     unsafe {
-        let mut data = [0_u8; winapi::um::winnt::MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
+        let mut data = [0_u8; MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
         let db = data.as_mut_ptr() as *mut REPARSE_MOUNTPOINT_DATA_BUFFER;
-        let buf = &mut (*db).ReparseTarget as *mut winapi::um::winnt::WCHAR;
+        let buf = &mut (*db).ReparseTarget as *mut libc::wchar_t;
         let mut i = 0;
         // FIXME: this conversion is very hacky
         let v = br"\??\";
@@ -113,16 +126,15 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
         }
         *buf.offset(i) = 0;
         i += 1;
-        (*db).ReparseTag = winapi::um::winnt::IO_REPARSE_TAG_MOUNT_POINT;
-        (*db).ReparseTargetMaximumLength = (i * 2) as winapi::shared::minwindef::WORD;
-        (*db).ReparseTargetLength = ((i - 1) * 2) as winapi::shared::minwindef::WORD;
-        (*db).ReparseDataLength =
-            (*db).ReparseTargetLength as winapi::shared::minwindef::DWORD + 12;
+        (*db).ReparseTag = windows_sys::Win32::System::SystemServices::IO_REPARSE_TAG_MOUNT_POINT;
+        (*db).ReparseTargetMaximumLength = (i * 2) as u16;
+        (*db).ReparseTargetLength = ((i - 1) * 2) as u16;
+        (*db).ReparseDataLength = (*db).ReparseTargetLength as u32 + 12;
 
         let mut ret = 0;
-        cvt(winapi::um::ioapiset::DeviceIoControl(
-            h as *mut _,
-            winapi::um::winioctl::FSCTL_SET_REPARSE_POINT,
+        cvt(windows_sys::Win32::System::IO::DeviceIoControl(
+            h as _,
+            windows_sys::Win32::System::Ioctl::FSCTL_SET_REPARSE_POINT,
             data.as_ptr() as *mut _,
             (*db).ReparseDataLength + 8,
             ptr::null_mut(),
@@ -154,16 +166,16 @@ fn symlink_junction_inner_utf8(
     let mut opts = OpenOptions::new();
     opts.write(true);
     opts.custom_flags(
-        winapi::um::winbase::FILE_FLAG_OPEN_REPARSE_POINT
-            | winapi::um::winbase::FILE_FLAG_BACKUP_SEMANTICS,
+        windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT
+            | windows_sys::Win32::Storage::FileSystem::FILE_FLAG_BACKUP_SEMANTICS,
     );
     let f = dir.open_with(junction, &opts)?;
     let h = f.as_raw_handle();
 
     unsafe {
-        let mut data = [0_u8; winapi::um::winnt::MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
+        let mut data = [0_u8; MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
         let db = data.as_mut_ptr() as *mut REPARSE_MOUNTPOINT_DATA_BUFFER;
-        let buf = &mut (*db).ReparseTarget as *mut winapi::um::winnt::WCHAR;
+        let buf = &mut (*db).ReparseTarget as *mut libc::wchar_t;
         let mut i = 0;
         // FIXME: this conversion is very hacky
         let v = br"\??\";
@@ -174,16 +186,15 @@ fn symlink_junction_inner_utf8(
         }
         *buf.offset(i) = 0;
         i += 1;
-        (*db).ReparseTag = winapi::um::winnt::IO_REPARSE_TAG_MOUNT_POINT;
-        (*db).ReparseTargetMaximumLength = (i * 2) as winapi::shared::minwindef::WORD;
-        (*db).ReparseTargetLength = ((i - 1) * 2) as winapi::shared::minwindef::WORD;
-        (*db).ReparseDataLength =
-            (*db).ReparseTargetLength as winapi::shared::minwindef::DWORD + 12;
+        (*db).ReparseTag = windows_sys::Win32::System::SystemServices::IO_REPARSE_TAG_MOUNT_POINT;
+        (*db).ReparseTargetMaximumLength = (i * 2) as u16;
+        (*db).ReparseTargetLength = ((i - 1) * 2) as u16;
+        (*db).ReparseDataLength = (*db).ReparseTargetLength as u32 + 12;
 
         let mut ret = 0;
-        cvt(winapi::um::ioapiset::DeviceIoControl(
-            h as *mut _,
-            winapi::um::winioctl::FSCTL_SET_REPARSE_POINT,
+        cvt(windows_sys::Win32::System::IO::DeviceIoControl(
+            h as _,
+            windows_sys::Win32::System::Ioctl::FSCTL_SET_REPARSE_POINT,
             data.as_ptr() as *mut _,
             (*db).ReparseDataLength + 8,
             ptr::null_mut(),

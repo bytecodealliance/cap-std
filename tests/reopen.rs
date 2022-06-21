@@ -7,7 +7,7 @@ use cap_fs_ext::{OpenOptions, Reopen};
 use std::io::{Read, Write};
 use sys_common::io::tmpdir;
 #[cfg(windows)]
-use winapi::um::winnt::FILE_GENERIC_READ;
+use windows_sys::Win32::Storage::FileSystem::FILE_GENERIC_READ;
 
 #[test]
 fn basic_reopen() {

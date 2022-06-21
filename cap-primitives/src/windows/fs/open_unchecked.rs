@@ -5,9 +5,10 @@ use crate::{ambient_authority, AmbientAuthority};
 use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 use std::{fs, io};
-use winapi::shared::winerror;
-use winapi::um::winbase;
-use winapi::um::winnt::FILE_ATTRIBUTE_DIRECTORY;
+use windows_sys::Win32::Foundation;
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_OPEN_REPARSE_POINT,
+};
 
 /// *Unsandboxed* function similar to `open`, but which does not perform
 /// sandboxing.
@@ -33,7 +34,7 @@ pub(crate) fn open_ambient_impl(
         Ok(f) => {
             let enforce_dir = options.dir_required;
             let enforce_nofollow = options.follow == FollowSymlinks::No
-                && (options.ext.custom_flags & winbase::FILE_FLAG_OPEN_REPARSE_POINT) == 0;
+                && (options.ext.custom_flags & FILE_FLAG_OPEN_REPARSE_POINT) == 0;
 
             if enforce_dir || enforce_nofollow {
                 let metadata = f.metadata().map_err(OpenUncheckedError::Other)?;
@@ -62,7 +63,9 @@ pub(crate) fn open_ambient_impl(
                     // them as a distinct error.
                     if metadata.file_type().is_symlink() {
                         return Err(OpenUncheckedError::Symlink(
-                            io::Error::from_raw_os_error(winerror::ERROR_STOPPED_ON_SYMLINK as i32),
+                            io::Error::from_raw_os_error(
+                                Foundation::ERROR_STOPPED_ON_SYMLINK as i32,
+                            ),
                             if metadata.file_attributes() & FILE_ATTRIBUTE_DIRECTORY
                                 == FILE_ATTRIBUTE_DIRECTORY
                             {
@@ -88,7 +91,7 @@ pub(crate) fn open_ambient_impl(
         Err(e) if e.kind() == io::ErrorKind::NotFound => Err(OpenUncheckedError::NotFound(e)),
         Err(e) => match e.raw_os_error() {
             Some(code) => match code as u32 {
-                winerror::ERROR_FILE_NOT_FOUND | winerror::ERROR_PATH_NOT_FOUND => {
+                Foundation::ERROR_FILE_NOT_FOUND | Foundation::ERROR_PATH_NOT_FOUND => {
                     Err(OpenUncheckedError::NotFound(e))
                 }
                 _ => Err(OpenUncheckedError::Other(e)),

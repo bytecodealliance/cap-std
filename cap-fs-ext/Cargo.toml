@@ -32,8 +32,12 @@ async_std = ["cap-async-std", "async-std", "io-lifetimes/async-std", "async-trai
 async_std_fs_utf8 = ["cap-async-std/fs_utf8", "camino"]
 async_std_arf_strings = ["cap-async-std/arf_strings", "async_std_fs_utf8", "arf-strings"]
 
-[target.'cfg(windows)'.dependencies]
-winapi = "0.3.9"
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.36.0"
+features = [
+    "Win32_Storage_FileSystem",
+    "Win32_System_SystemServices",
+]
 
 [dev-dependencies]
 cap-tempfile = { path = "../cap-tempfile" }

@@ -20,11 +20,14 @@ camino = { version = "1.0.5", optional = true }
 [target.'cfg(target_os = "emscripten")'.dependencies]
 rand = "0.8.1"
 
-[target.'cfg(windows)'.dev-dependencies]
-winapi = "0.3.9"
-
 [target.'cfg(not(windows))'.dependencies]
 rustix = { version = "0.35.6", features = ["procfs"] }
+
+[target.'cfg(windows)'.dev-dependencies.windows-sys]
+version = "0.36.0"
+features = [
+    "Win32_Foundation",
+]
 
 [features]
 default = []
