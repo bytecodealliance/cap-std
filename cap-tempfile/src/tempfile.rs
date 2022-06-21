@@ -158,7 +158,7 @@ impl<'d> TempFile<'d> {
             // But, if we catch an error here, then move ownership back into self,
             // which means the Drop invocation will clean it up.
             self.name = Some(tempname);
-            e.into()
+            e
         })
     }
 

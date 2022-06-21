@@ -122,12 +122,12 @@ pub(crate) fn open_beneath(
                         break;
                     }
 
-                    _ => return Err(err.into()),
+                    _ => return Err(err),
                 },
             }
         }
 
-        Err(rustix::io::Errno::NOSYS.into())
+        Err(rustix::io::Errno::NOSYS)
     })
     .map_err(|err| match err {
         rustix::io::Errno::XDEV => errors::escape_attempt(),

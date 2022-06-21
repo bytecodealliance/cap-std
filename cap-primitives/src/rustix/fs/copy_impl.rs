@@ -128,7 +128,7 @@ pub(crate) fn copy_impl(
             }
             copy_result
         } else {
-            Err(rustix::io::Errno::NOSYS.into())
+            Err(rustix::io::Errno::NOSYS)
         };
         match copy_result {
             Ok(ret) => written += ret as u64,

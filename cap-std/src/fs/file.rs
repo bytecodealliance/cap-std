@@ -123,7 +123,7 @@ impl File {
     ) -> io::Result<Self> {
         let std = open_ambient(
             path.as_ref(),
-            &OpenOptions::new().read(true),
+            OpenOptions::new().read(true),
             ambient_authority,
         )?;
         Ok(Self::from_std(std))

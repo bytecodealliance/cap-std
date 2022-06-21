@@ -121,7 +121,7 @@ impl File {
         spawn_blocking(move || {
             open_ambient(
                 path.as_ref(),
-                &OpenOptions::new().read(true),
+                OpenOptions::new().read(true),
                 ambient_authority,
             )
         })
