@@ -12,13 +12,12 @@ use std::path::Path;
 use std::{fs, io};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the
-/// path never escapes the directory tree rooted at `start`.
+/// path never escapes the directory tree rooted at `start`.  An error
+/// is returned if the target path is absolute.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[cfg(not(windows))]
 #[inline]
 pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
-    use crate::fs::symlink_impl;
-
     // Don't allow creating symlinks to absolute paths. This isn't strictly
     // necessary to preserve the sandbox, since `open` will refuse to follow
     // absolute symlinks in any case. However, it is useful to enforce this
@@ -27,6 +26,13 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
     if old_path.has_root() {
         return Err(errors::escape_attempt());
     }
+
+    write_symlink_impl(old_path, new_start, new_path)
+}
+
+#[cfg(not(windows))]
+fn write_symlink_impl(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Result<()> {
+    use crate::fs::symlink_impl;
 
     #[cfg(racy_asserts)]
     let stat_before = stat_unchecked(new_start, new_path, FollowSymlinks::No);
@@ -48,6 +54,17 @@ pub fn symlink(old_path: &Path, new_start: &fs::File, new_path: &Path) -> io::Re
     );
 
     result
+}
+
+/// Perform a `symlinkat`-like operation, ensuring that the resolution of the
+/// link path never escapes the directory tree rooted at `start`.
+#[cfg(not(windows))]
+pub fn symlink_contents<P: AsRef<Path>, Q: AsRef<Path>>(
+    old_path: P,
+    new_start: &fs::File,
+    new_path: Q,
+) -> io::Result<()> {
+    write_symlink_impl(old_path.as_ref(), new_start, new_path.as_ref())
 }
 
 /// Perform a `symlink_file`-like operation, ensuring that the resolution of

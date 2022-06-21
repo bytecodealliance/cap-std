@@ -8,10 +8,10 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 /// Perform a `readlinkat`-like operation, ensuring that the resolution of the
-/// path never escapes the directory tree rooted at `start`.
+/// link path never escapes the directory tree rooted at `start`.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
-pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+pub fn read_link_contents(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
     let result = read_link_impl(start, path);
 
@@ -20,6 +20,18 @@ pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
 
     #[cfg(racy_asserts)]
     check_read_link(start, path, &result, &unchecked);
+
+    result
+}
+
+/// Perform a `readlinkat`-like operation, ensuring that the resolution of the
+/// path never escapes the directory tree rooted at `start`, and also verifies
+/// that the link target is not absolute.
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
+#[inline]
+pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
+    // Call the underlying implementation.
+    let result = read_link_contents(start, path);
 
     // Don't allow reading symlinks to absolute paths. This isn't strictly
     // necessary to preserve the sandbox, since `open` will refuse to follow
@@ -72,5 +84,27 @@ fn check_read_link(
             path.display(),
             other,
         ),
+    }
+}
+
+#[cfg(not(windows))]
+#[test]
+fn test_read_link_contents() {
+    use io_lifetimes::AsFilelike;
+    let td = cap_tempfile::tempdir(cap_tempfile::ambient_authority()).unwrap();
+    let td_view = &td.as_filelike_view::<std::fs::File>();
+    let valid = [
+        "relative/path",
+        "/some/absolute/path",
+        "/",
+        "../",
+        "basepath",
+    ];
+    for case in valid {
+        let linkname = Path::new("linkname");
+        crate::fs::symlink_contents(case, td_view, linkname).unwrap();
+        let contents = crate::fs::read_link_contents(td_view, linkname).unwrap();
+        assert_eq!(contents.to_str().unwrap(), case);
+        crate::fs::remove_file(td_view, linkname).unwrap();
     }
 }

@@ -80,7 +80,7 @@ pub use open_dir::*;
 pub use open_options::OpenOptions;
 pub use permissions::Permissions;
 pub use read_dir::{read_base_dir, read_dir, ReadDir};
-pub use read_link::read_link;
+pub use read_link::{read_link, read_link_contents};
 pub use remove_dir::remove_dir;
 pub use remove_dir_all::remove_dir_all;
 pub use remove_file::remove_file;
@@ -92,7 +92,7 @@ pub use set_permissions::set_permissions;
 pub use set_times::{set_times, set_times_nofollow};
 pub use stat::stat;
 #[cfg(not(windows))]
-pub use symlink::symlink;
+pub use symlink::{symlink, symlink_contents};
 #[cfg(windows)]
 pub use symlink::{symlink_dir, symlink_file};
 pub use system_time_spec::SystemTimeSpec;
