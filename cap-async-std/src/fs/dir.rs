@@ -136,7 +136,7 @@ impl Dir {
     /// This corresponds to [`async_std::fs::create_dir`], but only accesses
     /// paths relative to `self`.
     ///
-    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
+    /// TODO: async: fix this when we fix <https://github.com/bytecodealliance/cap-std/issues/51>
     #[inline]
     pub fn create_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self._create_dir_one(path.as_ref(), &DirOptions::new())
@@ -148,7 +148,7 @@ impl Dir {
     /// This corresponds to [`async_std::fs::create_dir_all`], but only
     /// accesses paths relative to `self`.
     ///
-    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
+    /// TODO: async: fix this when we fix <https://github.com/bytecodealliance/cap-std/issues/51>
     #[inline]
     pub fn create_dir_all<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         self._create_dir_all(path.as_ref(), &DirOptions::new())
@@ -159,7 +159,7 @@ impl Dir {
     ///
     /// This corresponds to [`async_std::fs::DirBuilder::create`].
     ///
-    /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
+    /// TODO: async: fix this when we fix <https://github.com/bytecodealliance/cap-std/issues/51>
     #[inline]
     pub fn create_dir_with<P: AsRef<Path>>(
         &self,

@@ -10,19 +10,16 @@ use std::{fmt, io};
 ///
 /// This corresponds to [`std::os::unix::net::UnixDatagram`].
 ///
-/// Note that this `UnixDatagram` has no `bind`, `connect`, or `send_to`
-/// methods. To create a `UnixDatagram`,
-/// you must first obtain a [`Dir`] containing the path, and then call
-/// [`Dir::bind_unix_datagram`], [`Dir::connect_unix_datagram`], or
-/// [`Dir::send_to_unix_datagram_addr`].
+/// This `UnixDatagram` has no `bind`, `connect`, or `send_to` methods. To
+/// create a `UnixDatagram`, you must first obtain a [`Dir`] containing the
+/// path, and then call [`Dir::bind_unix_datagram`],
+/// [`Dir::connect_unix_datagram`], or [`Dir::send_to_unix_datagram_addr`].
 ///
 /// [`std::os::unix::net::UnixDatagram`]: https://doc.rust-lang.org/std/os/unix/net/struct.UnixDatagram.html
 /// [`Dir`]: struct.Dir.html
-/// [`Dir::connect_unix_datagram`]:
-/// struct.Dir.html#method.connect_unix_datagram [`Dir::bind_unix_datagram`]:
-/// struct.Dir.html#method.bind_unix_datagram
-/// [`Dir::send_to_unix_datagram_addr`]:
-/// struct.Dir.html#method.send_to_unix_datagram_addr
+/// [`Dir::connect_unix_datagram`]: struct.Dir.html#method.connect_unix_datagram
+/// [`Dir::bind_unix_datagram`]: struct.Dir.html#method.bind_unix_datagram
+/// [`Dir::send_to_unix_datagram_addr`]: struct.Dir.html#method.send_to_unix_datagram_addr
 pub struct UnixDatagram {
     std: unix::net::UnixDatagram,
 }

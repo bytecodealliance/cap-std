@@ -26,8 +26,7 @@ use {
 /// [`Pool`]: struct.Pool.html
 /// [`Pool::bind_udp_socket`]: struct.Pool.html#method.bind_udp_socket
 /// [`Pool::connect_udp_socket`]: struct.Pool.html#method.connect_udp_socket
-/// [`Pool::send_to_udp_socket_addr`]:
-/// struct.Pool.html#method.send_to_udp_socket_addr
+/// [`Pool::send_to_udp_socket_addr`]: struct.Pool.html#method.send_to_udp_socket_addr
 pub struct UdpSocket {
     pub(crate) std: net::UdpSocket,
 }
