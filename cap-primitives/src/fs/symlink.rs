@@ -12,8 +12,8 @@ use std::path::Path;
 use std::{fs, io};
 
 /// Perform a `symlinkat`-like operation, ensuring that the resolution of the
-/// path never escapes the directory tree rooted at `start`.  An error
-/// is returned if the target path is absolute.
+/// path never escapes the directory tree rooted at `start`. An error is
+/// returned if the target path is absolute.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[cfg(not(windows))]
 #[inline]

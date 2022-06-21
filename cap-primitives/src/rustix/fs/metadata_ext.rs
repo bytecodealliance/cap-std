@@ -1,7 +1,6 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::fs::PermissionsExt;
-use crate::fs::{FileTypeExt, Metadata};
+use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
 use crate::time::{Duration, SystemClock, SystemTime};
 // TODO: update all these to
 // #[cfg(any(target_os = "android", target_os = "linux"))]
