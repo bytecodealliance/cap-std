@@ -1,4 +1,4 @@
-use crate::fs::{errors, open, OpenOptions, Permissions};
+use crate::fs::{open, OpenOptions, Permissions};
 use rustix::fs::{fchmod, Mode};
 use rustix::io::Errno;
 use std::convert::TryInto;

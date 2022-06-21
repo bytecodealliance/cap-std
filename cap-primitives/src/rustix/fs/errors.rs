@@ -1,5 +1,6 @@
 use std::io;
 
+#[cfg(any(target_os = "android", target_os = "linux"))]
 #[cold]
 pub(crate) fn invalid_flags() -> io::Error {
     rustix::io::Errno::INVAL.into()
