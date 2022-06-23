@@ -3,12 +3,9 @@ use rustix::fs::{statat, AtFlags};
 use std::path::Path;
 use std::{fs, io};
 
-// TODO: update all these to
-// #[cfg(any(target_os = "android", target_os = "linux"))]
-// once we're on restix >= v0.34.3.
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use rustix::fs::{statx, StatxFlags};
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use std::sync::atomic::{AtomicU8, Ordering};
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform
@@ -28,7 +25,7 @@ pub(crate) fn stat_unchecked(
     // Older versions of Docker/seccomp would return `EPERM` for `statx`; see
     // <https://github.com/rust-lang/rust/pull/65685/>. We store the
     // availability in a global to avoid unnecessary syscalls.
-    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+    #[cfg(any(target_os = "android", target_os = "linux"))]
     {
         // 0: Unknown
         // 1: Not available
