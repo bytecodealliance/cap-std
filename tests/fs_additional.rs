@@ -931,9 +931,7 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        // The standard library returns file format bits with `mode()`, whereas
-        // cap-std currently doesn't.
-        assert_eq!(std.permissions().mode() & 0o7777, cap.permissions().mode());
+        assert_eq!(std.permissions().mode(), cap.permissions().mode());
     }
 
     // If the standard library supports file modified/accessed/created times,

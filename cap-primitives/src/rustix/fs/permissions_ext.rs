@@ -16,7 +16,7 @@ impl PermissionsExt {
     pub(crate) fn from_std(std: fs::Permissions) -> Self {
         use std::os::unix::fs::PermissionsExt;
         Self {
-            mode: std.mode() as RawMode & 0o7777,
+            mode: std.mode() as RawMode,
         }
     }
 
@@ -26,9 +26,7 @@ impl PermissionsExt {
     pub(crate) const fn from_raw_mode(mode: RawMode) -> Permissions {
         Permissions {
             readonly: Self::readonly(mode),
-            ext: Self {
-                mode: mode & 0o7777,
-            },
+            ext: Self { mode },
         }
     }
 
