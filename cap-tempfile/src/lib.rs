@@ -21,6 +21,9 @@ pub mod utf8;
 mod tempfile;
 pub use tempfile::*;
 
+/// Re-export because we use this in our public API.
+pub use cap_std;
+
 #[doc(hidden)]
 pub use cap_std::ambient_authority_known_at_compile_time;
 pub use cap_std::{ambient_authority, AmbientAuthority};
