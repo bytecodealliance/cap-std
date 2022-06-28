@@ -48,3 +48,5 @@ pub mod time;
 #[doc(hidden)]
 pub use cap_primitives::ambient_authority_known_at_compile_time;
 pub use cap_primitives::{ambient_authority, AmbientAuthority};
+// And this is also part of our public API
+pub use io_lifetimes;
