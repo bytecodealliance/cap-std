@@ -3,7 +3,7 @@
 use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
 use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(any(target_os = "android", target_os = "linux"))]
-use rustix::fs::{makedev, Statx};
+use rustix::fs::{makedev, Statx, StatxFlags};
 use rustix::fs::{RawMode, Stat};
 use std::convert::{TryFrom, TryInto};
 use std::{fs, io};
@@ -228,7 +228,11 @@ impl MetadataExt {
             permissions: PermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             modified: system_time_from_rustix(statx.stx_mtime.tv_sec, statx.stx_mtime.tv_nsec as _),
             accessed: system_time_from_rustix(statx.stx_atime.tv_sec, statx.stx_atime.tv_nsec as _),
-            created: system_time_from_rustix(statx.stx_btime.tv_sec, statx.stx_btime.tv_nsec as _),
+            created: if statx.stx_mask & StatxFlags::BTIME.bits() != 0 {
+                system_time_from_rustix(statx.stx_btime.tv_sec, statx.stx_btime.tv_nsec as _)
+            } else {
+                None
+            },
 
             ext: Self {
                 dev: makedev(statx.stx_dev_major, statx.stx_dev_minor),
