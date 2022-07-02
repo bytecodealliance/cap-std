@@ -6,6 +6,7 @@
 mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};
+use cap_std::time::SystemClock;
 use std::io::{self, Read, Write};
 use std::path::Path;
 use std::str;
@@ -968,12 +969,19 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     }
     match std.created() {
         Ok(expected) => assert_eq!(expected, check!(cap.created()).into_std()),
-        Err(e) => assert!(
-            cap.created().is_err(),
-            "created time should be error ({}), got {:#?}",
-            e,
-            cap.created()
-        ),
+        Err(e) => {
+            // An earlier bug returned the Unix epoch instead of `None` when
+            // created times were unavailable. This tries to catch such errors,
+            // while also allowing some targets to return valid created times
+            // even when std doesn't.
+            if let Ok(actual) = cap.created() {
+                println!(
+                    "std returned error for created time ({}) but got {:#?}",
+                    e, actual
+                );
+                assert_ne!(actual, SystemClock::UNIX_EPOCH);
+            }
+        }
     }
 
     #[cfg(unix)]
