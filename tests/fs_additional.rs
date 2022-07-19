@@ -6,6 +6,7 @@
 mod sys_common;
 
 use cap_std::fs::{DirBuilder, OpenOptions};
+use cap_std::time::SystemClock;
 use std::io::{self, Read, Write};
 use std::path::Path;
 use std::str;
@@ -936,24 +937,51 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
 
     // If the standard library supports file modified/accessed/created times,
     // then cap-std should too.
-    if let Ok(expected) = std.modified() {
-        assert_eq!(expected, check!(cap.modified()).into_std());
+    match std.modified() {
+        Ok(expected) => assert_eq!(expected, check!(cap.modified()).into_std()),
+        Err(e) => assert!(
+            cap.modified().is_err(),
+            "modified time should be error ({}), got {:#?}",
+            e,
+            cap.modified()
+        ),
     }
     // The access times might be a little different due to either our own
     // or concurrent accesses.
     const ACCESS_TOLERANCE_SEC: u32 = 60;
-    if let Ok(expected) = std.accessed() {
-        let access_tolerance = std::time::Duration::from_secs(ACCESS_TOLERANCE_SEC.into());
-        assert!(
-            ((expected - access_tolerance)..(expected + access_tolerance))
-                .contains(&check!(cap.accessed()).into_std()),
-            "std accessed {:#?}, cap accessed {:#?}",
-            expected,
+    match std.accessed() {
+        Ok(expected) => {
+            let access_tolerance = std::time::Duration::from_secs(ACCESS_TOLERANCE_SEC.into());
+            assert!(
+                ((expected - access_tolerance)..(expected + access_tolerance))
+                    .contains(&check!(cap.accessed()).into_std()),
+                "std accessed {:#?}, cap accessed {:#?}",
+                expected,
+                cap.accessed()
+            );
+        }
+        Err(e) => assert!(
+            cap.accessed().is_err(),
+            "accessed time should be error ({}), got {:#?}",
+            e,
             cap.accessed()
-        );
+        ),
     }
-    if let Ok(expected) = std.created() {
-        assert_eq!(expected, check!(cap.created()).into_std());
+    match std.created() {
+        Ok(expected) => assert_eq!(expected, check!(cap.created()).into_std()),
+        Err(e) => {
+            // An earlier bug returned the Unix epoch instead of `None` when
+            // created times were unavailable. This tries to catch such errors,
+            // while also allowing some targets to return valid created times
+            // even when std doesn't.
+            if let Ok(actual) = cap.created() {
+                println!(
+                    "std returned error for created time ({}) but got {:#?}",
+                    e, actual
+                );
+                assert_ne!(actual, SystemClock::UNIX_EPOCH);
+            }
+        }
     }
 
     #[cfg(unix)]
