@@ -226,8 +226,16 @@ impl MetadataExt {
             file_type: FileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             len: u64::try_from(statx.stx_size).unwrap(),
             permissions: PermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
-            modified: system_time_from_rustix(statx.stx_mtime.tv_sec, statx.stx_mtime.tv_nsec as _),
-            accessed: system_time_from_rustix(statx.stx_atime.tv_sec, statx.stx_atime.tv_nsec as _),
+            modified: if statx.stx_mask & StatxFlags::MTIME.bits() != 0 {
+                system_time_from_rustix(statx.stx_mtime.tv_sec, statx.stx_mtime.tv_nsec as _)
+            } else {
+                None
+            },
+            accessed: if statx.stx_mask & StatxFlags::ATIME.bits() != 0 {
+                system_time_from_rustix(statx.stx_atime.tv_sec, statx.stx_atime.tv_nsec as _)
+            } else {
+                None
+            },
             created: if statx.stx_mask & StatxFlags::BTIME.bits() != 0 {
                 system_time_from_rustix(statx.stx_btime.tv_sec, statx.stx_btime.tv_nsec as _)
             } else {
