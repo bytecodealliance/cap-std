@@ -86,7 +86,7 @@ pub(crate) use dir_entry_inner::DirEntryInner;
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use dir_options_ext::DirOptionsExt;
 pub(crate) use dir_utils::*;
-pub(crate) use file_type_ext::FileTypeExt;
+pub(crate) use file_type_ext::ImplFileTypeExt;
 pub(crate) use hard_link_unchecked::hard_link_unchecked;
 pub(crate) use is_file_read_write_impl::is_file_read_write_impl;
 pub(crate) use is_root_dir::is_root_dir;

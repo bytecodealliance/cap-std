@@ -22,6 +22,10 @@ pub use read_dir::ReadDir;
 // Re-export things from `cap_std::fs` that we can use as-is.
 pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
+// Re-export conditional types from `cap_primitives`.
+#[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
+pub use cap_primitives::fs::FileTypeExt;
+
 // Re-export `camino` to make it easy for users to depend on the same
 // version we do, because we use its types in our public API.
 pub use camino;

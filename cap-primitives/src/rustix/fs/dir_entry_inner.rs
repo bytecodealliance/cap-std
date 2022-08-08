@@ -1,5 +1,5 @@
 use crate::fs::{
-    FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir, ReadDirInner,
+    FileType, ImplFileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir, ReadDirInner,
 };
 use rustix::fs::DirEntry;
 use std::ffi::{OsStr, OsString};
@@ -46,13 +46,13 @@ impl DirEntryInner {
         Ok(match self.rustix.file_type() {
             rustix::fs::FileType::Directory => FileType::dir(),
             rustix::fs::FileType::RegularFile => FileType::file(),
-            rustix::fs::FileType::Symlink => FileType::ext(FileTypeExt::symlink()),
+            rustix::fs::FileType::Symlink => FileType::ext(ImplFileTypeExt::symlink()),
             #[cfg(not(target_os = "wasi"))]
-            rustix::fs::FileType::Fifo => FileType::ext(FileTypeExt::fifo()),
+            rustix::fs::FileType::Fifo => FileType::ext(ImplFileTypeExt::fifo()),
             #[cfg(not(target_os = "wasi"))]
-            rustix::fs::FileType::Socket => FileType::ext(FileTypeExt::socket()),
-            rustix::fs::FileType::CharacterDevice => FileType::ext(FileTypeExt::char_device()),
-            rustix::fs::FileType::BlockDevice => FileType::ext(FileTypeExt::block_device()),
+            rustix::fs::FileType::Socket => FileType::ext(ImplFileTypeExt::socket()),
+            rustix::fs::FileType::CharacterDevice => FileType::ext(ImplFileTypeExt::char_device()),
+            rustix::fs::FileType::BlockDevice => FileType::ext(ImplFileTypeExt::block_device()),
             rustix::fs::FileType::Unknown => FileType::unknown(),
         })
     }

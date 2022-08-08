@@ -2,8 +2,9 @@ use crate::fs::FileType;
 use rustix::fs::RawMode;
 use std::{fs, io};
 
+/// A type that implements `FileTypeExt` for this platform.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub(crate) enum FileTypeExt {
+pub(crate) enum ImplFileTypeExt {
     Symlink,
     BlockDevice,
     CharDevice,
@@ -11,7 +12,7 @@ pub(crate) enum FileTypeExt {
     Socket,
 }
 
-impl FileTypeExt {
+impl ImplFileTypeExt {
     /// Constructs a new instance of `FileType` from the given
     /// [`std::fs::File`] and [`std::fs::FileType`].
     #[inline]

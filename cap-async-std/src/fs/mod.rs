@@ -37,6 +37,10 @@ pub use read_dir::ReadDir;
 #[cfg(not(target_os = "wasi"))]
 pub use cap_primitives::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 
+// Re-export conditional types from `cap_primitives`.
+#[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
+pub use cap_primitives::fs::FileTypeExt;
+
 // Re-export things from `async_std` that we can use as-is.
 #[cfg(target_os = "wasi")]
 pub use async_std::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};

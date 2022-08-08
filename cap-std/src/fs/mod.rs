@@ -34,3 +34,7 @@ pub use read_dir::ReadDir;
 
 // Re-export types from `cap_primitives`.
 pub use cap_primitives::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
+
+// Re-export conditional types from `cap_primitives`.
+#[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
+pub use cap_primitives::fs::FileTypeExt;

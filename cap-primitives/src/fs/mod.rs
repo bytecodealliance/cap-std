@@ -66,6 +66,8 @@ pub use dir_entry::DirEntry;
 pub use dir_entry::_WindowsDirEntryExt;
 pub use dir_options::DirOptions;
 pub use file_type::FileType;
+#[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
+pub use file_type::FileTypeExt;
 #[cfg(windows)]
 pub use file_type::_WindowsFileTypeExt;
 pub use follow_symlinks::FollowSymlinks;
