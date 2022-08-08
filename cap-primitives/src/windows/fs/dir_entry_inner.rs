@@ -1,8 +1,8 @@
 use super::open_options_to_std;
 use crate::ambient_authority;
 use crate::fs::{
-    open, open_ambient_dir, FileType, ImplFileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir,
-    ReadDirInner,
+    open, open_ambient_dir, FileType, FollowSymlinks, ImplFileTypeExt, Metadata, OpenOptions,
+    ReadDir, ReadDirInner,
 };
 use std::ffi::OsString;
 use std::os::windows::fs::OpenOptionsExt;

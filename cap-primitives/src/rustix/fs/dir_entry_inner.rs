@@ -1,5 +1,5 @@
 use crate::fs::{
-    FileType, ImplFileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir, ReadDirInner,
+    FileType, FollowSymlinks, ImplFileTypeExt, Metadata, OpenOptions, ReadDir, ReadDirInner,
 };
 use rustix::fs::DirEntry;
 use std::ffi::{OsStr, OsString};
