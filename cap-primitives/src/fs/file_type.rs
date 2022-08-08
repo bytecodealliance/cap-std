@@ -137,12 +137,12 @@ pub trait FileTypeExt {
 impl FileTypeExt for FileType {
     #[inline]
     fn is_symlink_dir(&self) -> bool {
-        self.0 == Inner::Ext(FileTypeExt::symlink_dir())
+        self.0 == Inner::Ext(ImplFileTypeExt::symlink_dir())
     }
 
     #[inline]
     fn is_symlink_file(&self) -> bool {
-        self.0 == Inner::Ext(FileTypeExt::symlink_file())
+        self.0 == Inner::Ext(ImplFileTypeExt::symlink_file())
     }
 }
 
