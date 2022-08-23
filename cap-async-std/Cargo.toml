@@ -11,6 +11,7 @@ keywords = ["network", "file", "async", "future", "await"]
 categories = ["filesystem", "network-programming", "asynchronous", "concurrency"]
 repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
+publish = false # temporary, until async-rs/async-std#1036 is available
 
 [dependencies]
 arf-strings = { version = "0.6.7", optional = true }

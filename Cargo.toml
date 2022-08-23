@@ -15,9 +15,9 @@ publish = false
 exclude = ["/.*"]
 
 [dev-dependencies]
-async-std = { version = "1.10.0", features = ["attributes"] }
+#async-std = { version = "1.10.0", features = ["attributes"] }
 anyhow = "1.0.37"
-cap-async-std = { path = "cap-async-std", version = "^0.25.0" }
+#cap-async-std = { path = "cap-async-std", version = "^0.25.0" }
 cap-fs-ext = { path = "cap-fs-ext", version = "^0.25.0" }
 cap-directories = { path = "cap-directories", version = "^0.25.0" }
 cap-std = { path = "cap-std", version = "^0.25.0" }
@@ -51,23 +51,23 @@ fs_utf8 = [
     "cap-fs-ext/fs_utf8",
     "cap-tempfile/fs_utf8",
 ]
-async_std_fs_utf8 = [
-    "cap-async-std/fs_utf8",
-    "cap-fs-ext/async_std_fs_utf8"
-]
+#async_std_fs_utf8 = [
+#    "cap-async-std/fs_utf8",
+#    "cap-fs-ext/async_std_fs_utf8"
+#]
 arf_strings = [
     "cap-std/arf_strings",
     "cap-fs-ext/arf_strings",
     "cap-tempfile/arf_strings",
 ]
-async_std_arf_strings = [
-    "cap-async-std/arf_strings",
-    "cap-fs-ext/async_std_arf_strings"
-]
+#async_std_arf_strings = [
+#    "cap-async-std/arf_strings",
+#    "cap-fs-ext/async_std_arf_strings"
+#]
 
 [workspace]
 members = [
-  "cap-async-std",
+  #"cap-async-std",
   "cap-fs-ext",
   "cap-directories",
   "cap-primitives",
