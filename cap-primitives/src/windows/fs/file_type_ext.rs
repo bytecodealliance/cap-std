@@ -24,7 +24,7 @@ impl ImplFileTypeExt {
         }
 
         // Use the open file to check for one of the exotic file types.
-        let file_type = winapi_util::file::typ(file)?;
+        let file_type = winx::winapi_util::file::typ(file)?;
         if file_type.is_char() {
             return Ok(FileType::ext(ImplFileTypeExt::CharacterDevice));
         }
