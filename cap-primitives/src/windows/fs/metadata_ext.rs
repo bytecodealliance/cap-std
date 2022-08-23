@@ -44,7 +44,7 @@ impl MetadataExt {
 
         #[cfg(not(windows_by_handle))]
         if volume_serial_number.is_none() || number_of_links.is_none() || file_index.is_none() {
-            let fileinfo = winapi_util::file::information(file)?;
+            let fileinfo = winx::winapi_util::file::information(file)?;
             if volume_serial_number.is_none() {
                 let t64: u64 = fileinfo.volume_serial_number();
                 let t32: u32 = t64.try_into().unwrap();
