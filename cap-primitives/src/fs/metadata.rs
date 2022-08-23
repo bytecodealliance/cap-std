@@ -1,4 +1,4 @@
-use crate::fs::{FileType, FileTypeExt, MetadataExt, Permissions};
+use crate::fs::{FileType, ImplFileTypeExt, MetadataExt, Permissions};
 use crate::time::SystemTime;
 use std::{fs, io};
 
@@ -28,7 +28,7 @@ impl Metadata {
     pub fn from_file(file: &fs::File) -> io::Result<Self> {
         let std = file.metadata()?;
         let ext = MetadataExt::from(file, &std)?;
-        let file_type = FileTypeExt::from(file, &std)?;
+        let file_type = ImplFileTypeExt::from(file, &std)?;
         Ok(Self::from_parts(std, ext, file_type))
     }
 
@@ -42,7 +42,7 @@ impl Metadata {
     #[inline]
     pub fn from_just_metadata(std: fs::Metadata) -> Self {
         let ext = MetadataExt::from_just_metadata(&std);
-        let file_type = FileTypeExt::from_just_metadata(&std);
+        let file_type = ImplFileTypeExt::from_just_metadata(&std);
         Self::from_parts(std, ext, file_type)
     }
 

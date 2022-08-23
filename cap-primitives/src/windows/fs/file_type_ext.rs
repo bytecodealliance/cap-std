@@ -1,8 +1,9 @@
 use crate::fs::FileType;
 use std::{fs, io};
 
+/// A type that implements `FileTypeExt` for this platform.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub(crate) enum FileTypeExt {
+pub(crate) enum ImplFileTypeExt {
     CharacterDevice,
     Fifo,
     #[cfg(windows_file_type_ext)]
@@ -12,7 +13,7 @@ pub(crate) enum FileTypeExt {
     SymlinkUnknown,
 }
 
-impl FileTypeExt {
+impl ImplFileTypeExt {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`]
     /// and [`std::fs::Metadata`].
     pub(crate) fn from(file: &fs::File, metadata: &fs::Metadata) -> io::Result<FileType> {
@@ -25,10 +26,10 @@ impl FileTypeExt {
         // Use the open file to check for one of the exotic file types.
         let file_type = winapi_util::file::typ(file)?;
         if file_type.is_char() {
-            return Ok(FileType::ext(FileTypeExt::CharacterDevice));
+            return Ok(FileType::ext(ImplFileTypeExt::CharacterDevice));
         }
         if file_type.is_pipe() {
-            return Ok(FileType::ext(FileTypeExt::Fifo));
+            return Ok(FileType::ext(ImplFileTypeExt::Fifo));
         }
 
         Ok(FileType::unknown())
@@ -105,12 +106,12 @@ impl crate::fs::_WindowsFileTypeExt for crate::fs::FileType {
 
     #[inline]
     fn is_char_device(&self) -> bool {
-        *self == FileType::ext(FileTypeExt::CharacterDevice)
+        *self == FileType::ext(ImplFileTypeExt::CharacterDevice)
     }
 
     #[inline]
     fn is_fifo(&self) -> bool {
-        *self == FileType::ext(FileTypeExt::Fifo)
+        *self == FileType::ext(ImplFileTypeExt::Fifo)
     }
 
     #[inline]

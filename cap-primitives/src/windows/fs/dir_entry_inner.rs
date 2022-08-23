@@ -1,8 +1,8 @@
 use super::open_options_to_std;
 use crate::ambient_authority;
 use crate::fs::{
-    open, open_ambient_dir, FileType, FileTypeExt, FollowSymlinks, Metadata, OpenOptions, ReadDir,
-    ReadDirInner,
+    open, open_ambient_dir, FileType, FollowSymlinks, ImplFileTypeExt, Metadata, OpenOptions,
+    ReadDir, ReadDirInner,
 };
 use std::ffi::OsString;
 use std::os::windows::fs::OpenOptionsExt;
@@ -83,7 +83,7 @@ impl DirEntryInner {
 
     #[inline]
     pub(crate) fn file_type(&self) -> io::Result<FileType> {
-        self.std.file_type().map(FileTypeExt::from_std)
+        self.std.file_type().map(ImplFileTypeExt::from_std)
     }
 
     #[inline]

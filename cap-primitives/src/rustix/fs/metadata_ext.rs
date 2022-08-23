@@ -1,6 +1,6 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::fs::{FileTypeExt, Metadata, PermissionsExt};
+use crate::fs::{ImplFileTypeExt, Metadata, PermissionsExt};
 use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use rustix::fs::{makedev, Statx, StatxFlags};
@@ -103,7 +103,7 @@ impl MetadataExt {
     #[inline]
     pub(crate) fn from_rustix(stat: Stat) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_raw_mode(stat.st_mode as RawMode),
+            file_type: ImplFileTypeExt::from_raw_mode(stat.st_mode as RawMode),
             len: u64::try_from(stat.st_size).unwrap(),
             #[cfg(not(target_os = "wasi"))]
             permissions: PermissionsExt::from_raw_mode(stat.st_mode as RawMode),
@@ -223,7 +223,7 @@ impl MetadataExt {
     #[inline]
     pub(crate) fn from_rustix_statx(statx: Statx) -> Metadata {
         Metadata {
-            file_type: FileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),
+            file_type: ImplFileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             len: u64::try_from(statx.stx_size).unwrap(),
             permissions: PermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             modified: if statx.stx_mask & StatxFlags::MTIME.bits() != 0 {

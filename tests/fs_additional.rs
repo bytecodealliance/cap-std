@@ -913,17 +913,22 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     assert_eq!(std.file_type().is_symlink(), cap.file_type().is_symlink());
     #[cfg(unix)]
     {
-        use std::os::unix::fs::FileTypeExt;
         assert_eq!(
-            std.file_type().is_block_device(),
-            cap.file_type().is_block_device()
+            std::os::unix::fs::FileTypeExt::is_block_device(&std.file_type()),
+            cap_std::fs::FileTypeExt::is_block_device(&cap.file_type())
         );
         assert_eq!(
-            std.file_type().is_char_device(),
-            cap.file_type().is_char_device()
+            std::os::unix::fs::FileTypeExt::is_char_device(&std.file_type()),
+            cap_std::fs::FileTypeExt::is_char_device(&cap.file_type())
         );
-        assert_eq!(std.file_type().is_fifo(), cap.file_type().is_fifo());
-        assert_eq!(std.file_type().is_socket(), cap.file_type().is_socket());
+        assert_eq!(
+            std::os::unix::fs::FileTypeExt::is_fifo(&std.file_type()),
+            cap_std::fs::FileTypeExt::is_fifo(&cap.file_type())
+        );
+        assert_eq!(
+            std::os::unix::fs::FileTypeExt::is_socket(&std.file_type()),
+            cap_std::fs::FileTypeExt::is_socket(&cap.file_type())
+        );
     }
 
     assert_eq!(std.len(), cap.len());

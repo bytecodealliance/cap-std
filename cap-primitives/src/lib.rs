@@ -2,6 +2,7 @@
 
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
+#![allow(stable_features)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(all(windows, windows_by_handle), feature(windows_by_handle))]
 #![cfg_attr(all(windows, windows_file_type_ext), feature(windows_file_type_ext))]

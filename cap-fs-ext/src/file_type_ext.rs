@@ -67,22 +67,22 @@ impl FileTypeExt for std::fs::FileType {
 impl FileTypeExt for cap_primitives::fs::FileType {
     #[inline]
     fn is_block_device(&self) -> bool {
-        std::os::unix::fs::FileTypeExt::is_block_device(self)
+        cap_primitives::fs::FileTypeExt::is_block_device(self)
     }
 
     #[inline]
     fn is_char_device(&self) -> bool {
-        std::os::unix::fs::FileTypeExt::is_char_device(self)
+        cap_primitives::fs::FileTypeExt::is_char_device(self)
     }
 
     #[inline]
     fn is_fifo(&self) -> bool {
-        std::os::unix::fs::FileTypeExt::is_fifo(self)
+        cap_primitives::fs::FileTypeExt::is_fifo(self)
     }
 
     #[inline]
     fn is_socket(&self) -> bool {
-        std::os::unix::fs::FileTypeExt::is_socket(self)
+        cap_primitives::fs::FileTypeExt::is_socket(self)
     }
 }
 
