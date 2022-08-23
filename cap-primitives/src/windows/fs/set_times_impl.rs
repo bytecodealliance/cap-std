@@ -1,5 +1,4 @@
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
-use fs_set_times::SetTimes;
 use std::os::windows::fs::OpenOptionsExt;
 use std::path::Path;
 use std::{fs, io};
@@ -37,12 +36,13 @@ fn set_times_inner(
     let custom_flags = custom_flags | FILE_FLAG_BACKUP_SEMANTICS;
 
     // On Windows, `set_times` requires write permissions.
-    open(
+    let file = open(
         start,
         path,
         OpenOptions::new().write(true).custom_flags(custom_flags),
-    )?
-    .set_times(
+    )?;
+    fs_set_times::SetTimes::set_times(
+        &file,
         atime.map(SystemTimeSpec::into_std),
         mtime.map(SystemTimeSpec::into_std),
     )
