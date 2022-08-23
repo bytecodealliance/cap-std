@@ -3,7 +3,6 @@
 
 use super::procfs::set_times_through_proc_self_fd;
 use crate::fs::{open, OpenOptions, SystemTimeSpec};
-use fs_set_times::SetTimes;
 use std::path::Path;
 use std::{fs, io};
 
@@ -17,7 +16,8 @@ pub(crate) fn set_times_impl(
     // access, so first try write.
     match open(start, path, OpenOptions::new().write(true)) {
         Ok(file) => {
-            return file.set_times(
+            return fs_set_times::SetTimes::set_times(
+                &file,
                 atime.map(SystemTimeSpec::into_std),
                 mtime.map(SystemTimeSpec::into_std),
             )
@@ -31,7 +31,8 @@ pub(crate) fn set_times_impl(
     // Next try read.
     match open(start, path, OpenOptions::new().read(true)) {
         Ok(file) => {
-            return file.set_times(
+            return fs_set_times::SetTimes::set_times(
+                &file,
                 atime.map(SystemTimeSpec::into_std),
                 mtime.map(SystemTimeSpec::into_std),
             )
