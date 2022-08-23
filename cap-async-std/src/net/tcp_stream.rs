@@ -5,9 +5,9 @@ use async_std::net;
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::task::{Context, Poll};
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
+use io_lifetimes::{AsSocket, BorrowedSocket, OwnedSocket};
 use std::fmt;
 use std::pin::Pin;
 #[cfg(windows)]
@@ -131,10 +131,10 @@ impl FromRawFd for TcpStream {
 }
 
 #[cfg(not(windows))]
-impl FromFd for TcpStream {
+impl From<OwnedFd> for TcpStream {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::TcpStream::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(net::TcpStream::from(fd))
     }
 }
 
@@ -147,10 +147,10 @@ impl FromRawSocket for TcpStream {
 }
 
 #[cfg(windows)]
-impl FromSocket for TcpStream {
+impl From<OwnedSocket> for TcpStream {
     #[inline]
-    fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::TcpStream::from_socket(socket))
+    fn from(socket: OwnedSocket) -> Self {
+        Self::from_std(net::TcpStream::from(socket))
     }
 }
 
@@ -203,10 +203,10 @@ impl IntoRawFd for TcpStream {
 }
 
 #[cfg(not(windows))]
-impl IntoFd for TcpStream {
+impl From<TcpStream> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(stream: TcpStream) -> OwnedFd {
+        stream.std.into()
     }
 }
 
@@ -219,10 +219,10 @@ impl IntoRawSocket for TcpStream {
 }
 
 #[cfg(windows)]
-impl IntoSocket for TcpStream {
+impl From<TcpStream> for OwnedSocket {
     #[inline]
-    fn into_socket(self) -> OwnedSocket {
-        self.std.into_socket()
+    fn from(stream: TcpStream) -> OwnedSocket {
+        stream.std.into()
     }
 }
 

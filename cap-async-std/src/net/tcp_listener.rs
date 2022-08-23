@@ -3,9 +3,9 @@ use crate::net::{Incoming, SocketAddr, TcpStream};
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use async_std::{io, net};
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
+use io_lifetimes::{AsSocket, BorrowedSocket, OwnedSocket};
 use std::fmt;
 #[cfg(windows)]
 use {
@@ -87,10 +87,10 @@ impl FromRawFd for TcpListener {
 }
 
 #[cfg(not(windows))]
-impl FromFd for TcpListener {
+impl From<OwnedFd> for TcpListener {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::TcpListener::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(net::TcpListener::from(fd))
     }
 }
 
@@ -103,10 +103,10 @@ impl FromRawSocket for TcpListener {
 }
 
 #[cfg(windows)]
-impl FromSocket for TcpListener {
+impl From<OwnedSocket> for TcpListener {
     #[inline]
-    fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::TcpListener::from_socket(socket))
+    fn from(socket: OwnedSocket) -> Self {
+        Self::from_std(net::TcpListener::from(socket))
     }
 }
 
@@ -159,10 +159,10 @@ impl IntoRawFd for TcpListener {
 }
 
 #[cfg(not(windows))]
-impl IntoFd for TcpListener {
+impl From<TcpListener> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(listener: TcpListener) -> OwnedFd {
+        listener.std.into()
     }
 }
 
@@ -175,10 +175,10 @@ impl IntoRawSocket for TcpListener {
 }
 
 #[cfg(windows)]
-impl IntoSocket for TcpListener {
+impl From<TcpListener> for OwnedSocket {
     #[inline]
-    fn into_socket(self) -> OwnedSocket {
-        self.std.into_socket()
+    fn from(listener: TcpListener) -> OwnedSocket {
+        listener.std.into()
     }
 }
 

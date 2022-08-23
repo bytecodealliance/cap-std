@@ -55,7 +55,7 @@ impl<'d> Debug for TempFile<'d> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn new_tempfile_linux(d: &Dir) -> io::Result<Option<File>> {
-    use rustix::fd::FromFd;
+    use cap_std::io_lifetimes::FromFd;
     use rustix::fs::{Mode, OFlags};
     // openat's API uses WRONLY.  There may be use cases for reading too, so let's support it.
     let oflags = OFlags::CLOEXEC | OFlags::TMPFILE | OFlags::RDWR;
@@ -64,7 +64,7 @@ fn new_tempfile_linux(d: &Dir) -> io::Result<Option<File>> {
     let mode = Mode::from_raw_mode(0o666);
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
-        Ok(r) => return Ok(Some(File::from_fd(r.into()))),
+        Ok(r) => return Ok(Some(File::from_into_fd(r))),
         // See https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81
         // TODO: With newer Rust versions, this could be simplied to only write `Err` once.
         Err(rustix::io::Errno::OPNOTSUPP)

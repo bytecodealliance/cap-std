@@ -5,9 +5,9 @@ use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
+use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::io::{self, IoSlice, IoSliceMut, Read, Seek, SeekFrom, Write};
 #[cfg(target_os = "wasi")]
 use std::path::Path;
@@ -166,10 +166,10 @@ impl FromRawFd for File {
 }
 
 #[cfg(not(windows))]
-impl FromFd for File {
+impl From<OwnedFd> for File {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(fs::File::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(fs::File::from(fd))
     }
 }
 
@@ -182,10 +182,10 @@ impl FromRawHandle for File {
 }
 
 #[cfg(windows)]
-impl FromHandle for File {
+impl From<OwnedHandle> for File {
     #[inline]
-    fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std(fs::File::from_handle(handle))
+    fn from(handle: OwnedHandle) -> Self {
+        Self::from_std(fs::File::from(handle))
     }
 }
 
@@ -238,10 +238,10 @@ impl IntoRawFd for File {
 }
 
 #[cfg(not(windows))]
-impl IntoFd for File {
+impl From<File> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.cap_std.into_fd()
+    fn from(file: File) -> OwnedFd {
+        file.cap_std.into()
     }
 }
 
@@ -254,10 +254,10 @@ impl IntoRawHandle for File {
 }
 
 #[cfg(windows)]
-impl IntoHandle for File {
+impl From<File> for OwnedHandle {
     #[inline]
-    fn into_handle(self) -> OwnedHandle {
-        self.cap_std.into_handle()
+    fn from(file: File) -> OwnedHandle {
+        file.cap_std.into()
     }
 }
 
