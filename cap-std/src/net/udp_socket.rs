@@ -2,9 +2,9 @@ use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsSocket, BorrowedSocket, FromSocket, IntoSocket, OwnedSocket};
+use io_lifetimes::{AsSocket, BorrowedSocket, OwnedSocket};
 use std::time::Duration;
 use std::{fmt, io, net};
 #[cfg(windows)]
@@ -286,10 +286,10 @@ impl FromRawFd for UdpSocket {
 }
 
 #[cfg(not(windows))]
-impl FromFd for UdpSocket {
+impl From<OwnedFd> for UdpSocket {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(net::UdpSocket::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(net::UdpSocket::from(fd))
     }
 }
 
@@ -302,10 +302,10 @@ impl FromRawSocket for UdpSocket {
 }
 
 #[cfg(windows)]
-impl FromSocket for UdpSocket {
+impl From<OwnedSocket> for UdpSocket {
     #[inline]
-    fn from_socket(socket: OwnedSocket) -> Self {
-        Self::from_std(net::UdpSocket::from_socket(socket))
+    fn from(socket: OwnedSocket) -> Self {
+        Self::from_std(net::UdpSocket::from(socket))
     }
 }
 
@@ -358,10 +358,10 @@ impl IntoRawFd for UdpSocket {
 }
 
 #[cfg(not(windows))]
-impl IntoFd for UdpSocket {
+impl From<UdpSocket> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(socket: UdpSocket) -> OwnedFd {
+        socket.std.into()
     }
 }
 
@@ -374,10 +374,10 @@ impl IntoRawSocket for UdpSocket {
 }
 
 #[cfg(windows)]
-impl IntoSocket for UdpSocket {
+impl From<UdpSocket> for OwnedSocket {
     #[inline]
-    fn into_socket(self) -> OwnedSocket {
-        self.std.into_socket()
+    fn from(socket: UdpSocket) -> OwnedSocket {
+        socket.std.into()
     }
 }
 

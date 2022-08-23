@@ -4,9 +4,9 @@ use crate::fs::{
     Metadata, OpenOptions, ReadDir,
 };
 use io_extras::os::rustix::{AsRawFd, FromRawFd, RawFd};
-use io_lifetimes::{AsFd, IntoFd};
+use io_lifetimes::AsFd;
+use rustix::fd::OwnedFd;
 use rustix::fs::Dir;
-use rustix::io::OwnedFd;
 use std::ffi::OsStr;
 use std::mem::ManuallyDrop;
 #[cfg(unix)]
@@ -32,7 +32,7 @@ impl ReadDirInner {
         let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
             raw_fd: fd.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
+            rustix: Arc::new(Mutex::new((dir, OwnedFd::from(fd)))),
         })
     }
 
@@ -46,7 +46,7 @@ impl ReadDirInner {
         let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
             raw_fd: fd.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
+            rustix: Arc::new(Mutex::new((dir, fd.into()))),
         })
     }
 
@@ -59,7 +59,7 @@ impl ReadDirInner {
         let dir = Dir::read_from(fd.as_fd())?;
         Ok(Self {
             raw_fd: fd.as_fd().as_raw_fd(),
-            rustix: Arc::new(Mutex::new((dir, fd.into_fd().into()))),
+            rustix: Arc::new(Mutex::new((dir, fd.into()))),
         })
     }
 

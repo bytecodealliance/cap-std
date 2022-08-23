@@ -6,7 +6,7 @@ use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
-use io_lifetimes::{AsHandle, BorrowedHandle, FromHandle, IntoHandle, OwnedHandle};
+use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::fmt;
 #[cfg(unix)]
 use {
@@ -644,10 +644,10 @@ impl FromRawFd for Dir {
 }
 
 #[cfg(not(windows))]
-impl FromFd for Dir {
+impl From<OwnedFd> for Dir {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std_file(fs::File::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std_file(fs::File::from(fd))
     }
 }
 
@@ -662,10 +662,10 @@ impl FromRawHandle for Dir {
 }
 
 #[cfg(windows)]
-impl FromHandle for Dir {
+impl From<OwnedHandle> for Dir {
     #[inline]
-    fn from_handle(handle: OwnedHandle) -> Self {
-        Self::from_std_file(fs::File::from_handle(handle))
+    fn from(handle: OwnedHandle) -> Self {
+        Self::from_std_file(fs::File::from(handle))
     }
 }
 
@@ -718,10 +718,10 @@ impl IntoRawFd for Dir {
 }
 
 #[cfg(not(windows))]
-impl IntoFd for Dir {
+impl From<Dir> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.cap_std.into_fd()
+    fn from(dir: Dir) -> OwnedFd {
+        dir.cap_std.into()
     }
 }
 
@@ -734,10 +734,10 @@ impl IntoRawHandle for Dir {
 }
 
 #[cfg(windows)]
-impl IntoHandle for Dir {
+impl From<Dir> for OwnedHandle {
     #[inline]
-    fn into_handle(self) -> OwnedHandle {
-        self.cap_std.into_handle()
+    fn from(dir: Dir) -> OwnedHandle {
+        dir.cap_std.into()
     }
 }
 

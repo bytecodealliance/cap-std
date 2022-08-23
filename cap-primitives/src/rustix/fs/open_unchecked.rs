@@ -1,7 +1,7 @@
 use super::compute_oflags;
 use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
 use crate::AmbientAuthority;
-use io_lifetimes::{AsFilelike, FromFd};
+use io_lifetimes::AsFilelike;
 use rustix::fs::{cwd, openat, Mode};
 use rustix::io;
 use std::fs;
@@ -24,7 +24,7 @@ pub(crate) fn open_unchecked(
 
     let err = match openat(start, path, oflags, mode) {
         Ok(file) => {
-            return Ok(fs::File::from_fd(file.into()));
+            return Ok(fs::File::from(file));
         }
         Err(err) => err,
     };

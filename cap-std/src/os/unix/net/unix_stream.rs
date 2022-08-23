@@ -1,6 +1,6 @@
 use crate::net::Shutdown;
 use crate::os::unix::net::SocketAddr;
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::fmt;
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::os::unix;
@@ -157,10 +157,10 @@ impl FromRawFd for UnixStream {
     }
 }
 
-impl FromFd for UnixStream {
+impl From<OwnedFd> for UnixStream {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(unix::net::UnixStream::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixStream::from(fd))
     }
 }
 
@@ -185,10 +185,10 @@ impl IntoRawFd for UnixStream {
     }
 }
 
-impl IntoFd for UnixStream {
+impl From<UnixStream> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(stream: UnixStream) -> OwnedFd {
+        stream.std.into()
     }
 }
 

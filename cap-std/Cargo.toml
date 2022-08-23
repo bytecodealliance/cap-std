@@ -20,12 +20,12 @@ rustdoc-args = ["--cfg=doc_cfg"]
 arf-strings = { version = "0.6.7", optional = true }
 cap-primitives = { path = "../cap-primitives", version = "^0.25.0" }
 ipnet = "2.3.0"
-io-extras = "0.15.0"
-io-lifetimes = { version = "0.7.0", default-features = false }
+io-extras = "0.16.0-rc1"
+io-lifetimes = { version = "1.0.0-rc1", default-features = false }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.35.6", features = ["fs"] }
+rustix = { version = "0.36.0-rc1", features = ["fs"] }
 
 [features]
 default = []

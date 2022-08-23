@@ -1,5 +1,5 @@
 use crate::os::unix::net::{Incoming, SocketAddr, UnixStream};
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::os::unix;
 use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::{fmt, io};
@@ -103,10 +103,10 @@ impl FromRawFd for UnixListener {
     }
 }
 
-impl FromFd for UnixListener {
+impl From<OwnedFd> for UnixListener {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(unix::net::UnixListener::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixListener::from(fd))
     }
 }
 
@@ -131,10 +131,10 @@ impl IntoRawFd for UnixListener {
     }
 }
 
-impl IntoFd for UnixListener {
+impl From<UnixListener> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(listener: UnixListener) -> OwnedFd {
+        listener.std.into()
     }
 }
 

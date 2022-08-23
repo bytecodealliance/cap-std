@@ -3,7 +3,7 @@ use crate::os::unix::net::SocketAddr;
 use async_std::io;
 use async_std::os::unix;
 use async_std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use std::fmt;
 
 /// A Unix datagram socket.
@@ -148,10 +148,10 @@ impl FromRawFd for UnixDatagram {
     }
 }
 
-impl FromFd for UnixDatagram {
+impl From<OwnedFd> for UnixDatagram {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self::from_std(unix::net::UnixDatagram::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self::from_std(unix::net::UnixDatagram::from(fd))
     }
 }
 
@@ -176,10 +176,10 @@ impl IntoRawFd for UnixDatagram {
     }
 }
 
-impl IntoFd for UnixDatagram {
+impl From<UnixDatagram> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.std.into_fd()
+    fn from(datagram: UnixDatagram) -> OwnedFd {
+        datagram.std.into()
     }
 }
 
