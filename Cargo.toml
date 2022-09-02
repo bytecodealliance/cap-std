@@ -21,7 +21,7 @@ anyhow = "1.0.37"
 cap-fs-ext = { path = "cap-fs-ext", version = "^1.0.0-rc1" }
 cap-directories = { path = "cap-directories", version = "^0.25.0" }
 cap-std = { path = "cap-std", version = "^1.0.0-rc1" }
-cap-tempfile = { path = "cap-tempfile", version = "^0.25.0" }
+cap-tempfile = { path = "cap-tempfile", version = "^1.0.0-rc1" }
 rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
