@@ -18,7 +18,7 @@ rustdoc-args = ["--cfg=doc_cfg"]
 
 [dependencies]
 arf-strings = { version = "0.6.7", optional = true }
-cap-primitives = { path = "../cap-primitives", version = "^0.25.0" }
+cap-primitives = { path = "../cap-primitives", version = "^1.0.0-rc1" }
 ipnet = "2.3.0"
 io-extras = "0.16.0-rc1"
 io-lifetimes = { version = "1.0.0-rc1", default-features = false }
