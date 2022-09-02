@@ -15,7 +15,7 @@ edition = "2018"
 [dependencies]
 arf-strings = { version = "0.6.7", optional = true }
 #cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.25.0" }
-cap-std = { path = "../cap-std", optional = true, version = "^0.25.0" }
+cap-std = { path = "../cap-std", optional = true, version = "^1.0.0-rc1" }
 cap-primitives = { path = "../cap-primitives", version = "^1.0.0-rc1" }
 io-lifetimes = { version = "1.0.0-rc1", default-features = false }
 # Enable "unstable" for `spawn_blocking`.
