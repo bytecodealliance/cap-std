@@ -14,7 +14,8 @@
 //! interface, it provides a `from_entropy` function which directly reads
 //! from the operating system entropy source. To preserve the
 //! capability-based interface, avoid using `rand::SeedableRng`'s
-//! `from_entropy` function on any of the types that implement that trait.
+//! `from_entropy` function on any of the types that implement that trait; use
+//! [`std_rng_from_entropy`] instead.
 //!
 //! [`OsRng`]: crate::rngs::OsRng
 //! [`CapRng`]: crate::rngs::CapRng
@@ -164,6 +165,19 @@ pub fn thread_rng(_: AmbientAuthority) -> rngs::CapRng {
     rngs::CapRng {
         inner: rand::thread_rng(),
     }
+}
+
+/// Retrieve the standard random number generator, seeded by the system.
+///
+/// This corresponds to [`rand::rngs::StdRng::from_entropy`].
+///
+/// # Ambient Authority
+///
+/// This function makes use of ambient authority to access the platform entropy
+/// source.
+#[inline]
+pub fn std_rng_from_entropy(_: AmbientAuthority) -> rngs::StdRng {
+    rand::rngs::StdRng::from_entropy()
 }
 
 /// Generates a random value using the thread-local random number generator.
