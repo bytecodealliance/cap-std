@@ -1,6 +1,6 @@
 [package]
 name = "cap-async-std"
-version = "0.25.4-backport0"
+version = "0.25.5"
 description = "Capability-based version of async-std"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -16,7 +16,7 @@ edition = "2018"
 arf-strings = { version = "0.6.7", optional = true }
 # Enable "unstable" for `spawn_blocking`.
 async-std = { version = "1.10.0", features = ["attributes", "unstable"] }
-cap-primitives = { path = "../cap-primitives", version = "^0.25.4-backport0" }
+cap-primitives = { path = "../cap-primitives", version = "^0.25.5" }
 io-lifetimes = { version = "0.7.0", default-features = false, features = ["async-std"] }
 ipnet = "2.3.0"
 io-extras = { version = "0.15.0", features = ["use_async_std"] }
