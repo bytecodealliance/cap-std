@@ -6,7 +6,7 @@ use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
 #[cfg(target_os = "wasi")]
-use std::os::wasi::ffi::OsStrExt;
+use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
 use std::path::Path;
 #[cfg(racy_asserts)]
 use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
@@ -100,15 +100,15 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
 pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Result<fs::File> {
-    // This is for `std::fs`, so we don't have `dir_required`, so set
-    // `O_DIRECTORY` manually.
-    let flags = OFlags::DIRECTORY | target_o_path();
-
     let mut options = fs::OpenOptions::new();
     options.read(true);
 
     #[cfg(not(target_os = "wasi"))]
-    options.custom_flags(flags.bits() as i32);
+    // This is for `std::fs`, so we don't have `dir_required`, so set
+    // `O_DIRECTORY` manually.
+    options.custom_flags((OFlags::DIRECTORY | target_o_path()).bits() as i32);
+    #[cfg(target_os = "wasi")]
+    options.directory(true);
 
     options.open(&path)
 }
