@@ -1,6 +1,6 @@
 [package]
 name = "cap-std"
-version = "0.26.0"
+version = "0.25.4-backport0"
 description = "Capability-based version of the Rust standard library"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -18,7 +18,7 @@ rustdoc-args = ["--cfg=doc_cfg"]
 
 [dependencies]
 arf-strings = { version = "0.6.7", optional = true }
-cap-primitives = { path = "../cap-primitives", version = "^0.26.0-patch0" }
+cap-primitives = { path = "../cap-primitives", version = "^0.25.4-backport0" }
 ipnet = "2.3.0"
 io-extras = "0.15.0"
 io-lifetimes = { version = "0.7.0", default-features = false }
