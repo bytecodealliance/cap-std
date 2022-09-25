@@ -1,6 +1,6 @@
 [package]
 name = "cap-time-ext"
-version = "0.25.5"
+version = "0.25.2"
 description = "Extension traits for `SystemClock` and `MonotonicClock`"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -13,8 +13,8 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-cap-primitives = { path = "../cap-primitives", version = "^0.25.5" }
-cap-std = { path = "../cap-std", optional = true, version = "^0.25.5" }
+cap-primitives = { path = "../cap-primitives", version = "^0.25.2" }
+cap-std = { path = "../cap-std", optional = true, version = "^0.25.2" }
 
 [target.'cfg(not(windows))'.dependencies]
 rustix = { version = "0.35.6", features = ["time"] }
