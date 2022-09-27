@@ -24,8 +24,15 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
             opts.ext.custom_flags | FILE_FLAG_OPEN_REPARSE_POINT
         }
     };
+    let mut share_mode = opts.ext.share_mode;
     if opts.maybe_dir {
         custom_flags |= FILE_FLAG_BACKUP_SEMANTICS;
+
+        // Only allow `FILE_SHARE_READ` and `FILE_SHARE_WRITE`; this mirrors
+        // the values in `dir_options()` and is done to prevent directories
+        // from being deleted or renamed underneath cap-std's sandboxed path
+        // lookups on Windows.
+        share_mode &= !FILE_SHARE_DELETE;
     }
     let mut std_opts = fs::OpenOptions::new();
     std_opts
@@ -35,7 +42,7 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
         .truncate(trunc)
         .create(opts.create)
         .create_new(opts.create_new)
-        .share_mode(opts.ext.share_mode)
+        .share_mode(share_mode)
         .custom_flags(custom_flags)
         .attributes(opts.ext.attributes);
 
