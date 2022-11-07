@@ -27,10 +27,10 @@ rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
 libc = "0.2.100"
-io-lifetimes = "1.0.0-rc1"
+io-lifetimes = "1.0.0"
 
 [target.'cfg(not(windows))'.dev-dependencies]
-rustix = { version = "0.36.0-rc2", features = ["fs"] }
+rustix = { version = "0.36.0", features = ["fs"] }
 
 [target.'cfg(windows)'.dev-dependencies]
 # nt_version uses internal Windows APIs, however we're only using it
@@ -38,7 +38,7 @@ rustix = { version = "0.36.0-rc2", features = ["fs"] }
 nt_version = "0.1.3"
 
 [target.'cfg(windows)'.dependencies.windows-sys]
-version = "0.36.0"
+version = "0.42.0"
 features = [
     "Win32_Storage_FileSystem",
     "Win32_Foundation",

@@ -18,13 +18,13 @@ arf-strings = { version = "0.6.7", optional = true }
 # Enable "unstable" for `spawn_blocking`.
 async-std = { version = "1.10.0", features = ["attributes", "unstable"] }
 cap-primitives = { path = "../cap-primitives", version = "^0.25.0" }
-io-lifetimes = { version = "1.0.0-rc1", default-features = false, features = ["async-std"] }
+io-lifetimes = { version = "1.0.0", default-features = false, features = ["async-std"] }
 ipnet = "2.3.0"
-io-extras = { version = "0.16.0-rc1", features = ["use_async_std"] }
+io-extras = { version = "0.16.0", features = ["use_async_std"] }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.36.0-rc2", features = ["fs"] }
+rustix = { version = "0.36.0", features = ["fs"] }
 
 [features]
 default = []
