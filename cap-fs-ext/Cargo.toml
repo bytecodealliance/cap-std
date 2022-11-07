@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-arf-strings = { version = "0.6.7", optional = true }
+arf-strings = { version = "0.7.0", optional = true }
 #cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.25.0" }
 cap-std = { path = "../cap-std", optional = true, version = "^1.0.0-rc2" }
 cap-primitives = { path = "../cap-primitives", version = "^1.0.0-rc2" }
