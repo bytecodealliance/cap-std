@@ -13,8 +13,8 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-cap-primitives = { path = "../cap-primitives", version = "^1.0.0-rc1" }
-cap-std = { path = "../cap-std", optional = true, version = "^1.0.0-rc1" }
+cap-primitives = { path = "../cap-primitives", version = "^1.0.0-rc2" }
+cap-std = { path = "../cap-std", optional = true, version = "^1.0.0-rc2" }
 
 [target.'cfg(not(windows))'.dependencies]
 rustix = { version = "0.36.0", features = ["time"] }
