@@ -127,9 +127,11 @@ impl FileTypeExt for FileType {
 /// This corresponds to [`std::os::windows::fs::FileTypeExt`].
 #[cfg(all(windows, windows_file_type_ext))]
 pub trait FileTypeExt {
-    /// Returns `true` if this file type is a symbolic link that is also a directory.
+    /// Returns `true` if this file type is a symbolic link that is also a
+    /// directory.
     fn is_symlink_dir(&self) -> bool;
-    /// Returns `true` if this file type is a symbolic link that is also a file.
+    /// Returns `true` if this file type is a symbolic link that is also a
+    /// file.
     fn is_symlink_file(&self) -> bool;
 }
 
