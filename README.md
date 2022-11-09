@@ -238,6 +238,11 @@ a symlink to an absolute path within a `Dir` is always an error. With
 potentially resolve to something different than it would when resolved through
 the process filesystem namespace.
 
+## Minimum Supported Rust Version (MSRV)
+
+This crate currently works on Rust 1.58, when default features are enabled.
+Some of the optional features have stricter requirements.
+
 [`arf-strings`]: https://github.com/bytecodealliance/arf-strings/
 [`openat`]: https://crates.io/crates/openat
 [`pathrs`]: https://crates.io/crates/pathrs

@@ -353,6 +353,30 @@ jobs:
         toolchain: ${{ matrix.rust }}
     - run: cargo test --all-features --workspace
 
+  test_msrv:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [msrv]
+        include:
+          - build: msrv
+            os: ubuntu-latest
+            rust: 1.58
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: ${{ matrix.rust }}
+    # Don't use --all-features because some of the features have dependencies
+    # that don't work on newer Rust versions.
+    - run: cargo test --workspace --features=fs_utf8,arf_strings
+      env:
+        RUST_BACKTRACE: 1
+
   fuzz_targets:
     name: Fuzz Targets
     runs-on: ubuntu-latest
