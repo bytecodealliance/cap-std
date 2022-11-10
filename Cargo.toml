@@ -13,6 +13,8 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 publish = false
 exclude = ["/.*"]
+# This is also checked in CI.
+rust-version = "1.56"
 
 [dev-dependencies]
 #async-std = { version = "1.10.0", features = ["attributes"] }
