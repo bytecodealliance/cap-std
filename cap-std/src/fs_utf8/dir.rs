@@ -671,6 +671,9 @@ impl AsFd for Dir {
     }
 }
 
+// Safety: `FilelikeViewType` is implemented for `std::fs::File`.
+unsafe impl io_lifetimes::views::FilelikeViewType for Dir {}
+
 #[cfg(windows)]
 impl AsRawHandle for Dir {
     #[inline]

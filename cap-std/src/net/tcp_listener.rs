@@ -107,6 +107,9 @@ impl TcpListener {
     }
 }
 
+// Safety: `SocketlikeViewType` is implemented for `std`'s socket types.
+unsafe impl io_lifetimes::views::SocketlikeViewType for TcpListener {}
+
 #[cfg(not(windows))]
 impl FromRawFd for TcpListener {
     #[inline]

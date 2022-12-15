@@ -122,6 +122,9 @@ impl TcpStream {
     // async_std doesn't have `set_nonblocking`.
 }
 
+// Safety: `SocketlikeViewType` is implemented for `std`'s socket types.
+unsafe impl io_lifetimes::views::SocketlikeViewType for TcpStream {}
+
 #[cfg(not(windows))]
 impl FromRawFd for TcpStream {
     #[inline]

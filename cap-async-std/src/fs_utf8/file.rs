@@ -151,6 +151,9 @@ impl File {
     }
 }
 
+// Safety: `FilelikeViewType` is implemented for `std::fs::File`.
+unsafe impl io_lifetimes::views::FilelikeViewType for File {}
+
 #[cfg(not(windows))]
 impl FromRawFd for File {
     #[inline]

@@ -78,6 +78,9 @@ impl TcpListener {
     // async_std doesn't have `TcpListener::set_nonblocking`.
 }
 
+// Safety: `SocketlikeViewType` is implemented for `std`'s socket types.
+unsafe impl io_lifetimes::views::SocketlikeViewType for TcpListener {}
+
 #[cfg(not(windows))]
 impl FromRawFd for TcpListener {
     #[inline]
