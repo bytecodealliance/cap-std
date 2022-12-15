@@ -868,7 +868,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
 impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[inline]
     fn set_atime<P: AsRef<Utf8Path>>(&self, path: P, atime: SystemTimeSpec) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         set_times(
             &self.as_filelike_view::<std::fs::File>(),
             &path,
@@ -879,7 +879,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
 
     #[inline]
     fn set_mtime<P: AsRef<Utf8Path>>(&self, path: P, mtime: SystemTimeSpec) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         set_times(
             &self.as_filelike_view::<std::fs::File>(),
             &path,
@@ -895,7 +895,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         set_times(
             &self.as_filelike_view::<std::fs::File>(),
             &path,
@@ -911,7 +911,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         set_times_nofollow(
             &self.as_filelike_view::<std::fs::File>(),
             &path,
@@ -1040,7 +1040,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         path: P,
         atime: SystemTimeSpec,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || {
             set_times(
@@ -1059,7 +1059,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         path: P,
         mtime: SystemTimeSpec,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || {
             set_times(
@@ -1079,7 +1079,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || {
             set_times(
@@ -1099,7 +1099,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         atime: Option<SystemTimeSpec>,
         mtime: Option<SystemTimeSpec>,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || {
             set_times_nofollow(
@@ -1210,7 +1210,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
     #[inline]
     async fn open_dir_nofollow<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || {
             match open_dir_nofollow(&clone.as_filelike_view::<std::fs::File>(), path.as_ref()) {
@@ -1266,28 +1266,27 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 }
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
-fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<std::path::PathBuf> {
-    #[cfg(not(feature = "arf_strings"))]
-    {
-        Ok(path.as_ref().as_std_path().to_path_buf())
-    }
+#[cfg(not(feature = "arf_strings"))]
+fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a std::path::Path> {
+    Ok(path.as_std_path())
+}
 
-    #[cfg(feature = "arf_strings")]
-    {
-        #[cfg(not(windows))]
-        let path = {
-            #[cfg(unix)]
-            use std::{ffi::OsString, os::unix::ffi::OsStringExt};
-            #[cfg(target_os = "wasi")]
-            use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
+#[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
+#[cfg(feature = "arf_strings")]
+fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<std::path::PathBuf> {
+    #[cfg(not(windows))]
+    let path = {
+        #[cfg(unix)]
+        use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+        #[cfg(target_os = "wasi")]
+        use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
 
-            let string = arf_strings::str_to_host(path.as_ref().as_str())?;
-            OsString::from_vec(string.into_bytes())
-        };
+        let string = arf_strings::str_to_host(path.as_str())?;
+        OsString::from_vec(string.into_bytes())
+    };
 
-        #[cfg(windows)]
-        let path = arf_strings::str_to_host(path.as_ref().as_str())?;
+    #[cfg(windows)]
+    let path = arf_strings::str_to_host(path.as_str())?;
 
-        Ok(path.into())
-    }
+    Ok(path.into())
 }

@@ -56,7 +56,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn open<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.open(path).map(File::from_cap_std)
     }
 
@@ -72,7 +72,7 @@ impl Dir {
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std
             .open_with(path, options)
             .map(File::from_cap_std)
@@ -81,7 +81,7 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub fn open_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.open_dir(path).map(Self::from_cap_std)
     }
 
@@ -91,7 +91,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn create_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir(path)
     }
 
@@ -102,7 +102,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub fn create_dir_all<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir_all(path)
     }
 
@@ -117,7 +117,7 @@ impl Dir {
         path: P,
         dir_builder: &DirBuilder,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir_with(path, dir_builder)
     }
 
@@ -127,7 +127,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn create<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create(path).map(File::from_cap_std)
     }
 
@@ -139,7 +139,7 @@ impl Dir {
     /// represented by `self`.
     #[inline]
     pub fn canonicalize<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.canonicalize(path).and_then(to_utf8)
     }
 
@@ -156,8 +156,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        let from = from_utf8(from)?;
-        let to = from_utf8(to)?;
+        let from = from_utf8(from.as_ref())?;
+        let to = from_utf8(to.as_ref())?;
         self.cap_std.copy(from, &to_dir.cap_std, to)
     }
 
@@ -172,8 +172,8 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
+        let src = from_utf8(src.as_ref())?;
+        let dst = from_utf8(dst.as_ref())?;
         self.cap_std.hard_link(src, &dst_dir.cap_std, dst)
     }
 
@@ -184,7 +184,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn metadata<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Metadata> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.metadata(path)
     }
 
@@ -200,7 +200,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn read_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<ReadDir> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_dir(path).map(ReadDir::from_cap_std)
     }
 
@@ -210,7 +210,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn read<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Vec<u8>> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read(path)
     }
 
@@ -220,7 +220,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn read_link<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_link(path).and_then(to_utf8)
     }
 
@@ -230,7 +230,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub fn read_to_string<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<String> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_to_string(path)
     }
 
@@ -240,7 +240,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn remove_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_dir(path)
     }
 
@@ -251,7 +251,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub fn remove_dir_all<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_dir_all(path)
     }
 
@@ -282,7 +282,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub fn remove_file<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_file(path)
     }
 
@@ -298,8 +298,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        let from = from_utf8(from)?;
-        let to = from_utf8(to)?;
+        let from = from_utf8(from.as_ref())?;
+        let to = from_utf8(to.as_ref())?;
         self.cap_std.rename(from, &to_dir.cap_std, to)
     }
 
@@ -315,7 +315,7 @@ impl Dir {
         path: P,
         perm: Permissions,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.set_permissions(path, perm)
     }
 
@@ -325,7 +325,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub fn symlink_metadata<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Metadata> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.symlink_metadata(path)
     }
 
@@ -339,7 +339,7 @@ impl Dir {
         path: P,
         contents: C,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.write(path, contents)
     }
 
@@ -366,8 +366,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink(original, link)
     }
 
@@ -394,8 +394,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink_file(original, link)
     }
 
@@ -422,8 +422,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink_dir(original, link)
     }
 
@@ -438,7 +438,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_listener<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<UnixListener> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.bind_unix_listener(path)
     }
 
@@ -453,7 +453,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn connect_unix_stream<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<UnixStream> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.connect_unix_stream(path)
     }
 
@@ -468,7 +468,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub fn bind_unix_datagram<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<UnixDatagram> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.bind_unix_datagram(path)
     }
 
@@ -487,7 +487,7 @@ impl Dir {
         unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.connect_unix_datagram(unix_datagram, path)
     }
 
@@ -507,7 +507,7 @@ impl Dir {
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std
             .send_to_unix_datagram_addr(unix_datagram, buf, path)
     }
@@ -527,7 +527,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub fn exists<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.exists(path),
             Err(_) => false,
         }
@@ -539,7 +539,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub fn try_exists<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<bool> {
-        self.cap_std.try_exists(from_utf8(path)?)
+        self.cap_std.try_exists(from_utf8(path.as_ref())?)
     }
 
     /// Returns `true` if the path exists on disk and is pointing at a regular
@@ -549,7 +549,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub fn is_file<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.is_file(path),
             Err(_) => false,
         }
@@ -563,7 +563,7 @@ impl Dir {
     /// file. In case of broken symbolic links, this will return `false`.
     #[inline]
     pub fn is_dir<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.is_dir(path),
             Err(_) => false,
         }
@@ -581,7 +581,7 @@ impl Dir {
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         crate::fs::Dir::open_ambient_dir(path, ambient_authority).map(Self::from_cap_std)
     }
 
@@ -614,7 +614,7 @@ impl Dir {
         ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
         let _ = ambient_authority;
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         fs::create_dir_all(path)
     }
 }

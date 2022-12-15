@@ -32,31 +32,30 @@ pub use camino;
 
 use camino::{Utf8Path, Utf8PathBuf};
 
-fn from_utf8<P: AsRef<Utf8Path>>(path: P) -> std::io::Result<async_std::path::PathBuf> {
-    #[cfg(not(feature = "arf_strings"))]
-    {
-        Ok(path.as_ref().as_std_path().to_path_buf().into())
-    }
-
-    #[cfg(feature = "arf_strings")]
-    {
-        #[cfg(not(windows))]
-        let path = {
-            #[cfg(unix)]
-            use std::{ffi::OsString, os::unix::ffi::OsStringExt};
-            #[cfg(target_os = "wasi")]
-            use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
-
-            let string = arf_strings::str_to_host(path.as_ref().as_str())?;
-            OsString::from_vec(string.into_bytes())
-        };
-
-        #[cfg(windows)]
-        let path = arf_strings::str_to_host(path.as_ref().as_str())?;
-
-        Ok(path.into())
-    }
+#[cfg(not(feature = "arf_strings"))]
+fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a async_std::path::Path> {
+    Ok(path.as_std_path())
 }
+
+#[cfg(feature = "arf_strings")]
+fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<async_std::path::PathBuf> {
+    #[cfg(not(windows))]
+    let path = {
+        #[cfg(unix)]
+        use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+        #[cfg(target_os = "wasi")]
+        use std::{ffi::OsString, os::wasi::ffi::OsStringExt};
+
+        let string = arf_strings::str_to_host(path.as_str())?;
+        OsString::from_vec(string.into_bytes())
+    };
+
+    #[cfg(windows)]
+    let path = arf_strings::str_to_host(path.as_str())?;
+
+    Ok(path.into())
+}
+
 
 fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
     #[cfg(not(feature = "arf_strings"))]

@@ -118,7 +118,7 @@ impl File {
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         Ok(Self::from_cap_std(crate::fs::File::open_ambient(
             path,
             ambient_authority,
@@ -139,7 +139,7 @@ impl File {
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         Ok(Self::from_cap_std(crate::fs::File::open_ambient_with(
             path,
             options,

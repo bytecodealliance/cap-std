@@ -60,7 +60,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn open<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.open(path).await.map(File::from_cap_std)
     }
 
@@ -76,7 +76,7 @@ impl Dir {
         path: P,
         options: &OpenOptions,
     ) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std
             .open_with(path, options)
             .await
@@ -86,7 +86,7 @@ impl Dir {
     /// Attempts to open a directory.
     #[inline]
     pub async fn open_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.open_dir(path).await.map(Self::from_cap_std)
     }
 
@@ -98,7 +98,7 @@ impl Dir {
     /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
     #[inline]
     pub fn create_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir(path)
     }
 
@@ -111,7 +111,7 @@ impl Dir {
     /// TODO: async: fix this when we fix https://github.com/bytecodealliance/cap-std/issues/51
     #[inline]
     pub fn create_dir_all<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir_all(path)
     }
 
@@ -127,7 +127,7 @@ impl Dir {
         path: P,
         dir_builder: &DirBuilder,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create_dir_with(path, dir_builder)
     }
 
@@ -137,7 +137,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn create<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<File> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.create(path).await.map(File::from_cap_std)
     }
 
@@ -149,7 +149,7 @@ impl Dir {
     /// directory represented by `self`.
     #[inline]
     pub async fn canonicalize<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.canonicalize(path).await.and_then(to_utf8)
     }
 
@@ -194,7 +194,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn metadata<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Metadata> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.metadata(path).await
     }
 
@@ -210,7 +210,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn read_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<ReadDir> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_dir(path).await.map(ReadDir::from_cap_std)
     }
 
@@ -220,7 +220,7 @@ impl Dir {
     /// relative to `self`.
     #[inline]
     pub async fn read<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Vec<u8>> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read(path).await
     }
 
@@ -230,7 +230,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn read_link<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_link(path).await.and_then(to_utf8)
     }
 
@@ -240,7 +240,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn read_to_string<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<String> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.read_to_string(path).await
     }
 
@@ -250,7 +250,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn remove_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_dir(path).await
     }
 
@@ -261,7 +261,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn remove_dir_all<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_dir_all(path).await
     }
 
@@ -292,7 +292,7 @@ impl Dir {
     /// paths relative to `self`.
     #[inline]
     pub async fn remove_file<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.remove_file(path).await
     }
 
@@ -324,7 +324,7 @@ impl Dir {
         path: P,
         perm: Permissions,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.set_permissions(path, perm).await
     }
 
@@ -334,7 +334,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn symlink_metadata<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Metadata> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.symlink_metadata(path).await
     }
 
@@ -348,7 +348,7 @@ impl Dir {
         path: P,
         contents: C,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.write(path, contents).await
     }
 
@@ -450,7 +450,7 @@ impl Dir {
         &self,
         path: P,
     ) -> io::Result<UnixListener> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.bind_unix_listener(path).await
     }
 
@@ -465,7 +465,7 @@ impl Dir {
     #[cfg(unix)]
     #[inline]
     pub async fn connect_unix_stream<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<UnixStream> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.connect_unix_stream(path).await
     }
 
@@ -483,7 +483,7 @@ impl Dir {
         &self,
         path: P,
     ) -> io::Result<UnixDatagram> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std.bind_unix_datagram(path).await
     }
 
@@ -503,7 +503,7 @@ impl Dir {
         unix_datagram: &UnixDatagram,
         path: P,
     ) -> io::Result<()> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std
             .connect_unix_datagram(unix_datagram, path)
             .await
@@ -526,7 +526,7 @@ impl Dir {
         buf: &[u8],
         path: P,
     ) -> io::Result<usize> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         self.cap_std
             .send_to_unix_datagram_addr(unix_datagram, buf, path)
             .await
@@ -540,7 +540,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn exists<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.exists(path).await,
             Err(_) => false,
         }
@@ -552,7 +552,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn try_exists<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<bool> {
-        self.cap_std.try_exists(from_utf8(path)?).await
+        self.cap_std.try_exists(from_utf8(path.as_ref())?).await
     }
 
     /// Returns `true` if the path exists on disk and is pointing at a regular
@@ -562,7 +562,7 @@ impl Dir {
     /// accesses paths relative to `self`.
     #[inline]
     pub async fn is_file<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.is_file(path).await,
             Err(_) => false,
         }
@@ -576,7 +576,7 @@ impl Dir {
     /// of broken symbolic links, this will return `false`.
     #[inline]
     pub async fn is_dir<P: AsRef<Utf8Path>>(&self, path: P) -> bool {
-        match from_utf8(path) {
+        match from_utf8(path.as_ref()) {
             Ok(path) => self.cap_std.is_dir(path).await,
             Err(_) => false,
         }
@@ -594,7 +594,7 @@ impl Dir {
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         crate::fs::Dir::open_ambient_dir(path, ambient_authority)
             .await
             .map(Self::from_cap_std)
@@ -630,7 +630,7 @@ impl Dir {
         ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
         let _ = ambient_authority;
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         fs::create_dir_all(path).await
     }
 }
