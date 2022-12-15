@@ -635,6 +635,9 @@ impl Dir {
     }
 }
 
+// Safety: `FilelikeViewType` is implemented for `std::fs::File`.
+unsafe impl io_lifetimes::views::FilelikeViewType for Dir {}
+
 #[cfg(not(windows))]
 impl FromRawFd for Dir {
     #[inline]
