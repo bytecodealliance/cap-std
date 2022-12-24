@@ -29,7 +29,10 @@ use {
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     cap_primitives::fs::{symlink_dir, symlink_file},
-    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{
+        AsHandleOrSocket, AsRawHandleOrSocket, BorrowedHandleOrSocket, IntoRawHandleOrSocket,
+        OwnedHandleOrSocket, RawHandleOrSocket,
+    },
 };
 
 /// A reference to an open directory on a filesystem.
@@ -937,6 +940,14 @@ impl AsRawHandleOrSocket for Dir {
     }
 }
 
+#[cfg(windows)]
+impl AsHandleOrSocket for Dir {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.std_file.as_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for Dir {
     #[inline]
@@ -974,6 +985,14 @@ impl IntoRawHandleOrSocket for Dir {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.std_file.into_raw_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<Dir> for OwnedHandleOrSocket {
+    #[inline]
+    fn from(dir: Dir) -> Self {
+        dir.std_file.into()
     }
 }
 

@@ -16,7 +16,10 @@ use {
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{
+        AsHandleOrSocket, AsRawHandleOrSocket, BorrowedHandleOrSocket, IntoRawHandleOrSocket,
+        OwnedHandleOrSocket, RawHandleOrSocket,
+    },
 };
 
 /// A reference to an open directory on a filesystem.
@@ -705,6 +708,14 @@ impl AsHandle for Dir {
 }
 
 #[cfg(windows)]
+impl AsHandleOrSocket for Dir {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.cap_std.as_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
 impl AsRawHandleOrSocket for Dir {
     #[inline]
     fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
@@ -749,6 +760,14 @@ impl IntoRawHandleOrSocket for Dir {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.cap_std.into_raw_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<Dir> for OwnedHandleOrSocket {
+    #[inline]
+    fn from(dir: Dir) -> Self {
+        dir.cap_std.into()
     }
 }
 

@@ -17,7 +17,7 @@ impl SystemClock {
     ///
     /// This corresponds to [`std::time::SystemTime::UNIX_EPOCH`].
     pub const UNIX_EPOCH: SystemTime = SystemTime {
-        std: time::SystemTime::UNIX_EPOCH
+        std: time::SystemTime::UNIX_EPOCH,
     };
 
     /// Constructs a new instance of `Self`.

@@ -56,7 +56,6 @@ fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<async_std::path::PathBuf
     Ok(path.into())
 }
 
-
 fn to_utf8<P: AsRef<async_std::path::Path>>(path: P) -> std::io::Result<Utf8PathBuf> {
     #[cfg(not(feature = "arf_strings"))]
     #[cfg(not(windows))]
