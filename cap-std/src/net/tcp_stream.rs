@@ -10,7 +10,10 @@ use std::time::Duration;
 use std::{fmt, net};
 #[cfg(windows)]
 use {
-    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{
+        AsHandleOrSocket, AsRawHandleOrSocket, BorrowedHandleOrSocket, IntoRawHandleOrSocket,
+        OwnedHandleOrSocket, RawHandleOrSocket,
+    },
     std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
 };
 
@@ -237,6 +240,14 @@ impl AsRawHandleOrSocket for TcpStream {
     }
 }
 
+#[cfg(windows)]
+impl AsHandleOrSocket for TcpStream {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.std.as_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for TcpStream {
     #[inline]
@@ -274,6 +285,14 @@ impl IntoRawHandleOrSocket for TcpStream {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.std.into_raw_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<TcpStream> for OwnedHandleOrSocket {
+    #[inline]
+    fn from(stream: TcpStream) -> Self {
+        stream.std.into()
     }
 }
 

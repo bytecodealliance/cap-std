@@ -10,7 +10,10 @@ use std::fmt;
 #[cfg(windows)]
 use {
     async_std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
-    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{
+        AsHandleOrSocket, AsRawHandleOrSocket, BorrowedHandleOrSocket, IntoRawHandleOrSocket,
+        OwnedHandleOrSocket, RawHandleOrSocket,
+    },
 };
 
 /// A TCP socket server, listening for connections.
@@ -153,6 +156,14 @@ impl AsRawHandleOrSocket for TcpListener {
     }
 }
 
+#[cfg(windows)]
+impl AsHandleOrSocket for TcpListener {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.std.as_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for TcpListener {
     #[inline]
@@ -190,6 +201,14 @@ impl IntoRawHandleOrSocket for TcpListener {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.std.into_raw_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<TcpListener> for OwnedHandleOrSocket {
+    #[inline]
+    fn from(listener: TcpListener) -> Self {
+        listener.std.into()
     }
 }
 

@@ -12,7 +12,10 @@ use std::path::Path;
 use std::{fmt, fs, process};
 #[cfg(windows)]
 use {
-    io_extras::os::windows::{AsRawHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket},
+    io_extras::os::windows::{
+        AsHandleOrSocket, AsRawHandleOrSocket, BorrowedHandleOrSocket, IntoRawHandleOrSocket,
+        OwnedHandleOrSocket, RawHandleOrSocket,
+    },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
 
@@ -233,6 +236,14 @@ impl AsRawHandleOrSocket for File {
     }
 }
 
+#[cfg(windows)]
+impl AsHandleOrSocket for File {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.std.as_handle_or_socket()
+    }
+}
+
 #[cfg(not(windows))]
 impl IntoRawFd for File {
     #[inline]
@@ -270,6 +281,14 @@ impl IntoRawHandleOrSocket for File {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.std.into_raw_handle_or_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<File> for OwnedHandleOrSocket {
+    #[inline]
+    fn from(file: File) -> Self {
+        file.std.into()
     }
 }
 
