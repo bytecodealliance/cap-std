@@ -230,6 +230,16 @@ mod test {
         panic!("Could not determine process umask")
     }
 
+    /// Older Windows versions don't support removing open files
+    fn os_supports_unlinked_tmp(d: &Dir) -> bool {
+        if cfg!(not(windows)) {
+            return true;
+        }
+        let name = "testfile";
+        let _f = d.create(name).unwrap();
+        d.remove_file(name).and_then(|_| d.create(name)).is_ok()
+    }
+
     #[test]
     fn test_tempfile() -> io::Result<()> {
         use crate::ambient_authority;
@@ -263,6 +273,17 @@ mod test {
         assert_eq!(td.entries()?.into_iter().count(), 1);
 
         assert_eq!(td.read("testfile")?, b"hello world");
+
+        if os_supports_unlinked_tmp(&td) {
+            let mut tf = TempFile::new_anonymous(&td).unwrap();
+            tf.write_all(b"hello world, I'm anonymous").unwrap();
+            tf.seek(std::io::SeekFrom::Start(0)).unwrap();
+            let mut buf = String::new();
+            tf.read_to_string(&mut buf).unwrap();
+            assert_eq!(&buf, "hello world, I'm anonymous");
+        } else if cfg!(windows) {
+            eprintln!("notice: Detected older Windows");
+        }
 
         td.close()
     }
