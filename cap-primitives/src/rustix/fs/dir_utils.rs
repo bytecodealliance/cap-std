@@ -158,6 +158,10 @@ fn strip_dir_suffix_tests() {
     assert_eq!(&*strip_dir_suffix(Path::new("foo")), Path::new("foo"));
     assert_eq!(&*strip_dir_suffix(Path::new("/")), Path::new("/"));
     assert_eq!(&*strip_dir_suffix(Path::new("//")), Path::new("/"));
+    assert_eq!(&*strip_dir_suffix(Path::new("/.")), Path::new("/."));
+    assert_eq!(&*strip_dir_suffix(Path::new("//.")), Path::new("/."));
+    assert_eq!(&*strip_dir_suffix(Path::new(".")), Path::new("."));
+    assert_eq!(&*strip_dir_suffix(Path::new("foo/.")), Path::new("foo/."));
 }
 
 #[test]

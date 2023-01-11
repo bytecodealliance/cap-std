@@ -15,12 +15,13 @@ pub(crate) fn rename(
     let new_start = MaybeOwnedFile::borrowed(new_start);
 
     // As a special case, `rename` ignores a trailing slash rather than treating
-    // it as equivalent to a trailing slash-dot, so strip any trailing slashes.
-    let old_path = strip_dir_suffix(old_path);
-    let new_path = strip_dir_suffix(new_path);
+    // it as equivalent to a trailing slash-dot, so strip any trailing slashes
+    // for the purposes of `open_parent`.
+    let old_path_stripped = strip_dir_suffix(old_path);
+    let new_path_stripped = strip_dir_suffix(new_path);
 
-    let (old_dir, old_basename) = open_parent(old_start, &*old_path)?;
-    let (new_dir, new_basename) = open_parent(new_start, &*new_path)?;
+    let (old_dir, old_basename) = open_parent(old_start, &*old_path_stripped)?;
+    let (new_dir, new_basename) = open_parent(new_start, &*new_path_stripped)?;
 
     rename_unchecked(
         &old_dir,

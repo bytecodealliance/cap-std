@@ -137,6 +137,10 @@ fn rename_basics() {
         tmpdir.rename("/..", &tmpdir, "nope.txt"),
         "a path led outside of the filesystem"
     );
+    error_contains!(
+        tmpdir.rename("file.txt/", &tmpdir, "nope.txt"),
+        "Not a directory"
+    );
 
     /* // TODO: Platform-specific error code.
     error!(
