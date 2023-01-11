@@ -3,11 +3,16 @@ use ambient_authority::AmbientAuthority;
 use rustix::fs::OFlags;
 use std::ffi::{OsStr, OsString};
 use std::ops::Deref;
-use std::os::unix::ffi::OsStringExt;
 #[cfg(unix)]
-use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
+use std::os::unix::{
+    ffi::{OsStrExt, OsStringExt},
+    fs::OpenOptionsExt,
+};
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
+use std::os::wasi::{
+    ffi::{OsStrExt, OsStringExt},
+    fs::OpenOptionsExt,
+};
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
