@@ -88,9 +88,10 @@ impl File {
     ///
     /// This corresponds to [`async_std::fs::File::metadata`].
     #[inline]
-    pub fn metadata(&self) -> io::Result<Metadata> {
-        let sync = self.std.as_filelike_view::<std::fs::File>();
-        metadata_from(&*sync)
+    pub async fn metadata(&self) -> io::Result<Metadata> {
+        let clone = self.clone();
+        let sync = clone.std.as_filelike_view::<std::fs::File>();
+        spawn_blocking(move || metadata_from(&*sync)).await
     }
 
     // async_std doesn't have `try_clone`.

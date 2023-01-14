@@ -92,8 +92,9 @@ impl File {
     ///
     /// This corresponds to [`async_std::fs::File::metadata`].
     #[inline]
-    pub fn metadata(&self) -> io::Result<Metadata> {
-        self.cap_std.metadata()
+    pub async fn metadata(&self) -> io::Result<Metadata> {
+        let clone = self.clone();
+        spawn_blocking(move || clone.metadata()).await
     }
 
     // async_std doesn't have `try_clone`.
