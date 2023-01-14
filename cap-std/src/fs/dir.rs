@@ -241,7 +241,7 @@ impl Dir {
     /// This corresponds to [`std::fs::metadata`], but only accesses paths
     /// relative to `self`.
     #[inline]
-    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<cap_primitives::fs::Metadata> {
+    pub fn metadata<P: AsRef<Path>>(&self, path: P) -> io::Result<Metadata> {
         stat(&self.std_file, path.as_ref(), FollowSymlinks::Yes)
     }
 
