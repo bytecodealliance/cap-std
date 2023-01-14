@@ -327,6 +327,16 @@ impl Dir {
         )
     }
 
+    /// Queries metadata about the underlying directory.
+    ///
+    /// This is similar to [`std::fs::File::metadata`], but for `Dir` rather
+    /// than for `File`.
+    #[inline]
+    pub async fn dir_metadata(&self) -> io::Result<Metadata> {
+        let clone = self.clone();
+        spawn_blocking(move || metadata_from(&*clone.as_filelike_view::<std::fs::File>())).await
+    }
+
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub async fn entries(&self) -> io::Result<ReadDir> {
@@ -863,6 +873,18 @@ impl Dir {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    Metadata::from_file(file)
+}
+
+#[cfg(target_os = "wasi")]
+#[inline]
+fn metadata_from(file: &std::fs::File) -> io::Result<Metadata> {
+    file.metadata()
+}
+
 // Safety: `FilelikeViewType` is implemented for `std::fs::File`.
 unsafe impl io_lifetimes::views::FilelikeViewType for Dir {}
 
@@ -1005,7 +1027,10 @@ async fn initial_buffer_size(file: &File) -> usize {
     // Allocate one extra byte so the buffer doesn't need to grow before the
     // final `read` call at the end of the file. Don't worry about `usize`
     // overflow because reading will fail regardless in that case.
-    file.metadata().map(|m| m.len() as usize + 1).unwrap_or(0)
+    file.metadata()
+        .await
+        .map(|m| m.len() as usize + 1)
+        .unwrap_or(0)
 }
 
 impl fmt::Debug for Dir {

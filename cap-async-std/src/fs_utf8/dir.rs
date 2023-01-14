@@ -201,6 +201,15 @@ impl Dir {
         self.cap_std.metadata(path).await
     }
 
+    /// Queries metadata about the underlying directory.
+    ///
+    /// This is similar to [`std::fs::File::metadata`], but for `Dir` rather
+    /// than for `File`.
+    #[inline]
+    pub async fn dir_metadata(&self) -> io::Result<Metadata> {
+        self.cap_std.dir_metadata().await
+    }
+
     /// Returns an iterator over the entries within `self`.
     #[inline]
     pub async fn entries(&self) -> io::Result<ReadDir> {
