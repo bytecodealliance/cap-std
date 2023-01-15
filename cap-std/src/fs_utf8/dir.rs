@@ -6,6 +6,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
 use io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
+use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
@@ -625,6 +626,20 @@ impl Dir {
         let _ = ambient_authority;
         let path = from_utf8(path.as_ref())?;
         fs::create_dir_all(path)
+    }
+
+    /// Construct a new instance of `Self` from existing directory file
+    /// descriptor.
+    ///
+    /// This can be useful when interacting with other libraries and or C/C++
+    /// code which has invoked `openat(..., O_DIRECTORY)` external to this
+    /// crate.
+    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
+        cap_primitives::fs::open_dir(
+            &dir.as_filelike_view::<std::fs::File>(),
+            std::path::Component::CurDir.as_ref(),
+        )
+        .map(Self::from_std_file)
     }
 }
 

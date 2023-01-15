@@ -3,6 +3,7 @@ use crate::fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir};
 use async_std::{fs, io};
 use camino::{Utf8Path, Utf8PathBuf};
 use cap_primitives::AmbientAuthority;
+use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 #[cfg(windows)]
@@ -641,6 +642,23 @@ impl Dir {
         let _ = ambient_authority;
         let path = from_utf8(path.as_ref())?;
         fs::create_dir_all(path).await
+    }
+
+    /// Construct a new instance of `Self` from existing directory file
+    /// descriptor.
+    ///
+    /// This can be useful when interacting with other libraries and or C/C++
+    /// code which has invoked `openat(..., O_DIRECTORY)` external to this
+    /// crate.
+    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
+        spawn_blocking(move || {
+            cap_primitives::fs::open_dir(
+                &dir.as_filelike_view::<std::fs::File>(),
+                std::path::Component::CurDir.as_ref(),
+            )
+        })
+        .await
+        .map(Self::from_std_file)
     }
 }
 

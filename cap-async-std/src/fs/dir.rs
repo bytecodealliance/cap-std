@@ -871,6 +871,23 @@ impl Dir {
         let path = path.as_ref().to_path_buf();
         fs::create_dir_all(path).await
     }
+
+    /// Construct a new instance of `Self` from existing directory file
+    /// descriptor.
+    ///
+    /// This can be useful when interacting with other libraries and or C/C++
+    /// code which has invoked `openat(..., O_DIRECTORY)` external to this
+    /// crate.
+    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
+        spawn_blocking(move || {
+            cap_primitives::fs::open_dir(
+                &dir.as_filelike_view::<std::fs::File>(),
+                std::path::Component::CurDir.as_ref(),
+            )
+        })
+        .await
+        .map(Self::from_std_file)
+    }
 }
 
 #[cfg(not(target_os = "wasi"))]
