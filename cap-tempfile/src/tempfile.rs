@@ -54,11 +54,14 @@ impl<'d> Debug for TempFile<'d> {
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-fn new_tempfile_linux(d: &Dir) -> io::Result<Option<File>> {
+fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     use cap_std::io_lifetimes::OwnedFd;
     use rustix::fs::{Mode, OFlags};
     // openat's API uses WRONLY.  There may be use cases for reading too, so let's support it.
-    let oflags = OFlags::CLOEXEC | OFlags::TMPFILE | OFlags::RDWR;
+    let mut oflags = OFlags::CLOEXEC | OFlags::TMPFILE | OFlags::RDWR;
+    if anonymous {
+        oflags |= OFlags::EXCL;
+    }
     // We default to 0o666, same as main rust when creating new files; this will be modified by
     // umask: https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762
     let mode = Mode::from_raw_mode(0o666);
@@ -92,10 +95,11 @@ fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
 }
 
 /// Create a new temporary file in the target directory, which may or may not have a (randomly generated) name at this point.
-fn new_tempfile(d: &Dir) -> io::Result<(File, Option<String>)> {
+/// If anonymous is specified, the file will be deleted
+fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> {
     // On Linux, try O_TMPFILE
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    if let Some(f) = new_tempfile_linux(d)? {
+    if let Some(f) = new_tempfile_linux(d, anonymous)? {
         return Ok((f, None));
     }
     // Otherwise, fall back to just creating a randomly named file.
@@ -103,16 +107,21 @@ fn new_tempfile(d: &Dir) -> io::Result<(File, Option<String>)> {
     opts.read(true);
     opts.write(true);
     opts.create_new(true);
-    super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
+    let (f, name) = super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
         d.open_with(name, &opts)
-    })
-    .map(|(f, name)| (f, Some(name)))
+    })?;
+    if anonymous {
+        d.remove_file(name)?;
+        Ok((f, None))
+    } else {
+        Ok((f, Some(name)))
+    }
 }
 
 impl<'d> TempFile<'d> {
     /// Crate a new temporary file in the provided directory.
     pub fn new(dir: &'d Dir) -> io::Result<Self> {
-        let (fd, name) = new_tempfile(dir)?;
+        let (fd, name) = new_tempfile(dir, false)?;
         Ok(Self { dir, fd, name })
     }
 
@@ -121,11 +130,7 @@ impl<'d> TempFile<'d> {
     ///
     /// [`tempfile::tempfile_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile_in.html
     pub fn new_anonymous(dir: &'d Dir) -> io::Result<File> {
-        let (fd, name) = new_tempfile(dir)?;
-        if let Some(name) = name {
-            dir.remove_file(name)?;
-        }
-        Ok(fd)
+        new_tempfile(dir, true).map(|v| v.0)
     }
 
     /// Get a reference to the underlying file.
