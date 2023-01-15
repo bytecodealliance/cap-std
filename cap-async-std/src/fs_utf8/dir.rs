@@ -619,10 +619,7 @@ impl Dir {
     ///
     /// This function accesses a directory outside of the `self` subtree.
     #[inline]
-    pub async fn open_parent_dir<P: AsRef<Utf8Path>>(
-        &self,
-        ambient_authority: AmbientAuthority,
-    ) -> io::Result<Self> {
+    pub async fn open_parent_dir(&self, ambient_authority: AmbientAuthority) -> io::Result<Self> {
         self.cap_std
             .open_parent_dir(ambient_authority)
             .await
