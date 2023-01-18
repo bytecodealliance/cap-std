@@ -1,15 +1,19 @@
 use crate::fs::OpenOptions;
 use ambient_authority::AmbientAuthority;
 use rustix::fs::OFlags;
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::ops::Deref;
 #[cfg(unix)]
-use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
+use std::os::unix::{
+    ffi::{OsStrExt, OsStringExt},
+    fs::OpenOptionsExt,
+};
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{ffi::OsStrExt, fs::OpenOptionsExt};
-use std::path::Path;
-#[cfg(racy_asserts)]
-use std::{ffi::OsString, os::unix::ffi::OsStringExt, path::PathBuf};
+use std::os::wasi::{
+    ffi::{OsStrExt, OsStringExt},
+    fs::OpenOptionsExt,
+};
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 /// Rust's `Path` implicitly strips redundant slashes, however they aren't
@@ -53,7 +57,6 @@ pub(crate) fn path_has_trailing_slash(path: &Path) -> bool {
 
 /// Append a trailing `/`. This can be used to require that the given `path`
 /// names a directory.
-#[cfg(racy_asserts)]
 pub(crate) fn append_dir_suffix(path: PathBuf) -> PathBuf {
     let mut bytes = path.into_os_string().into_vec();
     bytes.push(b'/');
@@ -158,6 +161,10 @@ fn strip_dir_suffix_tests() {
     assert_eq!(&*strip_dir_suffix(Path::new("foo")), Path::new("foo"));
     assert_eq!(&*strip_dir_suffix(Path::new("/")), Path::new("/"));
     assert_eq!(&*strip_dir_suffix(Path::new("//")), Path::new("/"));
+    assert_eq!(&*strip_dir_suffix(Path::new("/.")), Path::new("/."));
+    assert_eq!(&*strip_dir_suffix(Path::new("//.")), Path::new("/."));
+    assert_eq!(&*strip_dir_suffix(Path::new(".")), Path::new("."));
+    assert_eq!(&*strip_dir_suffix(Path::new("foo/.")), Path::new("foo/."));
 }
 
 #[test]

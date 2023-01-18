@@ -178,10 +178,45 @@ fn rename_slashdots() {
     check!(tmpdir.rename("dir", &tmpdir, "dir"));
     check!(tmpdir.rename("dir", &tmpdir, "dir/"));
     check!(tmpdir.rename("dir/", &tmpdir, "dir"));
+    check!(tmpdir.rename("dir/", &tmpdir, "dir/"));
 
     // TODO: Platform-specific error code.
     error_contains!(tmpdir.rename("dir", &tmpdir, "dir/."), "");
     error_contains!(tmpdir.rename("dir/.", &tmpdir, "dir"), "");
+}
+
+#[test]
+#[cfg_attr(windows, ignore)] // TODO investigate why this one is failing
+fn rename_slashdots_ambient() {
+    let dir = tempfile::tempdir().unwrap();
+
+    check!(std::fs::create_dir_all(dir.path().join("dir")));
+    check!(std::fs::rename(
+        dir.path().join("dir"),
+        dir.path().join("dir")
+    ));
+    check!(std::fs::rename(
+        dir.path().join("dir"),
+        dir.path().join("dir/")
+    ));
+    check!(std::fs::rename(
+        dir.path().join("dir/"),
+        dir.path().join("dir")
+    ));
+    check!(std::fs::rename(
+        dir.path().join("dir/"),
+        dir.path().join("dir/")
+    ));
+
+    // TODO: Platform-specific error code.
+    error_contains!(
+        std::fs::rename(dir.path().join("dir"), dir.path().join("dir/.")),
+        ""
+    );
+    error_contains!(
+        std::fs::rename(dir.path().join("dir/."), dir.path().join("dir")),
+        ""
+    );
 }
 
 #[test]
