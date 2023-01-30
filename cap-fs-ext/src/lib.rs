@@ -17,6 +17,7 @@ mod is_file_read_write;
 mod metadata_ext;
 mod open_options_follow_ext;
 mod open_options_maybe_dir_ext;
+mod open_options_sync_ext;
 mod reopen;
 
 pub use dir_entry_ext::DirEntryExt;
@@ -28,6 +29,7 @@ pub use is_file_read_write::IsFileReadWrite;
 pub use metadata_ext::MetadataExt;
 pub use open_options_follow_ext::OpenOptionsFollowExt;
 pub use open_options_maybe_dir_ext::OpenOptionsMaybeDirExt;
+pub use open_options_sync_ext::OpenOptionsSyncExt;
 pub use reopen::Reopen;
 
 /// Re-export these to allow them to be used with `Reuse`.

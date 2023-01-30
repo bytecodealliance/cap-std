@@ -900,6 +900,33 @@ fn maybe_dir() {
 }
 
 #[test]
+fn sync() {
+    use cap_fs_ext::OpenOptionsSyncExt;
+
+    let tmpdir = tmpdir();
+    check!(tmpdir.create("file"));
+
+    check!(tmpdir.open_with("file", OpenOptions::new().write(true).sync(true)));
+    check!(tmpdir.open_with("file", OpenOptions::new().write(true).dsync(true)));
+    check!(tmpdir.open_with(
+        "file",
+        OpenOptions::new()
+            .read(true)
+            .write(true)
+            .sync(true)
+            .rsync(true)
+    ));
+    check!(tmpdir.open_with(
+        "file",
+        OpenOptions::new()
+            .read(true)
+            .write(true)
+            .dsync(true)
+            .rsync(true)
+    ));
+}
+
+#[test]
 #[cfg(not(windows))]
 fn reopen_fd() {
     use io_lifetimes::AsFilelike;

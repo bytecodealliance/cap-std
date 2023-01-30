@@ -2,7 +2,8 @@ use crate::fs::{FollowSymlinks, OpenOptions};
 use std::fs;
 use std::os::windows::fs::OpenOptionsExt;
 use windows_sys::Win32::Storage::FileSystem::{
-    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_DELETE,
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
+    FILE_SHARE_DELETE,
 };
 
 /// Translate the given `cap_std` into `std` options. Also return a bool
@@ -33,6 +34,11 @@ pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOpti
         // from being deleted or renamed underneath cap-std's sandboxed path
         // lookups on Windows.
         share_mode &= !FILE_SHARE_DELETE;
+    }
+    // This matches system-interface's `set_fd_flags` interpretation of these
+    // flags on Windows.
+    if opts.sync || opts.dsync {
+        custom_flags |= FILE_FLAG_WRITE_THROUGH;
     }
     let mut std_opts = fs::OpenOptions::new();
     std_opts

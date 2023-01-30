@@ -25,6 +25,10 @@ pub struct OpenOptions {
     pub(crate) create_new: bool,
     pub(crate) dir_required: bool,
     pub(crate) maybe_dir: bool,
+    pub(crate) sync: bool,
+    pub(crate) dsync: bool,
+    pub(crate) rsync: bool,
+    pub(crate) nonblock: bool,
     pub(crate) readdir_required: bool,
     pub(crate) follow: FollowSymlinks,
 
@@ -48,6 +52,10 @@ impl OpenOptions {
             create_new: false,
             dir_required: false,
             maybe_dir: false,
+            sync: false,
+            dsync: false,
+            rsync: false,
+            nonblock: false,
             readdir_required: false,
             follow: FollowSymlinks::Yes,
 
@@ -133,6 +141,34 @@ impl OpenOptions {
         self
     }
 
+    /// Sets the option to enable  fixme
+    #[inline]
+    pub(crate) fn sync(&mut self, enable: bool) -> &mut Self {
+        self.sync = enable;
+        self
+    }
+
+    /// Sets the option to enable  fixme
+    #[inline]
+    pub(crate) fn dsync(&mut self, enable: bool) -> &mut Self {
+        self.dsync = enable;
+        self
+    }
+
+    /// Sets the option to enable  fixme
+    #[inline]
+    pub(crate) fn rsync(&mut self, enable: bool) -> &mut Self {
+        self.rsync = enable;
+        self
+    }
+
+    /// Sets the option to enable  fixme
+    #[inline]
+    pub(crate) fn nonblock(&mut self, enable: bool) -> &mut Self {
+        self.nonblock = enable;
+        self
+    }
+
     /// Sets the option to request the ability to read directory entries.
     #[inline]
     pub(crate) fn readdir_required(&mut self, readdir_required: bool) -> &mut Self {
@@ -160,6 +196,50 @@ impl OpenOptions {
     #[inline]
     pub fn _cap_fs_ext_maybe_dir(&mut self, maybe_dir: bool) -> &mut Self {
         self.maybe_dir(maybe_dir)
+    }
+
+    /// Wrapper to allow `sync` to be exposed by the `cap-fs-ext` crate.
+    ///
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsSyncExt` instead of
+    /// calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub fn _cap_fs_ext_sync(&mut self, enable: bool) -> &mut Self {
+        self.sync(enable)
+    }
+
+    /// Wrapper to allow `dsync` to be exposed by the `cap-fs-ext` crate.
+    ///
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsSyncExt` instead of
+    /// calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub fn _cap_fs_ext_dsync(&mut self, enable: bool) -> &mut Self {
+        self.dsync(enable)
+    }
+
+    /// Wrapper to allow `rsync` to be exposed by the `cap-fs-ext` crate.
+    ///
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsSyncExt` instead of
+    /// calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub fn _cap_fs_ext_rsync(&mut self, enable: bool) -> &mut Self {
+        self.rsync(enable)
+    }
+
+    /// Wrapper to allow `nonblock` to be exposed by the `cap-fs-ext` crate.
+    ///
+    /// This is hidden from the main API since this functionality isn't present
+    /// in `std`. Use `cap_fs_ext::OpenOptionsSyncExt` instead of
+    /// calling this directly.
+    #[doc(hidden)]
+    #[inline]
+    pub fn _cap_fs_ext_nonblock(&mut self, enable: bool) -> &mut Self {
+        self.nonblock(enable)
     }
 }
 
@@ -292,6 +372,10 @@ impl arbitrary::Arbitrary<'_> for OpenOptions {
             .create_new(<bool as Arbitrary>::arbitrary(u)?)
             .dir_required(<bool as Arbitrary>::arbitrary(u)?)
             .maybe_dir(<bool as Arbitrary>::arbitrary(u)?)
+            .sync(<bool as Arbitrary>::arbitrary(u)?)
+            .dsync(<bool as Arbitrary>::arbitrary(u)?)
+            .rsync(<bool as Arbitrary>::arbitrary(u)?)
+            .nonblock(<bool as Arbitrary>::arbitrary(u)?)
             .readdir_required(<bool as Arbitrary>::arbitrary(u)?)
             .follow(<FollowSymlinks as Arbitrary>::arbitrary(u)?)
             .clone())
