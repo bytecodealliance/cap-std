@@ -24,15 +24,40 @@ pub(crate) fn canonicalize_with(
     let mut canonical_path = PathBuf::new();
     let start = MaybeOwnedFile::borrowed(start);
 
-    if let Err(e) = internal_open(
+    match internal_open(
         start,
         path,
         canonicalize_options().follow(follow),
         &mut symlink_count,
         Some(&mut canonical_path),
     ) {
-        if canonical_path.as_os_str().is_empty() {
-            return Err(e);
+        // If the open succeeded, we got our path.
+        Ok(_) => (),
+
+        // If it failed due to an invalid argument or filename, report it.
+        Err(err) if err.kind() == io::ErrorKind::InvalidInput => {
+            return Err(err);
+        }
+        #[cfg(io_error_more)]
+        Err(err) if err.kind() == io::ErrorKind::InvalidFilename => {
+            return Err(err);
+        }
+        #[cfg(windows)]
+        Err(err)
+            if err.raw_os_error()
+                == Some(windows_sys::Win32::Foundation::ERROR_INVALID_NAME as _)
+                || err.raw_os_error()
+                    == Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY as _) =>
+        {
+            return Err(err);
+        }
+
+        // For any other error, like permission denied, it's ok as long as
+        // we got our path.
+        Err(err) => {
+            if canonical_path.as_os_str().is_empty() {
+                return Err(err);
+            }
         }
     }
 

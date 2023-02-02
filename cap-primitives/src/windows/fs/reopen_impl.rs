@@ -1,11 +1,10 @@
-use crate::fs::OpenOptions;
+use crate::fs::{get_access_mode, get_flags_and_attributes, OpenOptions};
 use io_lifetimes::AsHandle;
 use std::{fs, io};
-use windows_sys::Win32::Foundation::ERROR_INVALID_PARAMETER;
 use windows_sys::Win32::Storage::FileSystem::{
-    FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
-    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_WRITE_DATA, SECURITY_CONTEXT_TRACKING,
-    SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY, SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
+    FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_WRITE_THROUGH, FILE_GENERIC_READ, FILE_GENERIC_WRITE,
+    SECURITY_CONTEXT_TRACKING, SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY,
+    SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
 };
 use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
 use winx::file::{AccessMode, Flags, ShareMode};
@@ -83,34 +82,4 @@ pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<
     let new_share_mode =
         ShareMode::FILE_SHARE_READ | ShareMode::FILE_SHARE_WRITE | ShareMode::FILE_SHARE_DELETE;
     winx::file::reopen_file(file.as_handle(), new_access_mode, new_share_mode, flags)
-}
-
-fn get_access_mode(options: &OpenOptions) -> io::Result<u32> {
-    match (
-        options.read,
-        options.write,
-        options.append,
-        options.ext.access_mode,
-    ) {
-        (.., Some(mode)) => Ok(mode),
-        (true, false, false, None) => Ok(GENERIC_READ),
-        (false, true, false, None) => Ok(GENERIC_WRITE),
-        (true, true, false, None) => Ok(GENERIC_READ | GENERIC_WRITE),
-        (false, _, true, None) => Ok(FILE_GENERIC_WRITE & !FILE_WRITE_DATA),
-        (true, _, true, None) => Ok(GENERIC_READ | (FILE_GENERIC_WRITE & !FILE_WRITE_DATA)),
-        (false, false, false, None) => {
-            Err(io::Error::from_raw_os_error(ERROR_INVALID_PARAMETER as i32))
-        }
-    }
-}
-
-fn get_flags_and_attributes(options: &OpenOptions) -> u32 {
-    options.ext.custom_flags
-        | options.ext.attributes
-        | options.ext.security_qos_flags
-        | if options.create_new {
-            FILE_FLAG_OPEN_REPARSE_POINT
-        } else {
-            0
-        }
 }

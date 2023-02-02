@@ -100,7 +100,7 @@ pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Res
         .read(true)
         .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
         .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
-        .open(&path)?;
+        .open(path)?;
 
     // Require a directory. It may seem possible to eliminate this `metadata()`
     // call by appending a slash to the path before opening it so that the OS
