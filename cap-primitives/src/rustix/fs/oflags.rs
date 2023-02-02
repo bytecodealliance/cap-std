@@ -9,6 +9,33 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     if options.follow == FollowSymlinks::No {
         oflags |= OFlags::NOFOLLOW;
     }
+    if options.sync {
+        oflags |= OFlags::SYNC;
+    }
+    if options.dsync {
+        #[cfg(not(any(target_os = "freebsd",)))]
+        {
+            oflags |= OFlags::DSYNC;
+        }
+
+        // Where needed, approximate `DSYNC` with `SYNC`.
+        #[cfg(any(target_os = "freebsd",))]
+        {
+            oflags |= OFlags::SYNC;
+        }
+    }
+    #[cfg(not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "freebsd",
+        target_os = "fuchsia"
+    )))]
+    if options.rsync {
+        oflags |= OFlags::RSYNC;
+    }
+    if options.nonblock {
+        oflags |= OFlags::NONBLOCK;
+    }
     if options.dir_required {
         oflags |= OFlags::DIRECTORY;
 
