@@ -1,5 +1,6 @@
 mod copy;
 mod create_dir_unchecked;
+mod create_file_at_w;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
