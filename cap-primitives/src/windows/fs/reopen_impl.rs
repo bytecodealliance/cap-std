@@ -8,7 +8,7 @@ use windows_sys::Win32::Storage::FileSystem::{
     SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY, SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION,
 };
 use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
-use winx::file::{AccessMode, Flags};
+use winx::file::{AccessMode, Flags, ShareMode};
 
 /// Implementation of `reopen`.
 pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<fs::File> {
@@ -80,7 +80,9 @@ pub(crate) fn reopen_impl(file: &fs::File, options: &OpenOptions) -> io::Result<
         return Err(io::Error::new(io::ErrorKind::Other, "Can't reopen file"));
     }
 
-    winx::file::reopen_file(file.as_handle(), new_access_mode, flags)
+    let new_share_mode =
+        ShareMode::FILE_SHARE_READ | ShareMode::FILE_SHARE_WRITE | ShareMode::FILE_SHARE_DELETE;
+    winx::file::reopen_file(file.as_handle(), new_access_mode, new_share_mode, flags)
 }
 
 fn get_access_mode(options: &OpenOptions) -> io::Result<u32> {

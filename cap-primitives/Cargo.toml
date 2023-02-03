@@ -28,10 +28,10 @@ cap-tempfile = { path = "../cap-tempfile" }
 rustix = { version = "0.36.0", features = ["fs", "process", "procfs", "termios", "time"] }
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.34.0"
+winx = "0.35.0"
 
 [target.'cfg(windows)'.dependencies.windows-sys]
-version = "0.42.0"
+version = "0.45.0"
 features = [
     "Win32_Storage_FileSystem",
     "Win32_Foundation",
