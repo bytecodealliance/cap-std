@@ -1,6 +1,6 @@
 [package]
 name = "cap-fs-ext"
-version = "1.0.4"
+version = "1.0.5"
 description = "Extension traits for `Dir`, `File`, etc."
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -15,8 +15,8 @@ edition = "2018"
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
 #cap-async-std = { path = "../cap-async-std", optional = true, version = "^0.25.0" }
-cap-std = { path = "../cap-std", optional = true, version = "^1.0.4" }
-cap-primitives = { path = "../cap-primitives", version = "^1.0.4" }
+cap-std = { path = "../cap-std", optional = true, version = "^1.0.5" }
+cap-primitives = { path = "../cap-primitives", version = "^1.0.5" }
 io-lifetimes = { version = "1.0.0", default-features = false }
 # Enable "unstable" for `spawn_blocking`.
 #async-std = { version = "1.10.0", features = ["attributes", "unstable"], optional = true }
