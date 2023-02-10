@@ -1,5 +1,6 @@
 mod copy;
 mod create_dir_unchecked;
+mod create_file_at_w;
 mod dir_entry_inner;
 mod dir_options_ext;
 mod dir_utils;
@@ -74,7 +75,6 @@ pub(crate) use symlink_unchecked::*;
 // <https://docs.microsoft.com/en-us/windows/win32/fileio/reparse-points>
 pub(crate) const MAX_SYMLINK_EXPANSIONS: u8 = 63;
 
-#[cfg(any(test, racy_asserts))]
 pub(crate) fn file_path(file: &std::fs::File) -> Option<std::path::PathBuf> {
     get_path::get_path(file).ok()
 }

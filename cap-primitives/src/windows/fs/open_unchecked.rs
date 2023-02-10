@@ -1,13 +1,24 @@
-use super::get_path::concatenate;
-use super::open_options_to_std;
-use crate::fs::{errors, FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind};
+//! Windows implementation of `openat` functionality.
+
+#![allow(unsafe_code)]
+
+use super::create_file_at_w::CreateFileAtW;
+use super::{open_options_to_std, prepare_open_options_for_open};
+use crate::fs::{
+    errors, file_path, get_access_mode, get_creation_mode, get_flags_and_attributes,
+    FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind,
+};
 use crate::{ambient_authority, AmbientAuthority};
+use std::convert::TryInto;
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
 use std::os::windows::fs::MetadataExt;
-use std::path::Path;
+use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
+use std::path::{Component, Path, PathBuf};
 use std::{fs, io};
-use windows_sys::Win32::Foundation;
+use windows_sys::Win32::Foundation::{self, ERROR_ACCESS_DENIED, HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::Storage::FileSystem::{
-    FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_OPEN_REPARSE_POINT,
+    CreateFileW, FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_OPEN_REPARSE_POINT,
 };
 
 /// *Unsandboxed* function similar to `open`, but which does not perform
@@ -17,8 +28,110 @@ pub(crate) fn open_unchecked(
     path: &Path,
     options: &OpenOptions,
 ) -> Result<fs::File, OpenUncheckedError> {
-    let full_path = concatenate(start, path).map_err(OpenUncheckedError::Other)?;
-    open_ambient_impl(&full_path, options, ambient_authority())
+    let _ = ambient_authority;
+
+    // We have the final `OpenOptions`; now prepare it for an `open`.
+    let mut prepared_opts = options.clone();
+    let manually_trunc = prepare_open_options_for_open(&mut prepared_opts);
+
+    handle_open_result(
+        open_at(start, path, &prepared_opts),
+        options,
+        manually_trunc,
+    )
+}
+
+// The following is derived from Rust's library/std/src/sys/windows/fs.rs
+// at revision 56888c1e9b4135b511abd2d8e907099003d12281, except with a
+// directory `start` parameter added and using `CreateFileAtW` instead of
+// `CreateFileW`.
+
+fn open_at(start: &fs::File, path: &Path, opts: &OpenOptions) -> io::Result<fs::File> {
+    let mut dir = start.as_raw_handle() as HANDLE;
+
+    // `PathCchCanonicalizeEx` and friends don't seem to work with relative
+    // paths. Or at least, when I tried it, they canonicalized "a" to "",
+    // which isn't what we want. So we manually canonicalize `..` and `.`.
+    // Hopefully there aren't other mysterious Windows path conventions that
+    // we're missing here.
+    let mut rebuilt = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::Prefix(_) | Component::RootDir => {
+                rebuilt.push(component);
+                dir = 0;
+            }
+            Component::Normal(_) => {
+                rebuilt.push(component);
+            }
+            Component::ParentDir => {
+                if !rebuilt.pop() {
+                    // We popped past the beginning of `path`. Substitute in
+                    // the path of `start` and convert this to an ambient
+                    // path by dropping the directory base. It's ok to do
+                    // this because we're not sandboxing at this level of the
+                    // code.
+                    if dir == 0 {
+                        return Err(io::Error::from_raw_os_error(ERROR_ACCESS_DENIED as _));
+                    }
+                    rebuilt = match file_path(start) {
+                        Some(path) => path,
+                        None => {
+                            return Err(io::Error::from_raw_os_error(ERROR_ACCESS_DENIED as _));
+                        }
+                    };
+                    dir = 0;
+                    // And then pop the last component of that.
+                    let _ = rebuilt.pop();
+                }
+            }
+            Component::CurDir => (),
+        }
+    }
+
+    let mut wide = OsStr::encode_wide(rebuilt.as_os_str()).collect::<Vec<u16>>();
+
+    // If we ended up re-rooting, use Windows' `CreateFileW` instead of our
+    // own `CreateFileAtW` so that it does the requisite magic for absolute
+    // paths.
+    if dir == 0 {
+        wide.push(0);
+        let handle = unsafe {
+            CreateFileW(
+                wide.as_ptr(),
+                get_access_mode(opts)?,
+                opts.ext.share_mode,
+                opts.ext.security_attributes,
+                get_creation_mode(opts)?,
+                get_flags_and_attributes(opts),
+                0 as HANDLE,
+            )
+        };
+        if handle != INVALID_HANDLE_VALUE {
+            Ok(unsafe { fs::File::from_raw_handle(handle as _) })
+        } else {
+            Err(io::Error::last_os_error())
+        }
+    } else {
+        let handle = unsafe {
+            CreateFileAtW(
+                dir,
+                &wide,
+                get_access_mode(opts)?,
+                opts.ext.share_mode,
+                opts.ext.security_attributes,
+                get_creation_mode(opts)?,
+                get_flags_and_attributes(opts),
+                0 as HANDLE,
+            )
+        };
+
+        if let Ok(handle) = handle.try_into() {
+            Ok(<fs::File as From<OwnedHandle>>::from(handle))
+        } else {
+            Err(io::Error::last_os_error())
+        }
+    }
 }
 
 /// *Unsandboxed* function similar to `open_unchecked`, but which just operates
@@ -29,8 +142,16 @@ pub(crate) fn open_ambient_impl(
     ambient_authority: AmbientAuthority,
 ) -> Result<fs::File, OpenUncheckedError> {
     let _ = ambient_authority;
-    let (opts, manually_trunc) = open_options_to_std(options);
-    match opts.open(path) {
+    let (std_opts, manually_trunc) = open_options_to_std(options);
+    handle_open_result(std_opts.open(path), options, manually_trunc)
+}
+
+fn handle_open_result(
+    result: io::Result<fs::File>,
+    options: &OpenOptions,
+    manually_trunc: bool,
+) -> Result<fs::File, OpenUncheckedError> {
+    match result {
         Ok(f) => {
             let enforce_dir = options.dir_required;
             let enforce_nofollow = options.follow == FollowSymlinks::No
