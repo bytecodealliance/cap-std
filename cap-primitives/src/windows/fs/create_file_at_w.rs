@@ -66,6 +66,10 @@ const FILE_ATTRIBUTE_VALID_FLAGS: FILE_FLAGS_AND_ATTRIBUTES = FILE_ATTRIBUTE_EA
 
 /// Like Windows' `CreateFileW`, but takes a `dir` argument to use as the
 /// root directory.
+///
+/// Also, the `lpfilename` is a Rust slice instead of a C-style NUL-terminated
+/// array, because that's what our callers have and it's closer to what
+/// `NtCreatePath` takes.
 #[allow(non_snake_case)]
 pub unsafe fn CreateFileAtW(
     dir: HANDLE,
