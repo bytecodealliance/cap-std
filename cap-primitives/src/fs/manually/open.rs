@@ -6,7 +6,7 @@ use crate::fs::{
     dir_options, errors, open_unchecked, path_has_trailing_dot, path_has_trailing_slash,
     stat_unchecked, FollowSymlinks, MaybeOwnedFile, Metadata, OpenOptions, OpenUncheckedError,
 };
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
 use rustix::fs::OFlags;
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -247,7 +247,7 @@ impl<'start> Context<'start> {
             Ok(file) => {
                 // Emulate `O_PATH` + `FollowSymlinks::Yes` on Linux. If `file`
                 // is a symlink, follow it.
-                #[cfg(any(target_os = "android", target_os = "linux"))]
+                #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
                 if should_emulate_o_path(&use_options) {
                     match read_link_one(
                         &file,
@@ -527,7 +527,7 @@ pub(crate) fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io:
 
 /// Test whether the given options imply that we should treat an open file as
 /// potentially being a symlink we need to follow, due to use of `O_PATH`.
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
 fn should_emulate_o_path(use_options: &OpenOptions) -> bool {
     (use_options.ext.custom_flags & (OFlags::PATH.bits() as i32)) == (OFlags::PATH.bits() as i32)
         && use_options.follow == FollowSymlinks::Yes
