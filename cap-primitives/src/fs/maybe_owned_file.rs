@@ -120,7 +120,7 @@ impl<'borrow> MaybeOwnedFile<'borrow> {
     }
 
     /// Assuming `self` holds an owned `File`, return it.
-    #[cfg_attr(windows, allow(dead_code))]
+    #[cfg_attr(any(windows, target_os = "freebsd"), allow(dead_code))]
     pub(super) fn unwrap_owned(self) -> fs::File {
         match self.inner {
             MaybeOwned::Owned(file) => file,

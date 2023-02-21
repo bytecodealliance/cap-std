@@ -7,7 +7,7 @@ use std::path::Path;
 use std::{fs, io};
 
 #[allow(clippy::useless_conversion)]
-fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<Timespec> {
+pub(crate) fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<Timespec> {
     Ok(match ft {
         None => Timespec {
             tv_sec: 0,
@@ -33,6 +33,7 @@ fn to_timespec(ft: Option<SystemTimeSpec>) -> io::Result<Timespec> {
     })
 }
 
+#[allow(dead_code)]
 pub(crate) fn set_times_nofollow_unchecked(
     start: &fs::File,
     path: &Path,
