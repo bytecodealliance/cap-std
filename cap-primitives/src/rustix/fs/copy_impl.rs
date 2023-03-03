@@ -10,6 +10,7 @@ use rustix::fs::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
     fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
 use std::convert::TryFrom;
 use std::path::Path;
 use std::{fs, io};
