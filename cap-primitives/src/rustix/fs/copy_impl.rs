@@ -10,6 +10,8 @@ use rustix::fs::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
     fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
 };
+#[cfg(any(target_os = "android", target_os = "linux"))]
+use std::convert::TryFrom;
 use std::path::Path;
 use std::{fs, io};
 
@@ -115,6 +117,11 @@ pub(crate) fn copy_impl(
     while written < len {
         let copy_result = if has_copy_file_range {
             let bytes_to_copy = cmp::min(len - written, usize::MAX as u64);
+
+            // `copy_file_range` takes a `usize`; convert with saturation so
+            // that we copy as many bytes as we can.
+            let bytes_to_copy = usize::try_from(bytes_to_copy).unwrap_or(usize::MAX);
+
             // We actually don't have to adjust the offsets,
             // because copy_file_range adjusts the file offset automatically
             let copy_result = copy_file_range(&reader, None, &writer, None, bytes_to_copy);
