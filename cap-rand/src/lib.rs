@@ -74,7 +74,8 @@ pub mod rngs {
         /// This function makes use of ambient authority to access the platform
         /// entropy source.
         #[inline]
-        pub const fn default(_: AmbientAuthority) -> Self {
+        pub const fn default(ambient_authority: AmbientAuthority) -> Self {
+            let _ = ambient_authority;
             Self(())
         }
     }
@@ -161,7 +162,8 @@ pub mod rngs {
 /// This function makes use of ambient authority to access the platform entropy
 /// source.
 #[inline]
-pub fn thread_rng(_: AmbientAuthority) -> rngs::CapRng {
+pub fn thread_rng(ambient_authority: AmbientAuthority) -> rngs::CapRng {
+    let _ = ambient_authority;
     rngs::CapRng {
         inner: rand::thread_rng(),
     }
@@ -176,7 +178,8 @@ pub fn thread_rng(_: AmbientAuthority) -> rngs::CapRng {
 /// This function makes use of ambient authority to access the platform entropy
 /// source.
 #[inline]
-pub fn std_rng_from_entropy(_: AmbientAuthority) -> rngs::StdRng {
+pub fn std_rng_from_entropy(ambient_authority: AmbientAuthority) -> rngs::StdRng {
+    let _ = ambient_authority;
     rand::rngs::StdRng::from_entropy()
 }
 
@@ -189,9 +192,10 @@ pub fn std_rng_from_entropy(_: AmbientAuthority) -> rngs::StdRng {
 /// This function makes use of ambient authority to access the platform entropy
 /// source.
 #[inline]
-pub fn random<T>(_: AmbientAuthority) -> T
+pub fn random<T>(ambient_authority: AmbientAuthority) -> T
 where
     crate::distributions::Standard: crate::distributions::Distribution<T>,
 {
+    let _ = ambient_authority;
     rand::random()
 }

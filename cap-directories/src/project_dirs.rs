@@ -34,8 +34,9 @@ impl ProjectDirs {
         qualifier: &str,
         organization: &str,
         application: &str,
-        _: AmbientAuthority,
+        ambient_authority: AmbientAuthority,
     ) -> Option<Self> {
+        let _ = ambient_authority;
         let inner = directories_next::ProjectDirs::from(qualifier, organization, application)?;
         Some(Self { inner })
     }
