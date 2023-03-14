@@ -21,12 +21,22 @@ impl AddrSet {
 #[derive(Clone)]
 struct IpGrant {
     set: AddrSet,
-    port: u16, // TODO: IANA port names, TODO: range
+    port: Option<u16>, // TODO: IANA port names, TODO: port ranges
 }
 
 impl IpGrant {
     fn contains(&self, addr: &net::SocketAddr) -> bool {
-        self.set.contains(addr.ip()) && addr.port() == self.port
+        if !self.set.contains(addr.ip()) {
+            return false;
+        }
+
+        if let Some(port) = self.port {
+            if port != addr.port() {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
@@ -46,6 +56,27 @@ impl Pool {
         Self { grants: Vec::new() }
     }
 
+    /// Add a range of network addresses to the pool.
+    ///
+    /// Unlike `insert_ip_net`, this function grants access to any requested
+    /// port.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_ip_net_any_port(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        ambient_authority: AmbientAuthority,
+    ) {
+        let _ = ambient_authority;
+
+        self.grants.push(IpGrant {
+            set: AddrSet::Net(ip_net),
+            port: None,
+        })
+    }
+
     /// Add a range of network addresses with a specific port to the pool.
     ///
     /// # Ambient Authority
@@ -61,7 +92,7 @@ impl Pool {
 
         self.grants.push(IpGrant {
             set: AddrSet::Net(ip_net),
-            port,
+            port: Some(port),
         })
     }
 
@@ -79,7 +110,7 @@ impl Pool {
 
         self.grants.push(IpGrant {
             set: AddrSet::Net(addr.ip().into()),
-            port: addr.port(),
+            port: Some(addr.port()),
         })
     }
 
