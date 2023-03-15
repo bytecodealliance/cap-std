@@ -17,7 +17,8 @@ impl MonotonicClock {
     ///
     /// This uses ambient authority to accesses clocks.
     #[inline]
-    pub const fn new(_: AmbientAuthority) -> Self {
+    pub const fn new(ambient_authority: AmbientAuthority) -> Self {
+        let _ = ambient_authority;
         Self(())
     }
 

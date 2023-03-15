@@ -51,7 +51,14 @@ impl Pool {
     /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub fn insert_ip_net(&mut self, ip_net: ipnet::IpNet, port: u16, _: AmbientAuthority) {
+    pub fn insert_ip_net(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        port: u16,
+        ambient_authority: AmbientAuthority,
+    ) {
+        let _ = ambient_authority;
+
         self.grants.push(IpGrant {
             set: AddrSet::Net(ip_net),
             port,
@@ -63,7 +70,13 @@ impl Pool {
     /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub fn insert_socket_addr(&mut self, addr: net::SocketAddr, _: AmbientAuthority) {
+    pub fn insert_socket_addr(
+        &mut self,
+        addr: net::SocketAddr,
+        ambient_authority: AmbientAuthority,
+    ) {
+        let _ = ambient_authority;
+
         self.grants.push(IpGrant {
             set: AddrSet::Net(addr.ip().into()),
             port: addr.port(),

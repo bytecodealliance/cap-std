@@ -102,7 +102,12 @@ pub(crate) fn canonicalize_options() -> OpenOptions {
 ///
 /// This function is not sandboxed and may trivially access any path that the
 /// host process has access to.
-pub(crate) fn open_ambient_dir_impl(path: &Path, _: AmbientAuthority) -> io::Result<fs::File> {
+pub(crate) fn open_ambient_dir_impl(
+    path: &Path,
+    ambient_authority: AmbientAuthority,
+) -> io::Result<fs::File> {
+    let _ = ambient_authority;
+
     let mut options = fs::OpenOptions::new();
     options.read(true);
 
