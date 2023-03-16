@@ -19,7 +19,6 @@ arf-strings = { version = "0.7.0", optional = true }
 async-std = { version = "1.10.0", features = ["attributes", "unstable"] }
 cap-primitives = { path = "../cap-primitives", version = "^0.25.0" }
 io-lifetimes = { version = "1.0.0", default-features = false, features = ["async-std"] }
-ipnet = "2.3.0"
 io-extras = { version = "0.17.0", features = ["use_async_std"] }
 camino = { version = "1.0.5", optional = true }
 
