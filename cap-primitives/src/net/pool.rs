@@ -1,5 +1,9 @@
-use ambient_authority::AmbientAuthority;
+#[cfg(test)]
+use crate::ambient_authority;
+use crate::AmbientAuthority;
 use ipnet::IpNet;
+#[cfg(test)]
+use std::str::FromStr;
 use std::{io, net};
 
 // TODO: Perhaps we should have our own version of `ToSocketAddrs` which
@@ -21,12 +25,27 @@ impl AddrSet {
 #[derive(Clone)]
 struct IpGrant {
     set: AddrSet,
-    port: u16, // TODO: IANA port names, TODO: range
+    ports_start: u16,
+    ports_end: Option<u16>,
 }
 
 impl IpGrant {
     fn contains(&self, addr: &net::SocketAddr) -> bool {
-        self.set.contains(addr.ip()) && addr.port() == self.port
+        if !self.set.contains(addr.ip()) {
+            return false;
+        }
+
+        let port = addr.port();
+        if port < self.ports_start {
+            return false;
+        }
+        if let Some(ports_end) = self.ports_end {
+            if port >= ports_end {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
@@ -46,6 +65,43 @@ impl Pool {
         Self { grants: Vec::new() }
     }
 
+    /// Add a range of network addresses, accepting any port, to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_ip_net_port_any(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.insert_ip_net_port_range(ip_net, 0, None, ambient_authority)
+    }
+
+    /// Add a range of network addresses, accepting a range of ports, to the pool.
+    ///
+    /// This grants access to the port range starting at `ports_start` and,
+    /// if `ports_end` is provided, ending before `ports_end`.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_ip_net_port_range(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        ports_start: u16,
+        ports_end: Option<u16>,
+        ambient_authority: AmbientAuthority,
+    ) {
+        let _ = ambient_authority;
+
+        self.grants.push(IpGrant {
+            set: AddrSet::Net(ip_net),
+            ports_start,
+            ports_end,
+        })
+    }
+
     /// Add a range of network addresses with a specific port to the pool.
     ///
     /// # Ambient Authority
@@ -57,12 +113,7 @@ impl Pool {
         port: u16,
         ambient_authority: AmbientAuthority,
     ) {
-        let _ = ambient_authority;
-
-        self.grants.push(IpGrant {
-            set: AddrSet::Net(ip_net),
-            port,
-        })
+        self.insert_ip_net_port_range(ip_net, port, port.checked_add(1), ambient_authority)
     }
 
     /// Add a specific [`net::SocketAddr`] to the pool.
@@ -75,12 +126,7 @@ impl Pool {
         addr: net::SocketAddr,
         ambient_authority: AmbientAuthority,
     ) {
-        let _ = ambient_authority;
-
-        self.grants.push(IpGrant {
-            set: AddrSet::Net(addr.ip().into()),
-            port: addr.port(),
-        })
+        self.insert_ip_net(addr.ip().into(), addr.port(), ambient_authority)
     }
 
     /// Check whether the given address is within the pool.
@@ -98,3 +144,82 @@ impl Pool {
 
 /// An empty array of `SocketAddr`s.
 pub const NO_SOCKET_ADDRS: &[net::SocketAddr] = &[];
+
+#[test]
+fn test_empty() {
+    let p = Pool::new();
+
+    p.check_addr(&net::SocketAddr::from_str("[::1]:0").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1023").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1024").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:8080").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
+        .unwrap_err();
+}
+
+#[test]
+fn test_port_any() {
+    let mut p = Pool::new();
+    p.insert_ip_net_port_any(
+        IpNet::new(net::IpAddr::V6(net::Ipv6Addr::LOCALHOST), 48).unwrap(),
+        ambient_authority(),
+    );
+
+    p.check_addr(&net::SocketAddr::from_str("[::1]:0").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1023").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1024").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:8080").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
+        .unwrap();
+}
+
+#[test]
+fn test_port_range() {
+    let mut p = Pool::new();
+    p.insert_ip_net_port_range(
+        IpNet::new(net::IpAddr::V6(net::Ipv6Addr::LOCALHOST), 48).unwrap(),
+        1024,
+        Some(9000),
+        ambient_authority(),
+    );
+
+    p.check_addr(&net::SocketAddr::from_str("[::1]:0").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1023").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1024").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:8080").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
+        .unwrap_err();
+}
+
+#[test]
+fn test_port_one() {
+    let mut p = Pool::new();
+    p.insert_ip_net(
+        IpNet::new(net::IpAddr::V6(net::Ipv6Addr::LOCALHOST), 48).unwrap(),
+        8080,
+        ambient_authority(),
+    );
+
+    p.check_addr(&net::SocketAddr::from_str("[::1]:0").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1023").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1024").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:8080").unwrap())
+        .unwrap();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
+        .unwrap_err();
+}
