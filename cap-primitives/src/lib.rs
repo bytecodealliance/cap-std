@@ -28,3 +28,5 @@ pub mod time;
 #[doc(hidden)]
 pub use ambient_authority::ambient_authority_known_at_compile_time;
 pub use ambient_authority::{ambient_authority, AmbientAuthority};
+// This is part of our public API.
+pub use ipnet;
