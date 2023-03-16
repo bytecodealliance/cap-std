@@ -1,4 +1,4 @@
-//! A capability-based clock API modeled after `std::time`.
+//! A capability-based clock API modeled after [`std::time`].
 //!
 //! This corresponds to [`std::time`].
 //!

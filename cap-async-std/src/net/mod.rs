@@ -1,4 +1,4 @@
-//! A capability-based network API modeled after `async_std::net`.
+//! A capability-based network API modeled after [`async_std::net`].
 //!
 //! This corresponds to [`async_std::net`].
 //!
