@@ -20,7 +20,7 @@ impl Pool {
         }
     }
 
-    /// Add a range of network addresses to the pool.
+    /// Add a range of network addresses, accepting any port, to the pool.
     ///
     /// Unlike `insert_ip_net`, this function grants access to any requested
     /// port.
@@ -28,8 +28,26 @@ impl Pool {
     /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub fn insert_ip_net_any_port(&mut self, ip_net: ipnet::IpNet, ambient_authority: AmbientAuthority) {
-        self.cap.insert_ip_net_any_port(ip_net, ambient_authority)
+    pub fn insert_ip_net_port_any(&mut self, ip_net: ipnet::IpNet, ambient_authority: AmbientAuthority) {
+        self.cap.insert_ip_net_port_any(ip_net, ambient_authority)
+    }
+
+    /// Add a range of network addresses, accepting a range of ports, to the pool.
+    ///
+    /// This grants access to the port range starting at `ports_start` and,
+    /// if `ports_end` is provided, ending before `ports_end`.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_ip_net_port_range(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        ports_start: u16,
+        ports_end: Option<u16>,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.cap.insert_ip_net_port_range(ip_net, ports_start, ports_end, ambient_authority)
     }
 
     /// Add a range of network addresses with a specific port to the pool.
