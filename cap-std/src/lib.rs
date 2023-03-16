@@ -1,4 +1,4 @@
-//! A capability-based API modeled after `std`.
+//! A capability-based API modeled after [`std`].
 //!
 //! This corresponds to [`std`].
 //!

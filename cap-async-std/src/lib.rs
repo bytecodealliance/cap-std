@@ -1,4 +1,4 @@
-//! A capability-based API modeled after `async_std`.
+//! A capability-based API modeled after [`async_std`].
 //!
 //! This corresponds to [`async_std`].
 //!
