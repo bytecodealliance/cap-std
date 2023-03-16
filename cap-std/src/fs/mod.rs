@@ -1,4 +1,4 @@
-//! A capability-based filesystem API modeled after `std::fs`.
+//! A capability-based filesystem API modeled after [`std::fs`].
 //!
 //! This corresponds to [`std::fs`].
 //!
