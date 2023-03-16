@@ -50,5 +50,6 @@ pub use cap_primitives::{ambient_authority, AmbientAuthority};
 // Re-export `async_std` to make it easy for users to depend on the same
 // version we do, because we use its types in our public API.
 pub use async_std;
-// And this is also part of our public API
+// And these are also part of our public API
 pub use io_lifetimes;
+pub use cap_primitives::ipnet;

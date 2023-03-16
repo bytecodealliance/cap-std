@@ -1,7 +1,7 @@
 use crate::net::{TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use async_std::{io, net};
 use cap_primitives::net::NO_SOCKET_ADDRS;
-use cap_primitives::AmbientAuthority;
+use cap_primitives::{ipnet, AmbientAuthority};
 
 /// A pool of network addresses.
 ///

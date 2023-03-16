@@ -1,6 +1,6 @@
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use cap_primitives::net::NO_SOCKET_ADDRS;
-use cap_primitives::AmbientAuthority;
+use cap_primitives::{ipnet, AmbientAuthority};
 use std::time::Duration;
 use std::{io, net};
 
