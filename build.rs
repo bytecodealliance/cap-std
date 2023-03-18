@@ -50,7 +50,7 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
-    let mut cmd = if let Ok(wrapper) = var("CARGO_RUSTC_WRAPPER") {
+    let mut cmd = if let Ok(wrapper) = var("RUSTC_WRAPPER") {
         let mut cmd = std::process::Command::new(wrapper);
         // The wrapper's first argument is supposed to be the path to rustc.
         cmd.arg(rustc);
