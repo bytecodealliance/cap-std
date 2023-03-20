@@ -50,7 +50,14 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
-    let mut cmd = if let Ok(wrapper) = var("RUSTC_WRAPPER") {
+    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string,
+    // as documented [here].
+    // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
+    let wrapper = var("RUSTC_WRAPPER")
+        .ok()
+        .and_then(|w| if w.is_empty() { None } else { Some(w) });
+
+    let mut cmd = if let Some(wrapper) = wrapper {
         let mut cmd = std::process::Command::new(wrapper);
         // The wrapper's first argument is supposed to be the path to rustc.
         cmd.arg(rustc);
