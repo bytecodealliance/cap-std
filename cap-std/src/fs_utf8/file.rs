@@ -128,6 +128,26 @@ impl File {
         )?))
     }
 
+    /// Constructs a new instance of `Self` in write-only mode by opening,
+    /// creating or truncating, the given path as a file using the host
+    /// process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub fn create_ambient<P: AsRef<Utf8Path>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        let path = from_utf8(path.as_ref())?;
+        Ok(Self::from_cap_std(crate::fs::File::create_ambient(
+            path,
+            ambient_authority,
+        )?))
+    }
+
     /// Constructs a new instance of `Self` with the options specified by
     /// `options` by opening the given path as a file using the host process'
     /// ambient authority.
