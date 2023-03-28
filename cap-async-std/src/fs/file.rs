@@ -131,6 +131,31 @@ impl File {
         .map(|f| Self::from_std(f.into()))
     }
 
+    /// Constructs a new instance of `Self` in write-only mode by opening,
+    /// creating or truncating, the given path as a file using the host
+    /// process' ambient authority.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function is not sandboxed and may access any path that the host
+    /// process has access to.
+    #[inline]
+    pub async fn create_ambient<P: AsRef<Path>>(
+        path: P,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<Self> {
+        let path = path.as_ref().to_path_buf();
+        spawn_blocking(move || {
+            open_ambient(
+                path.as_ref(),
+                OpenOptions::new().write(true).create(true).truncate(true),
+                ambient_authority,
+            )
+        })
+        .await
+        .map(|f| Self::from_std(f.into()))
+    }
+
     /// Constructs a new instance of `Self` with the options specified by
     /// `options` by opening the given path as a file using the host process'
     /// ambient authority.
