@@ -201,7 +201,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows-latest, windows-2019, macos-latest, macos-10.15, beta, ubuntu-18.04, aarch64-ubuntu]
+        build: [stable, windows-latest, windows-2019, macos-latest, macos-10.15, beta, ubuntu-20.04, aarch64-ubuntu]
         include:
           - build: stable
             os: ubuntu-latest
@@ -221,8 +221,8 @@ jobs:
           - build: beta
             os: ubuntu-latest
             rust: beta
-          - build: ubuntu-18.04
-            os: ubuntu-18.04
+          - build: ubuntu-20.04
+            os: ubuntu-20.04
             rust: stable
           - build: aarch64-ubuntu
             os: ubuntu-latest
@@ -332,13 +332,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-18.04]
+        build: [ubuntu, ubuntu-20.04]
         include:
           - build: ubuntu
             os: ubuntu-latest
             rust: nightly
-          - build: ubuntu-18.04
-            os: ubuntu-18.04
+          - build: ubuntu-20.04
+            os: ubuntu-20.04
             rust: nightly
 
     env:
