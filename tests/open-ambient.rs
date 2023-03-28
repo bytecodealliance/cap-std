@@ -10,6 +10,15 @@ fn test_open_ambient() {
 }
 
 #[test]
+fn test_create_ambient() {
+    let dir = tempfile::tempdir().unwrap();
+    let foo_path = dir.path().join("foo");
+    let _ = File::create_ambient(&foo_path, ambient_authority()).unwrap();
+    let _ = File::open_ambient(&foo_path, ambient_authority()).unwrap();
+    let _ = File::create_ambient(&foo_path, ambient_authority()).unwrap();
+}
+
+#[test]
 fn test_create_dir_ambient() {
     let dir = tempfile::tempdir().unwrap();
     let foo_path = dir.path().join("foo");
