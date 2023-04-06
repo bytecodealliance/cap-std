@@ -3,14 +3,13 @@
 use crate::fs::OpenOptions;
 use std::io;
 use std::ptr::null_mut;
-use windows_sys::Win32::Foundation::ERROR_INVALID_PARAMETER;
+use windows_sys::Win32::Foundation::{ERROR_INVALID_PARAMETER, GENERIC_READ, GENERIC_WRITE};
 use windows_sys::Win32::Security::SECURITY_ATTRIBUTES;
 use windows_sys::Win32::Storage::FileSystem::{
     CREATE_ALWAYS, CREATE_NEW, FILE_FLAG_OPEN_REPARSE_POINT, FILE_GENERIC_WRITE, FILE_SHARE_DELETE,
     FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_WRITE_DATA, OPEN_ALWAYS, OPEN_EXISTING,
     SECURITY_SQOS_PRESENT, TRUNCATE_EXISTING,
 };
-use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
 
 #[derive(Debug, Clone)]
 pub(crate) struct OpenOptionsExt {
