@@ -20,6 +20,32 @@ impl Pool {
         }
     }
 
+    /// Add addresses to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert<A: ToSocketAddrs>(
+        &mut self,
+        addrs: A,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<()> {
+        self.cap.insert(addrs, ambient_authority)
+    }
+
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_socket_addr(
+        &mut self,
+        addr: net::SocketAddr,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.cap.insert_socket_addr(addr, ambient_authority)
+    }
+
     /// Add a range of network addresses, accepting any port, to the pool.
     ///
     /// Unlike `insert_ip_net`, this function grants access to any requested
@@ -62,19 +88,6 @@ impl Pool {
         ambient_authority: AmbientAuthority,
     ) {
         self.cap.insert_ip_net(ip_net, port, ambient_authority)
-    }
-
-    /// Add a specific [`net::SocketAddr`] to the pool.
-    ///
-    /// # Ambient Authority
-    ///
-    /// This function allows ambient access to any IP address.
-    pub fn insert_socket_addr(
-        &mut self,
-        addr: net::SocketAddr,
-        ambient_authority: AmbientAuthority,
-    ) {
-        self.cap.insert_socket_addr(addr, ambient_authority)
     }
 
     /// Creates a new `TcpListener` which will be bound to the specified
