@@ -231,7 +231,8 @@ pub trait PoolExt: private::Sealed {
         addrs: A,
     ) -> io::Result<()>;
 
-    /// Initiate a TCP connection, converting a [`TcpListener`] to a [`TcpStream`].
+    /// Initiate a TCP connection, converting a [`TcpListener`] to a
+    /// [`TcpStream`].
     ///
     /// This is simlar to to [`Pool::connect_tcp_stream`] in that it performs a
     /// TCP connection, but instead of creating a new socket itself it takes a

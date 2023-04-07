@@ -14,26 +14,32 @@ use std::io::{self, Read, Seek, Write};
 ///
 /// # Name-able, but not necessarily named
 ///
-/// By default, the file does not necessarily have an name until the file is written
-/// persistently.
+/// By default, the file does not necessarily have an name until the file is
+/// written persistently.
 ///
 /// On some operating systems like Linux, it is possible to create anonymous
-/// temporary files that can still be written to disk persistently via `O_TMPFILE`.
-/// The advantage of this is that if the process (or operating system) crashes
-/// while the file is being written, the temporary space will be automatically cleaned up.
-/// For this reason, there is no API to retrieve the name, for either case.
+/// temporary files that can still be written to disk persistently via
+/// `O_TMPFILE`. The advantage of this is that if the process (or operating
+/// system) crashes while the file is being written, the temporary space will
+/// be automatically cleaned up. For this reason, there is no API to retrieve
+/// the name, for either case.
 ///
-/// To more closely match the semantics of [`tempfile::tempfile`], use [`crate::TempFile::new_anonymous`].
+/// To more closely match the semantics of [`tempfile::tempfile`], use
+/// [`crate::TempFile::new_anonymous`].
 ///
 /// # File permissions
 ///
-/// Unlike the tempfile crate, the default [`TempFile::new`] will use the same permissions as [`File::create_new`] in
-/// the Rust standard library.  Concretely on Unix systems for example this can (depending on `umask`) result in
-/// files that are readable by all users.  The rationale for this is to make it more ergonomic and natural to use this API to
-/// atomically create new files and replace existing ones.  Many cases that want "private" files will
-/// prefer [`TempFile::new_anonymous`] to have the file not be accessible at all outside the current process.
+/// Unlike the tempfile crate, the default [`TempFile::new`] will use the same
+/// permissions as [`File::create_new`] in the Rust standard library.
+/// Concretely on Unix systems for example this can (depending on `umask`)
+/// result in files that are readable by all users.  The rationale for this is
+/// to make it more ergonomic and natural to use this API to atomically create
+/// new files and replace existing ones.  Many cases that want "private" files
+/// will prefer [`TempFile::new_anonymous`] to have the file not be accessible
+/// at all outside the current process.
 ///
-/// To fully control the permissions of the resulting file, you can use [`File::set_permissions`].
+/// To fully control the permissions of the resulting file, you can use
+/// [`File::set_permissions`].
 ///
 /// [`tempfile::tempfile`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile.html
 /// [`tempfile::NamedTempFile`]: https://docs.rs/tempfile/latest/tempfile/struct.NamedTempFile.html
@@ -57,18 +63,19 @@ impl<'d> Debug for TempFile<'d> {
 fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     use cap_std::io_lifetimes::OwnedFd;
     use rustix::fs::{Mode, OFlags};
-    // openat's API uses WRONLY.  There may be use cases for reading too, so let's support it.
+    // openat's API uses WRONLY.  There may be use cases for reading too, so let's
+    // support it.
     let mut oflags = OFlags::CLOEXEC | OFlags::TMPFILE | OFlags::RDWR;
     if anonymous {
         oflags |= OFlags::EXCL;
     }
-    // We default to 0o666, same as main rust when creating new files; this will be modified by
-    // umask: https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762
+    // We default to 0o666, same as main rust when creating new files; this will be
+    // modified by umask: <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
     let mode = Mode::from_raw_mode(0o666);
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
         Ok(r) => return Ok(Some(File::from(OwnedFd::from(r)))),
-        // See https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81
+        // See <https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81>
         // TODO: With newer Rust versions, this could be simplied to only write `Err` once.
         Err(rustix::io::Errno::OPNOTSUPP)
         | Err(rustix::io::Errno::ISDIR)
@@ -94,8 +101,9 @@ fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
     .map(|(_, name)| name)
 }
 
-/// Create a new temporary file in the target directory, which may or may not have a (randomly generated) name at this point.
-/// If anonymous is specified, the file will be deleted
+/// Create a new temporary file in the target directory, which may or may not
+/// have a (randomly generated) name at this point. If anonymous is specified,
+/// the file will be deleted
 fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> {
     // On Linux, try O_TMPFILE
     #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -125,8 +133,8 @@ impl<'d> TempFile<'d> {
         Ok(Self { dir, fd, name })
     }
 
-    /// Crate a new temporary file in the provided directory that will not have a
-    /// name.  This corresponds to [`tempfile::tempfile_in`].
+    /// Crate a new temporary file in the provided directory that will not have
+    /// a name.  This corresponds to [`tempfile::tempfile_in`].
     ///
     /// [`tempfile::tempfile_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile_in.html
     pub fn new_anonymous(dir: &'d Dir) -> io::Result<File> {
@@ -144,17 +152,18 @@ impl<'d> TempFile<'d> {
     }
 
     fn impl_replace(mut self, destname: &OsStr) -> io::Result<()> {
-        // At this point on Linux if O_TMPFILE is used, we need to give the file a temporary name in
-        // order to link it into place.  There are patches to add an `AT_LINKAT_REPLACE`
-        // API.  With that we could skip this and have file-leak-proof atomic file replacement:
-        // https://marc.info/?l=linux-fsdevel&m=158028833007418&w=2
+        // At this point on Linux if O_TMPFILE is used, we need to give the file a
+        // temporary name in order to link it into place.  There are patches to
+        // add an `AT_LINKAT_REPLACE` API.  With that we could skip this and
+        // have file-leak-proof atomic file replacement: <https://marc.info/?l=linux-fsdevel&m=158028833007418&w=2>
         #[cfg(any(target_os = "android", target_os = "linux"))]
         let tempname = self
             .name
             .take()
             .map(Ok)
             .unwrap_or_else(|| generate_name_in(self.dir, &self.fd))?;
-        // SAFETY: We only support anonymous files on Linux, so the file must have a name here.
+        // SAFETY: We only support anonymous files on Linux, so the file must have a
+        // name here.
         #[cfg(not(any(target_os = "android", target_os = "linux")))]
         let tempname = self.name.take().unwrap();
         // And try the rename into place.

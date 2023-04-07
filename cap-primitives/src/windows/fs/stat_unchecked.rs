@@ -1,12 +1,9 @@
-use crate::fs::{FollowSymlinks, Metadata};
+use crate::fs::{open_unchecked, FollowSymlinks, Metadata, OpenOptions};
+use std::os::windows::fs::OpenOptionsExt;
 use std::path::Path;
 use std::{fs, io};
-use {
-    crate::fs::{open_unchecked, OpenOptions},
-    std::os::windows::fs::OpenOptionsExt,
-    windows_sys::Win32::Storage::FileSystem::{
-        FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
-    },
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
 };
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform
