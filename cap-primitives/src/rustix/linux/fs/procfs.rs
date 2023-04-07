@@ -46,7 +46,7 @@ pub(crate) fn set_permissions_through_proc_self_fd(
 
     let dirfd = proc_self_fd()?;
     let mode = Mode::from_bits(perm.mode() as RawMode).ok_or_else(errors::invalid_flags)?;
-    Ok(chmodat(&dirfd, DecInt::from_fd(&opath), mode)?)
+    Ok(chmodat(dirfd, DecInt::from_fd(&opath), mode)?)
 }
 
 pub(crate) fn set_times_through_proc_self_fd(

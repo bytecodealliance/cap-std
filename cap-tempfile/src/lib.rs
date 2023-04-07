@@ -83,9 +83,9 @@ impl TempDir {
     pub fn new_in(dir: &Dir) -> io::Result<Self> {
         for _ in 0..Self::num_iterations() {
             let name = &Self::new_name();
-            match dir.create_dir(&name) {
+            match dir.create_dir(name) {
                 Ok(()) => {
-                    let dir = match dir.open_dir(&name) {
+                    let dir = match dir.open_dir(name) {
                         Ok(dir) => dir,
                         Err(e) => {
                             dir.remove_dir(name).ok();
@@ -203,7 +203,7 @@ where
             Err(e) => return Err(e),
         }
     }
-    return Err(std::io::Error::new(err, "too many temporary files exist"));
+    Err(std::io::Error::new(err, "too many temporary files exist"))
 }
 
 #[test]

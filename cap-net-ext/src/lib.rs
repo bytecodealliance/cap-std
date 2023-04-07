@@ -154,7 +154,7 @@ impl TcpListenerExt for TcpListener {
     }
 
     fn accept_with(&self, blocking: Blocking) -> io::Result<(TcpStream, SocketAddr)> {
-        let (stream, addr) = rustix::net::acceptfrom_with(&self, socket_flags(blocking))?;
+        let (stream, addr) = rustix::net::acceptfrom_with(self, socket_flags(blocking))?;
         set_socket_flags(&stream, blocking)?;
 
         // We know have a TCP socket, so we know we'll get an IP address.

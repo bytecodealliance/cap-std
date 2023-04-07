@@ -522,7 +522,7 @@ pub(crate) fn stat(start: &fs::File, path: &Path, follow: FollowSymlinks) -> io:
 
     // If the path ended in `.` or `..`, we already have it open, so just do
     // `.metadata()` on it.
-    Metadata::from_file(&*ctx.base)
+    Metadata::from_file(&ctx.base)
 }
 
 /// Test whether the given options imply that we should treat an open file as

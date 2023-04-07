@@ -61,7 +61,6 @@ impl<'d> Debug for TempFile<'d> {
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
-    use cap_std::io_lifetimes::OwnedFd;
     use rustix::fs::{Mode, OFlags};
     // openat's API uses WRONLY.  There may be use cases for reading too, so let's
     // support it.
@@ -74,15 +73,13 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     let mode = Mode::from_raw_mode(0o666);
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
-        Ok(r) => return Ok(Some(File::from(OwnedFd::from(r)))),
+        Ok(r) => Ok(Some(File::from(r))),
         // See <https://github.com/Stebalien/tempfile/blob/1a40687e06eb656044e3d2dffa1379f04b3ef3fd/src/file/imp/unix.rs#L81>
         // TODO: With newer Rust versions, this could be simplied to only write `Err` once.
         Err(rustix::io::Errno::OPNOTSUPP)
         | Err(rustix::io::Errno::ISDIR)
         | Err(rustix::io::Errno::NOENT) => Ok(None),
-        Err(e) => {
-            return Err(e.into());
-        }
+        Err(e) => Err(e.into()),
     }
 }
 
@@ -92,10 +89,10 @@ fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
     use rustix::fd::AsFd;
     use rustix::fs::AtFlags;
     let procself_fd = rustix::io::proc_self_fd()?;
-    let fdnum = rustix::path::DecInt::from_fd(&f.as_fd());
+    let fdnum = rustix::path::DecInt::from_fd(f.as_fd());
     let fdnum = fdnum.as_c_str();
     super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
-        rustix::fs::linkat(&procself_fd, fdnum, subdir, name, AtFlags::SYMLINK_FOLLOW)
+        rustix::fs::linkat(procself_fd, fdnum, subdir, name, AtFlags::SYMLINK_FOLLOW)
             .map_err(Into::into)
     })
     .map(|(_, name)| name)

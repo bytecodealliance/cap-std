@@ -58,5 +58,5 @@ pub(crate) fn set_times_follow_unchecked(
         last_access: to_timespec(atime)?,
         last_modification: to_timespec(mtime)?,
     };
-    Ok(utimensat(&start, path, &times, AtFlags::empty())?)
+    Ok(utimensat(start, path, &times, AtFlags::empty())?)
 }

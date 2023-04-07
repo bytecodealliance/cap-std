@@ -118,7 +118,7 @@ pub(crate) fn open_ambient_dir_impl(
     #[cfg(target_os = "wasi")]
     options.directory(true);
 
-    options.open(&path)
+    options.open(path)
 }
 
 /// Use `O_PATH` on platforms which have it, or none otherwise.

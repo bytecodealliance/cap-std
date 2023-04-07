@@ -27,8 +27,8 @@ pub(crate) fn rename(
     let old_path = strip_dir_suffix(old_path);
     let new_path = strip_dir_suffix(new_path);
 
-    let (old_dir, old_basename) = open_parent(old_start, &*old_path)?;
-    let (new_dir, new_basename) = open_parent(new_start, &*new_path)?;
+    let (old_dir, old_basename) = open_parent(old_start, &old_path)?;
+    let (new_dir, new_basename) = open_parent(new_start, &new_path)?;
 
     // On Unix, re-append a slash if needed.
     #[cfg(unix)]

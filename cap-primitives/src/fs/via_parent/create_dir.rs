@@ -13,7 +13,7 @@ pub(crate) fn create_dir(start: &fs::File, path: &Path, options: &DirOptions) ->
     // slashes.
     let path = strip_dir_suffix(path);
 
-    let (dir, basename) = open_parent(start, &*path)?;
+    let (dir, basename) = open_parent(start, &path)?;
 
     create_dir_unchecked(&dir, basename.as_ref(), options)
 }
