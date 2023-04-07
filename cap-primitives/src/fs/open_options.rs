@@ -141,28 +141,35 @@ impl OpenOptions {
         self
     }
 
-    /// Sets the option to enable  fixme
+    /// Requests write operations complete as defined by synchronized I/O file
+    /// integrity completion.
     #[inline]
     pub(crate) fn sync(&mut self, enable: bool) -> &mut Self {
         self.sync = enable;
         self
     }
 
-    /// Sets the option to enable  fixme
+    /// Requests write operations complete as defined by synchronized I/O data
+    /// integrity completion.
     #[inline]
     pub(crate) fn dsync(&mut self, enable: bool) -> &mut Self {
         self.dsync = enable;
         self
     }
 
-    /// Sets the option to enable  fixme
+    /// Requests read operations complete as defined by the level of integrity
+    /// specified by `sync` and `dsync`.
     #[inline]
     pub(crate) fn rsync(&mut self, enable: bool) -> &mut Self {
         self.rsync = enable;
         self
     }
 
-    /// Sets the option to enable  fixme
+    /// Requests that I/O operations fail with `std::io::ErrorKind::WouldBlock`
+    /// if they would otherwise block.
+    ///
+    /// This option is commonly not implemented for regular files, so blocking
+    /// may still occur.
     #[inline]
     pub(crate) fn nonblock(&mut self, enable: bool) -> &mut Self {
         self.nonblock = enable;
