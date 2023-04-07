@@ -28,6 +28,8 @@ develops libraries to make it easy to write capability-based code, including:
    what's available in `std`
  - [`cap-rand`], which provides capability-based access to
    [random number generators]
+ - [`cap-net-ext`], which provides additional network features beyond
+   what's available in `std`
 
 There is also a [`cap-std-ext`](https://crates.io/crates/cap-std-ext) crate available
 which is maintained independently, and includes further extension APIs for
@@ -49,6 +51,7 @@ Linux.
 [`cap-fs-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-fs-ext/README.md
 [`cap-time-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-time-ext/README.md
 [`cap-rand`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-rand/README.md
+[`cap-net-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-net-ext/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
 [`async-std`]: https://docs.rs/async-std/
 [standard application directories]: https://docs.rs/directories-next/

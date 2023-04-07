@@ -44,7 +44,8 @@ use cap_std::net::{IpAddr, Pool, SocketAddr, TcpListener, TcpStream, ToSocketAdd
 use rustix::fd::OwnedFd;
 use std::io;
 
-/// Address families supported by `TcpListener`.
+/// Address families supported by [`TcpListenerExt::new`] and
+/// [`UdpSocketExt::new`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum AddressFamily {
     /// IPv4
@@ -97,8 +98,8 @@ pub trait TcpListenerExt: private::Sealed + Sized {
     ///
     /// The created socket is not bound or connected to any address and may be
     /// used for either listening or connecting. Use
-    /// [`PoolExt::bind_existing_tcp_listener`] to bind it in preparation
-    /// for listening, or [`PoolExt::connect_into_tcp_stream`] to initiate a
+    /// [`PoolExt::bind_existing_tcp_listener`] to bind it in preparation for
+    /// listening, or [`PoolExt::connect_into_tcp_stream`] to initiate a
     /// connection.
     ///
     /// This is similar to [`Pool::bind_tcp_listener`] in that it creates a TCP
@@ -107,9 +108,9 @@ pub trait TcpListenerExt: private::Sealed + Sized {
     /// for the created socket.
     ///
     /// And it's similar to [`Pool::connect_tcp_stream`] in that it creates a
-    /// TCP socket, however it does not perform the `connect` step. And,
-    /// it has a `blocking` argument to select blocking or non-blocking mode
-    /// for the created socket.
+    /// TCP socket, however it does not perform the `connect` step. And, it has
+    /// a `blocking` argument to select blocking or non-blocking mode for the
+    /// created socket.
     fn new(address_family: AddressFamily, blocking: Blocking) -> io::Result<Self>;
 
     /// Enble listening in a `TcpListener`.
@@ -181,9 +182,9 @@ pub trait UdpSocketExt: private::Sealed + Sized {
     /// created socket.
     ///
     /// And it's similar to [`Pool::connect_udp_socket`] in that it creates a
-    /// UDP socket, however it does not perform the `connect` step. And,
-    /// it has a `blocking` argument to select blocking or non-blocking mode
-    /// for the created socket.
+    /// UDP socket, however it does not perform the `connect` step. And, it has
+    /// a `blocking` argument to select blocking or non-blocking mode for the
+    /// created socket.
     fn new(address_family: AddressFamily, blocking: Blocking) -> io::Result<Self>;
 }
 
@@ -219,8 +220,8 @@ pub trait PoolExt: private::Sealed {
 
     /// Bind a [`UdpSocket`] to the specified address.
     ///
-    /// A newly-created `UdpSocket` created with [`UdpSocketExt::new`]
-    /// has not been bound yet; this function binds it.
+    /// A newly-created `UdpSocket` created with [`UdpSocketExt::new`] has not
+    /// been bound yet; this function binds it.
     ///
     /// This is similar to [`Pool::bind_udp_socket`] in that it binds a UDP
     /// socket, however it does not create the socket itself.
@@ -353,9 +354,9 @@ fn socket(
     blocking: Blocking,
     socket_type: rustix::net::SocketType,
 ) -> io::Result<OwnedFd> {
-    // The Rust standard library has code to call `WSAStartup`, which is
-    // needed on Windows before we do any other Winsock2 calls, so just
-    // make a useless API call once.
+    // The Rust standard library has code to call `WSAStartup`, which is needed
+    // on Windows before we do any other Winsock2 calls, so just make a useless
+    // API call once.
     #[cfg(windows)]
     {
         use std::sync::Once;
@@ -420,8 +421,8 @@ fn socket_flags(blocking: Blocking) -> rustix::net::SocketFlags {
     socket_flags
 }
 
-/// On platforms which don't support `SOCK_CLOEXEC` or `SOCK_NONBLOCK, set
-/// them after creating the socket.
+/// On platforms which don't support `SOCK_CLOEXEC` or `SOCK_NONBLOCK, set them
+/// after creating the socket.
 fn set_socket_flags(fd: &OwnedFd, blocking: Blocking) -> io::Result<()> {
     let _ = fd;
     let _ = blocking;
