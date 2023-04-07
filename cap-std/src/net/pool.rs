@@ -21,6 +21,32 @@ impl Pool {
         }
     }
 
+    /// Add addresses to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert<A: ToSocketAddrs>(
+        &mut self,
+        addrs: A,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<()> {
+        self.cap.insert(addrs, ambient_authority)
+    }
+
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
+    /// # AmbientAuthority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_socket_addr(
+        &mut self,
+        addr: net::SocketAddr,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.cap.insert_socket_addr(addr, ambient_authority)
+    }
+
     /// Add a range of network addresses, accepting any port, to the pool.
     ///
     /// Unlike `insert_ip_net`, this function grants access to any requested
@@ -37,7 +63,8 @@ impl Pool {
         self.cap.insert_ip_net_port_any(ip_net, ambient_authority)
     }
 
-    /// Add a range of network addresses, accepting a range of ports, to the pool.
+    /// Add a range of network addresses, accepting a range of ports, to the
+    /// pool.
     ///
     /// This grants access to the port range starting at `ports_start` and,
     /// if `ports_end` is provided, ending before `ports_end`.
@@ -68,19 +95,6 @@ impl Pool {
         ambient_authority: AmbientAuthority,
     ) {
         self.cap.insert_ip_net(ip_net, port, ambient_authority)
-    }
-
-    /// Add a specific [`net::SocketAddr`] to the pool.
-    ///
-    /// # AmbientAuthority
-    ///
-    /// This function allows ambient access to any IP address.
-    pub fn insert_socket_addr(
-        &mut self,
-        addr: net::SocketAddr,
-        ambient_authority: AmbientAuthority,
-    ) {
-        self.cap.insert_socket_addr(addr, ambient_authority)
     }
 
     /// Creates a new `TcpListener` which will be bound to the specified
@@ -209,5 +223,11 @@ impl Pool {
             Some(e) => Err(e),
             None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
         }
+    }
+
+    /// This is for cap-net-ext.
+    #[doc(hidden)]
+    pub fn _pool(&self) -> &cap_primitives::net::Pool {
+        &self.cap
     }
 }

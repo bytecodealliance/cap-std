@@ -1,5 +1,6 @@
 #[cfg(test)]
 use crate::ambient_authority;
+use crate::net::pool::net::ToSocketAddrs;
 use crate::AmbientAuthority;
 use ipnet::IpNet;
 #[cfg(test)]
@@ -65,6 +66,35 @@ impl Pool {
         Self { grants: Vec::new() }
     }
 
+    /// Add addresses to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert<A: ToSocketAddrs>(
+        &mut self,
+        addrs: A,
+        ambient_authority: AmbientAuthority,
+    ) -> io::Result<()> {
+        for addr in addrs.to_socket_addrs()? {
+            self.insert_socket_addr(addr, ambient_authority);
+        }
+        Ok(())
+    }
+
+    /// Add a specific [`net::SocketAddr`] to the pool.
+    ///
+    /// # Ambient Authority
+    ///
+    /// This function allows ambient access to any IP address.
+    pub fn insert_socket_addr(
+        &mut self,
+        addr: net::SocketAddr,
+        ambient_authority: AmbientAuthority,
+    ) {
+        self.insert_ip_net(addr.ip().into(), addr.port(), ambient_authority)
+    }
+
     /// Add a range of network addresses, accepting any port, to the pool.
     ///
     /// # Ambient Authority
@@ -78,7 +108,8 @@ impl Pool {
         self.insert_ip_net_port_range(ip_net, 0, None, ambient_authority)
     }
 
-    /// Add a range of network addresses, accepting a range of ports, to the pool.
+    /// Add a range of network addresses, accepting a range of ports, to the
+    /// pool.
     ///
     /// This grants access to the port range starting at `ports_start` and,
     /// if `ports_end` is provided, ending before `ports_end`.
@@ -114,19 +145,6 @@ impl Pool {
         ambient_authority: AmbientAuthority,
     ) {
         self.insert_ip_net_port_range(ip_net, port, port.checked_add(1), ambient_authority)
-    }
-
-    /// Add a specific [`net::SocketAddr`] to the pool.
-    ///
-    /// # Ambient Authority
-    ///
-    /// This function allows ambient access to any IP address.
-    pub fn insert_socket_addr(
-        &mut self,
-        addr: net::SocketAddr,
-        ambient_authority: AmbientAuthority,
-    ) {
-        self.insert_ip_net(addr.ip().into(), addr.port(), ambient_authority)
     }
 
     /// Check whether the given address is within the pool.
@@ -222,4 +240,28 @@ fn test_port_one() {
         .unwrap();
     p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
         .unwrap_err();
+}
+
+#[test]
+fn test_addrs() {
+    let mut p = Pool::new();
+    match p.insert("example.com:80", ambient_authority()) {
+        Ok(()) => (),
+        Err(_) => return, // not all test environments have DNS
+    }
+
+    p.check_addr(&net::SocketAddr::from_str("[::1]:0").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1023").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:1024").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:8080").unwrap())
+        .unwrap_err();
+    p.check_addr(&net::SocketAddr::from_str("[::1]:65535").unwrap())
+        .unwrap_err();
+
+    for addr in "example.com:80".to_socket_addrs().unwrap() {
+        p.check_addr(&addr).unwrap();
+    }
 }
