@@ -246,6 +246,17 @@ pub trait PoolExt: private::Sealed {
         addrs: A,
     ) -> io::Result<TcpStream>;
 
+    /// Initiate a TCP connection on a socket.
+    ///
+    /// This is simlar to to [`connect_into_tcp_stream`], however instead
+    /// of converting a `TcpListener` to a `TcpStream`, it leaves fd in the
+    /// existing `TcpListener`.
+    fn connect_existing_tcp_listener<A: ToSocketAddrs>(
+        &self,
+        socket: &TcpListener,
+        addrs: A,
+    ) -> io::Result<()>;
+
     /// Initiate a UDP connection.
     ///
     /// This is simlar to to [`Pool::connect_udp_socket`] in that it performs a
@@ -310,6 +321,15 @@ impl PoolExt for Pool {
         socket: TcpListener,
         addrs: A,
     ) -> io::Result<TcpStream> {
+        self.connect_existing_tcp_listener(&socket, addrs)?;
+        Ok(TcpStream::from(OwnedFd::from(socket)))
+    }
+
+    fn connect_existing_tcp_listener<A: ToSocketAddrs>(
+        &self,
+        socket: &TcpListener,
+        addrs: A,
+    ) -> io::Result<()> {
         let addrs = addrs.to_socket_addrs()?;
 
         let mut last_err = None;
@@ -317,7 +337,7 @@ impl PoolExt for Pool {
             self._pool().check_addr(&addr)?;
 
             match rustix::net::connect(&socket, &addr) {
-                Ok(()) => return Ok(TcpStream::from(OwnedFd::from(socket))),
+                Ok(()) => return Ok(()),
                 Err(err) => last_err = Some(err),
             }
         }
