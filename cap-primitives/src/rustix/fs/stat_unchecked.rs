@@ -32,6 +32,18 @@ pub(crate) fn stat_unchecked(
         // 2: Available
         static STATX_STATE: AtomicU8 = AtomicU8::new(0);
         let state = STATX_STATE.load(Ordering::Relaxed);
+
+        // On Android, seccomp kills processes that execute unrecognized system
+        // calls, so we do an explicit version check rather than relying on
+        // getting an `ENOSYS`.
+        #[cfg(target_os = "android")]
+        let state = if state == 0 && !statx_supported() {
+            STATX_STATE.store(1, Ordering::Relaxed);
+            1
+        } else {
+            state
+        };
+
         if state != 1 {
             let statx_result = statx(
                 start,
@@ -70,4 +82,12 @@ pub(crate) fn stat_unchecked(
     }
 
     Ok(statat(start, path, atflags).map(MetadataExt::from_rustix)?)
+}
+
+/// Test whether `statx` is supported on the currently running OS.
+#[cfg(target_os = "android")]
+fn statx_supported() -> bool {
+    // `statx` is supported in Linux 4.11 and later. Parse the current
+    // Linux version from the `release` field from `uname` to detect this.
+    super::super::linux::linux_version_at_least(4, 11)
 }

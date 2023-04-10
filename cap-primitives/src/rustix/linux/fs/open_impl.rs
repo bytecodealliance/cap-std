@@ -140,47 +140,7 @@ pub(crate) fn open_beneath(
 fn openat2_supported() -> bool {
     // `openat2` is supported in Linux 5.6 and later. Parse the current
     // Linux version from the `release` field from `uname` to detect this.
-    let uname = rustix::process::uname();
-    let release = uname.release().to_bytes();
-    if let Some((major, minor)) = linux_major_minor(release) {
-        if major >= 6 || (major == 5 && minor >= 6) {
-            return true;
-        }
-    }
-
-    false
-}
-
-/// Extract the major and minor values from a Linux `release` string.
-#[cfg(target_os = "android")]
-fn linux_major_minor(release: &[u8]) -> Option<(u32, u32)> {
-    let mut parts = release.split(|b| *b == b'.');
-    if let Some(major) = parts.next() {
-        if let Ok(major) = std::str::from_utf8(major) {
-            if let Ok(major) = major.parse::<u32>() {
-                if let Some(minor) = parts.next() {
-                    if let Ok(minor) = std::str::from_utf8(minor) {
-                        if let Ok(minor) = minor.parse::<u32>() {
-                            return Some((major, minor));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    None
-}
-
-#[cfg(target_os = "android")]
-#[test]
-fn test_linux_major_minor() {
-    assert_eq!(linux_major_minor(b"5.11.0-5489-something"), Some((5, 11)));
-    assert_eq!(linux_major_minor(b"5.10.0-9-whatever"), Some((5, 10)));
-    assert_eq!(linux_major_minor(b"5.6.0"), Some((5, 6)));
-    assert_eq!(linux_major_minor(b"2.6.34"), Some((2, 6)));
-    assert_eq!(linux_major_minor(b""), None);
-    assert_eq!(linux_major_minor(b"linux-2.6.32"), None);
+    super::super::linux_version_at_least(5, 6)
 }
 
 #[cfg(racy_asserts)]
