@@ -12,7 +12,7 @@ pub(crate) fn linux_version_at_least(major: u32, minor: u32) -> bool {
     let uname = rustix::process::uname();
     let release = uname.release().to_bytes();
     if let Some((current_major, current_minor)) = linux_major_minor(release) {
-        if major > current_major || (major == current_major && minor >= current_minor) {
+        if current_major > major || (current_major == major && current_minor >= minor) {
             return true;
         }
     }
