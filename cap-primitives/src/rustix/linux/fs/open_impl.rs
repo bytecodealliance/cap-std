@@ -25,16 +25,24 @@ pub(crate) fn open_impl(
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    let result = open_beneath(start, path, options);
+    // On regular Linux, attempt to use `openat2` to accelerate sandboxed
+    // lookups. On Android, the [seccomp policy] prevents us from even
+    // detecting whether `openat2` is supported, so don't even try.
+    //
+    // [seccomp policy]: https://android-developers.googleblog.com/2017/07/seccomp-filter-in-android-o.html
+    #[cfg(target_os = "linux")]
+    {
+        let result = open_beneath(start, path, options);
 
-    // If that returned `ENOSYS`, use a fallback strategy.
-    if let Err(err) = &result {
-        if Some(rustix::io::Errno::NOSYS.raw_os_error()) == err.raw_os_error() {
-            return manually::open(start, path, options);
+        // If we got anything other than a `ENOSYS` error, that's our result.
+        match result {
+            Err(err) if err.raw_os_error() == Some(rustix::io::Errno::NOSYS.raw_os_error()) => {}
+            Err(err) => return Err(err.into()),
+            Ok(fd) => return Ok(fd),
         }
     }
 
-    result
+    manually::open(start, path, options)
 }
 
 /// Call the `openat2` system call with `RESOLVE_BENEATH`. If the syscall is
@@ -60,23 +68,6 @@ pub(crate) fn open_beneath(
     } else {
         Mode::empty()
     };
-
-    // On Android, seccomp kills processes that execute unrecognized system
-    // calls, so we do an explicit version check rather than relying on
-    // getting an `ENOSYS`.
-    #[cfg(target_os = "android")]
-    {
-        static CHECKED: AtomicBool = AtomicBool::new(false);
-
-        if !CHECKED.load(Relaxed) {
-            if !openat2_supported() {
-                INVALID.store(true, Relaxed);
-                return Err(rustix::io::Errno::NOSYS.into());
-            }
-
-            CHECKED.store(true, Relaxed);
-        }
-    }
 
     // We know `openat2` needs a `&CStr` internally; to avoid allocating on
     // each iteration of the loop below, allocate the `CString` now.
@@ -133,14 +124,6 @@ pub(crate) fn open_beneath(
         rustix::io::Errno::XDEV => errors::escape_attempt(),
         err => err.into(),
     })
-}
-
-/// Test whether `openat2` is supported on the currently running OS.
-#[cfg(target_os = "android")]
-fn openat2_supported() -> bool {
-    // `openat2` is supported in Linux 5.6 and later. Parse the current
-    // Linux version from the `release` field from `uname` to detect this.
-    super::super::linux_version_at_least(5, 6)
 }
 
 #[cfg(racy_asserts)]

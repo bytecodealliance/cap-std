@@ -3,9 +3,9 @@ use rustix::fs::{statat, AtFlags};
 use std::path::Path;
 use std::{fs, io};
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 use rustix::fs::{statx, StatxFlags};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 use std::sync::atomic::{AtomicU8, Ordering};
 
 /// *Unsandboxed* function similar to `stat`, but which does not perform
@@ -20,29 +20,23 @@ pub(crate) fn stat_unchecked(
         FollowSymlinks::No => AtFlags::SYMLINK_NOFOLLOW,
     };
 
-    // `statx` is preferred on Linux because it can return creation times.
-    // Linux kernels prior to 4.11 don't have `statx` and return `ENOSYS`.
-    // Older versions of Docker/seccomp would return `EPERM` for `statx`; see
-    // <https://github.com/rust-lang/rust/pull/65685/>. We store the
-    // availability in a global to avoid unnecessary syscalls.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    // `statx` is preferred on regular Linux because it can return creation
+    // times. Linux kernels prior to 4.11 don't have `statx` and return
+    // `ENOSYS`. Older versions of Docker/seccomp would return `EPERM` for
+    // `statx`; see <https://github.com/rust-lang/rust/pull/65685/>. We store
+    // the availability in a global to avoid unnecessary syscalls.
+    //
+    // On Android, the [seccomp policy] prevents us from even
+    // detecting whether `statx` is supported, so don't even try.
+    //
+    // [seccomp policy]: https://android-developers.googleblog.com/2017/07/seccomp-filter-in-android-o.html
+    #[cfg(target_os = "linux")]
     {
         // 0: Unknown
         // 1: Not available
         // 2: Available
         static STATX_STATE: AtomicU8 = AtomicU8::new(0);
         let state = STATX_STATE.load(Ordering::Relaxed);
-
-        // On Android, seccomp kills processes that execute unrecognized system
-        // calls, so we do an explicit version check rather than relying on
-        // getting an `ENOSYS`.
-        #[cfg(target_os = "android")]
-        let state = if state == 0 && !statx_supported() {
-            STATX_STATE.store(1, Ordering::Relaxed);
-            1
-        } else {
-            state
-        };
 
         if state != 1 {
             let statx_result = statx(
@@ -82,12 +76,4 @@ pub(crate) fn stat_unchecked(
     }
 
     Ok(statat(start, path, atflags).map(MetadataExt::from_rustix)?)
-}
-
-/// Test whether `statx` is supported on the currently running OS.
-#[cfg(target_os = "android")]
-fn statx_supported() -> bool {
-    // `statx` is supported in Linux 4.11 and later. Parse the current
-    // Linux version from the `release` field from `uname` to detect this.
-    super::super::linux::linux_version_at_least(4, 11)
 }
