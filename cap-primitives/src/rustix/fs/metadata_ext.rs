@@ -2,7 +2,7 @@
 
 use crate::fs::{ImplFileTypeExt, Metadata, PermissionsExt};
 use crate::time::{Duration, SystemClock, SystemTime};
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(target_os = "linux")]
 use rustix::fs::{makedev, Statx, StatxFlags};
 use rustix::fs::{RawMode, Stat};
 use std::convert::{TryFrom, TryInto};
@@ -219,7 +219,7 @@ impl MetadataExt {
     }
 
     /// Constructs a new instance of `Metadata` from the given `Statx`.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(target_os = "linux")]
     #[inline]
     pub(crate) fn from_rustix_statx(statx: Statx) -> Metadata {
         Metadata {
