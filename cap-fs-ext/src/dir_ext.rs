@@ -982,7 +982,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
             &self.as_filelike_view::<std::fs::File>(),
             path.as_ref().as_ref(),
         ) {
-            Ok(file) => Ok(Self::from_std_file(file.into())),
+            Ok(file) => Ok(Self::from_std_file(file)),
             Err(e) => Err(e),
         }
     }

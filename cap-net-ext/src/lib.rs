@@ -336,7 +336,7 @@ impl PoolExt for Pool {
         for addr in addrs {
             self._pool().check_addr(&addr)?;
 
-            match rustix::net::connect(&socket, &addr) {
+            match rustix::net::connect(socket, &addr) {
                 Ok(()) => return Ok(()),
                 Err(err) => last_err = Some(err),
             }

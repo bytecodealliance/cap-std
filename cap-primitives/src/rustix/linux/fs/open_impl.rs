@@ -37,7 +37,7 @@ pub(crate) fn open_impl(
         // If we got anything other than a `ENOSYS` error, that's our result.
         match result {
             Err(err) if err.raw_os_error() == Some(rustix::io::Errno::NOSYS.raw_os_error()) => {}
-            Err(err) => return Err(err.into()),
+            Err(err) => return Err(err),
             Ok(fd) => return Ok(fd),
         }
     }
