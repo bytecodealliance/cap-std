@@ -92,29 +92,28 @@ pub(crate) fn open_beneath(
 
                     return Ok(file);
                 }
-                Err(err) => match err {
-                    // A rename or similar happened. Try again.
-                    rustix::io::Errno::AGAIN => continue,
 
-                    // `EPERM` is used by some `seccomp` sandboxes to indicate
-                    // that `openat2` is unimplemented:
-                    // <https://github.com/systemd/systemd/blob/e2357b1c8a87b610066b8b2a59517bcfb20b832e/src/shared/seccomp-util.c#L2066>
-                    //
-                    // However, `EPERM` may also indicate a failed `O_NOATIME`
-                    // or a file seal prevented the operation, and it's complex
-                    // to detect those cases, so exit the loop and use the
-                    // fallback.
-                    rustix::io::Errno::PERM => break,
+                // A rename or similar happened. Try again.
+                Err(rustix::io::Errno::AGAIN) => continue,
 
-                    // `ENOSYS` means `openat2` is permanently unavailable;
-                    // mark it so and exit the loop.
-                    rustix::io::Errno::NOSYS => {
-                        INVALID.store(true, Relaxed);
-                        break;
-                    }
+                // `EPERM` is used by some `seccomp` sandboxes to indicate
+                // that `openat2` is unimplemented:
+                // <https://github.com/systemd/systemd/blob/e2357b1c8a87b610066b8b2a59517bcfb20b832e/src/shared/seccomp-util.c#L2066>
+                //
+                // However, `EPERM` may also indicate a failed `O_NOATIME`
+                // or a file seal prevented the operation, and it's complex
+                // to detect those cases, so exit the loop and use the
+                // fallback.
+                Err(rustix::io::Errno::PERM) => break,
 
-                    _ => return Err(err),
-                },
+                // `ENOSYS` means `openat2` is permanently unavailable;
+                // mark it so and exit the loop.
+                Err(rustix::io::Errno::NOSYS) => {
+                    INVALID.store(true, Relaxed);
+                    break;
+                }
+
+                Err(err) => return Err(err),
             }
         }
 

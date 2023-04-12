@@ -139,23 +139,19 @@ pub(crate) fn copy_impl(
         };
         match copy_result {
             Ok(ret) => written += ret as u64,
-            Err(err) => {
-                match err {
-                    rustix::io::Errno::NOSYS
-                    | rustix::io::Errno::XDEV
-                    | rustix::io::Errno::INVAL
-                    | rustix::io::Errno::PERM => {
-                        // Try fallback io::copy if either:
-                        // - Kernel version is < 4.5 (ENOSYS)
-                        // - Files are mounted on different fs (EXDEV)
-                        // - copy_file_range is disallowed, for example by seccomp (EPERM)
-                        // - copy_file_range cannot be used with pipes or device nodes (EINVAL)
-                        assert_eq!(written, 0);
-                        return io::copy(&mut reader, &mut writer);
-                    }
-                    _ => return Err(err.into()),
-                }
+            Err(rustix::io::Errno::NOSYS)
+            | Err(rustix::io::Errno::XDEV)
+            | Err(rustix::io::Errno::INVAL)
+            | Err(rustix::io::Errno::PERM) => {
+                // Try fallback io::copy if either:
+                // - Kernel version is < 4.5 (ENOSYS)
+                // - Files are mounted on different fs (EXDEV)
+                // - copy_file_range is disallowed, for example by seccomp (EPERM)
+                // - copy_file_range cannot be used with pipes or device nodes (EINVAL)
+                assert_eq!(written, 0);
+                return io::copy(&mut reader, &mut writer);
             }
+            Err(err) => return Err(err.into()),
         }
     }
     Ok(written)
@@ -195,17 +191,15 @@ pub(crate) fn copy_impl(
         let clonefile_result = fclonefileat(&reader, to_start, to_path, CloneFlags::empty());
         match clonefile_result {
             Ok(_) => return Ok(reader_metadata.len()),
-            Err(err) => match err {
-                // `fclonefileat` will fail on non-APFS volumes, if the
-                // destination already exists, or if the source and destination
-                // are on different devices. In all these cases `fcopyfile`
-                // should succeed.
-                rustix::io::Errno::NOTSUP | rustix::io::Errno::EXIST | rustix::io::Errno::XDEV => {
-                    ()
-                }
-                rustix::io::Errno::NOSYS => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
-                _ => return Err(err.into()),
-            },
+            // `fclonefileat` will fail on non-APFS volumes, if the
+            // destination already exists, or if the source and destination
+            // are on different devices. In all these cases `fcopyfile`
+            // should succeed.
+            Err(rustix::io::Errno::NOTSUP)
+            | Err(rustix::io::Errno::EXIST)
+            | Err(rustix::io::Errno::XDEV) => (),
+            Err(rustix::io::Errno::NOSYS) => HAS_FCLONEFILEAT.store(false, Ordering::Relaxed),
+            Err(err) => return Err(err.into()),
         }
     }
 
