@@ -7,17 +7,21 @@
 //!
 //! On older Linux, fall back to `manually::open`.
 
-use super::super::super::fs::compute_oflags;
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
-use crate::fs::{errors, manually, OpenOptions};
-use io_lifetimes::FromFd;
-use rustix::fs::{openat2, Mode, OFlags, RawMode, ResolveFlags};
-use rustix::path::Arg;
+use crate::fs::{manually, OpenOptions};
 use std::path::Path;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering::Relaxed;
 use std::{fs, io};
+#[cfg(target_os = "linux")]
+use {
+    super::super::super::fs::compute_oflags,
+    crate::fs::errors,
+    io_lifetimes::FromFd,
+    rustix::fs::{openat2, Mode, OFlags, RawMode, ResolveFlags},
+    rustix::path::Arg,
+    std::sync::atomic::AtomicBool,
+    std::sync::atomic::Ordering::Relaxed,
+};
 
 /// Call the `openat2` system call, or use a fallback if that's unavailable.
 pub(crate) fn open_impl(
@@ -48,6 +52,7 @@ pub(crate) fn open_impl(
 /// Call the `openat2` system call with `RESOLVE_BENEATH`. If the syscall is
 /// unavailable, mark it so for future calls. If `openat2` is unavailable
 /// either permanently or temporarily, return `ENOSYS`.
+#[cfg(target_os = "linux")]
 pub(crate) fn open_beneath(
     start: &fs::File,
     path: &Path,
