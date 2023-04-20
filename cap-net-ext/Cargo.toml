@@ -1,6 +1,6 @@
 [package]
 name = "cap-net-ext"
-version = "1.0.13"
+version = "1.0.14"
 description = "Extension traits for `TcpListener`, `Pool`, etc."
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -13,6 +13,6 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2018"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^1.0.13" }
-cap-primitives = { path = "../cap-primitives", version = "^1.0.13" }
+cap-std = { path = "../cap-std", version = "^1.0.14" }
+cap-primitives = { path = "../cap-primitives", version = "^1.0.14" }
 rustix = { version = "0.37.9", features = ["net"] }
