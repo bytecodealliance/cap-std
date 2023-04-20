@@ -2,7 +2,7 @@
 //! having read or write access to it; we can use that with `openat2` and
 //! `fstat` to perform a fast sandboxed `stat`.
 
-use super::file_metadata;
+use super::file_metadata::file_metadata;
 use crate::fs::{manually, open_beneath, FollowSymlinks, Metadata, OpenOptions};
 use rustix::fs::OFlags;
 use std::path::Path;
