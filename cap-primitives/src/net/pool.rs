@@ -54,7 +54,7 @@ impl IpGrant {
 ///
 /// This is presently a very simple concept, though it could grow in
 /// sophistication in the future.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Pool {
     // TODO: when compiling for WASI, use WASI-specific handle instead
     grants: Vec<IpGrant>,
