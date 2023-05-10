@@ -609,6 +609,8 @@ fn recursive_rmdir() {
     assert!(tmpdir.exists(canary));
 }
 
+// See the comments on `create_dir_all_with_junctions` in tests/fs.rs about Windows.
+#[cfg_attr(windows, ignore)]
 #[test]
 fn recursive_rmdir_of_symlink() {
     // test we do not recursively delete a symlink but only dirs.
@@ -1425,7 +1427,9 @@ fn read_dir_not_found() {
     assert_eq!(res.err().unwrap().kind(), ErrorKind::NotFound);
 }
 
+// See the comments on `create_dir_all_with_junctions` in tests/fs.rs about Windows.
 #[test]
+#[cfg_attr(windows, ignore)]
 fn create_dir_all_with_junctions() {
     let tmpdir = tmpdir();
     let target = "target";
