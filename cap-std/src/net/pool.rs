@@ -8,7 +8,7 @@ use std::{io, net};
 ///
 /// This does not directly correspond to anything in `std`, however its methods
 /// correspond to the several functions in [`std::net`].
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
 }

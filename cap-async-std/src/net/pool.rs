@@ -7,7 +7,7 @@ use cap_primitives::{ipnet, AmbientAuthority};
 ///
 /// This does not directly correspond to anything in `async_std`, however its
 /// methods correspond to the several functions in [`async_std::net`].
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
 }
