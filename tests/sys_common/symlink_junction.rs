@@ -1,17 +1,6 @@
 // Implementation derived from `symlink_junction` and related code in Rust's
 // library/std/src/sys/windows/fs.rs at revision
-// 108e90ca78f052c0c1c49c42a22c85620be19712.
-
-// TODO: Replace this definition of `MAXIMUM_REPARSE_DATA_BUFFER_SIZE`
-// once windows-sys has it.
-//  - [windows-sys bug filed]
-//  - [winapi doc]
-//
-// [windows-sys bug filed]: https://github.com/microsoft/windows-rs/issues/1823>
-// [winapi doc]: https://docs.rs/winapi/latest/winapi/um/winnt/constant.MAXIMUM_REPARSE_DATA_BUFFER_SIZE.html
-#[cfg(windows)]
-#[allow(dead_code)]
-pub const MAXIMUM_REPARSE_DATA_BUFFER_SIZE: u32 = 16 * 1024; // 16_384u32
+// 3ffb27ff89db780e88abe829783565a7122be1c5.
 
 #[cfg(feature = "fs_utf8")]
 use camino::Utf8Path;
@@ -61,6 +50,14 @@ pub fn symlink_junction_utf8<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
     symlink_junction_inner_utf8(src.as_ref(), dst_dir, dst.as_ref())
 }
 
+/// Align the inner value to 8 bytes.
+///
+/// This is enough for almost all of the buffers we're likely to work with in
+/// the Windows APIs we use.
+#[repr(C, align(8))]
+#[derive(Copy, Clone)]
+struct Align8<T: ?Sized>(pub T);
+
 #[cfg(windows)]
 #[allow(dead_code)]
 #[allow(non_snake_case)]
@@ -94,12 +91,15 @@ pub fn cvt(
 // http://www.flexhex.com/docs/articles/hard-links.phtml
 #[cfg(windows)]
 #[allow(dead_code)]
-fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Result<()> {
+fn symlink_junction_inner(original: &Path, dir: &Dir, junction: &Path) -> io::Result<()> {
     use cap_std::fs::OpenOptions;
+    use std::convert::TryFrom;
+    use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
     use std::os::windows::fs::OpenOptionsExt;
     use std::os::windows::io::AsRawHandle;
-    use std::ptr;
+    use std::{mem, ptr};
+    use windows_sys::Win32::Storage::FileSystem::MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
 
     dir.create_dir(junction)?;
 
@@ -111,21 +111,44 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
     );
     let f = dir.open_with(junction, &opts)?;
     let h = f.as_raw_handle();
-
     unsafe {
-        let mut data = [0_u8; MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
-        let db = data.as_mut_ptr() as *mut REPARSE_MOUNTPOINT_DATA_BUFFER;
-        let buf = &mut (*db).ReparseTarget as *mut libc::wchar_t;
-        let mut i = 0;
+        let mut data =
+            Align8([MaybeUninit::<u8>::uninit(); MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize]);
+        let data_ptr = data.0.as_mut_ptr();
+        let data_end = data_ptr.add(MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize);
+        let db = data_ptr.cast::<REPARSE_MOUNTPOINT_DATA_BUFFER>();
+        // Zero the header to ensure it's fully initialized, including reserved parameters.
+        *db = mem::zeroed();
+        let reparse_target_slice = {
+            let buf_start = ptr::addr_of_mut!((*db).ReparseTarget).cast::<libc::wchar_t>();
+            // Compute offset in bytes and then divide so that we round down
+            // rather than hit any UB (admittedly this arithmetic should work
+            // out so that this isn't necessary)
+            // TODO: use `byte_offfset_from` when pointer_byte_offsets is stable
+            // let buf_len_bytes = usize::try_from(data_end.byte_offset_from(buf_start)).unwrap();
+            let buf_len_bytes =
+                usize::try_from(data_end.cast::<u8>().offset_from(buf_start.cast::<u8>())).unwrap();
+            let buf_len_wchars = buf_len_bytes / core::mem::size_of::<libc::wchar_t>();
+            core::slice::from_raw_parts_mut(buf_start, buf_len_wchars)
+        };
         // FIXME: this conversion is very hacky
-        let v = br"\??\";
-        let v = v.iter().map(|x| *x as u16);
-        for c in v.chain(target.as_os_str().encode_wide()) {
-            *buf.offset(i) = c;
+        let iter = br"\??\"
+            .iter()
+            .map(|x| *x as u16)
+            .chain(original.as_os_str().encode_wide())
+            .chain(core::iter::once(0));
+        let mut i = 0;
+        for c in iter {
+            if i >= reparse_target_slice.len() {
+                return Err(io::Error::new(
+                    // TODO: use io::ErrorKind::InvalidFilename when io_error_more is stabilized
+                    io::ErrorKind::Other,
+                    "Input filename is too long",
+                ));
+            }
+            reparse_target_slice[i] = c;
             i += 1;
         }
-        *buf.offset(i) = 0;
-        i += 1;
         (*db).ReparseTag = windows_sys::Win32::System::SystemServices::IO_REPARSE_TAG_MOUNT_POINT;
         (*db).ReparseTargetMaximumLength = (i * 2) as u16;
         (*db).ReparseTargetLength = ((i - 1) * 2) as u16;
@@ -135,7 +158,7 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
         cvt(windows_sys::Win32::System::IO::DeviceIoControl(
             h as _,
             windows_sys::Win32::System::Ioctl::FSCTL_SET_REPARSE_POINT,
-            data.as_ptr() as *mut _,
+            data_ptr.cast(),
             (*db).ReparseDataLength + 8,
             ptr::null_mut(),
             0,
@@ -151,15 +174,18 @@ fn symlink_junction_inner(target: &Path, dir: &Dir, junction: &Path) -> io::Resu
 #[cfg(windows)]
 #[allow(dead_code)]
 fn symlink_junction_inner_utf8(
-    target: &Utf8Path,
+    original: &Utf8Path,
     dir: &cap_std::fs_utf8::Dir,
     junction: &Utf8Path,
 ) -> io::Result<()> {
     use cap_std::fs::OpenOptions;
+    use std::convert::TryFrom;
+    use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
     use std::os::windows::fs::OpenOptionsExt;
     use std::os::windows::io::AsRawHandle;
-    use std::ptr;
+    use std::{mem, ptr};
+    use windows_sys::Win32::Storage::FileSystem::MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
 
     dir.create_dir(junction)?;
 
@@ -171,21 +197,44 @@ fn symlink_junction_inner_utf8(
     );
     let f = dir.open_with(junction, &opts)?;
     let h = f.as_raw_handle();
-
     unsafe {
-        let mut data = [0_u8; MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize];
-        let db = data.as_mut_ptr() as *mut REPARSE_MOUNTPOINT_DATA_BUFFER;
-        let buf = &mut (*db).ReparseTarget as *mut libc::wchar_t;
-        let mut i = 0;
+        let mut data =
+            Align8([MaybeUninit::<u8>::uninit(); MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize]);
+        let data_ptr = data.0.as_mut_ptr();
+        let data_end = data_ptr.add(MAXIMUM_REPARSE_DATA_BUFFER_SIZE as usize);
+        let db = data_ptr.cast::<REPARSE_MOUNTPOINT_DATA_BUFFER>();
+        // Zero the header to ensure it's fully initialized, including reserved parameters.
+        *db = mem::zeroed();
+        let reparse_target_slice = {
+            let buf_start = ptr::addr_of_mut!((*db).ReparseTarget).cast::<libc::wchar_t>();
+            // Compute offset in bytes and then divide so that we round down
+            // rather than hit any UB (admittedly this arithmetic should work
+            // out so that this isn't necessary)
+            // TODO: use `byte_offfset_from` when pointer_byte_offsets is stable
+            // let buf_len_bytes = usize::try_from(data_end.byte_offset_from(buf_start)).unwrap();
+            let buf_len_bytes =
+                usize::try_from(data_end.cast::<u8>().offset_from(buf_start.cast::<u8>())).unwrap();
+            let buf_len_wchars = buf_len_bytes / core::mem::size_of::<libc::wchar_t>();
+            core::slice::from_raw_parts_mut(buf_start, buf_len_wchars)
+        };
         // FIXME: this conversion is very hacky
-        let v = br"\??\";
-        let v = v.iter().map(|x| *x as u16);
-        for c in v.chain(target.as_os_str().encode_wide()) {
-            *buf.offset(i) = c;
+        let iter = br"\??\"
+            .iter()
+            .map(|x| *x as u16)
+            .chain(original.as_os_str().encode_wide())
+            .chain(core::iter::once(0));
+        let mut i = 0;
+        for c in iter {
+            if i >= reparse_target_slice.len() {
+                return Err(io::Error::new(
+                    // TODO: use io::ErrorKind::InvalidFilename when io_error_more is stabilized
+                    io::ErrorKind::Other,
+                    "Input filename is too long",
+                ));
+            }
+            reparse_target_slice[i] = c;
             i += 1;
         }
-        *buf.offset(i) = 0;
-        i += 1;
         (*db).ReparseTag = windows_sys::Win32::System::SystemServices::IO_REPARSE_TAG_MOUNT_POINT;
         (*db).ReparseTargetMaximumLength = (i * 2) as u16;
         (*db).ReparseTargetLength = ((i - 1) * 2) as u16;
@@ -195,7 +244,7 @@ fn symlink_junction_inner_utf8(
         cvt(windows_sys::Win32::System::IO::DeviceIoControl(
             h as _,
             windows_sys::Win32::System::Ioctl::FSCTL_SET_REPARSE_POINT,
-            data.as_ptr() as *mut _,
+            data_ptr.cast(),
             (*db).ReparseDataLength + 8,
             ptr::null_mut(),
             0,
