@@ -54,6 +54,17 @@ impl IpGrant {
 ///
 /// This is presently a very simple concept, though it could grow in
 /// sophistication in the future.
+///
+/// `Pool` implements `Clone`, which creates new independent entities that
+/// carry the full authority of the originals. This means that in a borrow
+/// of a `Pool`, the scope of the authority is not necessarily limited to
+/// the scope of the borrow.
+///
+/// Similarly, the [`cap_net_ext::PoolExt`] class allows creating "binder"
+/// and "connecter" objects which represent capabilities to bind and
+/// connect to addresses.
+///
+/// [`cap_net_ext::PoolExt`]: https://docs.rs/cap-net-ext/latest/cap_net_ext/trait.PoolExt.html
 #[derive(Clone, Default)]
 pub struct Pool {
     // TODO: when compiling for WASI, use WASI-specific handle instead
@@ -162,6 +173,12 @@ impl Pool {
 
 /// An empty array of `SocketAddr`s.
 pub const NO_SOCKET_ADDRS: &[net::SocketAddr] = &[];
+
+/// Return an error for reporting that no socket addresses were available.
+#[cold]
+pub fn no_socket_addrs() -> io::Error {
+    std::net::TcpListener::bind(&NO_SOCKET_ADDRS).unwrap_err()
+}
 
 #[test]
 fn test_empty() {

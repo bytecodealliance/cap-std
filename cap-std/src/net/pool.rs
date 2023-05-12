@@ -1,5 +1,5 @@
 use crate::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
-use cap_primitives::net::NO_SOCKET_ADDRS;
+use cap_primitives::net::no_socket_addrs;
 use cap_primitives::{ipnet, AmbientAuthority};
 use std::time::Duration;
 use std::{io, net};
@@ -8,6 +8,17 @@ use std::{io, net};
 ///
 /// This does not directly correspond to anything in `std`, however its methods
 /// correspond to the several functions in [`std::net`].
+///
+/// `Pool` implements `Clone`, which creates new independent entities that
+/// carry the full authority of the originals. This means that in a borrow
+/// of a `Pool`, the scope of the authority is not necessarily limited to
+/// the scope of the borrow.
+///
+/// Similarly, the [`cap_net_ext::PoolExt`] class allows creating "binder"
+/// and "connecter" objects which represent capabilities to bind and
+/// connect to addresses.
+///
+/// [`cap_net_ext::PoolExt`]: https://docs.rs/cap-net-ext/latest/cap_net_ext/trait.PoolExt.html
 #[derive(Clone, Default)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
@@ -116,7 +127,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::TcpListener::bind(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -138,7 +149,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::TcpStream::connect(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -173,7 +184,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -191,9 +202,7 @@ impl Pool {
         let mut addrs = addr.to_socket_addrs()?;
 
         // `UdpSocket::send_to` only sends to the first address.
-        let addr = addrs
-            .next()
-            .ok_or_else(|| net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err())?;
+        let addr = addrs.next().ok_or_else(no_socket_addrs)?;
         self.cap.check_addr(&addr)?;
         udp_socket.std.send_to(buf, addr)
     }
@@ -221,7 +230,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
