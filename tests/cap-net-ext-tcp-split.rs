@@ -36,7 +36,7 @@ fn bind_error() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     match pool
-        .tcp_binder_for("1.1.1.1:9999")
+        .tcp_binder("1.1.1.1:9999")
         .unwrap()
         .bind_existing_tcp_listener(&listener)
     {
@@ -52,7 +52,7 @@ fn connect_error() {
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     match pool
-        .tcp_connecter_for("0.0.0.0:1")
+        .tcp_connecter("0.0.0.0:1")
         .unwrap()
         .connect_into_tcp_stream(socket)
     {
@@ -85,7 +85,7 @@ fn listen_localhost() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&socket_addr)
+        .tcp_binder(&socket_addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
@@ -93,7 +93,7 @@ fn listen_localhost() {
     let _t = thread::spawn(move || {
         let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
         let mut stream = t!(pool
-            .tcp_connecter_for(&("localhost", socket_addr.port()))
+            .tcp_connecter(&("localhost", socket_addr.port()))
             .unwrap()
             .connect_into_tcp_stream(socket));
         t!(stream.write(&[144]));
@@ -114,7 +114,7 @@ fn connect_loopback() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -127,7 +127,7 @@ fn connect_loopback() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut stream = t!(pool
-                .tcp_connecter_for(&(host, addr.port()))
+                .tcp_connecter(&(host, addr.port()))
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             t!(stream.write(&[66]));
@@ -149,7 +149,7 @@ fn smoke_test() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -159,7 +159,7 @@ fn smoke_test() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut stream = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             t!(stream.write(&[99]));
@@ -183,7 +183,7 @@ fn read_eof() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -192,7 +192,7 @@ fn read_eof() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let _stream = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             // Close
@@ -216,7 +216,7 @@ fn write_close() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -226,7 +226,7 @@ fn write_close() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             drop(t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket)));
             tx.send(()).unwrap();
@@ -260,7 +260,7 @@ fn multiple_connect_serial() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -270,7 +270,7 @@ fn multiple_connect_serial() {
                 let socket =
                     TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
                 let mut stream = t!(pool
-                    .tcp_connecter_for(&addr)
+                    .tcp_connecter(&addr)
                     .unwrap()
                     .connect_into_tcp_stream(socket));
                 t!(stream.write(&[99]));
@@ -296,7 +296,7 @@ fn multiple_connect_interleaved_greedy_schedule() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -326,7 +326,7 @@ fn multiple_connect_interleaved_greedy_schedule() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut stream = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             // Connect again before writing
@@ -347,7 +347,7 @@ fn multiple_connect_interleaved_lazy_schedule() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -376,7 +376,7 @@ fn multiple_connect_interleaved_lazy_schedule() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut stream = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             connect(i + 1, addr, pool);
@@ -395,7 +395,7 @@ fn socket_and_peer_name() {
         let listener =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&listener));
         listener.listen(None).unwrap();
@@ -407,7 +407,7 @@ fn socket_and_peer_name() {
 
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let stream = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         assert_eq!(addr, t!(stream.peer_addr()));
@@ -423,7 +423,7 @@ fn partial_read() {
         let (tx, rx) = channel();
         let srv = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&srv));
         srv.listen(None).unwrap();
@@ -437,7 +437,7 @@ fn partial_read() {
 
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut c = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let mut b = [0; 10];
@@ -455,13 +455,13 @@ fn read_vectored() {
 
         let srv = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&srv));
         srv.listen(None).unwrap();
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut s1 = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let mut s2 = t!(srv.accept()).0;
@@ -494,13 +494,13 @@ fn write_vectored() {
 
         let srv = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&srv));
         srv.listen(None).unwrap();
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut s1 = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let mut s2 = t!(srv.accept()).0;
@@ -533,14 +533,14 @@ fn double_bind() {
         let listener1 =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&listener1));
         listener1.listen(None).unwrap();
         let listener2 =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         match pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&listener2)
         {
@@ -572,7 +572,7 @@ fn tcp_clone_smoke() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -581,7 +581,7 @@ fn tcp_clone_smoke() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut s = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             let mut buf = [0, 0];
@@ -617,7 +617,7 @@ fn tcp_clone_two_read() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -628,7 +628,7 @@ fn tcp_clone_two_read() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut s = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             t!(s.write(&[1]));
@@ -665,7 +665,7 @@ fn tcp_clone_two_write() {
         let acceptor =
             TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&acceptor));
         acceptor.listen(None).unwrap();
@@ -674,7 +674,7 @@ fn tcp_clone_two_write() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut s = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             let mut buf = [0, 1];
@@ -707,7 +707,7 @@ fn shutdown_smoke() {
 
         let a = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&a));
         a.listen(None).unwrap();
@@ -720,7 +720,7 @@ fn shutdown_smoke() {
 
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut s = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         t!(s.shutdown(Shutdown::Write));
@@ -741,7 +741,7 @@ fn close_readwrite_smoke() {
 
         let a = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&a));
         a.listen(None).unwrap();
@@ -754,7 +754,7 @@ fn close_readwrite_smoke() {
         let mut b = [0];
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut s = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let mut s2 = t!(s.try_clone());
@@ -793,7 +793,7 @@ fn close_read_wakes_up() {
 
         let a = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&a));
         a.listen(None).unwrap();
@@ -805,7 +805,7 @@ fn close_read_wakes_up() {
 
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let s = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let s2 = t!(s.try_clone());
@@ -832,7 +832,7 @@ fn clone_while_reading() {
 
         let accept = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&accept));
         accept.listen(None).unwrap();
@@ -845,7 +845,7 @@ fn clone_while_reading() {
             let socket =
                 TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
             let mut tcp = t!(pool
-                .tcp_connecter_for(&addr)
+                .tcp_connecter(&addr)
                 .unwrap()
                 .connect_into_tcp_stream(socket));
             rx.recv().unwrap();
@@ -885,7 +885,7 @@ fn clone_accept_smoke() {
 
         let a = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&a));
         a.listen(None).unwrap();
@@ -917,7 +917,7 @@ fn clone_accept_concurrent() {
 
         let a = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&a));
         a.listen(None).unwrap();
@@ -989,7 +989,7 @@ fn debug() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&socket_addr)
+        .tcp_binder(&socket_addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
@@ -1003,7 +1003,7 @@ fn debug() {
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let stream = t!(pool
-        .tcp_connecter_for(&("localhost", socket_addr.port()))
+        .tcp_connecter(&("localhost", socket_addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
     let compare = format!(
@@ -1039,14 +1039,14 @@ fn timeouts() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
     let dur = Duration::new(15410, 0);
@@ -1085,14 +1085,14 @@ fn test_read_timeout() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let mut stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
@@ -1129,14 +1129,14 @@ fn test_read_with_timeout() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let mut stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
@@ -1174,13 +1174,13 @@ fn test_timeout_zero_duration() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let stream = t!(pool
-        .tcp_connecter_for(&addr)
+        .tcp_connecter(&addr)
         .unwrap()
         .connect_into_tcp_stream(socket));
 
@@ -1211,14 +1211,14 @@ fn nodelay() {
 
     let _listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&_listener));
     _listener.listen(None).unwrap();
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
 
@@ -1247,7 +1247,7 @@ fn ttl() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
@@ -1257,7 +1257,7 @@ fn ttl() {
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
 
@@ -1281,7 +1281,7 @@ fn set_nonblocking() {
 
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     t!(pool
-        .tcp_binder_for(&addr)
+        .tcp_binder(&addr)
         .unwrap()
         .bind_existing_tcp_listener(&listener));
     listener.listen(None).unwrap();
@@ -1291,7 +1291,7 @@ fn set_nonblocking() {
 
     let socket = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
     let mut stream = t!(pool
-        .tcp_connecter_for(&("localhost", addr.port()))
+        .tcp_connecter(&("localhost", addr.port()))
         .unwrap()
         .connect_into_tcp_stream(socket));
 
@@ -1317,7 +1317,7 @@ fn peek() {
 
         let srv = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         t!(pool
-            .tcp_binder_for(&addr)
+            .tcp_binder(&addr)
             .unwrap()
             .bind_existing_tcp_listener(&srv));
         srv.listen(None).unwrap();
@@ -1329,7 +1329,7 @@ fn peek() {
 
         let socket = TcpListener::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
         let mut c = t!(pool
-            .tcp_connecter_for(&addr)
+            .tcp_connecter(&addr)
             .unwrap()
             .connect_into_tcp_stream(socket));
         let mut b = [0; 10];
@@ -1356,7 +1356,7 @@ fn connect_timeout_valid() {
     let mut pool = Pool::new();
     pool.insert_socket_addr("127.0.0.1:0".parse().unwrap(), ambient_authority());
     let listener = TcpListener::new(AddressFamily::Ipv4, Blocking::Yes).unwrap();
-    pool.tcp_binder_for("127.0.0.1:0")
+    pool.tcp_binder("127.0.0.1:0")
         .unwrap()
         .bind_existing_tcp_listener(&listener)
         .unwrap();
