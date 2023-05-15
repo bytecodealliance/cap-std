@@ -1,12 +1,23 @@
 use crate::net::{TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use async_std::{io, net};
-use cap_primitives::net::NO_SOCKET_ADDRS;
+use cap_primitives::net::no_socket_addrs;
 use cap_primitives::{ipnet, AmbientAuthority};
 
 /// A pool of network addresses.
 ///
 /// This does not directly correspond to anything in `async_std`, however its
 /// methods correspond to the several functions in [`async_std::net`].
+///
+/// `Pool` implements `Clone`, which creates new independent entities that
+/// carry the full authority of the originals. This means that in a borrow
+/// of a `Pool`, the scope of the authority is not necessarily limited to
+/// the scope of the borrow.
+///
+/// Similarly, the [`cap_net_ext::PoolExt`] class allows creating "binder"
+/// and "connecter" objects which represent capabilities to bind and
+/// connect to addresses.
+///
+/// [`cap_net_ext::PoolExt`]: https://docs.rs/cap-net-ext/latest/cap_net_ext/trait.PoolExt.html
 #[derive(Clone, Default)]
 pub struct Pool {
     cap: cap_primitives::net::Pool,
@@ -109,7 +120,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::TcpListener::bind(NO_SOCKET_ADDRS).await.unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -131,7 +142,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::TcpStream::connect(NO_SOCKET_ADDRS).await.unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -154,7 +165,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).await.unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -172,7 +183,7 @@ impl Pool {
 
         // `UdpSocket::send_to` only sends to the first address.
         let addr = match addrs.next() {
-            None => return Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).await.unwrap_err()),
+            None => return Err(no_socket_addrs()),
             Some(addr) => addr,
         };
         self.cap.check_addr(&addr)?;
@@ -200,7 +211,7 @@ impl Pool {
         }
         match last_err {
             Some(e) => Err(e),
-            None => Err(net::UdpSocket::bind(NO_SOCKET_ADDRS).await.unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 }

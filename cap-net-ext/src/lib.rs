@@ -39,7 +39,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
 
-use cap_primitives::net::NO_SOCKET_ADDRS;
+use cap_primitives::net::no_socket_addrs;
 use cap_std::net::{IpAddr, Pool, SocketAddr, TcpListener, TcpStream, ToSocketAddrs, UdpSocket};
 use rustix::fd::OwnedFd;
 use std::io;
@@ -120,9 +120,9 @@ pub trait TcpListenerExt: private::Sealed + Sized {
     /// listening; this function enables listening. After this, the listener
     /// may accept new connections with [`accept`] or [`accept_with`].
     ///
-    /// This is similar to [`TcpListener::bind_tcp_listener`] in that it
-    /// performs the `listen` step, however it does not create the socket
-    /// itself, or bind it.
+    /// This is similar to [`Pool::bind_tcp_listener`] in that it performs the
+    /// `listen` step, however it does not create the socket itself, or bind
+    /// it.
     ///
     /// The `backlog` argument specifies an optional hint to the implementation
     /// about how many connections can be waiting before new connections are
@@ -176,8 +176,8 @@ pub trait UdpSocketExt: private::Sealed + Sized {
     /// Use [`PoolExt::bind_existing_udp_socket`] to bind it, or
     /// [`PoolExt::connect_existing_udp_socket`] to initiate a connection.
     ///
-    /// This is similar to [`TcpListener::bind_udp_socket`] in that it creates
-    /// a UDP socket, however it does not perform the `bind`. And, it has a
+    /// This is similar to [`Pool::bind_udp_socket`] in that it creates a UDP
+    /// socket, however it does not perform the `bind`. And, it has a
     /// `blocking` argument to select blocking or non-blocking mode for the
     /// created socket.
     ///
@@ -212,6 +212,11 @@ pub trait PoolExt: private::Sealed {
     /// This is similar to [`Pool::bind_tcp_listener`] in that it binds a TCP
     /// socket, however it does not create the socket itself, or perform the
     /// `listen` step.
+    ///
+    /// This function ensures that the address to be bound is permitted by the
+    /// pool, and performs the bind. To perform these steps separately, create
+    /// a [`TcpBinder`] with [`Self::tcp_binder`] and use
+    /// [`TcpBinder::bind_existing_tcp_listener`].
     fn bind_existing_tcp_listener<A: ToSocketAddrs>(
         &self,
         listener: &TcpListener,
@@ -225,6 +230,11 @@ pub trait PoolExt: private::Sealed {
     ///
     /// This is similar to [`Pool::bind_udp_socket`] in that it binds a UDP
     /// socket, however it does not create the socket itself.
+    ///
+    /// This function ensures that the address to be bound is permitted by the
+    /// pool, and performs the bind. To perform these steps separately, create
+    /// a [`UdpBinder`] with [`Self::udp_binder`] and use
+    /// [`UdpBinder::bind_existing_udp_socket`].
     fn bind_existing_udp_socket<A: ToSocketAddrs>(
         &self,
         socket: &UdpSocket,
@@ -240,6 +250,11 @@ pub trait PoolExt: private::Sealed {
     ///
     /// Despite the name, this function uses the `TcpListener` type as a
     /// generic socket container.
+    ///
+    /// This function ensures that the address to connect to is permitted by
+    /// the pool, and performs the connect. To perform these steps separately,
+    /// create a [`TcpConnecter`] with [`Self::tcp_connecter`] and use
+    /// [`TcpConnecter::connect_into_tcp_stream`].
     fn connect_into_tcp_stream<A: ToSocketAddrs>(
         &self,
         socket: TcpListener,
@@ -248,9 +263,14 @@ pub trait PoolExt: private::Sealed {
 
     /// Initiate a TCP connection on a socket.
     ///
-    /// This is simlar to to [`connect_into_tcp_stream`], however instead
+    /// This is simlar to to [`Self::connect_into_tcp_stream`], however instead
     /// of converting a `TcpListener` to a `TcpStream`, it leaves fd in the
     /// existing `TcpListener`.
+    ///
+    /// This function ensures that the address to connect to is permitted by
+    /// the pool, and performs the connect. To perform these steps separately,
+    /// create a [`TcpConnecter`] with [`Self::tcp_connecter`] and use
+    /// [`TcpConnecter::connect_existing_tcp_listener`].
     fn connect_existing_tcp_listener<A: ToSocketAddrs>(
         &self,
         socket: &TcpListener,
@@ -262,11 +282,51 @@ pub trait PoolExt: private::Sealed {
     /// This is simlar to to [`Pool::connect_udp_socket`] in that it performs a
     /// UDP connection, but instead of creating a new socket itself it takes a
     /// [`UdpSocket`], such as one created with [`UdpSocketExt::new`].
+    ///
+    /// This function ensures that the address to connect to is permitted by
+    /// the pool, and performs the connect. To perform these steps separately,
+    /// create a [`UdpConnecter`] with [`Self::udp_connecter`] and use
+    /// [`UdpConnecter::connect_existing_udp_socket`].
     fn connect_existing_udp_socket<A: ToSocketAddrs>(
         &self,
         socket: &UdpSocket,
         addrs: A,
     ) -> io::Result<()>;
+
+    /// Create a TCP binder.
+    ///
+    /// This is an alternative to [`Self::bind_existing_tcp_listener`]. It
+    /// checks that all the addresses in `addrs` are permitted for TCP binding
+    /// up front, and then records them in a [`TcpBinder`] which can then be
+    /// used to make repeated [`TcpBinder::bind_existing_tcp_listener`] calls.
+    fn tcp_binder<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<TcpBinder>;
+
+    /// Create a UDP binder.
+    ///
+    /// This is an alternative to [`Self::bind_existing_udp_socket`]. It checks
+    /// that all the addresses in `addrs` are permitted for UDP binding up
+    /// front, and then records them in a [`UdpBinder`] which can then be used
+    /// to make repeated [`UdpBinder::bind_existing_udp_socket`] calls.
+    fn udp_binder<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<UdpBinder>;
+
+    /// Create a TCP connecter.
+    ///
+    /// This is an alternative to [`Self::connect_into_tcp_stream`] and
+    /// [`Self::connect_existing_tcp_listener`]. It checks that all the
+    /// addresses in `addrs` are permitted for TCP connecting up front, and
+    /// then records them in a [`TcpConnecter`] which can then be used to make
+    /// repeated [`TcpConnecter::connect_into_tcp_stream`] and
+    /// [`TcpConnecter::connect_existing_tcp_listener`] calls.
+    fn tcp_connecter<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<TcpConnecter>;
+
+    /// Create a UDP connecter.
+    ///
+    /// This is an alternative to [`Self::connect_existing_udp_socket`]. It
+    /// checks that all the addresses in `addrs` are permitted for UDP
+    /// connecting up front, and then records them in a [`UdpConnecter`] which
+    /// can then be used to make repeated
+    /// [`UdpConnecter::connect_existing_udp_socket`] calls.
+    fn udp_connecter<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<UdpConnecter>;
 }
 
 impl PoolExt for Pool {
@@ -290,7 +350,7 @@ impl PoolExt for Pool {
         }
         match last_err {
             Some(err) => Err(err),
-            None => Err(std::net::TcpListener::bind(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -312,7 +372,7 @@ impl PoolExt for Pool {
         }
         match last_err {
             Some(err) => Err(err.into()),
-            None => Err(std::net::TcpListener::bind(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -343,7 +403,7 @@ impl PoolExt for Pool {
         }
         match last_err {
             Some(err) => Err(err.into()),
-            None => Err(std::net::TcpStream::connect(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
         }
     }
 
@@ -365,7 +425,183 @@ impl PoolExt for Pool {
         }
         match last_err {
             Some(err) => Err(err.into()),
-            None => Err(std::net::TcpStream::connect(NO_SOCKET_ADDRS).unwrap_err()),
+            None => Err(no_socket_addrs()),
+        }
+    }
+
+    fn tcp_binder<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<TcpBinder> {
+        Ok(TcpBinder(check_addrs(self._pool(), addrs)?))
+    }
+
+    fn udp_binder<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<UdpBinder> {
+        Ok(UdpBinder(check_addrs(self._pool(), addrs)?))
+    }
+
+    fn tcp_connecter<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<TcpConnecter> {
+        Ok(TcpConnecter(check_addrs(self._pool(), addrs)?))
+    }
+
+    fn udp_connecter<A: ToSocketAddrs>(&self, addrs: A) -> io::Result<UdpConnecter> {
+        Ok(UdpConnecter(check_addrs(self._pool(), addrs)?))
+    }
+}
+
+/// Check all the addresses in `addrs` and return a new list of them.
+fn check_addrs<A: ToSocketAddrs>(
+    pool: &cap_primitives::net::Pool,
+    addrs: A,
+) -> io::Result<smallvec::SmallVec<[SocketAddr; 1]>> {
+    let mut checked = smallvec::SmallVec::new();
+    for addr in addrs.to_socket_addrs()? {
+        pool.check_addr(&addr)?;
+        checked.push(addr);
+    }
+    Ok(checked)
+}
+
+/// A utility for binding TCP listeners.
+///
+/// See [`PoolExt::tcp_binder`] for details.
+pub struct TcpBinder(smallvec::SmallVec<[SocketAddr; 1]>);
+
+impl TcpBinder {
+    /// Bind a [`TcpListener`].
+    ///
+    /// A newly-created `TcpListener` created with [`TcpListenerExt::new`]
+    /// has not been bound yet; this function binds it. Before it can accept
+    /// connections, it must be marked for listening with
+    /// [`TcpListenerExt::listen`].
+    ///
+    /// This is similar to [`Pool::bind_tcp_listener`] in that it binds a TCP
+    /// socket, however it does not create the socket itself, or perform the
+    /// `listen` step.
+    ///
+    /// This is similar to [`PoolExt::bind_existing_tcp_listener`] except that
+    /// it uses a `TcpBinder` which contains addresses that have already been
+    /// checked against a `Pool`.
+    pub fn bind_existing_tcp_listener(&self, listener: &TcpListener) -> io::Result<()> {
+        let mut last_err = None;
+        for addr in &self.0 {
+            set_reuseaddr(listener)?;
+
+            match rustix::net::bind(listener, addr) {
+                Ok(()) => return Ok(()),
+                Err(err) => last_err = Some(err.into()),
+            }
+        }
+        match last_err {
+            Some(err) => Err(err),
+            None => Err(no_socket_addrs()),
+        }
+    }
+}
+
+/// A utility for binding UDP sockets.
+///
+/// See [`PoolExt::udp_binder`] for details.
+pub struct UdpBinder(smallvec::SmallVec<[SocketAddr; 1]>);
+
+impl UdpBinder {
+    /// Bind a [`UdpSocket`] to the specified address.
+    ///
+    /// A newly-created `UdpSocket` created with [`UdpSocketExt::new`] has not
+    /// been bound yet; this function binds it.
+    ///
+    /// This is similar to [`Pool::bind_udp_socket`] in that it binds a UDP
+    /// socket, however it does not create the socket itself.
+    ///
+    /// This is similar to [`PoolExt::bind_existing_udp_socket`] except that
+    /// it uses a `UdpBinder` which contains addresses that have already been
+    /// checked against a `Pool`.
+    pub fn bind_existing_udp_socket(&self, socket: &UdpSocket) -> io::Result<()> {
+        let mut last_err = None;
+        for addr in &self.0 {
+            match rustix::net::bind(socket, addr) {
+                Ok(()) => return Ok(()),
+                Err(err) => last_err = Some(err.into()),
+            }
+        }
+        match last_err {
+            Some(err) => Err(err),
+            None => Err(no_socket_addrs()),
+        }
+    }
+}
+
+/// A utility for making TCP connections.
+///
+/// See [`PoolExt::tcp_connecter`] for details.
+pub struct TcpConnecter(smallvec::SmallVec<[SocketAddr; 1]>);
+
+impl TcpConnecter {
+    /// Initiate a TCP connection, converting a [`TcpListener`] to a
+    /// [`TcpStream`].
+    ///
+    /// This is simlar to to [`Pool::connect_tcp_stream`] in that it performs a
+    /// TCP connection, but instead of creating a new socket itself it takes a
+    /// [`TcpListener`], such as one created with [`TcpListenerExt::new`].
+    ///
+    /// Despite the name, this function uses the `TcpListener` type as a
+    /// generic socket container.
+    ///
+    /// This is similar to [`PoolExt::connect_into_tcp_stream`] except that
+    /// it uses a `TcpConnecter` which contains addresses that have already
+    /// been checked against a `Pool`.
+    pub fn connect_into_tcp_stream(&self, socket: TcpListener) -> io::Result<TcpStream> {
+        self.connect_existing_tcp_listener(&socket)?;
+        Ok(TcpStream::from(OwnedFd::from(socket)))
+    }
+
+    /// Initiate a TCP connection on a socket.
+    ///
+    /// This is simlar to to [`Pool::connect_into_tcp_stream`], however instead
+    /// of converting a `TcpListener` to a `TcpStream`, it leaves fd in the
+    /// existing `TcpListener`.
+    ///
+    /// This is similar to [`PoolExt::connect_existing_tcp_listener`] except
+    /// that it uses a `TcpConnecter` which contains addresses that have
+    /// already been checked against a `Pool`.
+    pub fn connect_existing_tcp_listener(&self, socket: &TcpListener) -> io::Result<()> {
+        let mut last_err = None;
+        for addr in &self.0 {
+            match rustix::net::connect(socket, addr) {
+                Ok(()) => return Ok(()),
+                Err(err) => last_err = Some(err),
+            }
+        }
+        match last_err {
+            Some(err) => Err(err.into()),
+            None => Err(no_socket_addrs()),
+        }
+    }
+}
+
+/// A utility for making UDP connections.
+///
+/// See [`PoolExt::udp_connecter`] for details.
+pub struct UdpConnecter(smallvec::SmallVec<[SocketAddr; 1]>);
+
+impl UdpConnecter {
+    /// Initiate a UDP connection.
+    ///
+    /// This is simlar to to [`Pool::connect_udp_socket`] in that it performs a
+    /// UDP connection, but instead of creating a new socket itself it takes a
+    /// [`UdpSocket`], such as one created with [`UdpSocketExt::new`].
+    ///
+    /// This is similar to [`PoolExt::connect_existing_udp_socket`] except that
+    /// it uses a `UdpConnecter` which contains addresses that have already
+    /// been checked against a `Pool`.
+    pub fn connect_existing_udp_socket(&self, socket: &UdpSocket) -> io::Result<()> {
+        let mut last_err = None;
+        for addr in &self.0 {
+            match rustix::net::connect(socket, addr) {
+                Ok(()) => return Ok(()),
+                Err(err) => last_err = Some(err),
+            }
+        }
+        match last_err {
+            Some(err) => Err(err.into()),
+            None => Err(no_socket_addrs()),
         }
     }
 }
