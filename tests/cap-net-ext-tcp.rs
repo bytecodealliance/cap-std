@@ -401,7 +401,7 @@ fn read_vectored() {
             IoSliceMut::new(&mut a),
             IoSliceMut::new(&mut b),
             IoSliceMut::new(&mut c)
-        ],));
+        ]));
         assert!(len > 0);
         assert_eq!(b, [10]);
         // some implementations don't support readv, so we may only fill the first

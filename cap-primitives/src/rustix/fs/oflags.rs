@@ -13,13 +13,13 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
         oflags |= OFlags::SYNC;
     }
     if options.dsync {
-        #[cfg(not(any(target_os = "freebsd",)))]
+        #[cfg(not(any(target_os = "freebsd")))]
         {
             oflags |= OFlags::DSYNC;
         }
 
         // Where needed, approximate `DSYNC` with `SYNC`.
-        #[cfg(any(target_os = "freebsd",))]
+        #[cfg(any(target_os = "freebsd"))]
         {
             oflags |= OFlags::SYNC;
         }
