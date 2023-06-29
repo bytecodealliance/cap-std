@@ -60,7 +60,7 @@ pub(crate) fn stat_unchecked(
                     // the current working directory returns a similar error,
                     // then stop using `statx`.
                     if let Err(rustix::io::Errno::PERM) = statx(
-                        rustix::fs::cwd(),
+                        rustix::fs::CWD,
                         "",
                         AtFlags::EMPTY_PATH,
                         StatxFlags::empty(),

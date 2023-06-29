@@ -17,18 +17,18 @@ ambient-authority = "0.0.2"
 arbitrary = { version = "1.0.0", optional = true, features = ["derive"] }
 ipnet = "2.3.0"
 maybe-owned = "0.3.4"
-fs-set-times = "0.19.0"
-io-extras = "0.17.0"
-io-lifetimes = { version = "1.0.0", default-features = false }
+fs-set-times = "0.20.0"
+io-extras = "0.18.0"
+io-lifetimes = { version = "2.0.0", default-features = false }
 
 [dev-dependencies]
 cap-tempfile = { path = "../cap-tempfile" }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.37.9", features = ["fs", "process", "procfs", "termios", "time"] }
+rustix = { version = "0.38.0", features = ["fs", "process", "procfs", "termios", "time"] }
 
 [target.'cfg(windows)'.dependencies]
-winx = "0.35.0"
+winx = "0.36.0"
 
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = "0.48.0"

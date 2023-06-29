@@ -243,7 +243,7 @@ the process filesystem namespace.
 
 ## Minimum Supported Rust Version (MSRV)
 
-This crate currently works on Rust 1.58, when default features are enabled.
+This crate currently works on Rust 1.63, when default features are enabled.
 Some of the optional features have stricter requirements.
 
 [`arf-strings`]: https://github.com/bytecodealliance/arf-strings/

@@ -632,7 +632,7 @@ fn socket(
         address_family.into(),
         socket_type,
         socket_flags(blocking),
-        rustix::net::Protocol::default(),
+        None,
     )?;
 
     // Set the desired flags if we couldn't set them at creation.
