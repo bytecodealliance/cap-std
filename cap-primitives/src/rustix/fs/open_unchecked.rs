@@ -2,7 +2,7 @@ use super::compute_oflags;
 use crate::fs::{stat_unchecked, OpenOptions, OpenUncheckedError};
 use crate::AmbientAuthority;
 use io_lifetimes::AsFilelike;
-use rustix::fs::{cwd, openat, Mode};
+use rustix::fs::{openat, Mode, CWD};
 use rustix::io;
 use std::fs;
 use std::path::Path;
@@ -67,5 +67,5 @@ pub(crate) fn open_ambient_impl(
     ambient_authority: AmbientAuthority,
 ) -> Result<fs::File, OpenUncheckedError> {
     let _ = ambient_authority;
-    open_unchecked(&cwd().as_filelike_view::<fs::File>(), path, options)
+    open_unchecked(&CWD.as_filelike_view::<fs::File>(), path, options)
 }
