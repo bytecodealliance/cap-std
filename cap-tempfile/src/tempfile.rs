@@ -32,9 +32,9 @@ use std::io::{self, Read, Seek, Write};
 /// Unlike the tempfile crate, the default [`TempFile::new`] will use the same
 /// permissions as [`File::create_new`] in the Rust standard library.
 /// Concretely on Unix systems for example this can (depending on `umask`)
-/// result in files that are readable by all users.  The rationale for this is
+/// result in files that are readable by all users. The rationale for this is
 /// to make it more ergonomic and natural to use this API to atomically create
-/// new files and replace existing ones.  Many cases that want "private" files
+/// new files and replace existing ones. Many cases that want "private" files
 /// will prefer [`TempFile::new_anonymous`] to have the file not be accessible
 /// at all outside the current process.
 ///
@@ -62,7 +62,7 @@ impl<'d> Debug for TempFile<'d> {
 #[cfg(any(target_os = "android", target_os = "linux"))]
 fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     use rustix::fs::{Mode, OFlags};
-    // openat's API uses WRONLY.  There may be use cases for reading too, so let's
+    // openat's API uses WRONLY. There may be use cases for reading too, so let's
     // support it.
     let mut oflags = OFlags::CLOEXEC | OFlags::TMPFILE | OFlags::RDWR;
     if anonymous {
@@ -131,7 +131,7 @@ impl<'d> TempFile<'d> {
     }
 
     /// Crate a new temporary file in the provided directory that will not have
-    /// a name.  This corresponds to [`tempfile::tempfile_in`].
+    /// a name. This corresponds to [`tempfile::tempfile_in`].
     ///
     /// [`tempfile::tempfile_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile_in.html
     pub fn new_anonymous(dir: &'d Dir) -> io::Result<File> {
@@ -150,8 +150,8 @@ impl<'d> TempFile<'d> {
 
     fn impl_replace(mut self, destname: &OsStr) -> io::Result<()> {
         // At this point on Linux if O_TMPFILE is used, we need to give the file a
-        // temporary name in order to link it into place.  There are patches to
-        // add an `AT_LINKAT_REPLACE` API.  With that we could skip this and
+        // temporary name in order to link it into place. There are patches to
+        // add an `AT_LINKAT_REPLACE` API. With that we could skip this and
         // have file-leak-proof atomic file replacement: <https://marc.info/?l=linux-fsdevel&m=158028833007418&w=2>
         #[cfg(any(target_os = "android", target_os = "linux"))]
         let tempname = self
