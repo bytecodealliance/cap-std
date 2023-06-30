@@ -93,7 +93,6 @@ pub fn cvt(
 #[allow(dead_code)]
 fn symlink_junction_inner(original: &Path, dir: &Dir, junction: &Path) -> io::Result<()> {
     use cap_std::fs::OpenOptions;
-    use std::convert::TryFrom;
     use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
     use std::os::windows::fs::OpenOptionsExt;
@@ -179,7 +178,6 @@ fn symlink_junction_inner_utf8(
     junction: &Utf8Path,
 ) -> io::Result<()> {
     use cap_std::fs::OpenOptions;
-    use std::convert::TryFrom;
     use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
     use std::os::windows::fs::OpenOptionsExt;

@@ -1,6 +1,5 @@
 #![allow(unsafe_code)]
 
-use std::convert::TryInto;
 use std::mem;
 use std::os::windows::io::HandleOrInvalid;
 use std::ptr::null_mut;

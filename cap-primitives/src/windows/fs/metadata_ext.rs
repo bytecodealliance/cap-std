@@ -1,7 +1,5 @@
 #![allow(clippy::useless_conversion)]
 
-#[cfg(not(windows_by_handle))]
-use std::convert::TryInto;
 use std::{fs, io};
 
 #[derive(Debug, Clone)]
