@@ -5,7 +5,6 @@ use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(target_os = "linux")]
 use rustix::fs::{makedev, Statx, StatxFlags};
 use rustix::fs::{RawMode, Stat};
-use std::convert::{TryFrom, TryInto};
 use std::{fs, io};
 
 #[derive(Debug, Clone)]

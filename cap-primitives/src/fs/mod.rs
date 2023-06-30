@@ -112,7 +112,7 @@ fn map_result<T: Clone>(result: &std::io::Result<T>) -> Result<T, (std::io::Erro
 fn dir_paths() {
     use crate::ambient_authority;
 
-    for path in &[std::env::current_dir().unwrap(), std::env::temp_dir()] {
+    for path in [std::env::current_dir().unwrap(), std::env::temp_dir()] {
         let dir = open_ambient_dir(&path, ambient_authority()).unwrap();
         assert_eq!(
             file_path(&dir)

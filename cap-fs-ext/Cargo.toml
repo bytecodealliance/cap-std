@@ -10,7 +10,7 @@ license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["filesystem"]
 categories = ["filesystem"]
 repository = "https://github.com/bytecodealliance/cap-std"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }

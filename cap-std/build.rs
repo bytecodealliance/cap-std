@@ -3,8 +3,6 @@ use std::io::Write;
 
 fn main() {
     use_feature_or_nothing("can_vector"); // https://github.com/rust-lang/rust/issues/69941
-    use_feature_or_nothing("seek_convenience"); // https://github.com/rust-lang/rust/issues/59359
-    use_feature_or_nothing("with_options"); // https://github.com/rust-lang/rust/issues/65439
     use_feature_or_nothing("write_all_vectored"); // https://github.com/rust-lang/rust/issues/70436
 
     // Don't rerun this on changes other than build.rs, as we only depend on

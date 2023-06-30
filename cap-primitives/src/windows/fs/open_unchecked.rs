@@ -9,7 +9,6 @@ use crate::fs::{
     FollowSymlinks, OpenOptions, OpenUncheckedError, SymlinkKind,
 };
 use crate::{ambient_authority, AmbientAuthority};
-use std::convert::TryInto;
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 use std::os::windows::fs::MetadataExt;

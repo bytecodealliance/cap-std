@@ -10,7 +10,7 @@ license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 keywords = ["random", "rng"]
 categories = ["algorithms"]
 repository = "https://github.com/bytecodealliance/cap-std"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 ambient-authority = "0.0.2"

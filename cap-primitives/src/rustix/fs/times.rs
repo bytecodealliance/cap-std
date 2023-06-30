@@ -3,7 +3,6 @@ use crate::time::SystemClock;
 use io_lifetimes::BorrowedFd;
 use rustix::fs::{utimensat, AtFlags, Timestamps, UTIME_NOW, UTIME_OMIT};
 use rustix::time::Timespec;
-use std::convert::TryInto;
 use std::path::Path;
 use std::{fs, io};
 
