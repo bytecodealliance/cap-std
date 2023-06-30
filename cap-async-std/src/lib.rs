@@ -25,8 +25,6 @@
 #![deny(missing_docs)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 // async_std doesn't have "can_vector".
-// async_std doesn't have "seek_convenience".
-// async_std doesn't have "with_options".
 // async_std doesn't have "write_all_vectored".
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"

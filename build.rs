@@ -8,13 +8,11 @@ fn main() {
     use_feature_or_nothing("io_error_more"); // https://github.com/rust-lang/rust/issues/86442
     use_feature_or_nothing("io_error_uncategorized");
     use_feature_or_nothing("pattern"); // https://github.com/rust-lang/rust/issues/27721
-    use_feature_or_nothing("seek_convenience"); // https://github.com/rust-lang/rust/issues/59359
     use_feature_or_nothing("shrink_to"); // https://github.com/rust-lang/rust/issues/56431
     use_feature_or_nothing("toowned_clone_into"); // https://github.com/rust-lang/rust/issues/41263
     use_feature_or_nothing("try_reserve"); // https://github.com/rust-lang/rust/issues/56431
     use_feature_or_nothing("unix_socket_peek"); // https://github.com/rust-lang/rust/issues/76923
     use_feature_or_nothing("windows_by_handle"); // https://github.com/rust-lang/rust/issues/63010
-    use_feature_or_nothing("with_options"); // https://github.com/rust-lang/rust/issues/65439
     use_feature_or_nothing("write_all_vectored"); // https://github.com/rust-lang/rust/issues/70436
                                                   // https://doc.rust-lang.org/unstable-book/library-features/windows-file-type-ext.html
     use_feature_or_nothing("windows_file_type_ext");

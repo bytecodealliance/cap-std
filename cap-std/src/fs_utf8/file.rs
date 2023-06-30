@@ -451,7 +451,6 @@ impl Seek for File {
         self.cap_std.seek(pos)
     }
 
-    #[cfg(seek_convenience)]
     #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         self.cap_std.stream_position()
@@ -464,7 +463,6 @@ impl Seek for &File {
         (&mut &self.cap_std).seek(pos)
     }
 
-    #[cfg(seek_convenience)]
     #[inline]
     fn stream_position(&mut self) -> io::Result<u64> {
         (&mut &self.cap_std).stream_position()
