@@ -20,7 +20,7 @@ impl IsFileReadWrite for std::fs::File {
     }
 }
 
-#[cfg(all(feature = "std"))]
+#[cfg(feature = "std")]
 impl IsFileReadWrite for cap_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
@@ -36,7 +36,7 @@ impl IsFileReadWrite for cap_std::fs_utf8::File {
     }
 }
 
-#[cfg(all(feature = "async_std"))]
+#[cfg(feature = "async_std")]
 impl IsFileReadWrite for async_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
@@ -44,7 +44,7 @@ impl IsFileReadWrite for async_std::fs::File {
     }
 }
 
-#[cfg(all(feature = "async_std"))]
+#[cfg(feature = "async_std")]
 impl IsFileReadWrite for cap_async_std::fs::File {
     #[inline]
     fn is_file_read_write(&self) -> io::Result<(bool, bool)> {

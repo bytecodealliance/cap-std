@@ -177,7 +177,7 @@ pub const NO_SOCKET_ADDRS: &[net::SocketAddr] = &[];
 /// Return an error for reporting that no socket addresses were available.
 #[cold]
 pub fn no_socket_addrs() -> io::Error {
-    std::net::TcpListener::bind(&NO_SOCKET_ADDRS).unwrap_err()
+    std::net::TcpListener::bind(NO_SOCKET_ADDRS).unwrap_err()
 }
 
 #[test]

@@ -39,7 +39,7 @@ pub(crate) fn open_unchecked(
         io::Errno::MLINK => Err(OpenUncheckedError::Symlink(err.into(), ())),
 
         // NetBSD uses `EFTYPE`.
-        #[cfg(any(target_os = "netbsd"))]
+        #[cfg(target_os = "netbsd")]
         io::Errno::FTYPE => Err(OpenUncheckedError::Symlink(err.into(), ())),
 
         io::Errno::NOENT => Err(OpenUncheckedError::NotFound(err.into())),
