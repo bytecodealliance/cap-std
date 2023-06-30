@@ -469,8 +469,6 @@ impl Seek for File {
     ) -> Poll<io::Result<u64>> {
         Seek::poll_seek(Pin::new(&mut self.std), cx, pos)
     }
-
-    // async_std doesn't have `seek_convenience`.
 }
 
 impl Seek for &File {
@@ -478,8 +476,6 @@ impl Seek for &File {
     fn poll_seek(self: Pin<&mut Self>, cx: &mut Context, pos: SeekFrom) -> Poll<io::Result<u64>> {
         Seek::poll_seek(Pin::new(&mut &self.std), cx, pos)
     }
-
-    // async_std doesn't have `seek_convenience`.
 }
 
 // TODO: Can async_std implement `From<File>` for `process::Stdio`?
