@@ -47,7 +47,7 @@ impl Pool {
 
     /// Add a specific [`net::SocketAddr`] to the pool.
     ///
-    /// # AmbientAuthority
+    /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
     pub fn insert_socket_addr(
@@ -96,7 +96,7 @@ impl Pool {
 
     /// Add a range of network addresses with a specific port to the pool.
     ///
-    /// # AmbientAuthority
+    /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
     pub fn insert_ip_net(
@@ -112,6 +112,7 @@ impl Pool {
     /// address.
     ///
     /// This corresponds to [`std::net::TcpListener::bind`].
+    #[doc(alias = "bind")]
     #[inline]
     pub fn bind_tcp_listener<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpListener> {
         let addrs = addr.to_socket_addrs()?;
@@ -134,6 +135,7 @@ impl Pool {
     /// Opens a TCP connection to a remote host.
     ///
     /// This corresponds to [`std::net::TcpStream::connect`].
+    #[doc(alias = "connect")]
     #[inline]
     pub fn connect_tcp_stream<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpStream> {
         let addrs = addr.to_socket_addrs()?;
@@ -156,6 +158,7 @@ impl Pool {
     /// Opens a TCP connection to a remote host with a timeout.
     ///
     /// This corresponds to [`std::net::TcpStream::connect_timeout`].
+    #[doc(alias = "connect")]
     #[inline]
     pub fn connect_timeout_tcp_stream(
         &self,
@@ -170,6 +173,7 @@ impl Pool {
     /// Creates a UDP socket from the given address.
     ///
     /// This corresponds to [`std::net::UdpSocket::bind`].
+    #[doc(alias = "bind")]
     #[inline]
     pub fn bind_udp_socket<A: ToSocketAddrs>(&self, addr: A) -> io::Result<UdpSocket> {
         let addrs = addr.to_socket_addrs()?;
@@ -192,6 +196,7 @@ impl Pool {
     /// number of bytes written.
     ///
     /// This corresponds to [`std::net::UdpSocket::send_to`].
+    #[doc(alias = "send_to")]
     #[inline]
     pub fn send_to_udp_socket_addr<A: ToSocketAddrs>(
         &self,
@@ -212,6 +217,7 @@ impl Pool {
     /// only receive data from the specified address.
     ///
     /// This corresponds to [`std::net::UdpSocket::connect`].
+    #[doc(alias = "connect")]
     #[inline]
     pub fn connect_udp_socket<A: ToSocketAddrs>(
         &self,
