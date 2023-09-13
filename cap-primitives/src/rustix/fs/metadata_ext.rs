@@ -100,6 +100,7 @@ impl MetadataExt {
 
     /// Constructs a new instance of `Metadata` from the given `Stat`.
     #[inline]
+    #[allow(unused_comparisons)]
     pub(crate) fn from_rustix(stat: Stat) -> Metadata {
         Metadata {
             file_type: ImplFileTypeExt::from_raw_mode(stat.st_mode as RawMode),
@@ -173,7 +174,6 @@ impl MetadataExt {
                 // Note that the `unused_comparisons` is ignored here for
                 // platforms where it's unsigned since the first branch here
                 // will never be taken.
-                #[allow(unused_comparisons)]
                 dev: if stat.st_dev < 0 {
                     i64::try_from(stat.st_dev).unwrap() as u64
                 } else {
