@@ -100,7 +100,7 @@ impl MetadataExt {
 
     /// Constructs a new instance of `Metadata` from the given `Stat`.
     #[inline]
-    #[allow(unused_comparisons)]
+    #[allow(unused_comparisons)] // NB: rust-lang/rust#115823 requires this here instead of on `st_dev` processing below
     pub(crate) fn from_rustix(stat: Stat) -> Metadata {
         Metadata {
             file_type: ImplFileTypeExt::from_raw_mode(stat.st_mode as RawMode),
