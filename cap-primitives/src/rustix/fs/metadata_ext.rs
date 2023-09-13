@@ -164,7 +164,21 @@ impl MetadataExt {
             created: None,
 
             ext: Self {
-                dev: u64::try_from(stat.st_dev).unwrap(),
+                // The type of `st_dev` is `dev_t` which is signed on some
+                // platforms and unsigned on other platforms. A `u64` is enough
+                // to work for all unsigned platforms, and for signed platforms
+                // perform a sign extension to `i64` and then view that as an
+                // unsigned 64-bit number instead.
+                //
+                // Note that the `unused_comparisons` is ignored here for
+                // platforms where it's unsigned since the first branch here
+                // will never be taken.
+                #[allow(unused_comparisons)]
+                dev: if stat.st_dev < 0 {
+                    i64::try_from(stat.st_dev).unwrap() as u64
+                } else {
+                    u64::try_from(stat.st_dev).unwrap()
+                },
                 ino: stat.st_ino.into(),
                 #[cfg(not(target_os = "wasi"))]
                 mode: u32::from(stat.st_mode),
