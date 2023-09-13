@@ -270,7 +270,7 @@ mod test {
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
             let mode = Mode::from_bits_truncate(mode);
-            assert_eq!(0o666 & !umask, mode.bits());
+            assert_eq!(0o666 & !umask, mode.bits() & 0o777);
         }
         // And that we can write
         tf.write_all(b"hello world")?;
