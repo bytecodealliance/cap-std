@@ -285,7 +285,14 @@ impl MetadataExt {
 
 #[allow(clippy::similar_names)]
 fn system_time_from_rustix(sec: i64, nsec: u64) -> Option<SystemTime> {
-    SystemClock::UNIX_EPOCH.checked_add(Duration::new(u64::try_from(sec).unwrap(), nsec as _))
+    if sec >= 0 {
+        SystemClock::UNIX_EPOCH.checked_add(Duration::new(u64::try_from(sec).unwrap(), nsec as _))
+    } else {
+        SystemClock::UNIX_EPOCH
+            .checked_sub(Duration::new(u64::try_from(-sec).unwrap(), 0))
+            .map(|t| t.checked_add(Duration::new(0, nsec as u32)))
+            .flatten()
+    }
 }
 
 impl rustix::fs::MetadataExt for MetadataExt {
@@ -394,5 +401,17 @@ impl rustix::fs::MetadataExt for MetadataExt {
     #[cfg(target_os = "wasi")]
     fn ctim(&self) -> u64 {
         self.ctim
+    }
+}
+
+/// It should be possible to represent times before the Epoch.
+/// https://github.com/bytecodealliance/cap-std/issues/328
+#[test]
+fn negative_time() {
+    let system_time = system_time_from_rustix(-1, 1).unwrap();
+    let d = SystemClock::UNIX_EPOCH.duration_since(system_time).unwrap();
+    assert_eq!(d.as_secs(), 0);
+    if !cfg!(emulate_second_only_system) {
+        assert_eq!(d.subsec_nanos(), 999999999);
     }
 }

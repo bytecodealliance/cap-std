@@ -37,10 +37,20 @@ impl SystemTime {
     #[inline]
     pub fn from_std(std: time::SystemTime) -> Self {
         if cfg!(emulate_second_only_system) {
-            let duration = std.duration_since(time::SystemTime::UNIX_EPOCH).unwrap();
-            let secs = time::Duration::from_secs(duration.as_secs());
-            Self {
-                std: time::SystemTime::UNIX_EPOCH.checked_add(secs).unwrap(),
+            match std.duration_since(time::SystemTime::UNIX_EPOCH) {
+                Ok(duration) => {
+                    let secs = time::Duration::from_secs(duration.as_secs());
+                    Self {
+                        std: time::SystemTime::UNIX_EPOCH.checked_add(secs).unwrap(),
+                    }
+                }
+                Err(_) => {
+                    let duration = time::SystemTime::UNIX_EPOCH.duration_since(std).unwrap();
+                    let secs = time::Duration::from_secs(duration.as_secs());
+                    Self {
+                        std: time::SystemTime::UNIX_EPOCH.checked_sub(secs).unwrap(),
+                    }
+                }
             }
         } else {
             Self { std }
