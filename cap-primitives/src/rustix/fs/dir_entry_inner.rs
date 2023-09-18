@@ -69,7 +69,8 @@ impl DirEntryInner {
 
     #[inline]
     pub(crate) fn is_same_file(&self, metadata: &Metadata) -> io::Result<bool> {
-        Ok(self.ino() == metadata.ino() && self.metadata()?.dev() == metadata.dev())
+        let self_md = self.metadata()?;
+        Ok(self_md.ino() == metadata.ino() && self_md.dev() == metadata.dev())
     }
 
     fn file_name_bytes(&self) -> &OsStr {
