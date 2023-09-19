@@ -121,9 +121,10 @@ fn tty_path() {
     #[cfg(unix)]
     use std::os::unix::fs::FileTypeExt;
 
-    // On FreeBSD, `ttyname` doesn't seem to work on /dev/std{in,out,err}.
+    // On FreeBSD, /dev/{tty,stdin,stdout,stderr} are aliases to different real
+    // devices.
     let paths: &[&str] = if cfg!(target_os = "freebsd") {
-        &["/dev/tty"]
+        &["/dev/ttyv0", "/dev/pts/0"]
     } else {
         &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"]
     };
