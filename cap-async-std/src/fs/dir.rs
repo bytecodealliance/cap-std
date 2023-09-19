@@ -662,6 +662,7 @@ impl Dir {
     /// XXX: This function is not yet implemented.
     ///
     /// [`async_std::os::unix::net::UnixListener::bind`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.bind
+    #[doc(alias = "bind")]
     #[cfg(unix)]
     #[inline]
     pub async fn bind_unix_listener<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixListener> {
@@ -680,6 +681,7 @@ impl Dir {
     /// XXX: This function is not yet implemented.
     ///
     /// [`async_std::os::unix::net::UnixStream::connect`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixStream.html#method.connect
+    #[doc(alias = "connect")]
     #[cfg(unix)]
     #[inline]
     pub async fn connect_unix_stream<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixStream> {
@@ -698,6 +700,7 @@ impl Dir {
     /// XXX: This function is not yet implemented.
     ///
     /// [`async_std::os::unix::net::UnixDatagram::bind`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.bind
+    #[doc(alias = "bind")]
     #[cfg(unix)]
     #[inline]
     pub async fn bind_unix_datagram<P: AsRef<Path>>(&self, path: P) -> io::Result<UnixDatagram> {
@@ -717,6 +720,7 @@ impl Dir {
     /// XXX: This function is not yet implemented.
     ///
     /// [`async_std::os::unix::net::UnixDatagram::connect`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.connect
+    #[doc(alias = "connect")]
     #[cfg(unix)]
     #[inline]
     pub async fn connect_unix_datagram<P: AsRef<Path>>(
@@ -740,6 +744,7 @@ impl Dir {
     /// XXX: This function is not yet implemented.
     ///
     /// [`async_std::os::unix::net::UnixDatagram::send_to`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixDatagram.html#method.send_to
+    #[doc(alias = "send_to")]
     #[cfg(unix)]
     #[inline]
     pub async fn send_to_unix_datagram_addr<P: AsRef<Path>>(

@@ -105,6 +105,7 @@ impl Pool {
     /// address.
     ///
     /// This corresponds to [`async_std::net::TcpListener::bind`].
+    #[doc(alias = "bind")]
     #[inline]
     pub async fn bind_tcp_listener<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpListener> {
         let addrs = addr.to_socket_addrs().await?;
@@ -127,6 +128,7 @@ impl Pool {
     /// Creates a new TCP stream connected to the specified address.
     ///
     /// This corresponds to [`async_std::net::TcpStream::connect`].
+    #[doc(alias = "connect")]
     #[inline]
     pub async fn connect_tcp_stream<A: ToSocketAddrs>(&self, addr: A) -> io::Result<TcpStream> {
         let addrs = addr.to_socket_addrs().await?;
@@ -151,6 +153,7 @@ impl Pool {
     /// Creates a UDP socket from the given address.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::bind`].
+    #[doc(alias = "bind")]
     #[inline]
     pub async fn bind_udp_socket<A: ToSocketAddrs>(&self, addr: A) -> io::Result<UdpSocket> {
         let addrs = addr.to_socket_addrs().await?;
@@ -172,6 +175,7 @@ impl Pool {
     /// Sends data on the socket to the given address.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::send_to`].
+    #[doc(alias = "send_to")]
     #[inline]
     pub async fn send_to_udp_socket_addr<A: ToSocketAddrs>(
         &self,
@@ -193,6 +197,7 @@ impl Pool {
     /// Connects the UDP socket to a remote address.
     ///
     /// This corresponds to [`async_std::net::UdpSocket::connect`].
+    #[doc(alias = "connect")]
     #[inline]
     pub async fn connect_udp_socket<A: ToSocketAddrs>(
         &self,
