@@ -20,7 +20,6 @@ maybe-owned = "0.3.4"
 fs-set-times = "0.20.0"
 io-extras = "0.18.0"
 io-lifetimes = { version = "2.0.0", default-features = false }
-iana-time-zone = "0.1.57"
 
 [dev-dependencies]
 cap-tempfile = { path = "../cap-tempfile" }

@@ -7,7 +7,6 @@ pub struct Timezone(());
 #[derive(Debug)]
 pub struct TimezoneError(String);
 
-//impl LocalResult for TimezoneError {
 impl Timezone {
     /// Constructs a new instance of `Self`.
     ///
