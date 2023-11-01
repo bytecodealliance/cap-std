@@ -4,6 +4,7 @@
 #[macro_use]
 pub(crate) mod assert_same_file;
 
+mod access;
 mod canonicalize;
 mod copy;
 mod create_dir;
@@ -57,6 +58,7 @@ pub(crate) use super::windows::fs::*;
 #[cfg(not(windows))]
 pub(crate) use read_dir::{read_dir_nofollow, read_dir_unchecked};
 
+pub use access::{access, AccessModes, AccessType};
 pub use canonicalize::canonicalize;
 pub use copy::copy;
 pub use create_dir::create_dir;
@@ -90,7 +92,7 @@ pub use remove_open_dir::{remove_open_dir, remove_open_dir_all};
 pub use rename::rename;
 pub use reopen::reopen;
 #[cfg(not(target_os = "wasi"))]
-pub use set_permissions::set_permissions;
+pub use set_permissions::{set_permissions, set_symlink_permissions};
 pub use set_times::{set_times, set_times_nofollow};
 pub use stat::stat;
 #[cfg(not(windows))]

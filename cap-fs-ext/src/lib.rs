@@ -23,7 +23,7 @@ mod reopen;
 pub use dir_entry_ext::DirEntryExt;
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 pub use dir_ext::DirExtUtf8;
-pub use dir_ext::{DirExt, SystemTimeSpec};
+pub use dir_ext::{AccessType, DirExt, SystemTimeSpec};
 pub use file_type_ext::FileTypeExt;
 pub use is_file_read_write::IsFileReadWrite;
 pub use metadata_ext::MetadataExt;

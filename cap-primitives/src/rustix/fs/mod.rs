@@ -1,3 +1,4 @@
+mod access_unchecked;
 mod copy_impl;
 mod create_dir_unchecked;
 mod dir_entry_inner;
@@ -26,6 +27,8 @@ mod rename_unchecked;
 mod reopen_impl;
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 mod set_permissions_impl;
+#[cfg(not(target_os = "wasi"))]
+mod set_symlink_permissions_unchecked;
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 mod set_times_impl;
 mod stat_unchecked;
@@ -65,11 +68,14 @@ pub(super) use file_path::file_path_by_ttyname_or_seaching;
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
 pub(crate) use set_permissions_impl::set_permissions_impl;
+#[cfg(not(target_os = "wasi"))]
+pub(crate) use set_symlink_permissions_unchecked::set_symlink_permissions_unchecked;
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 pub(crate) use set_times_impl::set_times_impl;
 
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
+    via_parent::access as access_impl,
     via_parent::hard_link as hard_link_impl,
     via_parent::create_dir as create_dir_impl,
     via_parent::read_link as read_link_impl,
@@ -79,7 +85,10 @@ pub(crate) use crate::fs::{
     via_parent::remove_file as remove_file_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
+#[cfg(not(target_os = "wasi"))]
+pub(crate) use crate::fs::via_parent::set_symlink_permissions as set_symlink_permissions_impl;
 
+pub(crate) use access_unchecked::access_unchecked;
 pub(crate) use copy_impl::copy_impl;
 pub(crate) use create_dir_unchecked::create_dir_unchecked;
 pub(crate) use dir_entry_inner::DirEntryInner;

@@ -57,8 +57,8 @@ pub mod rngs {
     #[cfg(feature = "small_rng")]
     pub use rand::rngs::SmallRng;
 
-    /// A random number generator that retrieves randomness from from the
-    /// operating system.
+    /// A random number generator that retrieves randomness from the operating
+    /// system.
     ///
     /// This corresponds to [`rand::rngs::OsRng`], except instead of
     /// implementing `Default` it has an ambient-authority `default` function
