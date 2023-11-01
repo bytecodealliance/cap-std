@@ -244,7 +244,7 @@ pub trait PoolExt: private::Sealed {
     /// Initiate a TCP connection, converting a [`TcpListener`] to a
     /// [`TcpStream`].
     ///
-    /// This is simlar to to [`Pool::connect_tcp_stream`] in that it performs a
+    /// This is simlar to [`Pool::connect_tcp_stream`] in that it performs a
     /// TCP connection, but instead of creating a new socket itself it takes a
     /// [`TcpListener`], such as one created with [`TcpListenerExt::new`].
     ///
@@ -263,8 +263,8 @@ pub trait PoolExt: private::Sealed {
 
     /// Initiate a TCP connection on a socket.
     ///
-    /// This is simlar to to [`Self::connect_into_tcp_stream`], however instead
-    /// of converting a `TcpListener` to a `TcpStream`, it leaves fd in the
+    /// This is simlar to [`Self::connect_into_tcp_stream`], however instead of
+    /// converting a `TcpListener` to a `TcpStream`, it leaves fd in the
     /// existing `TcpListener`.
     ///
     /// This function ensures that the address to connect to is permitted by
@@ -279,7 +279,7 @@ pub trait PoolExt: private::Sealed {
 
     /// Initiate a UDP connection.
     ///
-    /// This is simlar to to [`Pool::connect_udp_socket`] in that it performs a
+    /// This is simlar to [`Pool::connect_udp_socket`] in that it performs a
     /// UDP connection, but instead of creating a new socket itself it takes a
     /// [`UdpSocket`], such as one created with [`UdpSocketExt::new`].
     ///
@@ -537,7 +537,7 @@ impl TcpConnecter {
     /// Initiate a TCP connection, converting a [`TcpListener`] to a
     /// [`TcpStream`].
     ///
-    /// This is simlar to to [`Pool::connect_tcp_stream`] in that it performs a
+    /// This is simlar to [`Pool::connect_tcp_stream`] in that it performs a
     /// TCP connection, but instead of creating a new socket itself it takes a
     /// [`TcpListener`], such as one created with [`TcpListenerExt::new`].
     ///
@@ -554,8 +554,8 @@ impl TcpConnecter {
 
     /// Initiate a TCP connection on a socket.
     ///
-    /// This is simlar to to [`Pool::connect_into_tcp_stream`], however instead
-    /// of converting a `TcpListener` to a `TcpStream`, it leaves fd in the
+    /// This is simlar to [`Pool::connect_into_tcp_stream`], however instead of
+    /// converting a `TcpListener` to a `TcpStream`, it leaves fd in the
     /// existing `TcpListener`.
     ///
     /// This is similar to [`PoolExt::connect_existing_tcp_listener`] except
@@ -584,7 +584,7 @@ pub struct UdpConnecter(smallvec::SmallVec<[SocketAddr; 1]>);
 impl UdpConnecter {
     /// Initiate a UDP connection.
     ///
-    /// This is simlar to to [`Pool::connect_udp_socket`] in that it performs a
+    /// This is simlar to [`Pool::connect_udp_socket`] in that it performs a
     /// UDP connection, but instead of creating a new socket itself it takes a
     /// [`UdpSocket`], such as one created with [`UdpSocketExt::new`].
     ///

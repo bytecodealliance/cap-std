@@ -1,10 +1,13 @@
 #[cfg(feature = "fs_utf8")]
 use camino::Utf8Path;
+#[cfg(all(windows, feature = "async_std", feature = "fs_utf8"))]
+use cap_primitives::fs::stat;
 #[cfg(not(windows))]
 use cap_primitives::fs::symlink;
-use cap_primitives::fs::{open_dir_nofollow, set_times, set_times_nofollow};
-#[cfg(all(windows, feature = "async_std", feature = "fs_utf8"))]
-use cap_primitives::fs::{stat, FollowSymlinks};
+use cap_primitives::fs::{
+    access, open_dir_nofollow, set_symlink_permissions, set_times, set_times_nofollow,
+    FollowSymlinks, Permissions,
+};
 #[cfg(windows)]
 use cap_primitives::fs::{symlink_dir, symlink_file};
 use io_lifetimes::AsFilelike;
@@ -13,7 +16,7 @@ use std::path::Path;
 #[cfg(feature = "async_std")]
 use {async_std::task::spawn_blocking, async_trait::async_trait};
 
-pub use cap_primitives::fs::SystemTimeSpec;
+pub use cap_primitives::fs::{AccessType, SystemTimeSpec};
 
 /// Extension trait for `Dir`.
 pub trait DirExt {
@@ -95,6 +98,18 @@ pub trait DirExt {
     /// points to a directory, it cannot be removed with the `remove_file`
     /// operation. This method will remove files and all symlinks.
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object, without
+    /// following symbolic links.
+    fn access_symlink<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    fn set_symlink_permissions<P: AsRef<Path>>(&self, path: P, perm: Permissions)
+        -> io::Result<()>;
 }
 
 /// Extension trait for `Dir`, async.
@@ -216,6 +231,17 @@ pub trait AsyncDirExt {
         &self,
         path: P,
     ) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object.
+    async fn access<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    async fn set_symlink_permissions<P: AsRef<Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()>;
 }
 
 /// `fs_utf8` version of `DirExt`.
@@ -304,6 +330,21 @@ pub trait DirExtUtf8 {
     /// on symlinks to directories on Windows, similar to how `unlink` works
     /// on symlinks to directories on Posix-ish platforms.
     fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object, without
+    /// following symbolic links.
+    fn access_symlink<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    fn set_symlink_permissions<P: AsRef<Utf8Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()>;
 }
 
 /// `fs_utf8` version of `DirExt`.
@@ -410,6 +451,25 @@ pub trait AsyncDirExtUtf8 {
     /// points to a directory, it cannot be removed with the `remove_file`
     /// operation. This method will remove files and all symlinks.
     async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object.
+    async fn access<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object, without
+    /// following symbolic links.
+    async fn access_symlink<P: AsRef<Utf8Path>>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()>;
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    async fn set_symlink_permissions<P: AsRef<Utf8Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()>;
 }
 
 #[cfg(feature = "std")]
@@ -533,7 +593,7 @@ impl DirExt for cap_std::fs::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
-        use crate::{FollowSymlinks, OpenOptionsFollowExt};
+        use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
@@ -565,6 +625,40 @@ impl DirExt for cap_std::fs::Dir {
         drop(file);
 
         Ok(())
+    }
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()> {
+        access(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref(),
+            type_,
+            FollowSymlinks::Yes,
+        )
+    }
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access_symlink<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()> {
+        access(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref(),
+            type_,
+            FollowSymlinks::No,
+        )
+    }
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    fn set_symlink_permissions<P: AsRef<Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()> {
+        set_symlink_permissions(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref(),
+            perm,
+        )
     }
 }
 
@@ -829,7 +923,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
         &self,
         path: P,
     ) -> io::Result<()> {
-        use crate::{FollowSymlinks, OpenOptionsFollowExt};
+        use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
@@ -996,7 +1090,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     #[cfg(windows)]
     #[inline]
     fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
-        use crate::{FollowSymlinks, OpenOptionsFollowExt};
+        use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
         use cap_std::fs::OpenOptions;
         use std::os::windows::fs::OpenOptionsExt;
@@ -1028,6 +1122,40 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
         drop(file);
 
         Ok(())
+    }
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()> {
+        access(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref().as_ref(),
+            type_,
+            FollowSymlinks::Yes,
+        )
+    }
+
+    /// Test for accessibility or existence of a filesystem object.
+    fn access_symlink<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()> {
+        access(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref().as_ref(),
+            type_,
+            FollowSymlinks::No,
+        )
+    }
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    fn set_symlink_permissions<P: AsRef<Utf8Path>>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()> {
+        set_symlink_permissions(
+            &self.as_filelike_view::<std::fs::File>(),
+            path.as_ref().as_ref(),
+            perm,
+        )
     }
 }
 
