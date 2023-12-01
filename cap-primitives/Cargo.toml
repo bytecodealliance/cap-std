@@ -31,11 +31,14 @@ rustix = { version = "0.38.0", features = ["fs", "process", "procfs", "termios",
 winx = "0.36.0"
 
 [target.'cfg(windows)'.dependencies.windows-sys]
-version = "0.48.0"
+version = "0.52.0"
 features = [
     "Win32_Foundation",
     "Win32_Security",
     "Win32_Storage_FileSystem",
     "Win32_System_Kernel",
     "Win32_System_WindowsProgramming",
+    "Win32_System_IO",
+    "Wdk_Storage_FileSystem",
+    "Wdk_Foundation",
 ]
