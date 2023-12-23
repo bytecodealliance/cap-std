@@ -10,7 +10,17 @@ pub(crate) fn remove_open_dir_by_searching(dir: fs::File) -> io::Result<()> {
     let mut iter = read_dir_unchecked(&dir, Component::ParentDir.as_ref(), FollowSymlinks::No)?;
     while let Some(child) = iter.next() {
         let child = child?;
-        if child.is_same_file(&metadata)? {
+
+        // Test if the child we found by iteration matches the directory we're
+        // looking for. Ignore `NotFound` errors, which can happen if another
+        // process removes a different directory in the same parent.
+        let same = match child.is_same_file(&metadata) {
+            Ok(same) => same,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => false,
+            Err(err) => Err(err)?,
+        };
+
+        if same {
             return child.remove_dir();
         }
     }
