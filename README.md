@@ -168,6 +168,11 @@ utilize [`openat2`], [`O_PATH`], and [`/proc/self/fd`] (though only when /proc
 is mounted, it's really `procfs`, and there are no mounts on top of it) for
 fast path resolution as well.
 
+On FreeBSD 13.0 and newer, `cap-std` uses [`openat(O_RESOLVE_BENEATH)`] to
+implement `Dir::open` with a single system call in common cases.
+Several other operations internally utilize `AT_RESOLVE_BENEATH` and `O_PATH` for
+fast path resolution as well.
+
 Otherwise, `cap-std` opens each component of a path individually, in order to
 specially handle `..` and symlinks. The algorithm is carefully designed to
 minimize system calls, so opening `red/green/blue` performs just 5 system
@@ -177,6 +182,7 @@ and `green`.
 [`openat2`]: https://lwn.net/Articles/796868/
 [`O_PATH`]: https://man7.org/linux/man-pages/man2/open.2.html
 [`/proc/self/fd`]: https://man7.org/linux/man-pages/man5/proc.5.html
+[`openat(O_RESOLVE_BENEATH)`]: https://man.freebsd.org/cgi/man.cgi?openat
 
 ## What about networking?
 

@@ -5,7 +5,7 @@ mod canonical_path;
 mod canonicalize;
 mod cow_component;
 mod open;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "freebsd")))]
 mod open_entry;
 mod read_link_one;
 
@@ -19,5 +19,5 @@ pub(super) use canonicalize::canonicalize_with;
 
 pub(crate) use canonicalize::canonicalize;
 pub(crate) use open::{open, stat};
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "freebsd")))]
 pub(crate) use open_entry::open_entry;

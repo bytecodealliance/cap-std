@@ -37,18 +37,18 @@ mod times;
 
 pub(crate) mod errors;
 
-// On Linux, use optimized implementations of `open` and `stat` using `openat2`
-// and `O_PATH` when available.
+// On Linux, use optimized implementations based on
+// `openat2` and `O_PATH` when available.
 //
-// FreeBSD has a similar mechanism in `O_BENEATH`, however it appears to have
-// different behavior on absolute and `..` paths in ways that make it
-// unsuitable for `cap-std`'s style of sandboxing. For more information, see
-// the bug filed upstream: <https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=248335>
+// On FreeBSD, use optimized implementations based on
+// `O_RESOLVE_BENEATH`/`AT_RESOLVE_BENEATH` and `O_PATH` when available.
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) use crate::rustix::darwin::fs::*;
+#[cfg(target_os = "freebsd")]
+pub(crate) use crate::rustix::freebsd::fs::*;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub(crate) use crate::rustix::linux::fs::*;
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "freebsd")))]
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     manually::open_entry as open_entry_impl,
@@ -66,13 +66,21 @@ pub(super) use file_path::file_path_by_ttyname_or_seaching;
     target_os = "ios"
 )))]
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
-#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "android",
+    target_os = "linux",
+    target_os = "freebsd",
+    target_os = "wasi"
+)))]
 pub(crate) use set_permissions_impl::set_permissions_impl;
+#[cfg(target_os = "freebsd")]
+pub(crate) use set_permissions_impl::set_permissions_impl as set_permissions_manually;
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use set_symlink_permissions_unchecked::set_symlink_permissions_unchecked;
-#[cfg(not(any(target_os = "android", target_os = "linux")))]
+#[cfg(not(any(target_os = "android", target_os = "linux", target_os = "freebsd")))]
 pub(crate) use set_times_impl::set_times_impl;
-
+#[cfg(target_os = "freebsd")]
+pub(crate) use set_times_impl::set_times_impl as set_times_manually;
 #[rustfmt::skip]
 pub(crate) use crate::fs::{
     via_parent::access as access_impl,
@@ -80,13 +88,17 @@ pub(crate) use crate::fs::{
     via_parent::create_dir as create_dir_impl,
     via_parent::read_link as read_link_impl,
     via_parent::rename as rename_impl,
-    via_parent::remove_dir as remove_dir_impl,
     via_parent::symlink as symlink_impl,
-    via_parent::remove_file as remove_file_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use crate::fs::via_parent::set_symlink_permissions as set_symlink_permissions_impl;
+#[cfg(not(target_os = "freebsd"))]
+#[rustfmt::skip]
+pub(crate) use crate::fs::{
+    via_parent::remove_dir as remove_dir_impl,
+    via_parent::remove_file as remove_file_impl,
+};
 
 pub(crate) use access_unchecked::access_unchecked;
 pub(crate) use copy_impl::copy_impl;
@@ -116,7 +128,7 @@ pub(crate) use reopen_impl::reopen_impl;
 pub(crate) use stat_unchecked::stat_unchecked;
 pub(crate) use symlink_unchecked::symlink_unchecked;
 #[allow(unused_imports)]
-pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked};
+pub(crate) use times::{set_times_follow_unchecked, set_times_nofollow_unchecked, to_timespec};
 
 // On Linux, there is a limit of 40 symlink expansions.
 // Source: <https://man7.org/linux/man-pages/man7/path_resolution.7.html>
