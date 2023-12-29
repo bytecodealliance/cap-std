@@ -10,7 +10,7 @@ pub(crate) fn open_impl(
     path: &Path,
     options: &OpenOptions,
 ) -> io::Result<fs::File> {
-    if !super::beneath_supported(start) {
+    if !super::beneath_supported() {
         return manually::open(start, path, options);
     }
 
