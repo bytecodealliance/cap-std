@@ -1,6 +1,6 @@
 [package]
 name = "cap-time-ext"
-version = "2.0.0"
+version = "2.0.1"
 description = "Extension traits for `SystemClock` and `MonotonicClock`"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -14,8 +14,8 @@ edition = "2021"
 
 [dependencies]
 ambient-authority = "0.0.2"
-cap-primitives = { path = "../cap-primitives", version = "^2.0.0" }
-cap-std = { path = "../cap-std", optional = true, version = "^2.0.0" }
+cap-primitives = { path = "../cap-primitives", version = "^2.0.1" }
+cap-std = { path = "../cap-std", optional = true, version = "^2.0.1" }
 iana-time-zone = "0.1.57"
 
 [target.'cfg(not(windows))'.dependencies]
