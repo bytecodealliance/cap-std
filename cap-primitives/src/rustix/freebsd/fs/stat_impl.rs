@@ -8,7 +8,7 @@ pub(crate) fn stat_impl(
     path: &Path,
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
-    if !super::beneath_supported(start) {
+    if !super::beneath_supported() {
         return manually::stat(start, path, follow);
     }
 

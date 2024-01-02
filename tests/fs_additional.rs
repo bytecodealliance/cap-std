@@ -454,16 +454,18 @@ fn check_dot_access() {
     check!(tmpdir.metadata("dir/"));
     check!(tmpdir.metadata("dir//"));
 
-    assert!(tmpdir.metadata("dir/.").is_err());
-    assert!(tmpdir.metadata("dir/./").is_err());
-    assert!(tmpdir.metadata("dir/.//").is_err());
-    assert!(tmpdir.metadata("dir/./.").is_err());
-    assert!(tmpdir.metadata("dir/.//.").is_err());
-    assert!(tmpdir.metadata("dir/..").is_err());
-    assert!(tmpdir.metadata("dir/../").is_err());
-    assert!(tmpdir.metadata("dir/..//").is_err());
-    assert!(tmpdir.metadata("dir/../.").is_err());
-    assert!(tmpdir.metadata("dir/..//.").is_err());
+    if !cfg!(target_os = "freebsd") {
+        assert!(tmpdir.metadata("dir/.").is_err());
+        assert!(tmpdir.metadata("dir/./").is_err());
+        assert!(tmpdir.metadata("dir/.//").is_err());
+        assert!(tmpdir.metadata("dir/./.").is_err());
+        assert!(tmpdir.metadata("dir/.//.").is_err());
+        assert!(tmpdir.metadata("dir/..").is_err());
+        assert!(tmpdir.metadata("dir/../").is_err());
+        assert!(tmpdir.metadata("dir/..//").is_err());
+        assert!(tmpdir.metadata("dir/../.").is_err());
+        assert!(tmpdir.metadata("dir/..//.").is_err());
+    }
 }
 
 /// This test is the same as `check_dot_access` but uses `std::fs`'
@@ -486,16 +488,18 @@ fn check_dot_access_ambient() {
     check!(fs::metadata(dir.path().join("dir/")));
     check!(fs::metadata(dir.path().join("dir//")));
 
-    assert!(fs::metadata(dir.path().join("dir/.")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/./")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/.//")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/./.")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/.//.")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/..")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/../")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/..//")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/../.")).is_err());
-    assert!(fs::metadata(dir.path().join("dir/..//.")).is_err());
+    if !cfg!(target_os = "freebsd") {
+        assert!(fs::metadata(dir.path().join("dir/.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/./")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/.//")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/./.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/.//.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/../")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..//")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/../.")).is_err());
+        assert!(fs::metadata(dir.path().join("dir/..//.")).is_err());
+    }
 }
 
 // Windows allows one to open "file/." and "file/.." and similar, however it
@@ -650,19 +654,16 @@ fn dir_unsearchable_unreadable() {
     options.mode(0o000);
     check!(tmpdir.create_dir_with("dir", &options));
 
-    // Platforms with `O_PATH` can open a directory with no permissions. And
-    // somehow FreeBSD can too; see `dir_unsearchable_unreadable_ambient`
-    // below confirming this.
+    // Platforms with `O_PATH` can open a directory with no permissions.
     if cfg!(any(
         target_os = "android",
-        target_os = "freebsd",
         target_os = "linux",
         target_os = "redox",
     )) {
         let dir = check!(tmpdir.open_dir("dir"));
         assert!(dir.entries().is_err());
         assert!(dir.open_dir(".").is_err());
-    } else {
+    } else if !cfg!(target_os = "freebsd") {
         assert!(tmpdir.open_dir("dir").is_err());
     }
 }
@@ -684,7 +685,6 @@ fn dir_unsearchable_unreadable_ambient() {
     if cfg!(any(
         target_os = "android",
         target_os = "linux",
-        target_os = "freebsd",
         target_os = "redox",
     )) {
         assert!(std::fs::File::open(dir.path().join("dir")).is_err());

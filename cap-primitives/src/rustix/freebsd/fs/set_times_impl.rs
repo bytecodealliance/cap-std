@@ -9,7 +9,7 @@ pub(crate) fn set_times_impl(
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
-    if !super::beneath_supported(start) {
+    if !super::beneath_supported() {
         return super::super::super::fs::set_times_manually(start, path, atime, mtime);
     }
 
@@ -27,7 +27,7 @@ pub(crate) fn set_times_nofollow_impl(
     atime: Option<SystemTimeSpec>,
     mtime: Option<SystemTimeSpec>,
 ) -> io::Result<()> {
-    if !super::beneath_supported(start) {
+    if !super::beneath_supported() {
         return via_parent::set_times_nofollow(start, path, atime, mtime);
     }
 
