@@ -3,13 +3,13 @@ use rustix::fs::RawMode;
 use std::fs;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) struct PermissionsExt {
+pub(crate) struct ImplPermissionsExt {
     #[cfg(not(target_os = "wasi"))]
     mode: RawMode,
 }
 
 #[cfg(not(target_os = "wasi"))]
-impl PermissionsExt {
+impl ImplPermissionsExt {
     /// Constructs a new instance of `Self` from the given
     /// [`std::fs::Permissions`].
     #[inline]
@@ -50,7 +50,7 @@ impl PermissionsExt {
 }
 
 #[cfg(not(target_os = "wasi"))]
-impl std::os::unix::fs::PermissionsExt for PermissionsExt {
+impl std::os::unix::fs::PermissionsExt for ImplPermissionsExt {
     fn mode(&self) -> u32 {
         self.mode as u32
     }
@@ -67,7 +67,7 @@ impl std::os::unix::fs::PermissionsExt for PermissionsExt {
 }
 
 #[cfg(target_os = "wasi")]
-impl PermissionsExt {
+impl ImplPermissionsExt {
     pub(crate) fn default() -> Permissions {
         Permissions { readonly: false }
     }

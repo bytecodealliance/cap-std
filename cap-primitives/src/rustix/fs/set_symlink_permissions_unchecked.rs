@@ -1,7 +1,7 @@
 use crate::fs::Permissions;
-use rustix::fs::{chmodat, AtFlags, Mode};
 #[cfg(unix)]
-use std::os::unix::fs::PermissionsExt;
+use crate::fs::PermissionsExt;
+use rustix::fs::{chmodat, AtFlags, Mode};
 use std::path::Path;
 use std::{fs, io};
 

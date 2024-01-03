@@ -75,14 +75,14 @@ pub use file_type::_WindowsFileTypeExt;
 pub use follow_symlinks::FollowSymlinks;
 pub use hard_link::hard_link;
 pub use is_file_read_write::is_file_read_write;
-pub use metadata::Metadata;
 #[cfg(windows)]
 pub use metadata::_WindowsByHandle;
+pub use metadata::{Metadata, MetadataExt};
 pub use open::open;
 pub use open_ambient::open_ambient;
 pub use open_dir::*;
 pub use open_options::OpenOptions;
-pub use permissions::Permissions;
+pub use permissions::{Permissions, PermissionsExt};
 pub use read_dir::{read_base_dir, read_dir, ReadDir};
 pub use read_link::{read_link, read_link_contents};
 pub use remove_dir::remove_dir;

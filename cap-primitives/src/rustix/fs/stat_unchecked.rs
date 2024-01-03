@@ -1,4 +1,4 @@
-use crate::fs::{FollowSymlinks, Metadata, MetadataExt};
+use crate::fs::{FollowSymlinks, ImplMetadataExt, Metadata};
 use rustix::fs::{statat, AtFlags};
 use std::path::Path;
 use std::{fs, io};
@@ -50,7 +50,7 @@ pub(crate) fn stat_unchecked(
                     if state == 0 {
                         STATX_STATE.store(2, Ordering::Relaxed);
                     }
-                    return Ok(MetadataExt::from_rustix_statx(statx));
+                    return Ok(ImplMetadataExt::from_rustix_statx(statx));
                 }
                 Err(rustix::io::Errno::NOSYS) => STATX_STATE.store(1, Ordering::Relaxed),
                 Err(rustix::io::Errno::PERM) if state == 0 => {
@@ -75,5 +75,5 @@ pub(crate) fn stat_unchecked(
         }
     }
 
-    Ok(statat(start, path, atflags).map(MetadataExt::from_rustix)?)
+    Ok(statat(start, path, atflags).map(ImplMetadataExt::from_rustix)?)
 }

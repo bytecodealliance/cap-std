@@ -1,5 +1,4 @@
-use crate::fs::Metadata;
-use rustix::fs::MetadataExt;
+use crate::fs::{Metadata, MetadataExt};
 use std::{fs, io};
 
 /// Determine if `a` and `b` refer to the same inode on the same device.
