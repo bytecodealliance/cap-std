@@ -266,7 +266,7 @@ mod test {
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
             use cap_std::fs_utf8::MetadataExt;
-            use rustix::fs::{MetadataExt, Mode};
+            use rustix::fs::Mode;
             let umask = get_process_umask()?;
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
