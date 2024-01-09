@@ -1,4 +1,4 @@
-use crate::fs::{manually, FollowSymlinks, Metadata, MetadataExt};
+use crate::fs::{manually, FollowSymlinks, ImplMetadataExt, Metadata};
 use rustix::fs::{statat, AtFlags};
 use std::path::Path;
 use std::{fs, io};
@@ -18,5 +18,5 @@ pub(crate) fn stat_impl(
         } else {
             AtFlags::SYMLINK_NOFOLLOW
         };
-    Ok(MetadataExt::from_rustix(statat(start, path, flags)?))
+    Ok(ImplMetadataExt::from_rustix(statat(start, path, flags)?))
 }
