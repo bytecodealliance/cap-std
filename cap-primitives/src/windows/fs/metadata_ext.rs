@@ -3,7 +3,7 @@
 use std::{fs, io};
 
 #[derive(Debug, Clone)]
-pub(crate) struct MetadataExt {
+pub(crate) struct ImplMetadataExt {
     file_attributes: u32,
     #[cfg(windows_by_handle)]
     creation_time: u64,
@@ -18,7 +18,7 @@ pub(crate) struct MetadataExt {
     file_index: Option<u64>,
 }
 
-impl MetadataExt {
+impl ImplMetadataExt {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`]
     /// and [`std::fs::Metadata`].
     #[inline]
@@ -148,7 +148,7 @@ impl MetadataExt {
 }
 
 #[cfg(windows_by_handle)]
-impl std::os::windows::fs::MetadataExt for MetadataExt {
+impl std::os::windows::fs::MetadataExt for ImplMetadataExt {
     #[inline]
     fn file_attributes(&self) -> u32 {
         self.file_attributes

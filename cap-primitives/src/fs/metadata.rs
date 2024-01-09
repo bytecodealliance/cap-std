@@ -260,6 +260,27 @@ pub trait MetadataExt {
     fn ctim(&self) -> u64;
 }
 
+/// Windows-specific extensions to [`Metadata`].
+#[cfg(windows)]
+pub trait MetadataExt {
+    /// Returns the value of the `dwFileAttributes` field of this metadata.
+    fn file_attributes(&self) -> u32;
+    /// Returns the value of the `ftCreationTime` field of this metadata.
+    fn creation_time(&self) -> u64;
+    /// Returns the value of the `ftLastAccessTime` field of this metadata.
+    fn last_access_time(&self) -> u64;
+    /// Returns the value of the `ftLastWriteTime` field of this metadata.
+    fn last_write_time(&self) -> u64;
+    /// Returns the value of the `nFileSize{High,Low}` fields of this metadata.
+    fn file_size(&self) -> u64;
+    /// Returns the value of the `dwVolumeSerialNumber` field of this metadata.
+    fn volume_serial_number(&self) -> Option<u32>;
+    /// Returns the value of the `nNumberOfLinks` field of this metadata.
+    fn number_of_links(&self) -> Option<u32>;
+    /// Returns the value of the `nFileIndex{Low,High}` fields of this metadata.
+    fn file_index(&self) -> Option<u64>;
+}
+
 #[cfg(unix)]
 impl MetadataExt for Metadata {
     #[inline]

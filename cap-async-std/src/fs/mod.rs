@@ -40,7 +40,9 @@ pub use cap_primitives::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permis
 // Re-export conditional types from `cap_primitives`.
 #[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
 pub use cap_primitives::fs::FileTypeExt;
-pub use cap_primitives::fs::{PermissionsExt, MetadataExt};
+pub use cap_primitives::fs::MetadataExt;
+#[cfg(unix)]
+pub use cap_primitives::fs::PermissionsExt;
 
 // Re-export things from `async_std` that we can use as-is.
 #[cfg(target_os = "wasi")]

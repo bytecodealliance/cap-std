@@ -82,7 +82,9 @@ pub use open::open;
 pub use open_ambient::open_ambient;
 pub use open_dir::*;
 pub use open_options::OpenOptions;
-pub use permissions::{Permissions, PermissionsExt};
+pub use permissions::Permissions;
+#[cfg(unix)]
+pub use permissions::PermissionsExt;
 pub use read_dir::{read_base_dir, read_dir, ReadDir};
 pub use read_link::{read_link, read_link_contents};
 pub use remove_dir::remove_dir;
