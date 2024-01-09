@@ -265,6 +265,7 @@ mod test {
         // Test that we created with the right permissions
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
+            use cap_std::fs_utf8::MetadataExt;
             use rustix::fs::{MetadataExt, Mode};
             let umask = get_process_umask()?;
             let metadata = tf.as_file().metadata().unwrap();
