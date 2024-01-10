@@ -75,17 +75,17 @@ impl MetadataExt for std::fs::Metadata {
 impl MetadataExt for cap_primitives::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::dev(self)
+        cap_primitives::fs::MetadataExt::dev(self)
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::ino(self)
+        cap_primitives::fs::MetadataExt::ino(self)
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        std::os::unix::fs::MetadataExt::nlink(self)
+        cap_primitives::fs::MetadataExt::nlink(self)
     }
 }
 

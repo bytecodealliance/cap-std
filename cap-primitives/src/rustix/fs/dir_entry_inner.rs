@@ -1,12 +1,13 @@
 use crate::fs::{
-    FileType, FollowSymlinks, ImplFileTypeExt, Metadata, OpenOptions, ReadDir, ReadDirInner,
+    FileType, FollowSymlinks, ImplFileTypeExt, Metadata, MetadataExt, OpenOptions, ReadDir,
+    ReadDirInner,
 };
 use rustix::fs::DirEntry;
 use std::ffi::{OsStr, OsString};
 #[cfg(unix)]
-use std::os::unix::{ffi::OsStrExt, fs::MetadataExt};
+use std::os::unix::ffi::OsStrExt;
 #[cfg(target_os = "wasi")]
-use std::os::wasi::{ffi::OsStrExt, fs::MetadataExt};
+use std::os::wasi::ffi::OsStrExt;
 use std::{fmt, fs, io};
 
 pub(crate) struct DirEntryInner {

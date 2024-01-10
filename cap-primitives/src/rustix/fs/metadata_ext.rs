@@ -1,6 +1,6 @@
 #![allow(clippy::useless_conversion)]
 
-use crate::fs::{ImplFileTypeExt, Metadata, PermissionsExt};
+use crate::fs::{ImplFileTypeExt, ImplPermissionsExt, Metadata};
 use crate::time::{Duration, SystemClock, SystemTime};
 #[cfg(target_os = "linux")]
 use rustix::fs::{makedev, Statx, StatxFlags};
@@ -8,7 +8,7 @@ use rustix::fs::{RawMode, Stat};
 use std::{fs, io};
 
 #[derive(Debug, Clone)]
-pub(crate) struct MetadataExt {
+pub(crate) struct ImplMetadataExt {
     dev: u64,
     ino: u64,
     #[cfg(not(target_os = "wasi"))]
@@ -45,7 +45,7 @@ pub(crate) struct MetadataExt {
     ctim: u64,
 }
 
-impl MetadataExt {
+impl ImplMetadataExt {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`]
     /// and [`std::fs::Metadata`].
     #[inline]
@@ -106,9 +106,9 @@ impl MetadataExt {
             file_type: ImplFileTypeExt::from_raw_mode(stat.st_mode as RawMode),
             len: u64::try_from(stat.st_size).unwrap(),
             #[cfg(not(target_os = "wasi"))]
-            permissions: PermissionsExt::from_raw_mode(stat.st_mode as RawMode),
+            permissions: ImplPermissionsExt::from_raw_mode(stat.st_mode as RawMode),
             #[cfg(target_os = "wasi")]
-            permissions: PermissionsExt::default(),
+            permissions: ImplPermissionsExt::default(),
 
             #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
             modified: system_time_from_rustix(
@@ -238,7 +238,7 @@ impl MetadataExt {
         Metadata {
             file_type: ImplFileTypeExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             len: u64::try_from(statx.stx_size).unwrap(),
-            permissions: PermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
+            permissions: ImplPermissionsExt::from_raw_mode(RawMode::from(statx.stx_mode)),
             modified: if statx.stx_mask & StatxFlags::MTIME.bits() != 0 {
                 system_time_from_rustix(statx.stx_mtime.tv_sec, statx.stx_mtime.tv_nsec as _)
             } else {
@@ -295,7 +295,7 @@ fn system_time_from_rustix(sec: i64, nsec: u64) -> Option<SystemTime> {
     }
 }
 
-impl rustix::fs::MetadataExt for MetadataExt {
+impl crate::fs::MetadataExt for ImplMetadataExt {
     #[inline]
     fn dev(&self) -> u64 {
         self.dev

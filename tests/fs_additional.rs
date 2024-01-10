@@ -967,7 +967,10 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        assert_eq!(std.permissions().mode(), cap.permissions().mode());
+        assert_eq!(
+            std.permissions().mode(),
+            cap_std::fs::PermissionsExt::mode(&cap.permissions())
+        );
     }
 
     // If the standard library supports file modified/accessed/created times,
@@ -1022,28 +1025,28 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::MetadataExt;
-        assert_eq!(std.dev(), cap.dev());
-        assert_eq!(std.ino(), cap.ino());
-        assert_eq!(std.mode(), cap.mode());
-        assert_eq!(std.nlink(), cap.nlink());
-        assert_eq!(std.uid(), cap.uid());
-        assert_eq!(std.gid(), cap.gid());
-        assert_eq!(std.rdev(), cap.rdev());
-        assert_eq!(std.size(), cap.size());
+        assert_eq!(std.dev(), cap_std::fs::MetadataExt::dev(cap));
+        assert_eq!(std.ino(), cap_std::fs::MetadataExt::ino(cap));
+        assert_eq!(std.mode(), cap_std::fs::MetadataExt::mode(cap));
+        assert_eq!(std.nlink(), cap_std::fs::MetadataExt::nlink(cap));
+        assert_eq!(std.uid(), cap_std::fs::MetadataExt::uid(cap));
+        assert_eq!(std.gid(), cap_std::fs::MetadataExt::gid(cap));
+        assert_eq!(std.rdev(), cap_std::fs::MetadataExt::rdev(cap));
+        assert_eq!(std.size(), cap_std::fs::MetadataExt::size(cap));
         assert!(
             ((std.atime() - i64::from(ACCESS_TOLERANCE_SEC))
                 ..(std.atime() + i64::from(ACCESS_TOLERANCE_SEC)))
-                .contains(&cap.atime()),
+                .contains(&cap_std::fs::MetadataExt::atime(cap)),
             "std atime {}, cap atime {}",
             std.atime(),
-            cap.atime()
+            cap_std::fs::MetadataExt::atime(cap)
         );
-        assert!((0..1_000_000_000).contains(&cap.atime_nsec()));
-        assert_eq!(std.mtime(), cap.mtime());
-        assert_eq!(std.mtime_nsec(), cap.mtime_nsec());
-        assert_eq!(std.ctime(), cap.ctime());
-        assert_eq!(std.ctime_nsec(), cap.ctime_nsec());
-        assert_eq!(std.blksize(), cap.blksize());
-        assert_eq!(std.blocks(), cap.blocks());
+        assert!((0..1_000_000_000).contains(&cap_std::fs::MetadataExt::atime_nsec(cap)));
+        assert_eq!(std.mtime(), cap_std::fs::MetadataExt::mtime(cap));
+        assert_eq!(std.mtime_nsec(), cap_std::fs::MetadataExt::mtime_nsec(cap));
+        assert_eq!(std.ctime(), cap_std::fs::MetadataExt::ctime(cap));
+        assert_eq!(std.ctime_nsec(), cap_std::fs::MetadataExt::ctime_nsec(cap));
+        assert_eq!(std.blksize(), cap_std::fs::MetadataExt::blksize(cap));
+        assert_eq!(std.blocks(), cap_std::fs::MetadataExt::blocks(cap));
     }
 }

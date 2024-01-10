@@ -1,4 +1,4 @@
-use crate::fs::{FileType, ImplFileTypeExt, MetadataExt, Permissions};
+use crate::fs::{FileType, ImplFileTypeExt, ImplMetadataExt, Permissions};
 use crate::time::SystemTime;
 use std::{fs, io};
 
@@ -18,7 +18,7 @@ pub struct Metadata {
     pub(crate) modified: Option<SystemTime>,
     pub(crate) accessed: Option<SystemTime>,
     pub(crate) created: Option<SystemTime>,
-    pub(crate) ext: MetadataExt,
+    pub(crate) ext: ImplMetadataExt,
 }
 
 #[allow(clippy::len_without_is_empty)]
@@ -27,7 +27,7 @@ impl Metadata {
     #[inline]
     pub fn from_file(file: &fs::File) -> io::Result<Self> {
         let std = file.metadata()?;
-        let ext = MetadataExt::from(file, &std)?;
+        let ext = ImplMetadataExt::from(file, &std)?;
         let file_type = ImplFileTypeExt::from(file, &std)?;
         Ok(Self::from_parts(std, ext, file_type))
     }
@@ -41,13 +41,13 @@ impl Metadata {
     /// [`std::fs::Metadata::volume_serial_number`]: https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.volume_serial_number
     #[inline]
     pub fn from_just_metadata(std: fs::Metadata) -> Self {
-        let ext = MetadataExt::from_just_metadata(&std);
+        let ext = ImplMetadataExt::from_just_metadata(&std);
         let file_type = ImplFileTypeExt::from_just_metadata(&std);
         Self::from_parts(std, ext, file_type)
     }
 
     #[inline]
-    fn from_parts(std: fs::Metadata, ext: MetadataExt, file_type: FileType) -> Self {
+    fn from_parts(std: fs::Metadata, ext: ImplMetadataExt, file_type: FileType) -> Self {
         Self {
             file_type,
             len: std.len(),
@@ -198,129 +198,215 @@ impl Metadata {
     }
 }
 
+/// Unix-specific extensions for [`MetadataExt`].
+///
+/// This corresponds to [`std::os::unix::fs::MetadataExt`].
+#[cfg(any(unix, target_os = "vxworks"))]
+pub trait MetadataExt {
+    /// Returns the ID of the device containing the file.
+    fn dev(&self) -> u64;
+    /// Returns the inode number.
+    fn ino(&self) -> u64;
+    /// Returns the rights applied to this file.
+    fn mode(&self) -> u32;
+    /// Returns the number of hard links pointing to this file.
+    fn nlink(&self) -> u64;
+    /// Returns the user ID of the owner of this file.
+    fn uid(&self) -> u32;
+    /// Returns the group ID of the owner of this file.
+    fn gid(&self) -> u32;
+    /// Returns the device ID of this file (if it is a special one).
+    fn rdev(&self) -> u64;
+    /// Returns the total size of this file in bytes.
+    fn size(&self) -> u64;
+    /// Returns the last access time of the file, in seconds since Unix Epoch.
+    fn atime(&self) -> i64;
+    /// Returns the last access time of the file, in nanoseconds since [`atime`].
+    fn atime_nsec(&self) -> i64;
+    /// Returns the last modification time of the file, in seconds since Unix Epoch.
+    fn mtime(&self) -> i64;
+    /// Returns the last modification time of the file, in nanoseconds since [`mtime`].
+    fn mtime_nsec(&self) -> i64;
+    /// Returns the last status change time of the file, in seconds since Unix Epoch.
+    fn ctime(&self) -> i64;
+    /// Returns the last status change time of the file, in nanoseconds since [`ctime`].
+    fn ctime_nsec(&self) -> i64;
+    /// Returns the block size for filesystem I/O.
+    fn blksize(&self) -> u64;
+    /// Returns the number of blocks allocated to the file, in 512-byte units.
+    fn blocks(&self) -> u64;
+    #[cfg(target_os = "vxworks")]
+    fn attrib(&self) -> u8;
+}
+
+/// WASI-specific extensions for [`MetadataExt`].
+///
+/// This corresponds to [`std::os::wasi::fs::MetadataExt`].
+#[cfg(target_os = "wasi")]
+pub trait MetadataExt {
+    /// Returns the ID of the device containing the file.
+    fn dev(&self) -> u64;
+    /// Returns the inode number.
+    fn ino(&self) -> u64;
+    /// Returns the number of hard links pointing to this file.
+    fn nlink(&self) -> u64;
+    /// Returns the total size of this file in bytes.
+    fn size(&self) -> u64;
+    /// Returns the last access time of the file, in seconds since Unix Epoch.
+    fn atim(&self) -> u64;
+    /// Returns the last modification time of the file, in seconds since Unix Epoch.
+    fn mtim(&self) -> u64;
+    /// Returns the last status change time of the file, in seconds since Unix Epoch.
+    fn ctim(&self) -> u64;
+}
+
+/// Windows-specific extensions to [`Metadata`].
+#[cfg(windows)]
+pub trait MetadataExt {
+    /// Returns the value of the `dwFileAttributes` field of this metadata.
+    fn file_attributes(&self) -> u32;
+    /// Returns the value of the `ftCreationTime` field of this metadata.
+    fn creation_time(&self) -> u64;
+    /// Returns the value of the `ftLastAccessTime` field of this metadata.
+    fn last_access_time(&self) -> u64;
+    /// Returns the value of the `ftLastWriteTime` field of this metadata.
+    fn last_write_time(&self) -> u64;
+    /// Returns the value of the `nFileSize{High,Low}` fields of this metadata.
+    fn file_size(&self) -> u64;
+    /// Returns the value of the `dwVolumeSerialNumber` field of this metadata.
+    #[cfg(windows_by_handle)]
+    fn volume_serial_number(&self) -> Option<u32>;
+    /// Returns the value of the `nNumberOfLinks` field of this metadata.
+    #[cfg(windows_by_handle)]
+    fn number_of_links(&self) -> Option<u32>;
+    /// Returns the value of the `nFileIndex{Low,High}` fields of this metadata.
+    #[cfg(windows_by_handle)]
+    fn file_index(&self) -> Option<u64>;
+}
+
 #[cfg(unix)]
-impl std::os::unix::fs::MetadataExt for Metadata {
+impl MetadataExt for Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        self.ext.dev()
+        crate::fs::MetadataExt::dev(&self.ext)
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        self.ext.ino()
+        crate::fs::MetadataExt::ino(&self.ext)
     }
 
     #[inline]
     fn mode(&self) -> u32 {
-        self.ext.mode()
+        crate::fs::MetadataExt::mode(&self.ext)
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        self.ext.nlink()
+        crate::fs::MetadataExt::nlink(&self.ext)
     }
 
     #[inline]
     fn uid(&self) -> u32 {
-        self.ext.uid()
+        crate::fs::MetadataExt::uid(&self.ext)
     }
 
     #[inline]
     fn gid(&self) -> u32 {
-        self.ext.gid()
+        crate::fs::MetadataExt::gid(&self.ext)
     }
 
     #[inline]
     fn rdev(&self) -> u64 {
-        self.ext.rdev()
+        crate::fs::MetadataExt::rdev(&self.ext)
     }
 
     #[inline]
     fn size(&self) -> u64 {
-        self.ext.size()
+        crate::fs::MetadataExt::size(&self.ext)
     }
 
     #[inline]
     fn atime(&self) -> i64 {
-        self.ext.atime()
+        crate::fs::MetadataExt::atime(&self.ext)
     }
 
     #[inline]
     fn atime_nsec(&self) -> i64 {
-        self.ext.atime_nsec()
+        crate::fs::MetadataExt::atime_nsec(&self.ext)
     }
 
     #[inline]
     fn mtime(&self) -> i64 {
-        self.ext.mtime()
+        crate::fs::MetadataExt::mtime(&self.ext)
     }
 
     #[inline]
     fn mtime_nsec(&self) -> i64 {
-        self.ext.mtime_nsec()
+        crate::fs::MetadataExt::mtime_nsec(&self.ext)
     }
 
     #[inline]
     fn ctime(&self) -> i64 {
-        self.ext.ctime()
+        crate::fs::MetadataExt::ctime(&self.ext)
     }
 
     #[inline]
     fn ctime_nsec(&self) -> i64 {
-        self.ext.ctime_nsec()
+        crate::fs::MetadataExt::ctime_nsec(&self.ext)
     }
 
     #[inline]
     fn blksize(&self) -> u64 {
-        self.ext.blksize()
+        crate::fs::MetadataExt::blksize(&self.ext)
     }
 
     #[inline]
     fn blocks(&self) -> u64 {
-        self.ext.blocks()
+        crate::fs::MetadataExt::blocks(&self.ext)
     }
 }
 
 #[cfg(target_os = "wasi")]
-impl std::os::wasi::fs::MetadataExt for Metadata {
+impl MetadataExt for Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        self.ext.dev()
+        crate::fs::MetadataExt::dev(&self.ext)
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        self.ext.ino()
+        crate::fs::MetadataExt::ino(&self.ext)
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        self.ext.nlink()
+        crate::fs::MetadataExt::nlink(&self.ext)
     }
 
     #[inline]
     fn size(&self) -> u64 {
-        self.ext.size()
+        crate::fs::MetadataExt::size(&self.ext)
     }
 
     #[inline]
     fn atim(&self) -> u64 {
-        self.ext.atim()
+        crate::fs::MetadataExt::atim(&self.ext)
     }
 
     #[inline]
     fn mtim(&self) -> u64 {
-        self.ext.mtim()
+        crate::fs::MetadataExt::mtim(&self.ext)
     }
 
     #[inline]
     fn ctim(&self) -> u64 {
-        self.ext.ctim()
+        crate::fs::MetadataExt::ctim(&self.ext)
     }
 }
 
 #[cfg(target_os = "vxworks")]
-impl std::os::vxworks::fs::MetadataExt for Metadata {
+impl MetadataExt for Metadata {
     #[inline]
     fn dev(&self) -> u64 {
         self.ext.dev()
@@ -402,8 +488,8 @@ impl std::os::vxworks::fs::MetadataExt for Metadata {
     }
 }
 
-#[cfg(all(windows, windows_by_handle))]
-impl std::os::windows::fs::MetadataExt for Metadata {
+#[cfg(windows)]
+impl MetadataExt for Metadata {
     #[inline]
     fn file_attributes(&self) -> u32 {
         self.ext.file_attributes()
@@ -430,16 +516,19 @@ impl std::os::windows::fs::MetadataExt for Metadata {
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn volume_serial_number(&self) -> Option<u32> {
         self.ext.volume_serial_number()
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn number_of_links(&self) -> Option<u32> {
         self.ext.number_of_links()
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn file_index(&self) -> Option<u64> {
         self.ext.file_index()
     }

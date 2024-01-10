@@ -1,5 +1,5 @@
 #[cfg(not(windows))]
-use crate::fs::PermissionsExt;
+use crate::fs::ImplPermissionsExt;
 #[cfg(unix)]
 use rustix::fs::RawMode;
 use std::{fs, io};
@@ -17,7 +17,7 @@ pub struct Permissions {
     pub(crate) readonly: bool,
 
     #[cfg(any(unix, target_os = "vxworks"))]
-    pub(crate) ext: PermissionsExt,
+    pub(crate) ext: ImplPermissionsExt,
 }
 
 impl Permissions {
@@ -29,7 +29,7 @@ impl Permissions {
             readonly: std.readonly(),
 
             #[cfg(any(unix, target_os = "vxworks"))]
-            ext: PermissionsExt::from_std(std),
+            ext: ImplPermissionsExt::from_std(std),
         }
     }
 
@@ -90,29 +90,44 @@ impl Permissions {
     }
 }
 
+/// Unix-specific extensions to [`Permissions`].
 #[cfg(unix)]
-impl std::os::unix::fs::PermissionsExt for Permissions {
+pub trait PermissionsExt {
+    /// Returns the underlying raw `st_mode` bits that contain the standard
+    /// Unix permissions for this file.
+    fn mode(&self) -> u32;
+
+    /// Sets the underlying raw bits for this set of permissions.
+    fn set_mode(&mut self, mode: u32);
+
+    /// Creates a new instance of `Permissions` from the given set of Unix
+    /// permission bits.
+    fn from_mode(mode: u32) -> Self;
+}
+
+#[cfg(unix)]
+impl PermissionsExt for Permissions {
     #[inline]
     fn mode(&self) -> u32 {
-        self.ext.mode()
+        std::os::unix::fs::PermissionsExt::mode(&self.ext)
     }
 
     #[inline]
     fn set_mode(&mut self, mode: u32) {
-        self.ext.set_mode(mode)
+        std::os::unix::fs::PermissionsExt::set_mode(&mut self.ext, mode)
     }
 
     #[inline]
     fn from_mode(mode: u32) -> Self {
         Self {
-            readonly: PermissionsExt::readonly(mode as RawMode),
-            ext: PermissionsExt::from_mode(mode),
+            readonly: ImplPermissionsExt::readonly(mode as RawMode),
+            ext: std::os::unix::fs::PermissionsExt::from_mode(mode),
         }
     }
 }
 
 #[cfg(target_os = "vxworks")]
-impl std::os::unix::fs::PermissionsExt for Permissions {
+impl PermissionsExt for Permissions {
     #[inline]
     fn mode(&self) -> u32 {
         self.ext.mode()
@@ -126,8 +141,8 @@ impl std::os::unix::fs::PermissionsExt for Permissions {
     #[inline]
     fn from_mode(mode: u32) -> Self {
         Self {
-            readonly: PermissionsExt::readonly(mode),
-            ext: PermissionsExt::from(mode),
+            readonly: ImplPermissionsExt::readonly(mode),
+            ext: ImplPermissionsExt::from(mode),
         }
     }
 }
