@@ -274,10 +274,13 @@ pub trait MetadataExt {
     /// Returns the value of the `nFileSize{High,Low}` fields of this metadata.
     fn file_size(&self) -> u64;
     /// Returns the value of the `dwVolumeSerialNumber` field of this metadata.
+    #[cfg(windows_by_handle)]
     fn volume_serial_number(&self) -> Option<u32>;
     /// Returns the value of the `nNumberOfLinks` field of this metadata.
+    #[cfg(windows_by_handle)]
     fn number_of_links(&self) -> Option<u32>;
     /// Returns the value of the `nFileIndex{Low,High}` fields of this metadata.
+    #[cfg(windows_by_handle)]
     fn file_index(&self) -> Option<u64>;
 }
 
@@ -285,82 +288,82 @@ pub trait MetadataExt {
 impl MetadataExt for Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        rustix::fs::MetadataExt::dev(&self.ext)
+        crate::fs::MetadataExt::dev(&self.ext)
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        rustix::fs::MetadataExt::ino(&self.ext)
+        crate::fs::MetadataExt::ino(&self.ext)
     }
 
     #[inline]
     fn mode(&self) -> u32 {
-        rustix::fs::MetadataExt::mode(&self.ext)
+        crate::fs::MetadataExt::mode(&self.ext)
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        rustix::fs::MetadataExt::nlink(&self.ext)
+        crate::fs::MetadataExt::nlink(&self.ext)
     }
 
     #[inline]
     fn uid(&self) -> u32 {
-        rustix::fs::MetadataExt::uid(&self.ext)
+        crate::fs::MetadataExt::uid(&self.ext)
     }
 
     #[inline]
     fn gid(&self) -> u32 {
-        rustix::fs::MetadataExt::gid(&self.ext)
+        crate::fs::MetadataExt::gid(&self.ext)
     }
 
     #[inline]
     fn rdev(&self) -> u64 {
-        rustix::fs::MetadataExt::rdev(&self.ext)
+        crate::fs::MetadataExt::rdev(&self.ext)
     }
 
     #[inline]
     fn size(&self) -> u64 {
-        rustix::fs::MetadataExt::size(&self.ext)
+        crate::fs::MetadataExt::size(&self.ext)
     }
 
     #[inline]
     fn atime(&self) -> i64 {
-        rustix::fs::MetadataExt::atime(&self.ext)
+        crate::fs::MetadataExt::atime(&self.ext)
     }
 
     #[inline]
     fn atime_nsec(&self) -> i64 {
-        rustix::fs::MetadataExt::atime_nsec(&self.ext)
+        crate::fs::MetadataExt::atime_nsec(&self.ext)
     }
 
     #[inline]
     fn mtime(&self) -> i64 {
-        rustix::fs::MetadataExt::mtime(&self.ext)
+        crate::fs::MetadataExt::mtime(&self.ext)
     }
 
     #[inline]
     fn mtime_nsec(&self) -> i64 {
-        rustix::fs::MetadataExt::mtime_nsec(&self.ext)
+        crate::fs::MetadataExt::mtime_nsec(&self.ext)
     }
 
     #[inline]
     fn ctime(&self) -> i64 {
-        rustix::fs::MetadataExt::ctime(&self.ext)
+        crate::fs::MetadataExt::ctime(&self.ext)
     }
 
     #[inline]
     fn ctime_nsec(&self) -> i64 {
-        rustix::fs::MetadataExt::ctime_nsec(&self.ext)
+        crate::fs::MetadataExt::ctime_nsec(&self.ext)
     }
 
     #[inline]
     fn blksize(&self) -> u64 {
-        rustix::fs::MetadataExt::blksize(&self.ext)
+        crate::fs::MetadataExt::blksize(&self.ext)
     }
 
     #[inline]
     fn blocks(&self) -> u64 {
-        rustix::fs::MetadataExt::blocks(&self.ext)
+        crate::fs::MetadataExt::blocks(&self.ext)
     }
 }
 
@@ -368,37 +371,37 @@ impl MetadataExt for Metadata {
 impl MetadataExt for Metadata {
     #[inline]
     fn dev(&self) -> u64 {
-        rustix::fs::MetadataExt::dev(&self.ext)
+        crate::fs::MetadataExt::dev(&self.ext)
     }
 
     #[inline]
     fn ino(&self) -> u64 {
-        rustix::fs::MetadataExt::ino(&self.ext)
+        crate::fs::MetadataExt::ino(&self.ext)
     }
 
     #[inline]
     fn nlink(&self) -> u64 {
-        rustix::fs::MetadataExt::nlink(&self.ext)
+        crate::fs::MetadataExt::nlink(&self.ext)
     }
 
     #[inline]
     fn size(&self) -> u64 {
-        rustix::fs::MetadataExt::size(&self.ext)
+        crate::fs::MetadataExt::size(&self.ext)
     }
 
     #[inline]
     fn atim(&self) -> u64 {
-        rustix::fs::MetadataExt::atim(&self.ext)
+        crate::fs::MetadataExt::atim(&self.ext)
     }
 
     #[inline]
     fn mtim(&self) -> u64 {
-        rustix::fs::MetadataExt::mtim(&self.ext)
+        crate::fs::MetadataExt::mtim(&self.ext)
     }
 
     #[inline]
     fn ctim(&self) -> u64 {
-        rustix::fs::MetadataExt::ctim(&self.ext)
+        crate::fs::MetadataExt::ctim(&self.ext)
     }
 }
 
@@ -485,7 +488,7 @@ impl MetadataExt for Metadata {
     }
 }
 
-#[cfg(all(windows, windows_by_handle))]
+#[cfg(windows)]
 impl MetadataExt for Metadata {
     #[inline]
     fn file_attributes(&self) -> u32 {
@@ -513,16 +516,19 @@ impl MetadataExt for Metadata {
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn volume_serial_number(&self) -> Option<u32> {
         self.ext.volume_serial_number()
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn number_of_links(&self) -> Option<u32> {
         self.ext.number_of_links()
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn file_index(&self) -> Option<u64> {
         self.ext.file_index()
     }

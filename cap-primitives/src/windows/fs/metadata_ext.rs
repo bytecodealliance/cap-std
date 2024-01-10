@@ -1,17 +1,14 @@
 #![allow(clippy::useless_conversion)]
 
+use crate::fs::MetadataExt;
 use std::{fs, io};
 
 #[derive(Debug, Clone)]
 pub(crate) struct ImplMetadataExt {
     file_attributes: u32,
-    #[cfg(windows_by_handle)]
     creation_time: u64,
-    #[cfg(windows_by_handle)]
     last_access_time: u64,
-    #[cfg(windows_by_handle)]
     last_write_time: u64,
-    #[cfg(windows_by_handle)]
     file_size: u64,
     volume_serial_number: Option<u32>,
     number_of_links: Option<u32>,
@@ -105,13 +102,9 @@ impl ImplMetadataExt {
         use std::os::windows::fs::MetadataExt;
         Self {
             file_attributes: std.file_attributes(),
-            #[cfg(windows_by_handle)]
             creation_time: std.creation_time(),
-            #[cfg(windows_by_handle)]
             last_access_time: std.last_access_time(),
-            #[cfg(windows_by_handle)]
             last_write_time: std.last_write_time(),
-            #[cfg(windows_by_handle)]
             file_size: std.file_size(),
             volume_serial_number,
             number_of_links,
@@ -147,9 +140,7 @@ impl ImplMetadataExt {
     }
 }
 
-#[cfg(windows_by_handle)]
-impl std::os::windows::fs::MetadataExt for ImplMetadataExt {
-    #[inline]
+impl MetadataExt for ImplMetadataExt {
     fn file_attributes(&self) -> u32 {
         self.file_attributes
     }
@@ -175,16 +166,19 @@ impl std::os::windows::fs::MetadataExt for ImplMetadataExt {
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn volume_serial_number(&self) -> Option<u32> {
         self.volume_serial_number
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn number_of_links(&self) -> Option<u32> {
         self.number_of_links
     }
 
     #[inline]
+    #[cfg(windows_by_handle)]
     fn file_index(&self) -> Option<u64> {
         self.file_index
     }

@@ -295,7 +295,7 @@ fn system_time_from_rustix(sec: i64, nsec: u64) -> Option<SystemTime> {
     }
 }
 
-impl rustix::fs::MetadataExt for ImplMetadataExt {
+impl crate::fs::MetadataExt for ImplMetadataExt {
     #[inline]
     fn dev(&self) -> u64 {
         self.dev

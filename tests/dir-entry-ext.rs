@@ -15,7 +15,7 @@ fn test_dir_entry_ext() {
     // First try with the regular `metadata()`. All nones.
     #[cfg(all(windows, windows_by_handle))]
     for entry in check!(tmpdir.entries()) {
-        use std::os::windows::fs::MetadataExt;
+        use cap_std::fs::MetadataExt;
         let entry = check!(entry);
         assert!(check!(entry.metadata()).volume_serial_number().is_none());
         assert!(check!(entry.metadata()).number_of_links().is_none());
