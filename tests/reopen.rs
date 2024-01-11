@@ -67,7 +67,7 @@ fn reopen_perms() {
 #[cfg(windows)]
 #[test]
 fn reopen_explicit_access() {
-    use std::os::windows::fs::OpenOptionsExt;
+    use cap_std::fs::OpenOptionsExt;
 
     let tmpdir = tmpdir();
 

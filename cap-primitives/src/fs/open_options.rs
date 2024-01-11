@@ -1,4 +1,4 @@
-use crate::fs::{FollowSymlinks, OpenOptionsExt};
+use crate::fs::{FollowSymlinks, ImplOpenOptionsExt};
 
 /// Options and flags which can be used to configure how a file is opened.
 ///
@@ -33,7 +33,7 @@ pub struct OpenOptions {
     pub(crate) follow: FollowSymlinks,
 
     #[cfg(any(unix, windows, target_os = "vxworks"))]
-    pub(crate) ext: OpenOptionsExt,
+    pub(crate) ext: ImplOpenOptionsExt,
 }
 
 impl OpenOptions {
@@ -60,7 +60,7 @@ impl OpenOptions {
             follow: FollowSymlinks::Yes,
 
             #[cfg(any(unix, windows, target_os = "vxworks"))]
-            ext: OpenOptionsExt::new(),
+            ext: ImplOpenOptionsExt::new(),
         }
     }
 
@@ -250,8 +250,99 @@ impl OpenOptions {
     }
 }
 
+/// Unix-specific extensions to [`fs::OpenOptions`].
 #[cfg(unix)]
-impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
+pub trait OpenOptionsExt {
+    /// Sets the mode bits that a new file will be created with.
+    fn mode(&mut self, mode: u32) -> &mut Self;
+
+    /// Pass custom flags to the `flags` argument of `open`.
+    fn custom_flags(&mut self, flags: i32) -> &mut Self;
+}
+
+/// WASI-specific extensions to [`fs::OpenOptions`].
+#[cfg(target_os = "wasi")]
+pub trait OpenOptionsExt {
+    /// Pass custom `dirflags` argument to `path_open`.
+    fn lookup_flags(&mut self, flags: u32) -> &mut Self;
+
+    /// Indicates whether `OpenOptions` must open a directory or not.
+    fn directory(&mut self, dir: bool) -> &mut Self;
+
+    /// Indicates whether `__WASI_FDFLAG_DSYNC` is passed in the `fs_flags`
+    /// field of `path_open`.
+    fn dsync(&mut self, dsync: bool) -> &mut Self;
+
+    /// Indicates whether `__WASI_FDFLAG_NONBLOCK` is passed in the `fs_flags`
+    /// field of `path_open`.
+    fn nonblock(&mut self, nonblock: bool) -> &mut Self;
+
+    /// Indicates whether `__WASI_FDFLAG_RSYNC` is passed in the `fs_flags`
+    /// field of `path_open`.
+    fn rsync(&mut self, rsync: bool) -> &mut Self;
+
+    /// Indicates whether `__WASI_FDFLAG_SYNC` is passed in the `fs_flags`
+    /// field of `path_open`.
+    fn sync(&mut self, sync: bool) -> &mut Self;
+
+    /// Indicates the value that should be passed in for the `fs_rights_base`
+    /// parameter of `path_open`.
+    fn fs_rights_base(&mut self, rights: u64) -> &mut Self;
+
+    /// Indicates the value that should be passed in for the
+    /// `fs_rights_inheriting` parameter of `path_open`.
+    fn fs_rights_inheriting(&mut self, rights: u64) -> &mut Self;
+
+    /// Open a file or directory.
+    fn open_at<P: AsRef<std::path::Path>>(
+        &self,
+        file: &std::fs::File,
+        path: P,
+    ) -> std::io::Result<std::fs::File>;
+}
+
+/// Windows-specific extensions to [`fs::OpenOptions`].
+#[cfg(windows)]
+pub trait OpenOptionsExt {
+    /// Overrides the `dwDesiredAccess` argument to the call to [`CreateFile`]
+    /// with the specified value.
+    fn access_mode(&mut self, access: u32) -> &mut Self;
+
+    /// Overrides the `dwShareMode` argument to the call to [`CreateFile`] with
+    /// the specified value.
+    fn share_mode(&mut self, val: u32) -> &mut Self;
+
+    /// Sets extra flags for the `dwFileFlags` argument to the call to
+    /// [`CreateFile2`] to the specified value (or combines it with
+    /// `attributes` and `security_qos_flags` to set the `dwFlagsAndAttributes`
+    /// for [`CreateFile`]).
+    ///
+    /// [`CreateFile`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea
+    /// [`CreateFile2`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfile2
+    fn custom_flags(&mut self, flags: u32) -> &mut Self;
+
+    /// Sets the `dwFileAttributes` argument to the call to [`CreateFile2`] to
+    /// the specified value (or combines it with `custom_flags` and
+    /// `security_qos_flags` to set the `dwFlagsAndAttributes` for
+    /// [`CreateFile`]).
+    ///
+    /// [`CreateFile`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea
+    /// [`CreateFile2`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfile2
+    fn attributes(&mut self, val: u32) -> &mut Self;
+
+    /// Sets the `dwSecurityQosFlags` argument to the call to [`CreateFile2`] to
+    /// the specified value (or combines it with `custom_flags` and `attributes`
+    /// to set the `dwFlagsAndAttributes` for [`CreateFile`]).
+    ///
+    /// [`CreateFile`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea
+    /// [`CreateFile2`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfile2
+    /// [Impersonation Levels]:
+    ///     https://docs.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-security_impersonation_level
+    fn security_qos_flags(&mut self, flags: u32) -> &mut Self;
+}
+
+#[cfg(unix)]
+impl OpenOptionsExt for OpenOptions {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.ext.mode(mode);
@@ -266,7 +357,7 @@ impl std::os::unix::fs::OpenOptionsExt for OpenOptions {
 }
 
 #[cfg(target_os = "wasi")]
-impl std::os::wasi::fs::OpenOptionsExt for OpenOptions {
+impl OpenOptionsExt for OpenOptions {
     fn lookup_flags(&mut self, _: u32) -> &mut Self {
         todo!()
     }
@@ -309,7 +400,7 @@ impl std::os::wasi::fs::OpenOptionsExt for OpenOptions {
 }
 
 #[cfg(target_os = "vxworks")]
-impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
+impl OpenOptionsExt for OpenOptions {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.ext.mode(mode);
@@ -324,7 +415,7 @@ impl std::os::vxworks::fs::OpenOptionsExt for OpenOptions {
 }
 
 #[cfg(windows)]
-impl std::os::windows::fs::OpenOptionsExt for OpenOptions {
+impl OpenOptionsExt for OpenOptions {
     #[inline]
     fn access_mode(&mut self, access: u32) -> &mut Self {
         self.ext.access_mode(access);

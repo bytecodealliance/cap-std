@@ -27,9 +27,9 @@ pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 // Re-export conditional types from `cap_primitives`.
 #[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
 pub use cap_primitives::fs::FileTypeExt;
-pub use cap_primitives::fs::MetadataExt;
 #[cfg(unix)]
-pub use cap_primitives::fs::PermissionsExt;
+pub use cap_primitives::fs::{DirBuilderExt, PermissionsExt};
+pub use cap_primitives::fs::{FileExt, MetadataExt, OpenOptionsExt};
 
 // Re-export `camino` to make it easy for users to depend on the same
 // version we do, because we use its types in our public API.

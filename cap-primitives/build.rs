@@ -2,6 +2,7 @@ use std::env::var;
 use std::io::Write;
 
 fn main() {
+    use_feature_or_nothing("unix_file_vectored_at");
     use_feature_or_nothing("windows_by_handle"); // https://github.com/rust-lang/rust/issues/63010
                                                  // https://doc.rust-lang.org/unstable-book/library-features/windows-file-type-ext.html
     use_feature_or_nothing("windows_file_type_ext");

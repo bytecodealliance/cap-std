@@ -1,10 +1,10 @@
 #[derive(Debug, Clone)]
-pub(crate) struct OpenOptionsExt {
+pub(crate) struct ImplOpenOptionsExt {
     pub(crate) mode: u32,
     pub(crate) custom_flags: i32,
 }
 
-impl OpenOptionsExt {
+impl ImplOpenOptionsExt {
     pub(crate) const fn new() -> Self {
         Self {
             mode: 0o666,

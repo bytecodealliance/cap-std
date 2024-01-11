@@ -11,6 +11,7 @@ mod create_dir;
 mod dir_builder;
 mod dir_entry;
 mod dir_options;
+mod file;
 #[cfg(not(any(target_os = "android", target_os = "linux", windows)))]
 mod file_path_by_searching;
 mod file_type;
@@ -62,11 +63,12 @@ pub use access::{access, AccessModes, AccessType};
 pub use canonicalize::canonicalize;
 pub use copy::copy;
 pub use create_dir::create_dir;
-pub use dir_builder::DirBuilder;
+pub use dir_builder::*;
 pub use dir_entry::DirEntry;
 #[cfg(windows)]
 pub use dir_entry::_WindowsDirEntryExt;
 pub use dir_options::DirOptions;
+pub use file::FileExt;
 pub use file_type::FileType;
 #[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
 pub use file_type::FileTypeExt;
@@ -81,7 +83,7 @@ pub use metadata::{Metadata, MetadataExt};
 pub use open::open;
 pub use open_ambient::open_ambient;
 pub use open_dir::*;
-pub use open_options::OpenOptions;
+pub use open_options::*;
 pub use permissions::Permissions;
 #[cfg(unix)]
 pub use permissions::PermissionsExt;

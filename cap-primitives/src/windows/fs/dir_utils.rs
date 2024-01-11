@@ -1,9 +1,9 @@
+use crate::fs::OpenOptionsExt;
 use crate::fs::{errors, OpenOptions};
 use crate::AmbientAuthority;
 use std::ffi::OsString;
 use std::ops::Deref;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::os::windows::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 use windows_sys::Win32::Storage::FileSystem::{
@@ -96,6 +96,8 @@ pub(crate) fn open_ambient_dir_impl(
     path: &Path,
     ambient_authority: AmbientAuthority,
 ) -> io::Result<fs::File> {
+    use std::os::windows::fs::OpenOptionsExt;
+
     let _ = ambient_authority;
 
     // Set `FILE_FLAG_BACKUP_SEMANTICS` so that we can open directories. Unset

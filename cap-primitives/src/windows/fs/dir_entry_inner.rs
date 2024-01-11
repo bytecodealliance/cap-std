@@ -1,11 +1,11 @@
 use super::open_options_to_std;
 use crate::ambient_authority;
+use crate::fs::OpenOptionsExt;
 use crate::fs::{
     open, open_ambient_dir, FileType, FollowSymlinks, ImplFileTypeExt, Metadata, OpenOptions,
     ReadDir, ReadDirInner,
 };
 use std::ffi::OsString;
-use std::os::windows::fs::OpenOptionsExt;
 use std::{fmt, fs, io};
 use windows_sys::Win32::Storage::FileSystem::{
     FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,

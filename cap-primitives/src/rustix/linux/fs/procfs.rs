@@ -6,6 +6,7 @@
 //! is mounted, with actual `procfs`, and without any additional mount points
 //! on top of the paths we open.
 
+use crate::fs::OpenOptionsExt;
 use crate::fs::{
     errors, open, read_link_unchecked, set_times_follow_unchecked, OpenOptions, SystemTimeSpec,
 };
@@ -13,7 +14,7 @@ use io_lifetimes::{AsFd, AsFilelike};
 use rustix::fs::{chmodat, AtFlags, Mode, OFlags, RawMode};
 use rustix::path::DecInt;
 use rustix::procfs::proc_self_fd;
-use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 

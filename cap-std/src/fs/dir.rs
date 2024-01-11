@@ -1,3 +1,5 @@
+#[cfg(target_os = "wasi")]
+use crate::fs::OpenOptionsExt;
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
@@ -14,8 +16,6 @@ use io_lifetimes::AsFilelike;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
-#[cfg(target_os = "wasi")]
-use rustix::fs::OpenOptionsExt;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::{fmt, fs};

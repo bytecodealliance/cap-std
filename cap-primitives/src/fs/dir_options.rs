@@ -25,7 +25,7 @@ impl DirOptions {
 }
 
 #[cfg(unix)]
-impl std::os::unix::fs::DirBuilderExt for DirOptions {
+impl crate::fs::DirBuilderExt for DirOptions {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.ext.mode(mode);
@@ -34,7 +34,7 @@ impl std::os::unix::fs::DirBuilderExt for DirOptions {
 }
 
 #[cfg(target_os = "vxworks")]
-impl std::os::vxworks::fs::DirBuilderExt for DirOptions {
+impl crate::fs::DirBuilderExt for DirOptions {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.ext.mode(mode);
@@ -46,7 +46,7 @@ impl std::os::vxworks::fs::DirBuilderExt for DirOptions {
 impl arbitrary::Arbitrary<'_> for DirOptions {
     fn arbitrary(u: &mut arbitrary::Unstructured<'_>) -> arbitrary::Result<Self> {
         #[cfg(any(unix, target_os = "vxworks"))]
-        use std::os::unix::fs::DirBuilderExt;
+        use crate::fs::DirBuilderExt;
 
         #[allow(unused_mut)]
         let mut dir_options = Self::new();

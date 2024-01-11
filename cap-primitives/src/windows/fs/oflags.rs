@@ -1,6 +1,5 @@
-use crate::fs::{FollowSymlinks, OpenOptions};
+use crate::fs::{FollowSymlinks, OpenOptions, OpenOptionsExt};
 use std::fs;
-use std::os::windows::fs::OpenOptionsExt;
 use windows_sys::Win32::Storage::FileSystem::{
     FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_WRITE_THROUGH,
     FILE_SHARE_DELETE,
@@ -53,6 +52,8 @@ pub(in super::super) fn prepare_open_options_for_open(opts: &mut OpenOptions) ->
 /// indicating that the `trunc` flag was requested but could not be set,
 /// so the file should be truncated manually after opening.
 pub(in super::super) fn open_options_to_std(opts: &OpenOptions) -> (fs::OpenOptions, bool) {
+    use std::os::windows::fs::OpenOptionsExt;
+
     let mut opts = opts.clone();
     let manually_trunc = prepare_open_options_for_open(&mut opts);
 
