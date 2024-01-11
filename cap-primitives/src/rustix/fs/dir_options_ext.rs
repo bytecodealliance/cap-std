@@ -13,7 +13,7 @@ impl DirOptionsExt {
     }
 }
 
-impl std::os::unix::fs::DirBuilderExt for DirOptionsExt {
+impl crate::fs::DirBuilderExt for DirOptionsExt {
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.mode = mode;
         self

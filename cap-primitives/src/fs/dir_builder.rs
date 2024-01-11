@@ -57,8 +57,16 @@ impl DirBuilder {
     }
 }
 
+/// Unix-specific extensions to [`fs::DirBuilder`].
 #[cfg(unix)]
-impl std::os::unix::fs::DirBuilderExt for DirBuilder {
+pub trait DirBuilderExt {
+    /// Sets the mode to create new directories with. This option defaults to
+    /// 0o777.
+    fn mode(&mut self, mode: u32) -> &mut Self;
+}
+
+#[cfg(unix)]
+impl DirBuilderExt for DirBuilder {
     #[inline]
     fn mode(&mut self, mode: u32) -> &mut Self {
         self.options.mode(mode);

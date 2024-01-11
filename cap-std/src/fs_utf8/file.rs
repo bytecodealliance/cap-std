@@ -477,7 +477,7 @@ impl From<File> for process::Stdio {
 }
 
 #[cfg(unix)]
-impl std::os::unix::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
         self.cap_std.read_at(buf, offset)
@@ -500,7 +500,7 @@ impl std::os::unix::fs::FileExt for File {
 }
 
 #[cfg(target_os = "wasi")]
-impl std::os::wasi::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
         self.cap_std.read_at(buf, offset)
@@ -589,7 +589,7 @@ impl std::os::wasi::fs::FileExt for File {
 }
 
 #[cfg(windows)]
-impl std::os::windows::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn seek_read(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
         self.cap_std.seek_read(buf, offset)

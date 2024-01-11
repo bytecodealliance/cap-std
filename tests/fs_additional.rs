@@ -440,8 +440,7 @@ fn follow_file_symlink() {
 #[cfg(unix)]
 #[test]
 fn check_dot_access() {
-    use cap_std::fs::DirBuilder;
-    use std::os::unix::fs::DirBuilderExt;
+    use cap_std::fs::{DirBuilder, DirBuilderExt};
 
     let tmpdir = tmpdir();
 
@@ -583,8 +582,7 @@ fn file_with_trailing_slashdot_ambient() {
 #[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
 #[test]
 fn dir_searchable_unreadable() {
-    use cap_std::fs::DirBuilder;
-    use std::os::unix::fs::DirBuilderExt;
+    use cap_std::fs::{DirBuilder, DirBuilderExt};
 
     let tmpdir = tmpdir();
 
@@ -628,8 +626,7 @@ fn dir_searchable_unreadable_ambient() {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[test]
 fn dir_searchable_unreadable() {
-    use cap_std::fs::DirBuilder;
-    use std::os::unix::fs::DirBuilderExt;
+    use cap_std::fs::{DirBuilder, DirBuilderExt};
 
     let tmpdir = tmpdir();
 
@@ -645,8 +642,7 @@ fn dir_searchable_unreadable() {
 #[cfg(unix)]
 #[test]
 fn dir_unsearchable_unreadable() {
-    use cap_std::fs::DirBuilder;
-    use std::os::unix::fs::DirBuilderExt;
+    use cap_std::fs::{DirBuilder, DirBuilderExt};
 
     let tmpdir = tmpdir();
 
@@ -829,7 +825,7 @@ fn readdir_write() {
 
     #[cfg(any(target_os = "android", target_os = "linux"))]
     {
-        use std::os::unix::fs::OpenOptionsExt;
+        use cap_std::fs::OpenOptionsExt;
         assert!(tmpdir
             .open_with(
                 "dir",

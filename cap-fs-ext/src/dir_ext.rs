@@ -595,8 +595,7 @@ impl DirExt for cap_std::fs::Dir {
     fn remove_file_or_symlink<P: AsRef<Path>>(&self, path: P) -> io::Result<()> {
         use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
-        use cap_std::fs::OpenOptions;
-        use std::os::windows::fs::OpenOptionsExt;
+        use cap_std::fs::{OpenOptions, OpenOptionsExt};
         use windows_sys::Win32::Storage::FileSystem::{
             DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS,
             FILE_FLAG_OPEN_REPARSE_POINT,
@@ -1092,8 +1091,7 @@ impl DirExtUtf8 for cap_std::fs_utf8::Dir {
     fn remove_file_or_symlink<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<()> {
         use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
-        use cap_std::fs::OpenOptions;
-        use std::os::windows::fs::OpenOptionsExt;
+        use cap_std::fs::{OpenOptions, OpenOptionsExt};
         use windows_sys::Win32::Storage::FileSystem::{
             DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS,
             FILE_FLAG_OPEN_REPARSE_POINT,

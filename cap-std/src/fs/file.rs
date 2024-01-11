@@ -479,58 +479,58 @@ impl From<File> for process::Stdio {
 }
 
 #[cfg(unix)]
-impl std::os::unix::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-        self.std.read_at(buf, offset)
+        std::os::unix::fs::FileExt::read_at(&self.std, buf, offset)
     }
 
     #[inline]
     fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
-        self.std.write_at(buf, offset)
+        std::os::unix::fs::FileExt::write_at(&self.std, buf, offset)
     }
 
     #[inline]
     fn read_exact_at(&self, buf: &mut [u8], offset: u64) -> io::Result<()> {
-        self.std.read_exact_at(buf, offset)
+        std::os::unix::fs::FileExt::read_exact_at(&self.std, buf, offset)
     }
 
     #[inline]
     fn write_all_at(&self, buf: &[u8], offset: u64) -> io::Result<()> {
-        self.std.write_all_at(buf, offset)
+        std::os::unix::fs::FileExt::write_all_at(&self.std, buf, offset)
     }
 }
 
 #[cfg(target_os = "wasi")]
-impl std::os::wasi::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn read_at(&self, bufs: &mut [u8], offset: u64) -> io::Result<usize> {
-        self.std.read_at(bufs, offset)
+        std::os::wasi::fs::FileExt::read_at(&self.std, bufs, offset)
     }
 
     #[inline]
     fn write_at(&self, bufs: &[u8], offset: u64) -> io::Result<usize> {
-        self.std.write_at(bufs, offset)
+        std::os::wasi::fs::FileExt::write_at(&self.std, bufs, offset)
     }
 
     #[inline]
     fn read_vectored_at(&self, bufs: &mut [IoSliceMut], offset: u64) -> io::Result<usize> {
-        self.std.read_vectored_at(bufs, offset)
+        std::os::wasi::fs::FileExt::read_vectored_at(&self.std, bufs, offset)
     }
 
     #[inline]
     fn write_vectored_at(&self, bufs: &[IoSlice], offset: u64) -> io::Result<usize> {
-        self.std.write_vectored_at(bufs, offset)
+        std::os::wasi::fs::FileExt::write_vectored_at(&self.std, bufs, offset)
     }
 
     #[inline]
     fn tell(&self) -> std::result::Result<u64, std::io::Error> {
-        self.std.tell()
+        std::os::wasi::fs::FileExt::tell(&self.std)
     }
 
     #[inline]
     fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), std::io::Error> {
-        self.std.fdstat_set_flags(flags)
+        std::os::wasi::fs::FileExt::fdstat_set_flags(&self.std, flags)
     }
 
     #[inline]
@@ -539,22 +539,22 @@ impl std::os::wasi::fs::FileExt for File {
         rights: u64,
         inheriting: u64,
     ) -> std::result::Result<(), std::io::Error> {
-        self.std.fdstat_set_rights(rights, inheriting)
+        std::os::wasi::fs::FileExt::fdstat_set_rights(&self.std, rights, inheriting)
     }
 
     #[inline]
     fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), std::io::Error> {
-        self.std.advise(offset, len, advice)
+        std::os::wasi::fs::FileExt::advise(&self.std, offset, len, advice)
     }
 
     #[inline]
     fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), std::io::Error> {
-        self.std.allocate(offset, len)
+        std::os::wasi::fs::FileExt::allocate(&self.std, offset, len)
     }
 
     #[inline]
     fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
-        self.std.create_directory(dir)
+        std::os::wasi::fs::FileExt::create_directory(&self.std, dir)
     }
 
     #[inline]
@@ -562,7 +562,7 @@ impl std::os::wasi::fs::FileExt for File {
         &self,
         path: P,
     ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
-        self.std.read_link(path)
+        std::os::wasi::fs::FileExt::read_link(&self.std, path)
     }
 
     #[inline]
@@ -571,30 +571,30 @@ impl std::os::wasi::fs::FileExt for File {
         lookup_flags: u32,
         path: P,
     ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
-        self.std.metadata_at(lookup_flags, path)
+        std::os::wasi::fs::FileExt::metadata_at(&self.std, lookup_flags, path)
     }
 
     #[inline]
     fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
-        self.std.remove_file(path)
+        std::os::wasi::fs::FileExt::remove_file(&self.std, path)
     }
 
     #[inline]
     fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
-        self.std.remove_directory(path)
+        std::os::wasi::fs::FileExt::remove_directory(&self.std, path)
     }
 }
 
 #[cfg(windows)]
-impl std::os::windows::fs::FileExt for File {
+impl crate::fs::FileExt for File {
     #[inline]
     fn seek_read(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-        self.std.seek_read(buf, offset)
+        std::os::windows::fs::FileExt::seek_read(&self.std, buf, offset)
     }
 
     #[inline]
     fn seek_write(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
-        self.std.seek_write(buf, offset)
+        std::os::windows::fs::FileExt::seek_write(&self.std, buf, offset)
     }
 }
 

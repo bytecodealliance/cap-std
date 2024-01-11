@@ -265,7 +265,7 @@ fn file_test_io_eof() {
 #[test]
 #[cfg(unix)]
 fn file_test_io_read_write_at() {
-    use std::os::unix::fs::FileExt;
+    use cap_std::fs_utf8::FileExt;
 
     let tmpdir = tmpdir();
     let filename = "file_rt_io_file_test_read_write_at.txt";
@@ -357,7 +357,7 @@ fn set_get_unix_permissions() {
 #[test]
 #[cfg(windows)]
 fn file_test_io_seek_read_write() {
-    use std::os::windows::fs::FileExt;
+    use cap_std::fs_utf8::FileExt;
 
     let tmpdir = tmpdir();
     let filename = "file_rt_io_file_test_seek_read_write.txt";

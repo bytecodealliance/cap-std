@@ -12,7 +12,7 @@ use windows_sys::Win32::Storage::FileSystem::{
 };
 
 #[derive(Debug, Clone)]
-pub(crate) struct OpenOptionsExt {
+pub(crate) struct ImplOpenOptionsExt {
     pub(super) access_mode: Option<u32>,
     pub(super) share_mode: u32,
     pub(super) custom_flags: u32,
@@ -21,10 +21,10 @@ pub(crate) struct OpenOptionsExt {
     pub(super) security_qos_flags: u32,
 }
 
-unsafe impl Send for OpenOptionsExt {}
-unsafe impl Sync for OpenOptionsExt {}
+unsafe impl Send for ImplOpenOptionsExt {}
+unsafe impl Sync for ImplOpenOptionsExt {}
 
-impl OpenOptionsExt {
+impl ImplOpenOptionsExt {
     pub(crate) const fn new() -> Self {
         Self {
             access_mode: None,

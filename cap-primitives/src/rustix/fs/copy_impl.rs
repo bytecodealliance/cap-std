@@ -31,7 +31,7 @@ fn open_to_and_set_permissions(
     path: &Path,
     reader_metadata: fs::Metadata,
 ) -> io::Result<(fs::File, fs::Metadata)> {
-    use rustix::fs::OpenOptionsExt;
+    use crate::fs::OpenOptionsExt;
     use std::os::unix::fs::PermissionsExt;
 
     let perm = reader_metadata.permissions();

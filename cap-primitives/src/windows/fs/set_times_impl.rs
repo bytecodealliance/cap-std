@@ -1,5 +1,4 @@
-use crate::fs::{open, OpenOptions, SystemTimeSpec};
-use std::os::windows::fs::OpenOptionsExt;
+use crate::fs::{open, OpenOptions, OpenOptionsExt, SystemTimeSpec};
 use std::path::Path;
 use std::{fs, io};
 use windows_sys::Win32::Storage::FileSystem::{

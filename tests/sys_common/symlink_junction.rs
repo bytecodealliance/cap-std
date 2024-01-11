@@ -92,10 +92,9 @@ pub fn cvt(
 #[cfg(windows)]
 #[allow(dead_code)]
 fn symlink_junction_inner(original: &Path, dir: &Dir, junction: &Path) -> io::Result<()> {
-    use cap_std::fs::OpenOptions;
+    use cap_std::fs::{OpenOptions, OpenOptionsExt};
     use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
-    use std::os::windows::fs::OpenOptionsExt;
     use std::os::windows::io::AsRawHandle;
     use std::{mem, ptr};
     use windows_sys::Win32::Storage::FileSystem::MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
@@ -177,10 +176,9 @@ fn symlink_junction_inner_utf8(
     dir: &cap_std::fs_utf8::Dir,
     junction: &Utf8Path,
 ) -> io::Result<()> {
-    use cap_std::fs::OpenOptions;
+    use cap_std::fs::{OpenOptions, OpenOptionsExt};
     use std::mem::MaybeUninit;
     use std::os::windows::ffi::OsStrExt;
-    use std::os::windows::fs::OpenOptionsExt;
     use std::os::windows::io::AsRawHandle;
     use std::{mem, ptr};
     use windows_sys::Win32::Storage::FileSystem::MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
