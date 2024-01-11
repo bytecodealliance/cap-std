@@ -626,8 +626,7 @@ fn dir_searchable_unreadable_ambient() {
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[test]
 fn dir_searchable_unreadable() {
-    use cap_std::fs::DirBuilder;
-    use std::os::unix::fs::DirBuilderExt;
+    use cap_std::fs::{DirBuilder, DirBuilderExt};
 
     let tmpdir = tmpdir();
 
