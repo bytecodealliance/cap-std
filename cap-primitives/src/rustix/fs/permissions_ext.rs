@@ -50,7 +50,7 @@ impl ImplPermissionsExt {
 }
 
 #[cfg(not(target_os = "wasi"))]
-impl std::os::unix::fs::PermissionsExt for ImplPermissionsExt {
+impl crate::fs::PermissionsExt for ImplPermissionsExt {
     fn mode(&self) -> u32 {
         self.mode as u32
     }

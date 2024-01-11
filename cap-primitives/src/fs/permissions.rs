@@ -49,7 +49,9 @@ impl Permissions {
     #[allow(clippy::unnecessary_wraps)]
     fn _into_std(self, _file: &fs::File) -> io::Result<fs::Permissions> {
         use std::os::unix::fs::PermissionsExt;
-        Ok(fs::Permissions::from_mode(self.ext.mode()))
+        Ok(fs::Permissions::from_mode(crate::fs::PermissionsExt::mode(
+            &self.ext,
+        )))
     }
 
     #[cfg(target_os = "wasi")]
@@ -109,19 +111,19 @@ pub trait PermissionsExt {
 impl PermissionsExt for Permissions {
     #[inline]
     fn mode(&self) -> u32 {
-        std::os::unix::fs::PermissionsExt::mode(&self.ext)
+        crate::fs::PermissionsExt::mode(&self.ext)
     }
 
     #[inline]
     fn set_mode(&mut self, mode: u32) {
-        std::os::unix::fs::PermissionsExt::set_mode(&mut self.ext, mode)
+        crate::fs::PermissionsExt::set_mode(&mut self.ext, mode)
     }
 
     #[inline]
     fn from_mode(mode: u32) -> Self {
         Self {
             readonly: ImplPermissionsExt::readonly(mode as RawMode),
-            ext: std::os::unix::fs::PermissionsExt::from_mode(mode),
+            ext: crate::fs::PermissionsExt::from_mode(mode),
         }
     }
 }
