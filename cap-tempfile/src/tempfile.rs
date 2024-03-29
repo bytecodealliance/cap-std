@@ -215,7 +215,6 @@ impl<'d> Drop for TempFile<'d> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::io;
 
     /// On Unix, calling `umask()` actually *mutates* the process global state.
     /// This uses Linux `/proc` to read the current value.
