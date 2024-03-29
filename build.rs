@@ -34,7 +34,7 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
-    can_compile(&format!(
+    can_compile(format!(
         "#![allow(stable_features)]\n#![feature({})]",
         feature
     ))
@@ -48,8 +48,8 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
-    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string,
-    // as documented [here].
+    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string, as
+    // documented [here].
     // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
     let wrapper = var("RUSTC_WRAPPER")
         .ok()
