@@ -25,7 +25,7 @@ io-lifetimes = { version = "2.0.0", default-features = false }
 cap-tempfile = { path = "../cap-tempfile" }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.38.0", features = ["fs", "process", "procfs", "termios", "time"] }
+rustix = { version = "0.38.32", features = ["fs", "process", "procfs", "termios", "time"] }
 
 [target.'cfg(windows)'.dependencies]
 winx = "0.36.0"
