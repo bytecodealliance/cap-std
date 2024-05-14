@@ -12,8 +12,7 @@ use std::io::prelude::*;
 
 #[cfg(target_os = "macos")]
 use crate::sys::weak::weak;
-use cap_std::ambient_authority;
-use cap_std::fs::{self, Dir, OpenOptions};
+use cap_std::fs::{self, OpenOptions};
 #[cfg(target_os = "macos")]
 use libc::{c_char, c_int};
 use std::io::{self, ErrorKind, SeekFrom};
@@ -935,24 +934,6 @@ fn symlink_noexist() {
 
 #[test]
 fn read_link() {
-    if cfg!(windows) {
-        // directory symlink
-        let root = Dir::open_ambient_dir(r"C:\", ambient_authority()).unwrap();
-        error_contains!(
-            root.read_link(r"Users\All Users"),
-            "a path led outside of the filesystem"
-        );
-        // junction
-        error_contains!(
-            root.read_link(r"Users\Default User"),
-            "a path led outside of the filesystem"
-        );
-        // junction with special permissions
-        error_contains!(
-            root.read_link(r"Documents and Settings\"),
-            "a path led outside of the filesystem"
-        );
-    }
     let tmpdir = tmpdir();
     let link = "link";
     if !got_symlink_permission(&tmpdir) {

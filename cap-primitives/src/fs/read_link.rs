@@ -1,7 +1,7 @@
 //! This defines `read_link`, the primary entrypoint to sandboxed symbolic link
 //! dereferencing.
 
-use crate::fs::{errors, read_link_impl};
+use crate::fs::read_link_impl;
 #[cfg(racy_asserts)]
 use crate::fs::{map_result, read_link_unchecked, stat, FollowSymlinks};
 use std::path::{Path, PathBuf};
@@ -24,27 +24,12 @@ pub fn read_link_contents(start: &fs::File, path: &Path) -> io::Result<PathBuf> 
     result
 }
 
-/// Perform a `readlinkat`-like operation, ensuring that the resolution of the
-/// path never escapes the directory tree rooted at `start`, and also verifies
-/// that the link target is not absolute.
+/// Perform a `readlinkat`-like operation.
 #[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
 #[inline]
 pub fn read_link(start: &fs::File, path: &Path) -> io::Result<PathBuf> {
     // Call the underlying implementation.
-    let result = read_link_contents(start, path);
-
-    // Don't allow reading symlinks to absolute paths. This isn't strictly
-    // necessary to preserve the sandbox, since `open` will refuse to follow
-    // absolute paths in any case. However, it is useful to enforce this
-    // restriction to avoid leaking information about the host filesystem
-    // outside the sandbox.
-    if let Ok(path) = &result {
-        if path.has_root() {
-            return Err(errors::escape_attempt());
-        }
-    }
-
-    result
+    read_link_contents(start, path)
 }
 
 #[cfg(racy_asserts)]

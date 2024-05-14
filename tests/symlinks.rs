@@ -4,6 +4,7 @@ mod sys_common;
 use cap_fs_ext::DirExt;
 use cap_std::ambient_authority;
 use cap_std::fs::Dir;
+use std::path::Path;
 use sys_common::io::tmpdir;
 use sys_common::symlink_supported;
 
@@ -116,19 +117,19 @@ fn readlink_absolute() {
     let tmpdir = check!(Dir::open_ambient_dir(dir.path(), ambient_authority()));
 
     #[cfg(not(windows))]
-    error_contains!(
-        tmpdir.read_link("thing_symlink"),
-        "a path led outside of the filesystem"
+    assert_eq!(
+        tmpdir.read_link("thing_symlink").unwrap(),
+        Path::new("/thing")
     );
     #[cfg(windows)]
-    error_contains!(
-        tmpdir.read_link("file_symlink_file"),
-        "a path led outside of the filesystem"
+    assert_eq!(
+        tmpdir.read_link("file_symlink_file").unwrap(),
+        Path::new("/file")
     );
     #[cfg(windows)]
-    error_contains!(
-        tmpdir.read_link("dir_symlink_dir"),
-        "a path led outside of the filesystem"
+    assert_eq!(
+        tmpdir.read_link("dir_symlink_dir").unwrap(),
+        Path::new("/dir")
     );
 }
 
