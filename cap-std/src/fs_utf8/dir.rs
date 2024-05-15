@@ -230,11 +230,22 @@ impl Dir {
     /// Reads a symbolic link, returning the file that the link points to.
     ///
     /// This corresponds to [`std::fs::read_link`], but only accesses paths
-    /// relative to `self`.
+    /// relative to `self`.  Unlike [`read_link_contents`], this method considers it an error if
+    /// the link's target is an absolute path.
     #[inline]
     pub fn read_link<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
         let path = from_utf8(path.as_ref())?;
         self.cap_std.read_link(path).and_then(to_utf8)
+    }
+
+    /// Reads a symbolic link, returning the file that the link points to.
+    ///
+    /// This corresponds to [`std::fs::read_link`]. but only accesses paths
+    /// relative to `self`.
+    #[inline]
+    pub fn read_link_contents<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Utf8PathBuf> {
+        let path = from_utf8(path.as_ref())?;
+        self.cap_std.read_link_contents(path).and_then(to_utf8)
     }
 
     /// Read the entire contents of a file into a string.
@@ -371,6 +382,9 @@ impl Dir {
     /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
     /// paths relative to `self`.
     ///
+    /// Unlike [`symlink_contents`] this method will return an error if `original` is an absolute
+    /// path.
+    ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
@@ -382,6 +396,34 @@ impl Dir {
         let original = from_utf8(original.as_ref())?;
         let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink(original, link)
+    }
+
+    /// Creates a new symbolic link on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
+    ///
+    /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
+    /// paths relative to `self`.
+    ///
+    /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
+    #[cfg(not(windows))]
+    #[inline]
+    pub fn symlink_contents<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
+        &self,
+        original: P,
+        link: Q,
+    ) -> io::Result<()> {
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
+        self.cap_std.symlink_contents(original, link)
     }
 
     /// Creates a new file symbolic link on a filesystem.

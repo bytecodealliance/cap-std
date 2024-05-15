@@ -31,6 +31,14 @@ use rand::rngs::StdRng;
 use rand::{RngCore, SeedableRng};
 
 #[cfg(not(windows))]
+fn symlink_contents<P: AsRef<Path>, Q: AsRef<Path>>(
+    src: P,
+    tmpdir: &TempDir,
+    dst: Q,
+) -> io::Result<()> {
+    tmpdir.symlink_contents(src, dst)
+}
+#[cfg(not(windows))]
 fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
     tmpdir.symlink(src, dst)
 }
@@ -972,6 +980,30 @@ fn readlink_not_symlink() {
         Ok(..) => panic!("wanted a failure"),
         Err(..) => {}
     }
+}
+
+#[cfg(not(windows))]
+#[test]
+fn read_link_contents() {
+    let tmpdir = tmpdir();
+    let link = "link";
+    if !got_symlink_permission(&tmpdir) {
+        return;
+    };
+    check!(symlink_file(&"foo", &tmpdir, &link));
+    assert_eq!(check!(tmpdir.read_link_contents(&link)).as_str(), "foo");
+}
+
+#[cfg(not(windows))]
+#[test]
+fn read_link_contents_absolute() {
+    let tmpdir = tmpdir();
+    let link = "link";
+    if !got_symlink_permission(&tmpdir) {
+        return;
+    };
+    check!(symlink_contents(&"/foo", &tmpdir, &link));
+    assert_eq!(check!(tmpdir.read_link_contents(&link)).as_str(), "/foo");
 }
 
 #[test]
