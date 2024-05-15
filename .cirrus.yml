@@ -2,9 +2,22 @@
 # at revision 7f4774e76bd5cb9ccb7140d71ef9be9c16009cdf.
 
 task:
-  name: stable x86_64-unknown-freebsd-14-snap
+  name: stable x86_64-unknown-freebsd-15-snap
   freebsd_instance:
-    image_family: freebsd-14-0-snap
+    image_family: freebsd-15-0-snap
+  setup_script:
+    - curl https://sh.rustup.rs -sSf --output rustup.sh
+    - sh rustup.sh --default-toolchain stable -y --profile=minimal
+    - . $HOME/.cargo/env
+    - rustup default stable
+  test_script:
+    - . $HOME/.cargo/env
+    - cargo test --features=fs_utf8 --workspace
+
+task:
+  name: stable x86_64-unknown-freebsd-14
+  freebsd_instance:
+    image_family: freebsd-14-0
   setup_script:
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
@@ -18,19 +31,6 @@ task:
   name: stable x86_64-unknown-freebsd-13
   freebsd_instance:
     image_family: freebsd-13-3
-  setup_script:
-    - curl https://sh.rustup.rs -sSf --output rustup.sh
-    - sh rustup.sh --default-toolchain stable -y --profile=minimal
-    - . $HOME/.cargo/env
-    - rustup default stable
-  test_script:
-    - . $HOME/.cargo/env
-    - cargo test --features=fs_utf8 --workspace
-
-task:
-  name: stable x86_64-unknown-freebsd-12
-  freebsd_instance:
-    image_family: freebsd-12-4
   setup_script:
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
