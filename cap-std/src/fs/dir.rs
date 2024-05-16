@@ -7,8 +7,9 @@ use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 use cap_primitives::fs::set_permissions;
 use cap_primitives::fs::{
     canonicalize, copy, create_dir, hard_link, open, open_ambient_dir, open_dir, open_parent_dir,
-    read_base_dir, read_dir, read_link, remove_dir, remove_dir_all, remove_file, remove_open_dir,
-    remove_open_dir_all, rename, stat, DirOptions, FollowSymlinks, Permissions,
+    read_base_dir, read_dir, read_link, read_link_contents, remove_dir, remove_dir_all,
+    remove_file, remove_open_dir, remove_open_dir_all, rename, stat, DirOptions, FollowSymlinks,
+    Permissions,
 };
 use cap_primitives::AmbientAuthority;
 use io_lifetimes::AsFilelike;
@@ -21,7 +22,7 @@ use std::path::{Path, PathBuf};
 use std::{fmt, fs};
 #[cfg(not(windows))]
 use {
-    cap_primitives::fs::symlink,
+    cap_primitives::fs::{symlink, symlink_contents},
     io_extras::os::rustix::{AsRawFd, FromRawFd, IntoRawFd, RawFd},
 };
 #[cfg(windows)]
@@ -284,10 +285,20 @@ impl Dir {
     /// Reads a symbolic link, returning the file that the link points to.
     ///
     /// This corresponds to [`std::fs::read_link`], but only accesses paths
-    /// relative to `self`.
+    /// relative to `self`.  Unlike [`read_link_contents`], this method considers it an error if
+    /// the link's target is an absolute path.
     #[inline]
     pub fn read_link<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
         read_link(&self.std_file, path.as_ref())
+    }
+
+    /// Reads a symbolic link, returning the file that the link points to.
+    ///
+    /// This corresponds to [`std::fs::read_link`]. but only accesses paths
+    /// relative to `self`.
+    #[inline]
+    pub fn read_link_contents<P: AsRef<Path>>(&self, path: P) -> io::Result<PathBuf> {
+        read_link_contents(&self.std_file, path.as_ref())
     }
 
     /// Read the entire contents of a file into a string.
@@ -411,11 +422,40 @@ impl Dir {
     /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
     /// paths relative to `self`.
     ///
+    /// Unlike [`symlink_contents`] this method will return an error if `original` is an absolute
+    /// path.
+    ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
     #[cfg(not(windows))]
     #[inline]
     pub fn symlink<P: AsRef<Path>, Q: AsRef<Path>>(&self, original: P, link: Q) -> io::Result<()> {
         symlink(original.as_ref(), &self.std_file, link.as_ref())
+    }
+
+    /// Creates a new symbolic link on a filesystem.
+    ///
+    /// The `original` argument provides the target of the symlink. The `link`
+    /// argument provides the name of the created symlink.
+    ///
+    /// Despite the argument ordering, `original` is not resolved relative to
+    /// `self` here. `link` is resolved relative to `self`, and `original` is
+    /// not resolved within this function.
+    ///
+    /// The `link` path is resolved when the symlink is dereferenced, relative
+    /// to the directory that contains it.
+    ///
+    /// This corresponds to [`std::os::unix::fs::symlink`], but only accesses
+    /// paths relative to `self`.
+    ///
+    /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
+    #[cfg(not(windows))]
+    #[inline]
+    pub fn symlink_contents<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        original: P,
+        link: Q,
+    ) -> io::Result<()> {
+        symlink_contents(original.as_ref(), &self.std_file, link.as_ref())
     }
 
     /// Creates a new file symbolic link on a filesystem.
