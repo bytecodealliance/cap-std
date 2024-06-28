@@ -32,7 +32,6 @@ std = ["cap-std"]
 #async_std = ["cap-async-std", "async-std", "io-lifetimes/async-std", "async-trait"]
 #async_std_fs_utf8 = ["cap-async-std/fs_utf8", "camino"]
 #async_std_arf_strings = ["cap-async-std/arf_strings", "async_std_fs_utf8", "arf-strings"]
-async_std = []
 
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = "0.52.0"
