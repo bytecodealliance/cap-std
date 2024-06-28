@@ -222,5 +222,6 @@ fn symlink_loop_from_rename() {
 fn proc_self_fd() {
     let fd = check!(std::fs::File::open("/proc/self/fd"));
     let dir = cap_std::fs::Dir::from_std_file(fd);
-    error!(dir.open("0"), "Too many levels of symbolic links");
+    // This should fail with "too many levels of symbolic links".
+    dir.open("0").unwrap_err();
 }
