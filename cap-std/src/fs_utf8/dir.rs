@@ -54,6 +54,14 @@ impl Dir {
         Self { cap_std }
     }
 
+    /// Return a view of this directory as a [`cap_std::fs::Dir`]. This
+    /// is often useful in order to write shared functions which can operate
+    /// on either type.
+    #[inline]
+    pub fn as_cap_std(&self) -> &crate::fs::Dir {
+        &self.cap_std
+    }
+
     /// Attempts to open a file in read-only mode.
     ///
     /// This corresponds to [`std::fs::File::open`], but only accesses paths
@@ -61,7 +69,7 @@ impl Dir {
     #[inline]
     pub fn open<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<File> {
         let path = from_utf8(path.as_ref())?;
-        self.cap_std.open(path).map(File::from_cap_std)
+        self.as_cap_std().open(path).map(File::from_cap_std)
     }
 
     /// Opens a file at `path` with the options specified by `options`.
