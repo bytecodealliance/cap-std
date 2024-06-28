@@ -10,9 +10,9 @@ fn main() {
     use_feature_or_nothing("io_error_uncategorized");
 
     // Cfgs that users may set.
-    println!("cargo::rustc-check-cfg=cfg(racy_asserts)");
-    println!("cargo::rustc-check-cfg=cfg(emulate_second_only_system)");
-    println!("cargo::rustc-check-cfg=cfg(io_lifetimes_use_std)");
+    println!("cargo:rustc-check-cfg=cfg(racy_asserts)");
+    println!("cargo:rustc-check-cfg=cfg(emulate_second_only_system)");
+    println!("cargo:rustc-check-cfg=cfg(io_lifetimes_use_std)");
 
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
@@ -23,7 +23,7 @@ fn use_feature_or_nothing(feature: &str) {
     if has_feature(feature) {
         use_feature(feature);
     }
-    println!("cargo::rustc-check-cfg=cfg({})", feature);
+    println!("cargo:rustc-check-cfg=cfg({})", feature);
 }
 
 fn use_feature(feature: &str) {
