@@ -1393,13 +1393,13 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 #[cfg(not(feature = "arf_strings"))]
-fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a std::path::Path> {
+fn from_utf8<'a>(path: &'a Utf8Path) -> io::Result<&'a std::path::Path> {
     Ok(path.as_std_path())
 }
 
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 #[cfg(feature = "arf_strings")]
-fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<std::path::PathBuf> {
+fn from_utf8<'a>(path: &'a Utf8Path) -> io::Result<std::path::PathBuf> {
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]

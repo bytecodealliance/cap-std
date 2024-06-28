@@ -13,6 +13,7 @@ fn use_feature_or_nothing(feature: &str) {
     if has_feature(feature) {
         use_feature(feature);
     }
+    println!("cargo::rustc-check-cfg=cfg({})", feature);
 }
 
 fn use_feature(feature: &str) {

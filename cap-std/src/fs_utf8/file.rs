@@ -522,12 +522,12 @@ impl crate::fs::FileExt for File {
     }
 
     #[inline]
-    fn tell(&self) -> std::result::Result<u64, std::io::Error> {
+    fn tell(&self) -> std::result::Result<u64, io::Error> {
         self.cap_std.tell()
     }
 
     #[inline]
-    fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), std::io::Error> {
+    fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), io::Error> {
         self.cap_std.fdstat_set_flags(flags)
     }
 
@@ -536,22 +536,22 @@ impl crate::fs::FileExt for File {
         &self,
         rights: u64,
         inheriting: u64,
-    ) -> std::result::Result<(), std::io::Error> {
+    ) -> std::result::Result<(), io::Error> {
         self.cap_std.fdstat_set_rights(rights, inheriting)
     }
 
     #[inline]
-    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), std::io::Error> {
+    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), io::Error> {
         self.cap_std.advise(offset, len, advice)
     }
 
     #[inline]
-    fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), std::io::Error> {
+    fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), io::Error> {
         self.cap_std.allocate(offset, len)
     }
 
     #[inline]
-    fn create_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn create_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         let path = path.as_ref();
         self.cap_std.create_directory(path)
     }
@@ -560,7 +560,7 @@ impl crate::fs::FileExt for File {
     fn read_link<P: AsRef<Path>>(
         &self,
         path: P,
-    ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
+    ) -> std::result::Result<std::path::PathBuf, io::Error> {
         let path = path.as_ref();
         self.cap_std.read_link(path)
     }
@@ -570,19 +570,19 @@ impl crate::fs::FileExt for File {
         &self,
         lookup_flags: u32,
         path: P,
-    ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
+    ) -> std::result::Result<std::fs::Metadata, io::Error> {
         let path = path.as_ref();
         self.cap_std.metadata_at(lookup_flags, path)
     }
 
     #[inline]
-    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         let path = path.as_ref();
         self.cap_std.remove_file(path)
     }
 
     #[inline]
-    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         let path = path.as_ref();
         self.cap_std.remove_directory(path)
     }
