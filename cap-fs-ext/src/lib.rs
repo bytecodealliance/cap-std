@@ -9,6 +9,9 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
+// Allow cfg(feature = "async_std") even though it isn't a feature. async_std
+// support is temporarily disabled.
+#![allow(unexpected_cfgs)]
 
 mod dir_entry_ext;
 mod dir_ext;

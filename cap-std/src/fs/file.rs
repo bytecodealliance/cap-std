@@ -524,12 +524,12 @@ impl crate::fs::FileExt for File {
     }
 
     #[inline]
-    fn tell(&self) -> std::result::Result<u64, std::io::Error> {
+    fn tell(&self) -> std::result::Result<u64, io::Error> {
         std::os::wasi::fs::FileExt::tell(&self.std)
     }
 
     #[inline]
-    fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), std::io::Error> {
+    fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::fdstat_set_flags(&self.std, flags)
     }
 
@@ -538,22 +538,22 @@ impl crate::fs::FileExt for File {
         &self,
         rights: u64,
         inheriting: u64,
-    ) -> std::result::Result<(), std::io::Error> {
+    ) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::fdstat_set_rights(&self.std, rights, inheriting)
     }
 
     #[inline]
-    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), std::io::Error> {
+    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::advise(&self.std, offset, len, advice)
     }
 
     #[inline]
-    fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), std::io::Error> {
+    fn allocate(&self, offset: u64, len: u64) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::allocate(&self.std, offset, len)
     }
 
     #[inline]
-    fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), std::io::Error> {
+    fn create_directory<P: AsRef<Path>>(&self, dir: P) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::create_directory(&self.std, dir)
     }
 
@@ -561,7 +561,7 @@ impl crate::fs::FileExt for File {
     fn read_link<P: AsRef<Path>>(
         &self,
         path: P,
-    ) -> std::result::Result<std::path::PathBuf, std::io::Error> {
+    ) -> std::result::Result<std::path::PathBuf, io::Error> {
         std::os::wasi::fs::FileExt::read_link(&self.std, path)
     }
 
@@ -570,17 +570,17 @@ impl crate::fs::FileExt for File {
         &self,
         lookup_flags: u32,
         path: P,
-    ) -> std::result::Result<std::fs::Metadata, std::io::Error> {
+    ) -> std::result::Result<std::fs::Metadata, io::Error> {
         std::os::wasi::fs::FileExt::metadata_at(&self.std, lookup_flags, path)
     }
 
     #[inline]
-    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::remove_file(&self.std, path)
     }
 
     #[inline]
-    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), std::io::Error> {
+    fn remove_directory<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::remove_directory(&self.std, path)
     }
 }

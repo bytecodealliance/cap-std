@@ -7,13 +7,9 @@ pub trait FileExt {
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize>;
 
     /// Like `read_at`, except that it reads into a slice of buffers.
-    #[cfg(feature = "unix_file_vectored_at")]
-    fn read_vectored_at(
-        &self,
-        bufs: &mut [std::io::IoSliceMut<'_>],
-        offset: u64,
-    ) -> io::Result<usize> {
-        io::default_read_vectored(|b| self.read_at(b, offset), bufs)
+    #[cfg(unix_file_vectored_at)]
+    fn read_vectored_at(&self, bufs: &mut [io::IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
+        default_read_vectored(|b| self.read_at(b, offset), bufs)
     }
 
     /// Reads the exact number of bytes required to fill `buf` from the given offset.
@@ -44,9 +40,9 @@ pub trait FileExt {
     fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize>;
 
     /// Like `write_at`, except that it writes from a slice of buffers.
-    #[cfg(feature = "unix_file_vectored_at")]
-    fn write_vectored_at(&self, bufs: &[std::io::IoSlice<'_>], offset: u64) -> io::Result<usize> {
-        io::default_write_vectored(|b| self.write_at(b, offset), bufs)
+    #[cfg(unix_file_vectored_at)]
+    fn write_vectored_at(&self, bufs: &[io::IoSlice<'_>], offset: u64) -> io::Result<usize> {
+        default_write_vectored(|b| self.write_at(b, offset), bufs)
     }
 
     /// Attempts to write an entire buffer starting from a given offset.
@@ -71,21 +67,41 @@ pub trait FileExt {
     }
 }
 
+#[cfg(unix_file_vectored_at)]
+fn default_read_vectored<F>(read: F, bufs: &mut [io::IoSliceMut<'_>]) -> io::Result<usize>
+where
+    F: FnOnce(&mut [u8]) -> io::Result<usize>,
+{
+    let buf = bufs
+        .iter_mut()
+        .find(|b| !b.is_empty())
+        .map_or(&mut [][..], |b| &mut **b);
+    read(buf)
+}
+
+#[cfg(unix_file_vectored_at)]
+fn default_write_vectored<F>(write: F, bufs: &[io::IoSlice<'_>]) -> io::Result<usize>
+where
+    F: FnOnce(&[u8]) -> io::Result<usize>,
+{
+    let buf = bufs
+        .iter()
+        .find(|b| !b.is_empty())
+        .map_or(&[][..], |b| &**b);
+    write(buf)
+}
+
 /// WASI-specific extensions to [`fs::File`].
 #[cfg(target_os = "wasi")]
 pub trait FileExt {
     /// Reads a number of bytes starting from a given offset.
     fn read_at(&self, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-        let bufs = &mut [std::io::IoSliceMut::new(buf)];
+        let bufs = &mut [io::IoSliceMut::new(buf)];
         self.read_vectored_at(bufs, offset)
     }
 
     /// Reads a number of bytes starting from a given offset.
-    fn read_vectored_at(
-        &self,
-        bufs: &mut [std::io::IoSliceMut<'_>],
-        offset: u64,
-    ) -> io::Result<usize>;
+    fn read_vectored_at(&self, bufs: &mut [io::IoSliceMut<'_>], offset: u64) -> io::Result<usize>;
 
     /// Reads the exact number of byte required to fill `buf` from the given offset.
     fn read_exact_at(&self, mut buf: &mut [u8], mut offset: u64) -> io::Result<()> {
@@ -113,12 +129,12 @@ pub trait FileExt {
 
     /// Writes a number of bytes starting from a given offset.
     fn write_at(&self, buf: &[u8], offset: u64) -> io::Result<usize> {
-        let bufs = &[std::io::IoSlice::new(buf)];
+        let bufs = &[io::IoSlice::new(buf)];
         self.write_vectored_at(bufs, offset)
     }
 
     /// Writes a number of bytes starting from a given offset.
-    fn write_vectored_at(&self, bufs: &[std::io::IoSlice<'_>], offset: u64) -> io::Result<usize>;
+    fn write_vectored_at(&self, bufs: &[io::IoSlice<'_>], offset: u64) -> io::Result<usize>;
 
     /// Attempts to write an entire buffer starting from a given offset.
     fn write_all_at(&self, mut buf: &[u8], mut offset: u64) -> io::Result<()> {
@@ -145,19 +161,19 @@ pub trait FileExt {
     fn tell(&self) -> io::Result<u64>;
 
     /// Adjust the flags associated with this file.
-    fn fdstat_set_flags(&self, flags: u16) -> std::io::Result<()>;
+    fn fdstat_set_flags(&self, flags: u16) -> io::Result<()>;
 
     /// Adjust the rights associated with this file.
-    fn fdstat_set_rights(&self, rights: u64, inheriting: u64) -> std::io::Result<()>;
+    fn fdstat_set_rights(&self, rights: u64, inheriting: u64) -> io::Result<()>;
 
     /// Provide file advisory information on a file descriptor.
-    fn advise(&self, offset: u64, len: u64, advice: u8) -> std::io::Result<()>;
+    fn advise(&self, offset: u64, len: u64, advice: u8) -> io::Result<()>;
 
     /// Force the allocation of space in a file.
-    fn allocate(&self, offset: u64, len: u64) -> std::io::Result<()>;
+    fn allocate(&self, offset: u64, len: u64) -> io::Result<()>;
 
     /// Create a directory.
-    fn create_directory<P: AsRef<std::path::Path>>(&self, dir: P) -> std::io::Result<()>;
+    fn create_directory<P: AsRef<std::path::Path>>(&self, dir: P) -> io::Result<()>;
 
     /// Read the contents of a symbolic link.
     fn read_link<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<std::path::PathBuf>;
