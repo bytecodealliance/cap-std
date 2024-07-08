@@ -261,6 +261,8 @@ pub trait MetadataExt {
 }
 
 /// Windows-specific extensions to [`Metadata`].
+///
+/// This corresponds to [`std::os::windows::fs::MetadataExt`].
 #[cfg(windows)]
 pub trait MetadataExt {
     /// Returns the value of the `dwFileAttributes` field of this metadata.

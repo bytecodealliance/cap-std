@@ -36,7 +36,9 @@ pub use open_options_sync_ext::OpenOptionsSyncExt;
 pub use reopen::Reopen;
 
 /// Re-export these to allow them to be used with `Reuse`.
-pub use cap_primitives::fs::{FollowSymlinks, Metadata, MetadataExt, OpenOptions, OpenOptionsExt};
+pub use cap_primitives::fs::{
+    FollowSymlinks, Metadata, MetadataExt as OsMetadataExt, OpenOptions, OpenOptionsExt,
+};
 
 #[doc(hidden)]
 pub use cap_primitives::ambient_authority_known_at_compile_time;
