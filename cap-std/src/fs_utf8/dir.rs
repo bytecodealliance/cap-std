@@ -11,6 +11,7 @@ use io_lifetimes::AsFilelike;
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
+use std::ops::Deref;
 use std::{fmt, fs, io};
 #[cfg(windows)]
 use {
@@ -20,6 +21,28 @@ use {
     },
     std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
 };
+
+enum DirImpl<'a> {
+    Owned(crate::fs::Dir),
+    Borrowed(&'a crate::fs::Dir),
+}
+
+impl<'a> Deref for DirImpl<'a> {
+    type Target = crate::fs::Dir;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            DirImpl::Owned(d) => d,
+            DirImpl::Borrowed(d) => d,
+        }
+    }
+}
+
+impl<'a> From<crate::fs::Dir> for DirImpl<'a> {
+    fn from(value: crate::fs::Dir) -> Self {
+        Self::Owned(value)
+    }
+}
 
 /// A reference to an open directory on a filesystem.
 ///
@@ -31,11 +54,11 @@ use {
 /// absolute paths don't interoperate well with the capability model.
 ///
 /// [functions in `std::fs`]: https://doc.rust-lang.org/std/fs/index.html#functions
-pub struct Dir {
-    cap_std: crate::fs::Dir,
+pub struct Dir<'a> {
+    cap_std: DirImpl<'a>,
 }
 
-impl Dir {
+impl<'a> Dir<'a> {
     /// Constructs a new instance of `Self` from the given [`std::fs::File`].
     ///
     /// To prevent race conditions on Windows, the file must be opened without
@@ -51,7 +74,16 @@ impl Dir {
     /// Constructs a new instance of `Self` from the given `cap_std::fs::Dir`.
     #[inline]
     pub fn from_cap_std(cap_std: crate::fs::Dir) -> Self {
-        Self { cap_std }
+        Self {
+            cap_std: cap_std.into(),
+        }
+    }
+
+    #[inline]
+    pub fn borrow_cap_std(cap_std: &crate::fs::Dir) -> Self {
+        Self {
+            cap_std: DirImpl::Borrowed(cap_std),
+        }
     }
 
     /// Return a view of this directory as a [`cap_std::fs::Dir`]. This
@@ -836,5 +868,11 @@ impl From<Dir> for OwnedHandleOrSocket {
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.cap_std.fmt(f)
+    }
+}
+
+impl From<&crate::fs::Dir> for Dir {
+    fn from(value: &crate::fs::Dir) -> Self {
+        Self::borrow_cap_std(value)
     }
 }
