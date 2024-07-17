@@ -101,6 +101,16 @@ impl TempDir {
         Err(Self::already_exists())
     }
 
+    /// Make this directory persistent.
+    ///
+    /// This corresponds to [`tempfile::TempDir::into_path`], but returns a [`Dir`].
+    ///
+    /// [`tempfile::TempDir::into_path`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.into_path
+    /// [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
+    pub fn into_dir(mut self) -> io::Result<Dir> {
+        Ok(self.dir.take().unwrap())
+    }
+
     /// Closes and removes the temporary directory, returning a `Result`.
     ///
     /// This corresponds to [`tempfile::TempDir::close`].
@@ -220,6 +230,15 @@ fn close_tempdir() {
 
     let t = tempdir(ambient_authority()).unwrap();
     t.close().unwrap();
+}
+
+#[test]
+fn persist_tempdir() {
+    use crate::ambient_authority;
+
+    let t = tempdir(ambient_authority()).unwrap();
+    let d = t.into_dir().unwrap();
+    assert!(d.exists("."));
 }
 
 #[test]
