@@ -2,12 +2,13 @@
 //!
 //! TODO: This whole scheme is still under development.
 
+#[cfg(test)]
 use camino::Utf8PathBuf;
 use cap_std::fs_utf8::Dir;
+#[cfg(test)]
+use std::env;
 use std::ops::Deref;
-use std::{env, fmt, fs, io, mem};
-#[cfg(not(target_os = "emscripten"))]
-use uuid::Uuid;
+use std::{fmt, io, mem};
 
 #[doc(hidden)]
 pub use cap_std::ambient_authority_known_at_compile_time;
@@ -28,6 +29,13 @@ pub struct TempDir {
 }
 
 impl TempDir {
+    // Consume a base/non-UTF8 tempdir instance and return a UTF8 version
+    fn from_cap_std(mut td: super::TempDir) -> Self {
+        // Take ownership of the underlying Dir instance
+        let dir = td.dir.take().map(Dir::from_cap_std);
+        Self { dir }
+    }
+
     /// Attempts to make a temporary directory inside of `env::temp_dir()`.
     ///
     /// This corresponds to [`tempfile::TempDir::new`].
@@ -39,27 +47,11 @@ impl TempDir {
     /// This function makes use of ambient authority to access temporary
     /// directories.
     pub fn new(ambient_authority: AmbientAuthority) -> io::Result<Self> {
-        let system_tmp: Utf8PathBuf = env::temp_dir()
-            .try_into()
-            .expect("temporary directory path should be valid UTF-8");
-        for _ in 0..Self::num_iterations() {
-            let name = system_tmp.join(&Self::new_name());
-            match fs::create_dir(&name) {
-                Ok(()) => {
-                    let dir = match Dir::open_ambient_dir(&name, ambient_authority) {
-                        Ok(dir) => dir,
-                        Err(e) => {
-                            fs::remove_dir(name).ok();
-                            return Err(e);
-                        }
-                    };
-                    return Ok(Self { dir: Some(dir) });
-                }
-                Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
-                Err(e) => return Err(e),
-            }
-        }
-        Err(Self::already_exists())
+        // Because a Dir instance doesn't have a name accessible to the calling
+        // code, we just delegate to the non-UTF8 base version. In some presumably
+        // very unusual situations the tempdir may have a non-UTF8 name,
+        // but that's fine.
+        super::TempDir::new(ambient_authority).map(Self::from_cap_std)
     }
 
     /// Create a new temporary directory.
@@ -68,24 +60,7 @@ impl TempDir {
     ///
     /// [`tempfile::TempDir::new_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempdir_in.html
     pub fn new_in(dir: &Dir) -> io::Result<Self> {
-        for _ in 0..Self::num_iterations() {
-            let name = &Self::new_name();
-            match dir.create_dir(name) {
-                Ok(()) => {
-                    let dir = match dir.open_dir(name) {
-                        Ok(dir) => dir,
-                        Err(e) => {
-                            dir.remove_dir(name).ok();
-                            return Err(e);
-                        }
-                    };
-                    return Ok(Self { dir: Some(dir) });
-                }
-                Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
-                Err(e) => return Err(e),
-            }
-        }
-        Err(Self::already_exists())
+        super::TempDir::new_in(dir.as_cap_std()).map(Self::from_cap_std)
     }
 
     /// Closes and removes the temporary directory, returning a `Result`.
@@ -95,33 +70,6 @@ impl TempDir {
     /// [`tempfile::TempDir::close`]: https://docs.rs/tempfile/latest/tempfile/struct.TempDir.html#method.close
     pub fn close(mut self) -> io::Result<()> {
         mem::take(&mut self.dir).unwrap().remove_open_dir_all()
-    }
-
-    fn new_name() -> String {
-        #[cfg(not(target_os = "emscripten"))]
-        {
-            Uuid::new_v4().to_string()
-        }
-
-        // Uuid doesn't support Emscripten yet, but Emscripten isn't multi-user
-        // or multi-process yet, so we can do something simple.
-        #[cfg(target_os = "emscripten")]
-        {
-            use rand::RngCore;
-            let mut r = rand::thread_rng();
-            format!("cap-primitives.{}", r.next_u32())
-        }
-    }
-
-    const fn num_iterations() -> i32 {
-        i32::MAX
-    }
-
-    fn already_exists() -> io::Error {
-        io::Error::new(
-            io::ErrorKind::AlreadyExists,
-            "too many temporary files exist",
-        )
     }
 }
 
