@@ -1,6 +1,8 @@
 #[cfg(target_os = "wasi")]
 use crate::fs::OpenOptionsExt;
 use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
+#[cfg(feature = "fs_utf8")]
+use crate::fs_utf8::Dir as DirUtf8;
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 #[cfg(not(target_os = "wasi"))]
@@ -107,6 +109,16 @@ impl Dir {
     pub fn open_dir<P: AsRef<Path>>(&self, path: P) -> io::Result<Self> {
         let dir = open_dir(&self.std_file, path.as_ref())?;
         Ok(Self::from_std_file(dir))
+    }
+
+    /// Attempts to open a directory, verifying UTF-8.
+    ///
+    /// This is equivalent to [`crate::fs_utf8::Dir::open_dir`].
+    #[inline]
+    #[cfg(feature = "fs_utf8")]
+    pub fn open_dir_utf8<P: AsRef<camino::Utf8Path>>(&self, path: P) -> io::Result<DirUtf8> {
+        let path = crate::fs_utf8::from_utf8(path.as_ref())?;
+        self.open_dir(path).map(DirUtf8::from_cap_std)
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -259,6 +271,15 @@ impl Dir {
     #[inline]
     pub fn entries(&self) -> io::Result<ReadDir> {
         read_base_dir(&self.std_file).map(|inner| ReadDir { inner })
+    }
+
+    /// Returns an iterator over UTF-8 entries within `self`.
+    ///
+    /// Equivalent to [`crate::fs_utf8::Dir::read_dir`].
+    #[inline]
+    #[cfg(feature = "fs_utf8")]
+    pub fn entries_utf8(&self) -> io::Result<crate::fs_utf8::ReadDir> {
+        self.entries().map(crate::fs_utf8::ReadDir::from_cap_std)
     }
 
     /// Returns an iterator over the entries within a directory.

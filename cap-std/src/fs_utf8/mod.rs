@@ -38,12 +38,12 @@ pub use camino;
 use camino::{Utf8Path, Utf8PathBuf};
 
 #[cfg(not(feature = "arf_strings"))]
-fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a std::path::Path> {
+pub(crate) fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a std::path::Path> {
     Ok(path.as_std_path())
 }
 
 #[cfg(feature = "arf_strings")]
-fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<std::path::PathBuf> {
+pub(crate) fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<std::path::PathBuf> {
     #[cfg(not(windows))]
     let path = {
         #[cfg(unix)]

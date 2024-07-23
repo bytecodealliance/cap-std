@@ -1680,3 +1680,16 @@ fn test_invalid_utf8() {
         }
     }
 }
+
+#[test]
+fn from_cap_std() {
+    let tmpdir = sys_common::io::tmpdir();
+    let dir = "d1/d2";
+    check!(tmpdir.create_dir_all(dir));
+    let d1_entry = tmpdir.entries_utf8().unwrap().next().unwrap().unwrap();
+    assert_eq!(d1_entry.file_name().unwrap(), "d1");
+
+    let d1 = tmpdir.open_dir_utf8("d1").unwrap();
+    let d2_entry = d1.entries().unwrap().next().unwrap().unwrap();
+    assert_eq!(d2_entry.file_name().unwrap(), "d2");
+}
