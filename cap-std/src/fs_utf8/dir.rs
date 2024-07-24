@@ -94,7 +94,7 @@ impl Dir {
     #[inline]
     pub fn open_dir<P: AsRef<Utf8Path>>(&self, path: P) -> io::Result<Self> {
         let path = from_utf8(path.as_ref())?;
-        self.cap_std.open_dir(path).map(Self::from_cap_std)
+        self.as_ref().open_dir(path).map(Self::from_cap_std)
     }
 
     /// Creates a new, empty directory at the provided path.
@@ -836,5 +836,11 @@ impl From<Dir> for OwnedHandleOrSocket {
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.cap_std.fmt(f)
+    }
+}
+
+impl AsRef<crate::fs::Dir> for Dir {
+    fn as_ref(&self) -> &crate::fs::Dir {
+        self.as_cap_std()
     }
 }
