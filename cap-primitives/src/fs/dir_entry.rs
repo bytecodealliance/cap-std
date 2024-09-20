@@ -82,6 +82,12 @@ impl DirEntry {
     /// Returns the file type for the file that this entry points at.
     ///
     /// This corresponds to [`std::fs::DirEntry::file_type`].
+    ///
+    /// # Platform-specific behavior
+    ///
+    /// On Windows and most Unix platforms this function is free (no extra system calls needed), but
+    /// some Unix platforms may require the equivalent call to `metadata` to learn about the target
+    /// file type.
     #[inline]
     pub fn file_type(&self) -> io::Result<FileType> {
         self.inner.file_type()
