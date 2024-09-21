@@ -1046,3 +1046,115 @@ fn check_metadata(std: &std::fs::Metadata, cap: &cap_std::fs::Metadata) {
         assert_eq!(std.blocks(), cap_std::fs::MetadataExt::blocks(cap));
     }
 }
+
+/// Test that a symlink in the middle of a path containing ".." doesn't cause
+/// the path to be treated as if it ends with "..".
+#[test]
+fn dotdot_in_middle_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.write("target", foo));
+    check!(tmpdir.create_dir("b"));
+    let b = check!(tmpdir.open_dir("b"));
+    check!(b.symlink("..", "up"));
+
+    let path = "b/up/target";
+    let mut file = check!(tmpdir.open(path));
+    let mut data = Vec::new();
+    check!(file.read_to_end(&mut data));
+    assert_eq!(data, foo);
+}
+
+/// Same as `dotdot_in_middle_of_symlink`, but use two levels of `..`.
+#[test]
+fn dotdot_more_in_middle_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.write("target", foo));
+    check!(tmpdir.create_dir_all("b/c"));
+    let b = check!(tmpdir.open_dir("b"));
+    check!(b.symlink("c/../..", "up"));
+
+    let path = "b/up/target";
+    let mut file = check!(tmpdir.open(path));
+    let mut data = Vec::new();
+    check!(file.read_to_end(&mut data));
+    assert_eq!(data, foo);
+}
+
+/// Same as `dotdot_more_in_middle_of_symlink`, but use a symlink that
+/// doesn't end with `..`.
+#[test]
+fn dotdot_even_more_in_middle_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.create_dir_all("b/c"));
+    check!(tmpdir.write("b/target", foo));
+    let b = check!(tmpdir.open_dir("b"));
+    check!(b.symlink("c/../../b", "up"));
+
+    let path = "b/up/target";
+    let mut file = check!(tmpdir.open(path));
+    let mut data = Vec::new();
+    check!(file.read_to_end(&mut data));
+    assert_eq!(data, foo);
+}
+
+/// Similar to `dotdot_in_middle_of_symlink`, but this time the symlink to
+/// `..` does happen to be the end of the path, so we need to make sure
+/// the implementation doesn't just do a stack pop when it sees the `..`
+/// leaving us with an `O_PATH` directory handle.
+#[test]
+fn dotdot_at_end_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.write("target", foo));
+    check!(tmpdir.create_dir("b"));
+    let b = check!(tmpdir.open_dir("b"));
+    check!(b.symlink("..", "up"));
+
+    // Do some things with `path` that might break with an `O_PATH` fd.
+    // On Linux, the `permissions` part doesn't because cap-std uses
+    // /proc/self/fd. But the `read_dir` part does.
+    let path = "b/up";
+
+    let perms = check!(tmpdir.metadata(path)).permissions();
+    check!(tmpdir.set_permissions(path, perms));
+
+    let contents = check!(tmpdir.read_dir(path));
+    for entry in contents {
+        let _entry = check!(entry);
+    }
+}
+
+/// Like `dotdot_at_end_of_symlink`, but do everything inside a new directory,
+/// so that `MaybeOwnedFile` doesn't reopen `.` which would artificially give
+/// us a non-`O_PATH` fd.
+#[test]
+fn dotdot_at_end_of_symlink_all_inside_dir() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.create_dir("dir"));
+    check!(tmpdir.write("dir/target", foo));
+    check!(tmpdir.create_dir("dir/b"));
+    let b = check!(tmpdir.open_dir("dir/b"));
+    check!(b.symlink("..", "up"));
+
+    // Do some things with `path` that might break with an `O_PATH` fd.
+    // On Linux, the `permissions` part doesn't because cap-std uses
+    // /proc/self/fd. But the `read_dir` part does.
+    let path = "dir/b/up";
+
+    let perms = check!(tmpdir.metadata(path)).permissions();
+    check!(tmpdir.set_permissions(path, perms));
+
+    let contents = check!(tmpdir.read_dir(path));
+    for entry in contents {
+        let _entry = check!(entry);
+    }
+}
