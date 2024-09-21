@@ -15,7 +15,20 @@ pub(crate) fn stat_impl(
     path: &Path,
     follow: FollowSymlinks,
 ) -> io::Result<Metadata> {
-    use crate::fs::OpenOptionsExt;
+    use crate::fs::{stat_unchecked, OpenOptionsExt};
+    use std::path::Component;
+
+    // Optimization: if path has exactly one component and it's not ".." and
+    // we're not following symlinks we can go straight to `stat_unchecked`,
+    // which is faster than doing an open with a separate fstat.
+    if follow == FollowSymlinks::No {
+        let mut components = path.components();
+        if let Some(component) = components.next() {
+            if components.next().is_none() && component != Component::ParentDir {
+                return stat_unchecked(start, component.as_ref(), FollowSymlinks::No);
+            }
+        }
+    }
 
     // Open the path with `O_PATH`. Use `read(true)` even though we don't need
     // `read` permissions, because Rust's libstd requires an access mode, and
