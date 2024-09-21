@@ -1062,6 +1062,7 @@ fn dotdot_in_middle_of_symlink() {
 ///
 /// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
