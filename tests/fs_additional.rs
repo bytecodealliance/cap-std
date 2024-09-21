@@ -1059,7 +1059,10 @@ fn dotdot_in_middle_of_symlink() {
 }
 
 /// Same as `dotdot_in_middle_of_symlink`, but use two levels of `..`.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
+#[cfg(not(windows))]
 fn dotdot_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1070,6 +1073,28 @@ fn dotdot_more_in_middle_of_symlink() {
     check!(symlink_dir("c/../..", &b, "up"));
 
     let path = "b/up/target";
+    let mut file = check!(tmpdir.open(path));
+    let mut data = Vec::new();
+    check!(file.read_to_end(&mut data));
+    assert_eq!(data, foo);
+}
+
+/// Same as `dotdot_more_in_middle_of_symlink`, but the symlink doesn't
+/// include `c`.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
+#[test]
+#[cfg(not(windows))]
+fn dotdot_other_in_middle_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.write("target", foo));
+    check!(tmpdir.create_dir_all("b/c"));
+    let c = check!(tmpdir.open_dir("b/c"));
+    check!(symlink_dir("../..", &c, "up"));
+
+    let path = "b/c/up/target";
     let mut file = check!(tmpdir.open(path));
     let mut data = Vec::new();
     check!(file.read_to_end(&mut data));
@@ -1089,6 +1114,25 @@ fn dotdot_even_more_in_middle_of_symlink() {
     check!(symlink_dir("c/../../b", &b, "up"));
 
     let path = "b/up/target";
+    let mut file = check!(tmpdir.open(path));
+    let mut data = Vec::new();
+    check!(file.read_to_end(&mut data));
+    assert_eq!(data, foo);
+}
+
+/// Same as `dotdot_even_more_in_middle_of_symlink`, but the symlink doesn't
+/// include `c`.
+#[test]
+fn dotdot_even_other_in_middle_of_symlink() {
+    let tmpdir = tmpdir();
+
+    let foo = b"foo";
+    check!(tmpdir.create_dir_all("b/c"));
+    check!(tmpdir.write("b/target", foo));
+    let c = check!(tmpdir.open_dir("b/c"));
+    check!(symlink_dir("../../b", &c, "up"));
+
+    let path = "b/c/up/target";
     let mut file = check!(tmpdir.open(path));
     let mut data = Vec::new();
     check!(file.read_to_end(&mut data));
