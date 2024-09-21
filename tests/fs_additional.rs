@@ -1059,6 +1059,8 @@ fn dotdot_in_middle_of_symlink() {
 }
 
 /// Like `dotdot_in_middle_of_symlink` but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
 fn dotdot_slashdot_in_middle_of_symlink() {
     let tmpdir = tmpdir();
@@ -1080,7 +1082,7 @@ fn dotdot_slashdot_in_middle_of_symlink() {
 ///
 /// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
-//#[cfg(not(windows))]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1098,8 +1100,10 @@ fn dotdot_more_in_middle_of_symlink() {
 }
 
 /// Like `dotdot_more_in_middle_of_symlink`, but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
-//#[cfg(not(windows))]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1121,7 +1125,7 @@ fn dotdot_slashdot_more_in_middle_of_symlink() {
 ///
 /// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
-//#[cfg(not(windows))]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1139,8 +1143,10 @@ fn dotdot_other_in_middle_of_symlink() {
 }
 
 /// Like `dotdot_other_in_middle_of_symlink`, but with `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
-//#[cfg(not(windows))]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1177,7 +1183,10 @@ fn dotdot_even_more_in_middle_of_symlink() {
 }
 
 /// Like `dotdot_even_more_in_middle_of_symlink`, but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_even_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1214,7 +1223,10 @@ fn dotdot_even_other_in_middle_of_symlink() {
 }
 
 /// Like `dotdot_even_other_in_middle_of_symlink`, but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_even_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1260,7 +1272,10 @@ fn dotdot_at_end_of_symlink() {
 }
 
 /// Like `dotdot_at_end_of_symlink`, but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_at_end_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1313,7 +1328,10 @@ fn dotdot_at_end_of_symlink_all_inside_dir() {
 }
 
 /// `dotdot_at_end_of_symlink_all_inside_dir`, but with a `/.` at the end.
+///
+/// This fails on Windows for unknown reasons. Patches welcome.
 #[test]
+//#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
     let tmpdir = tmpdir();
 
