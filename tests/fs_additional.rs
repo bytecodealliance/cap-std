@@ -5,36 +5,28 @@
 #[macro_use]
 mod sys_common;
 
-use cap_std::fs::{DirBuilder, OpenOptions};
+use cap_std::fs::{Dir, DirBuilder, OpenOptions};
 use cap_std::time::SystemClock;
 use std::io::{self, Read, Write};
 use std::path::Path;
 use std::str;
-use sys_common::io::{tmpdir, TempDir};
+use sys_common::io::tmpdir;
 use sys_common::symlink_supported;
 
 #[cfg(not(windows))]
-fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &Dir, dst: Q) -> io::Result<()> {
     tmpdir.symlink(src, dst)
 }
 #[cfg(not(windows))]
-fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
-    src: P,
-    tmpdir: &TempDir,
-    dst: Q,
-) -> io::Result<()> {
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &Dir, dst: Q) -> io::Result<()> {
     tmpdir.symlink(src, dst)
 }
 #[cfg(windows)]
-fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &TempDir, dst: Q) -> io::Result<()> {
+fn symlink_dir<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &Dir, dst: Q) -> io::Result<()> {
     tmpdir.symlink_dir(src, dst)
 }
 #[cfg(windows)]
-fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(
-    src: P,
-    tmpdir: &TempDir,
-    dst: Q,
-) -> io::Result<()> {
+fn symlink_file<P: AsRef<Path>, Q: AsRef<Path>>(src: P, tmpdir: &Dir, dst: Q) -> io::Result<()> {
     tmpdir.symlink_file(src, dst)
 }
 
@@ -1057,7 +1049,7 @@ fn dotdot_in_middle_of_symlink() {
     check!(tmpdir.write("target", foo));
     check!(tmpdir.create_dir("b"));
     let b = check!(tmpdir.open_dir("b"));
-    check!(b.symlink("..", "up"));
+    check!(symlink_dir("..", &b, "up"));
 
     let path = "b/up/target";
     let mut file = check!(tmpdir.open(path));
@@ -1075,7 +1067,7 @@ fn dotdot_more_in_middle_of_symlink() {
     check!(tmpdir.write("target", foo));
     check!(tmpdir.create_dir_all("b/c"));
     let b = check!(tmpdir.open_dir("b"));
-    check!(b.symlink("c/../..", "up"));
+    check!(symlink_dir("c/../..", &b, "up"));
 
     let path = "b/up/target";
     let mut file = check!(tmpdir.open(path));
@@ -1094,7 +1086,7 @@ fn dotdot_even_more_in_middle_of_symlink() {
     check!(tmpdir.create_dir_all("b/c"));
     check!(tmpdir.write("b/target", foo));
     let b = check!(tmpdir.open_dir("b"));
-    check!(b.symlink("c/../../b", "up"));
+    check!(symlink_dir("c/../../b", &b, "up"));
 
     let path = "b/up/target";
     let mut file = check!(tmpdir.open(path));
@@ -1115,7 +1107,7 @@ fn dotdot_at_end_of_symlink() {
     check!(tmpdir.write("target", foo));
     check!(tmpdir.create_dir("b"));
     let b = check!(tmpdir.open_dir("b"));
-    check!(b.symlink("..", "up"));
+    check!(symlink_dir("..", &b, "up"));
 
     // Do some things with `path` that might break with an `O_PATH` fd.
     // On Linux, the `permissions` part doesn't because cap-std uses
@@ -1143,7 +1135,7 @@ fn dotdot_at_end_of_symlink_all_inside_dir() {
     check!(tmpdir.write("dir/target", foo));
     check!(tmpdir.create_dir("dir/b"));
     let b = check!(tmpdir.open_dir("dir/b"));
-    check!(b.symlink("..", "up"));
+    check!(symlink_dir("..", &b, "up"));
 
     // Do some things with `path` that might break with an `O_PATH` fd.
     // On Linux, the `permissions` part doesn't because cap-std uses
