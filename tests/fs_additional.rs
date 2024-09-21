@@ -1060,7 +1060,7 @@ fn dotdot_in_middle_of_symlink() {
 
 /// Like `dotdot_in_middle_of_symlink` but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
 fn dotdot_slashdot_in_middle_of_symlink() {
     let tmpdir = tmpdir();
@@ -1080,9 +1080,9 @@ fn dotdot_slashdot_in_middle_of_symlink() {
 
 /// Same as `dotdot_in_middle_of_symlink`, but use two levels of `..`.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/..`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1101,9 +1101,9 @@ fn dotdot_more_in_middle_of_symlink() {
 
 /// Like `dotdot_more_in_middle_of_symlink`, but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1123,9 +1123,9 @@ fn dotdot_slashdot_more_in_middle_of_symlink() {
 /// Same as `dotdot_more_in_middle_of_symlink`, but the symlink doesn't
 /// include `c`.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/..`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1144,9 +1144,9 @@ fn dotdot_other_in_middle_of_symlink() {
 
 /// Like `dotdot_other_in_middle_of_symlink`, but with `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1184,9 +1184,9 @@ fn dotdot_even_more_in_middle_of_symlink() {
 
 /// Like `dotdot_even_more_in_middle_of_symlink`, but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_even_more_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1224,9 +1224,9 @@ fn dotdot_even_other_in_middle_of_symlink() {
 
 /// Like `dotdot_even_other_in_middle_of_symlink`, but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_even_other_in_middle_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1273,9 +1273,9 @@ fn dotdot_at_end_of_symlink() {
 
 /// Like `dotdot_at_end_of_symlink`, but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_at_end_of_symlink() {
     let tmpdir = tmpdir();
 
@@ -1329,9 +1329,9 @@ fn dotdot_at_end_of_symlink_all_inside_dir() {
 
 /// `dotdot_at_end_of_symlink_all_inside_dir`, but with a `/.` at the end.
 ///
-/// This fails on Windows for unknown reasons. Patches welcome.
+/// Windows doesn't appear to like symlinks that end with `/.`.
 #[test]
-//#[cfg_attr(windows, ignore)]
+#[cfg_attr(windows, ignore)]
 fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
     let tmpdir = tmpdir();
 
