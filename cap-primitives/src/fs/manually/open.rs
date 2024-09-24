@@ -314,6 +314,7 @@ impl<'start> Context<'start> {
 
     /// Push the components of `destination` onto the worklist stack.
     fn push_symlink_destination(&mut self, destination: PathBuf) -> io::Result<()> {
+        let at_end = self.components.is_empty();
         let trailing_slash = path_has_trailing_slash(&destination);
         let trailing_dot = path_has_trailing_dot(&destination);
         let trailing_dotdot = destination.ends_with(Component::ParentDir);
@@ -362,9 +363,11 @@ impl<'start> Context<'start> {
 
         // Record whether the new components ended with a path that implies
         // an open of `.` at the end of path resolution.
-        self.follow_with_dot |= trailing_dot | trailing_dotdot;
-        self.trailing_slash |= trailing_slash;
-        self.dir_required |= trailing_slash;
+        if at_end {
+            self.follow_with_dot |= trailing_dot | trailing_dotdot;
+            self.trailing_slash |= trailing_slash;
+            self.dir_required |= trailing_slash;
+        }
 
         // As an optimization, hold onto the `PathBuf` buffer for later reuse.
         self.reuse = destination;
