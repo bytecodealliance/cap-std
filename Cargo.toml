@@ -17,15 +17,15 @@ exclude = ["/.*"]
 rust-version = "1.63"
 
 [dev-dependencies]
-#async-std = { version = "1.10.0", features = ["attributes"] }
+async-std = { version = "1.13.0", features = ["attributes", "io_safety"] }
 anyhow = "1.0.37"
-#cap-async-std = { path = "cap-async-std", version = "^0.25.0" }
-cap-fs-ext = { path = "cap-fs-ext", version = "^3.3.0" }
-cap-net-ext = { path = "cap-net-ext", version = "^3.3.0" }
-cap-directories = { path = "cap-directories", version = "^3.3.0" }
-cap-std = { path = "cap-std", version = "^3.3.0" }
-cap-tempfile = { path = "cap-tempfile", version = "^3.3.0" }
-cap-rand = { path = "cap-rand", version = "^3.3.0" }
+cap-async-std = { path = "cap-async-std", version = "3.3.0" }
+cap-fs-ext = { path = "cap-fs-ext", version = "3.3.0" }
+cap-net-ext = { path = "cap-net-ext", version = "3.3.0" }
+cap-directories = { path = "cap-directories", version = "3.3.0" }
+cap-std = { path = "cap-std", version = "3.3.0" }
+cap-tempfile = { path = "cap-tempfile", version = "3.3.0" }
+cap-rand = { path = "cap-rand", version = "3.3.0" }
 rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
@@ -55,23 +55,23 @@ fs_utf8 = [
     "cap-fs-ext/fs_utf8",
     "cap-tempfile/fs_utf8",
 ]
-#async_std_fs_utf8 = [
-#    "cap-async-std/fs_utf8",
-#    "cap-fs-ext/async_std_fs_utf8"
-#]
+async_std_fs_utf8 = [
+    "cap-async-std/fs_utf8",
+    "cap-fs-ext/async_std_fs_utf8"
+]
 arf_strings = [
     "cap-std/arf_strings",
     "cap-fs-ext/arf_strings",
     "cap-tempfile/arf_strings",
 ]
-#async_std_arf_strings = [
-#    "cap-async-std/arf_strings",
-#    "cap-fs-ext/async_std_arf_strings"
-#]
+async_std_arf_strings = [
+    "cap-async-std/arf_strings",
+    "cap-fs-ext/async_std_arf_strings"
+]
 
 [workspace]
 members = [
-  #"cap-async-std",
+  "cap-async-std",
   "cap-fs-ext",
   "cap-net-ext",
   "cap-directories",

@@ -3,12 +3,14 @@ use crate::fs_utf8::{from_utf8, to_utf8, DirBuilder, File, Metadata, ReadDir};
 use async_std::{fs, io};
 use camino::{Utf8Path, Utf8PathBuf};
 use cap_primitives::AmbientAuthority;
+use io_lifetimes::raw::{AsRawFilelike, FromRawFilelike};
 use io_lifetimes::AsFilelike;
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::fmt;
+use std::mem::ManuallyDrop;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -170,8 +172,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<u64> {
-        let from = from_utf8(from)?;
-        let to = from_utf8(to)?;
+        let from = from_utf8(from.as_ref())?;
+        let to = from_utf8(to.as_ref())?;
         self.cap_std.copy(from, &to_dir.cap_std, to).await
     }
 
@@ -186,8 +188,8 @@ impl Dir {
         dst_dir: &Self,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
+        let src = from_utf8(src.as_ref())?;
+        let dst = from_utf8(dst.as_ref())?;
         self.cap_std.hard_link(src, &dst_dir.cap_std, dst).await
     }
 
@@ -321,8 +323,8 @@ impl Dir {
         to_dir: &Self,
         to: Q,
     ) -> io::Result<()> {
-        let from = from_utf8(from)?;
-        let to = from_utf8(to)?;
+        let from = from_utf8(from.as_ref())?;
+        let to = from_utf8(to.as_ref())?;
         self.cap_std.rename(from, &to_dir.cap_std, to).await
     }
 
@@ -388,8 +390,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink(original, link).await
     }
 
@@ -416,8 +418,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink_file(original, link).await
     }
 
@@ -444,8 +446,8 @@ impl Dir {
         original: P,
         link: Q,
     ) -> io::Result<()> {
-        let original = from_utf8(original)?;
-        let link = from_utf8(link)?;
+        let original = from_utf8(original.as_ref())?;
+        let link = from_utf8(link.as_ref())?;
         self.cap_std.symlink_dir(original, link).await
     }
 
@@ -655,15 +657,17 @@ impl Dir {
     /// This can be useful when interacting with other libraries and or C/C++
     /// code which has invoked `openat(..., O_DIRECTORY)` external to this
     /// crate.
-    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
-        spawn_blocking(move || {
-            cap_primitives::fs::open_dir(
-                &dir.as_filelike_view::<std::fs::File>(),
-                std::path::Component::CurDir.as_ref(),
-            )
-        })
-        .await
-        .map(Self::from_std_file)
+    pub async fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
+        // Our public API has a `&Filelike` here, which prevents us from doing
+        // a `clone` as we usually do. So instead, we use the raw fd, which we
+        // can clone and depend on it remaining open until we return.
+        let raw_filelike = dir.as_filelike_view::<std::fs::File>().as_raw_filelike();
+        // SAFETY: `raw_filelike` remains open for the duration of the `reopen_dir`
+        // call.
+        let file = ManuallyDrop::new(unsafe { std::fs::File::from_raw_filelike(raw_filelike) });
+        crate::fs::Dir::reopen_dir(&*file)
+            .await
+            .map(Self::from_cap_std)
     }
 }
 

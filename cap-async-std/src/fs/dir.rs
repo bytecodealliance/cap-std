@@ -13,12 +13,14 @@ use cap_primitives::fs::{
     remove_open_dir_all, rename, set_permissions, stat, DirOptions, FollowSymlinks, Permissions,
 };
 use cap_primitives::AmbientAuthority;
+use io_lifetimes::raw::{AsRawFilelike, FromRawFilelike};
 #[cfg(not(windows))]
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use io_lifetimes::{AsFilelike, FromFilelike};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::fmt;
+use std::mem::ManuallyDrop;
 #[cfg(unix)]
 use {
     crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream},
@@ -883,15 +885,20 @@ impl Dir {
     /// This can be useful when interacting with other libraries and or C/C++
     /// code which has invoked `openat(..., O_DIRECTORY)` external to this
     /// crate.
-    pub fn reopen_dir<Filelike: AsFilelike>(dir: &Filelike) -> io::Result<Self> {
-        spawn_blocking(move || {
-            cap_primitives::fs::open_dir(
-                &dir.as_filelike_view::<std::fs::File>(),
-                std::path::Component::CurDir.as_ref(),
-            )
+    pub async fn reopen_dir<Filelike: AsFilelike + Send>(dir: &Filelike) -> io::Result<Self> {
+        // Our public API has a `&Filelike` here, which prevents us from doing
+        // a `clone` as we usually do. So instead, we use the raw filelike, which
+        // we can clone and depend on it remaining open until we return.
+        let raw_filelike = dir.as_filelike_view::<std::fs::File>().as_raw_filelike();
+        // SAFETY: `raw_filelike` remains open for the duration of the
+        // `reopen_dir` call.
+        let file = ManuallyDrop::new(unsafe { std::fs::File::from_raw_filelike(raw_filelike) });
+        let dir = spawn_blocking(move || {
+            cap_primitives::fs::open_dir(&*file, std::path::Component::CurDir.as_ref())
         })
-        .await
-        .map(Self::from_std_file)
+        .await?
+        .into();
+        Ok(Self::from_std_file(dir))
     }
 }
 
