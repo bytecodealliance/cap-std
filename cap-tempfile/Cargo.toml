@@ -1,6 +1,6 @@
 [package]
 name = "cap-tempfile"
-version = "3.3.0"
+version = "3.4.0"
 description = "Capability-based temporary directories"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2021"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^3.3.0" }
+cap-std = { path = "../cap-std", version = "^3.4.0" }
 uuid = { version = "1.0.0", features = ["v4"] }
 camino = { version = "1.0.5", optional = true }
 
