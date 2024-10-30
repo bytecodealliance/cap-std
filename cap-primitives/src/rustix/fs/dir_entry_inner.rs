@@ -1,6 +1,5 @@
 use crate::fs::{
-    FileType, FollowSymlinks, ImplFileTypeExt, Metadata, MetadataExt, OpenOptions, ReadDir,
-    ReadDirInner,
+    FileType, FollowSymlinks, Metadata, MetadataExt, OpenOptions, ReadDir, ReadDirInner,
 };
 use rustix::fs::DirEntry;
 use std::ffi::{OsStr, OsString};
@@ -41,9 +40,12 @@ impl DirEntryInner {
         self.read_dir.remove_dir(self.file_name_bytes())
     }
 
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
     #[inline]
     #[allow(clippy::unnecessary_wraps)]
     pub(crate) fn file_type(&self) -> io::Result<FileType> {
+        use crate::fs::ImplFileTypeExt;
+
         Ok(match self.rustix.file_type() {
             rustix::fs::FileType::Directory => FileType::dir(),
             rustix::fs::FileType::RegularFile => FileType::file(),
@@ -56,6 +58,13 @@ impl DirEntryInner {
             rustix::fs::FileType::BlockDevice => FileType::ext(ImplFileTypeExt::block_device()),
             rustix::fs::FileType::Unknown => FileType::unknown(),
         })
+    }
+
+    #[cfg(any(target_os = "illumos", target_os = "solaris"))]
+    #[inline]
+    pub(crate) fn file_type(&self) -> io::Result<FileType> {
+        // These platforms don't have the file type on the dirent, so we must lstat the file.
+        self.metadata().map(|m| m.file_type())
     }
 
     #[inline]

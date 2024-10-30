@@ -142,10 +142,13 @@ fn tty_path() {
     #[cfg(unix)]
     use std::os::unix::fs::FileTypeExt;
 
-    // On FreeBSD, /dev/{tty,stdin,stdout,stderr} are aliases to different real
-    // devices.
     let paths: &[&str] = if cfg!(target_os = "freebsd") {
+        // On FreeBSD, /dev/{tty,stdin,stdout,stderr} are aliases to different
+        // real devices.
         &["/dev/ttyv0", "/dev/pts/0"]
+    } else if cfg!(target_os = "illumos") {
+        // On illumos, /dev/std{in,out,err} only exist if they're open.
+        &["/dev/tty", "/dev/pts/0"]
     } else {
         &["/dev/tty", "/dev/stdin", "/dev/stdout", "/dev/stderr"]
     };
@@ -162,7 +165,8 @@ fn tty_path() {
                             .as_ref()
                             .map(std::fs::canonicalize)
                             .map(Result::unwrap),
-                        Some(canonical)
+                        Some(canonical),
+                        "for path {path}, file_path matches canonicalized path"
                     );
                 }
             }
