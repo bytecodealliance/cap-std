@@ -10,7 +10,7 @@ use async_std::task::{Context, Poll};
 use camino::Utf8Path;
 use cap_primitives::AmbientAuthority;
 #[cfg(not(windows))]
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 #[cfg(windows)]
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::fmt;
@@ -93,8 +93,7 @@ impl File {
     /// This corresponds to [`async_std::fs::File::metadata`].
     #[inline]
     pub async fn metadata(&self) -> io::Result<Metadata> {
-        let clone = self.clone();
-        spawn_blocking(move || clone.metadata()).await
+        self.cap_std.metadata().await
     }
 
     // async_std doesn't have `try_clone`.
@@ -119,7 +118,7 @@ impl File {
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         crate::fs::File::open_ambient(path, ambient_authority)
             .await
             .map(Self::from_cap_std)
@@ -134,11 +133,11 @@ impl File {
     /// This function is not sandboxed and may access any path that the host
     /// process has access to.
     #[inline]
-    pub async fn create_ambient<P: AsRef<Path>>(
+    pub async fn create_ambient<P: AsRef<Utf8Path>>(
         path: P,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         crate::fs::File::create_ambient(path, ambient_authority)
             .await
             .map(Self::from_cap_std)
@@ -158,7 +157,7 @@ impl File {
         options: &OpenOptions,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<Self> {
-        let path = from_utf8(path)?;
+        let path = from_utf8(path.as_ref())?;
         crate::fs::File::open_ambient_with(path, options, ambient_authority)
             .await
             .map(Self::from_cap_std)

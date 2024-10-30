@@ -90,8 +90,7 @@ impl File {
     #[inline]
     pub async fn metadata(&self) -> io::Result<Metadata> {
         let clone = self.clone();
-        let sync = clone.std.as_filelike_view::<std::fs::File>();
-        spawn_blocking(move || metadata_from(&*sync)).await
+        spawn_blocking(move || metadata_from(&*clone.std.as_filelike_view::<std::fs::File>())).await
     }
 
     // async_std doesn't have `try_clone`.

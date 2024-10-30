@@ -9,9 +9,6 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.ico"
 )]
-// Allow cfg(feature = "async_std") even though it isn't a feature. async_std
-// support is temporarily disabled.
-#![allow(unexpected_cfgs)]
 
 mod dir_entry_ext;
 mod dir_ext;
@@ -24,6 +21,10 @@ mod open_options_sync_ext;
 mod reopen;
 
 pub use dir_entry_ext::DirEntryExt;
+#[cfg(feature = "async_std")]
+pub use dir_ext::AsyncDirExt;
+#[cfg(all(feature = "async_std", feature = "fs_utf8"))]
+pub use dir_ext::AsyncDirExtUtf8;
 #[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
 pub use dir_ext::DirExtUtf8;
 pub use dir_ext::{AccessType, DirExt, SystemTimeSpec};

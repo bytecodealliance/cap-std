@@ -1,7 +1,6 @@
 // Copied from https://doc.rust-lang.org/rust-by-example/std_misc/fs.html and
 // adapted to use this crate instead.
 
-/*
 use async_std::io;
 use async_std::io::prelude::*;
 use cap_async_std::ambient_authority;
@@ -111,8 +110,4 @@ async fn main() {
     cwd.remove_dir("a/c/d").await.unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
-}
-*/
-fn main() {
-    eprintln!("async-std doesn't have io_safety traits implemented yet");
 }

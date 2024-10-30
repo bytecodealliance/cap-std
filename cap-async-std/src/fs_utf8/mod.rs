@@ -25,9 +25,9 @@ pub use crate::fs::{DirBuilder, FileType, Metadata, OpenOptions, Permissions};
 // Re-export conditional types from `cap_primitives`.
 #[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
 pub use cap_primitives::fs::FileTypeExt;
-pub use cap_primitives::fs::{FileExt, OpenOptionsExt, MetadataExt};
 #[cfg(unix)]
 pub use cap_primitives::fs::{DirBuilderExt, PermissionsExt};
+pub use cap_primitives::fs::{FileExt, MetadataExt, OpenOptionsExt};
 
 // Re-export `camino` to make it easy for users to depend on the same
 // version we do, because we use its types in our public API.
@@ -37,7 +37,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 #[cfg(not(feature = "arf_strings"))]
 fn from_utf8<'a>(path: &'a Utf8Path) -> std::io::Result<&'a async_std::path::Path> {
-    Ok(path.as_std_path())
+    Ok(path.as_std_path().into())
 }
 
 #[cfg(feature = "arf_strings")]

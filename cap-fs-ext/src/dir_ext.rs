@@ -233,11 +233,23 @@ pub trait AsyncDirExt {
     ) -> io::Result<()>;
 
     /// Test for accessibility or existence of a filesystem object.
-    async fn access<P: AsRef<Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+    async fn access<P: AsRef<async_std::path::Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()>;
+
+    /// Test for accessibility or existence of a filesystem object, without
+    /// following symbolic links.
+    async fn access_symlink<P: AsRef<async_std::path::Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()>;
 
     /// Changes the permissions found on a file or a directory, without following
     /// symbolic links.
-    async fn set_symlink_permissions<P: AsRef<Path>>(
+    async fn set_symlink_permissions<P: AsRef<async_std::path::Path> + Send>(
         &self,
         path: P,
         perm: Permissions,
@@ -453,11 +465,12 @@ pub trait AsyncDirExtUtf8 {
     async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()>;
 
     /// Test for accessibility or existence of a filesystem object.
-    async fn access<P: AsRef<Utf8Path>>(&self, path: P, type_: AccessType) -> io::Result<()>;
+    async fn access<P: AsRef<Utf8Path> + Send>(&self, path: P, type_: AccessType)
+        -> io::Result<()>;
 
     /// Test for accessibility or existence of a filesystem object, without
     /// following symbolic links.
-    async fn access_symlink<P: AsRef<Utf8Path>>(
+    async fn access_symlink<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         type_: AccessType,
@@ -465,7 +478,7 @@ pub trait AsyncDirExtUtf8 {
 
     /// Changes the permissions found on a file or a directory, without following
     /// symbolic links.
-    async fn set_symlink_permissions<P: AsRef<Utf8Path>>(
+    async fn set_symlink_permissions<P: AsRef<Utf8Path> + Send>(
         &self,
         path: P,
         perm: Permissions,
@@ -924,8 +937,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
     ) -> io::Result<()> {
         use crate::OpenOptionsFollowExt;
         use cap_primitives::fs::_WindowsByHandle;
-        use cap_std::fs::OpenOptions;
-        use std::os::windows::fs::OpenOptionsExt;
+        use cap_std::fs::{OpenOptions, OpenOptionsExt};
         use windows_sys::Win32::Storage::FileSystem::{
             DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS,
             FILE_FLAG_OPEN_REPARSE_POINT,
@@ -938,7 +950,7 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
         opts.follow(FollowSymlinks::No);
         let file = self.open_with(path, &opts).await?;
 
-        let meta = file.metadata()?;
+        let meta = file.metadata().await?;
         if meta.file_type().is_symlink()
             && meta.file_attributes() & FILE_ATTRIBUTE_DIRECTORY == FILE_ATTRIBUTE_DIRECTORY
         {
@@ -954,6 +966,64 @@ impl AsyncDirExt for cap_async_std::fs::Dir {
         drop(file);
 
         Ok(())
+    }
+
+    /// Test for accessibility or existence of a filesystem object.
+    async fn access<P: AsRef<async_std::path::Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            access(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                type_,
+                FollowSymlinks::Yes,
+            )
+        })
+        .await
+    }
+
+    /// Test for accessibility or existence of a filesystem object, without
+    /// following symbolic links.
+    async fn access_symlink<P: AsRef<async_std::path::Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            access(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                type_,
+                FollowSymlinks::No,
+            )
+        })
+        .await
+    }
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    async fn set_symlink_permissions<P: AsRef<async_std::path::Path> + Send>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()> {
+        let path = path.as_ref().to_path_buf();
+        let clone = self.clone();
+        spawn_blocking(move || {
+            set_symlink_permissions(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                perm,
+            )
+        })
+        .await
     }
 }
 
@@ -1245,8 +1315,8 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         src: P,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
+        let src = from_utf8(src.as_ref())?;
+        let dst = from_utf8(dst.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || symlink(&src, &clone.as_filelike_view::<std::fs::File>(), &dst))
             .await
@@ -1279,9 +1349,9 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         src: P,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
+        let src = from_utf8(src.as_ref())?;
         let src_ = src.clone();
-        let dst = from_utf8(dst)?;
+        let dst = from_utf8(dst.as_ref())?;
         let clone = self.clone();
         // Call `stat` directly to avoid `async_trait` capturing `self`.
         let metadata = spawn_blocking(move || {
@@ -1313,8 +1383,8 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         src: P,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
+        let src = from_utf8(src.as_ref())?;
+        let dst = from_utf8(dst.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || symlink_file(&src, &clone.as_filelike_view::<std::fs::File>(), &dst))
             .await
@@ -1327,8 +1397,8 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         src: P,
         dst: Q,
     ) -> io::Result<()> {
-        let src = from_utf8(src)?;
-        let dst = from_utf8(dst)?;
+        let src = from_utf8(src.as_ref())?;
+        let dst = from_utf8(dst.as_ref())?;
         let clone = self.clone();
         spawn_blocking(move || symlink_dir(&src, &clone.as_filelike_view::<std::fs::File>(), &dst))
             .await
@@ -1358,8 +1428,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
     async fn remove_file_or_symlink<P: AsRef<Utf8Path> + Send>(&self, path: P) -> io::Result<()> {
         use crate::{FollowSymlinks, OpenOptionsFollowExt};
         use cap_primitives::fs::_WindowsByHandle;
-        use cap_std::fs::OpenOptions;
-        use std::os::windows::fs::OpenOptionsExt;
+        use cap_std::fs::{OpenOptions, OpenOptionsExt};
         use windows_sys::Win32::Storage::FileSystem::{
             DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_FLAG_BACKUP_SEMANTICS,
             FILE_FLAG_OPEN_REPARSE_POINT,
@@ -1372,7 +1441,7 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         opts.follow(FollowSymlinks::No);
         let file = self.open_with(path, &opts).await?;
 
-        let meta = file.metadata()?;
+        let meta = file.metadata().await?;
         if meta.file_type().is_symlink()
             && meta.file_attributes() & FILE_ATTRIBUTE_DIRECTORY == FILE_ATTRIBUTE_DIRECTORY
         {
@@ -1388,6 +1457,61 @@ impl AsyncDirExtUtf8 for cap_async_std::fs_utf8::Dir {
         drop(file);
 
         Ok(())
+    }
+
+    async fn access<P: AsRef<Utf8Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()> {
+        let path = from_utf8(path.as_ref())?;
+        let clone = self.clone();
+        spawn_blocking(move || {
+            access(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                type_,
+                FollowSymlinks::Yes,
+            )
+        })
+        .await
+    }
+
+    async fn access_symlink<P: AsRef<Utf8Path> + Send>(
+        &self,
+        path: P,
+        type_: AccessType,
+    ) -> io::Result<()> {
+        let path = from_utf8(path.as_ref())?;
+        let clone = self.clone();
+        spawn_blocking(move || {
+            access(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                type_,
+                FollowSymlinks::No,
+            )
+        })
+        .await
+    }
+
+    /// Changes the permissions found on a file or a directory, without following
+    /// symbolic links.
+    async fn set_symlink_permissions<P: AsRef<Utf8Path> + Send>(
+        &self,
+        path: P,
+        perm: Permissions,
+    ) -> io::Result<()> {
+        let path = from_utf8(path.as_ref())?;
+        let clone = self.clone();
+        spawn_blocking(move || {
+            set_symlink_permissions(
+                &clone.as_filelike_view::<std::fs::File>(),
+                path.as_ref(),
+                perm,
+            )
+        })
+        .await
     }
 }
 

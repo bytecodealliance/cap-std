@@ -36,12 +36,15 @@ impl Pool {
     /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub fn insert<A: ToSocketAddrs>(
+    pub async fn insert<A: ToSocketAddrs>(
         &mut self,
         addrs: A,
         ambient_authority: AmbientAuthority,
     ) -> io::Result<()> {
-        self.cap.insert(addrs, ambient_authority)
+        for addr in addrs.to_socket_addrs().await? {
+            self.cap.insert(addr, ambient_authority)?;
+        }
+        Ok(())
     }
 
     /// Add a specific [`net::SocketAddr`] to the pool.
@@ -65,11 +68,16 @@ impl Pool {
     /// # Ambient Authority
     ///
     /// This function allows ambient access to any IP address.
-    pub fn insert_ip_net_port_any(&mut self, ip_net: ipnet::IpNet, ambient_authority: AmbientAuthority) {
+    pub fn insert_ip_net_port_any(
+        &mut self,
+        ip_net: ipnet::IpNet,
+        ambient_authority: AmbientAuthority,
+    ) {
         self.cap.insert_ip_net_port_any(ip_net, ambient_authority)
     }
 
-    /// Add a range of network addresses, accepting a range of ports, to the pool.
+    /// Add a range of network addresses, accepting a range of ports, to the
+    /// pool.
     ///
     /// This grants access to the port range starting at `ports_start` and,
     /// if `ports_end` is provided, ending before `ports_end`.
@@ -84,7 +92,8 @@ impl Pool {
         ports_end: Option<u16>,
         ambient_authority: AmbientAuthority,
     ) {
-        self.cap.insert_ip_net_port_range(ip_net, ports_start, ports_end, ambient_authority)
+        self.cap
+            .insert_ip_net_port_range(ip_net, ports_start, ports_end, ambient_authority)
     }
 
     /// Add a range of network addresses with a specific port to the pool.

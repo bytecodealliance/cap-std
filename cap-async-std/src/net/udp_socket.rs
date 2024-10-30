@@ -337,7 +337,7 @@ impl IntoRawSocket for UdpSocket {
 impl From<UdpSocket> for OwnedSocket {
     #[inline]
     fn from(socket: UdpSocket) -> OwnedSocket {
-        self.std.into()
+        socket.std.into()
     }
 }
 

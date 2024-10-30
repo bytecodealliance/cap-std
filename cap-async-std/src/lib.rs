@@ -49,5 +49,5 @@ pub use cap_primitives::{ambient_authority, AmbientAuthority};
 // version we do, because we use its types in our public API.
 pub use async_std;
 // And these are also part of our public API
-pub use io_lifetimes;
 pub use cap_primitives::ipnet;
+pub use io_lifetimes;
