@@ -1,6 +1,6 @@
 [package]
 name = "cap-directories"
-version = "3.4.0"
+version = "3.4.1"
 description = "Capability-based standard directories for config, cache and other data"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -13,7 +13,7 @@ repository = "https://github.com/bytecodealliance/cap-std"
 edition = "2021"
 
 [dependencies]
-cap-std = { path = "../cap-std", version = "^3.4.0" }
+cap-std = { path = "../cap-std", version = "^3.4.1" }
 directories-next = "2.0.0"
 
 [target.'cfg(not(windows))'.dependencies]
