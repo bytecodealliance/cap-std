@@ -134,30 +134,54 @@ fn windows_open_special() {
     // Opening any of these should fail.
     for device in &[
         "CON", "PRN", "AUX", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
-        "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8",
-        "LPT9",
+        "COM8", "COM9", "COM¹", "COM²", "COM³", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5",
+        "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³",
     ] {
-        tmpdir.open(device).unwrap_err();
-        tmpdir.open(&format!(".\\{}", device)).unwrap_err();
-        tmpdir.open(&format!("{}.ext", device)).unwrap_err();
-        tmpdir.open(&format!(".\\{}.ext", device)).unwrap_err();
+        for prefix in &["", " ", ".", " .", ". ", ".\\", ".\\.", ". \\.", ".\\ ."] {
+            for suffix in &[
+                "",
+                " ",
+                ".",
+                ". ",
+                ".ext",
+                ".ext.",
+                ".ext. ",
+                ".ext ",
+                ".ext.more",
+                ".ext.more.",
+                ".ext.more ",
+                ".ext.more. ",
+                ".ext.more .",
+            ] {
+                match tmpdir
+                    .open(&format!("{}{}{}", prefix, device, suffix))
+                    .unwrap_err()
+                    .kind()
+                {
+                    std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
+                    kind => panic!("unexpected error: {:?}", kind),
+                }
 
-        let mut options = cap_std::fs::OpenOptions::new();
-        options.write(true);
-        tmpdir.open_with(device, &options).unwrap_err();
-        tmpdir
-            .open_with(&format!(".\\{}", device), &options)
-            .unwrap_err();
-        tmpdir
-            .open_with(&format!("{}.ext", device), &options)
-            .unwrap_err();
-        tmpdir
-            .open_with(&format!(".\\{}.ext", device), &options)
-            .unwrap_err();
+                let mut options = cap_std::fs::OpenOptions::new();
+                options.write(true);
+                match tmpdir
+                    .open_with(&format!("{}{}{}", prefix, device, suffix), &options)
+                    .unwrap_err()
+                    .kind()
+                {
+                    std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
+                    kind => panic!("unexpected error: {:?}", kind),
+                }
 
-        tmpdir.create(device).unwrap_err();
-        tmpdir.create(&format!(".\\{}", device)).unwrap_err();
-        tmpdir.create(&format!("{}.ext", device)).unwrap_err();
-        tmpdir.create(&format!(".\\{}.ext", device)).unwrap_err();
+                match tmpdir
+                    .create(&format!("{}{}{}", prefix, device, suffix))
+                    .unwrap_err()
+                    .kind()
+                {
+                    std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
+                    kind => panic!("unexpected error: {:?}", kind),
+                }
+            }
+        }
     }
 }
