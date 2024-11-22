@@ -17,6 +17,9 @@ fn main() {
                                                   // https://doc.rust-lang.org/unstable-book/library-features/windows-file-type-ext.html
     use_feature_or_nothing("windows_file_type_ext");
 
+    // Cfgs that users may set.
+    println!("cargo:rustc-check-cfg=cfg(racy_asserts)");
+
     // Don't rerun this on changes other than build.rs, as we only depend on
     // the rustc version.
     println!("cargo:rerun-if-changed=build.rs");
@@ -26,6 +29,7 @@ fn use_feature_or_nothing(feature: &str) {
     if has_feature(feature) {
         use_feature(feature);
     }
+    println!("cargo:rustc-check-cfg=cfg({})", feature);
 }
 
 fn use_feature(feature: &str) {
@@ -34,7 +38,7 @@ fn use_feature(feature: &str) {
 
 /// Test whether the rustc at `var("RUSTC")` supports the given feature.
 fn has_feature(feature: &str) -> bool {
-    can_compile(&format!(
+    can_compile(format!(
         "#![allow(stable_features)]\n#![feature({})]",
         feature
     ))
@@ -44,12 +48,11 @@ fn has_feature(feature: &str) -> bool {
 fn can_compile<T: AsRef<str>>(test: T) -> bool {
     use std::process::Stdio;
 
-    let out_dir = var("OUT_DIR").unwrap();
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
-    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string,
-    // as documented [here].
+    // Use `RUSTC_WRAPPER` if it's set, unless it's set to an empty string, as
+    // documented [here].
     // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
     let wrapper = var("RUSTC_WRAPPER")
         .ok()
@@ -68,8 +71,9 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
         .arg("--emit=metadata") // Do as little as possible but still parse.
         .arg("--target")
         .arg(target)
-        .arg("--out-dir")
-        .arg(out_dir); // Put the output somewhere inconsequential.
+        .arg("-o")
+        .arg("-")
+        .stdout(Stdio::null()); // We don't care about the output (only whether it builds or not)
 
     // If Cargo wants to set RUSTFLAGS, use that.
     if let Ok(rustflags) = var("CARGO_ENCODED_RUSTFLAGS") {
