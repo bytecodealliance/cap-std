@@ -18,6 +18,8 @@ pub(crate) struct MetadataExt {
     volume_serial_number: Option<u32>,
     number_of_links: Option<u32>,
     file_index: Option<u64>,
+    #[cfg(windows_change_time)]
+    change_time: Option<u64>,
 }
 
 impl MetadataExt {
@@ -26,7 +28,8 @@ impl MetadataExt {
     #[inline]
     #[allow(unused_variables)]
     pub(crate) fn from(file: &fs::File, std: &fs::Metadata) -> io::Result<Self> {
-        let (mut volume_serial_number, mut number_of_links, mut file_index) = (None, None, None);
+        let (mut volume_serial_number, mut number_of_links, mut file_index, mut change_time) =
+            (None, None, None, None);
 
         #[cfg(windows_by_handle)]
         {
@@ -40,10 +43,17 @@ impl MetadataExt {
             if let Some(some) = std.file_index() {
                 file_index = Some(some);
             }
+            if let Some(some) = std.change_time() {
+                change_time = Some(some);
+            }
         }
 
         #[cfg(not(windows_by_handle))]
-        if volume_serial_number.is_none() || number_of_links.is_none() || file_index.is_none() {
+        if volume_serial_number.is_none()
+            || number_of_links.is_none()
+            || file_index.is_none()
+            || change_time.is_none()
+        {
             let fileinfo = winx::winapi_util::file::information(file)?;
             if volume_serial_number.is_none() {
                 let t64: u64 = fileinfo.volume_serial_number();
@@ -58,6 +68,7 @@ impl MetadataExt {
             if file_index.is_none() {
                 file_index = Some(fileinfo.file_index());
             }
+            change_time = None;
         }
 
         Ok(Self::from_parts(
@@ -65,6 +76,7 @@ impl MetadataExt {
             volume_serial_number,
             number_of_links,
             file_index,
+            change_time,
         ))
     }
 
@@ -78,7 +90,8 @@ impl MetadataExt {
     #[inline]
     #[allow(unused_mut)]
     pub(crate) fn from_just_metadata(std: &fs::Metadata) -> Self {
-        let (mut volume_serial_number, mut number_of_links, mut file_index) = (None, None, None);
+        let (mut volume_serial_number, mut number_of_links, mut file_index, mut change_time) =
+            (None, None, None, None);
 
         #[cfg(windows_by_handle)]
         {
@@ -92,9 +105,18 @@ impl MetadataExt {
             if let Some(some) = std.file_index() {
                 file_index = Some(some);
             }
+            if let Some(some) = std.change_time() {
+                change_time = Some(some);
+            }
         }
 
-        Self::from_parts(std, volume_serial_number, number_of_links, file_index)
+        Self::from_parts(
+            std,
+            volume_serial_number,
+            number_of_links,
+            file_index,
+            change_time,
+        )
     }
 
     #[inline]
@@ -103,8 +125,13 @@ impl MetadataExt {
         volume_serial_number: Option<u32>,
         number_of_links: Option<u32>,
         file_index: Option<u64>,
+        change_time: Option<u64>,
     ) -> Self {
         use std::os::windows::fs::MetadataExt;
+
+        #[cfg(not(windows_change_time))]
+        let _ = change_time;
+
         Self {
             file_attributes: std.file_attributes(),
             #[cfg(windows_by_handle)]
@@ -118,6 +145,8 @@ impl MetadataExt {
             volume_serial_number,
             number_of_links,
             file_index,
+            #[cfg(windows_change_time)]
+            change_time,
         }
     }
 
@@ -189,6 +218,11 @@ impl std::os::windows::fs::MetadataExt for MetadataExt {
     #[inline]
     fn file_index(&self) -> Option<u64> {
         self.file_index
+    }
+
+    #[inline]
+    fn change_time(&self) -> Option<u64> {
+        self.change_time
     }
 }
 

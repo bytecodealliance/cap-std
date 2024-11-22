@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 mod symlink_junction;
 
 pub mod io;

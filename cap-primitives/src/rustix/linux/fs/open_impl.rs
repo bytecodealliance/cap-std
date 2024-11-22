@@ -140,7 +140,7 @@ pub(crate) fn open_beneath(
 fn openat2_supported() -> bool {
     // `openat2` is supported in Linux 5.6 and later. Parse the current
     // Linux version from the `release` field from `uname` to detect this.
-    let uname = rustix::process::uname();
+    let uname = rustix::system::uname();
     let release = uname.release().to_bytes();
     if let Some((major, minor)) = linux_major_minor(release) {
         if major >= 6 || (major == 5 && minor >= 6) {

@@ -40,3 +40,9 @@ features = [
 
 [dev-dependencies]
 cap-tempfile = { path = "../cap-tempfile" }
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+    'cfg(feature, values("async_std"))'
+]

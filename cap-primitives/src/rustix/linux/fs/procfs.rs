@@ -10,9 +10,9 @@ use crate::fs::{
     errors, open, read_link_unchecked, set_times_follow_unchecked, OpenOptions, SystemTimeSpec,
 };
 use io_lifetimes::{AsFd, AsFilelike};
-use rustix::fs::{chmodat, Mode, OFlags, RawMode};
-use rustix::io::proc_self_fd;
+use rustix::fs::{chmodat, AtFlags, Mode, OFlags, RawMode};
 use rustix::path::DecInt;
+use rustix::procfs::proc_self_fd;
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::{fs, io};
@@ -46,7 +46,12 @@ pub(crate) fn set_permissions_through_proc_self_fd(
 
     let dirfd = proc_self_fd()?;
     let mode = Mode::from_bits(perm.mode() as RawMode).ok_or_else(errors::invalid_flags)?;
-    Ok(chmodat(&dirfd, DecInt::from_fd(&opath), mode)?)
+    Ok(chmodat(
+        &dirfd,
+        DecInt::from_fd(&opath),
+        mode,
+        AtFlags::empty(),
+    )?)
 }
 
 pub(crate) fn set_times_through_proc_self_fd(

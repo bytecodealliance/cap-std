@@ -673,7 +673,6 @@ fn recursive_rmdir_toctou() {
     // `attack_dest/attack_file` is deleted.
     let tmpdir = tmpdir();
     let victim_del_path = "victim_del";
-    let victim_del_path_clone = victim_del_path.clone();
 
     // setup dest
     let attack_dest_dir = "attack_dest";
@@ -691,7 +690,7 @@ fn recursive_rmdir_toctou() {
     let tmpdir_clone = tmpdir.try_clone().unwrap();
     let _t = thread::spawn(move || {
         while drop_canary_weak.upgrade().is_some() {
-            let _ = tmpdir_clone.remove_dir_all(victim_del_path_clone);
+            let _ = tmpdir_clone.remove_dir_all(victim_del_path);
         }
     });
 

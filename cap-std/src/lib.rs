@@ -23,7 +23,7 @@
 //! [`Pool`]: net::Pool
 
 #![deny(missing_docs)]
-#![cfg_attr(doc_cfg, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(can_vector, feature(can_vector))]
 #![cfg_attr(seek_convenience, feature(seek_convenience))]

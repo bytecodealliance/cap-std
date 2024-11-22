@@ -14,7 +14,7 @@ edition = "2018"
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg=doc_cfg"]
+rustdoc-args = ["--cfg=docsrs"]
 
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
@@ -24,7 +24,7 @@ io-lifetimes = { version = "1.0.0", default-features = false }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.37.0", features = ["fs"] }
+rustix = { version = "0.38.0", features = ["fs"] }
 
 [features]
 default = []

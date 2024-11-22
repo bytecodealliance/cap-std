@@ -84,7 +84,7 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
 fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
     use rustix::fd::AsFd;
     use rustix::fs::AtFlags;
-    let procself_fd = rustix::io::proc_self_fd()?;
+    let procself_fd = rustix::procfs::proc_self_fd()?;
     let fdnum = rustix::path::DecInt::from_fd(&f.as_fd());
     let fdnum = fdnum.as_c_str();
     super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
@@ -265,7 +265,7 @@ mod test {
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
             let mode = Mode::from_bits_truncate(mode);
-            assert_eq!(0o666 & !umask, mode.bits());
+            assert_eq!(0o666 & !umask, mode.bits() & 0o777);
         }
         // And that we can write
         tf.write_all(b"hello world")?;
