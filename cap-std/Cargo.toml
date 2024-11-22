@@ -14,7 +14,7 @@ edition = "2021"
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg=doc_cfg"]
+rustdoc-args = ["--cfg=docsrs"]
 
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
