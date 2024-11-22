@@ -11,7 +11,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -34,7 +34,7 @@ jobs:
             rust: beta
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -88,7 +88,7 @@ jobs:
             rust: beta
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -116,7 +116,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -150,7 +150,7 @@ jobs:
         riscv64gc-unknown-linux-gnu
         arm-unknown-linux-gnueabihf
         aarch64-linux-android
-        wasm32-wasi
+        wasm32-wasip1
     - run: cargo check --workspace --all-targets --all-features --release -vv
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-musl
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=x86_64-unknown-linux-gnux32
@@ -164,7 +164,7 @@ jobs:
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=riscv64gc-unknown-linux-gnu
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=arm-unknown-linux-gnueabihf
     - run: cargo check --workspace --all-targets --all-features --release -vv --target=aarch64-linux-android
-    - run: cd cap-std && cargo check --features=fs_utf8 --release -vv --target=wasm32-wasi
+    - run: cd cap-std && cargo check --features=fs_utf8 --release -vv --target=wasm32-wasip1
 
   check_cross_nightly_windows:
     name: Check Cross-Compilation on Rust nightly on Windows
@@ -178,7 +178,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -201,7 +201,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, windows-latest, windows-2019, macos-latest, macos-11, beta, ubuntu-20.04, aarch64-ubuntu]
+        build: [stable, windows-latest, windows-2019, macos-latest, macos-12, beta, ubuntu-20.04, aarch64-ubuntu]
         include:
           - build: stable
             os: ubuntu-latest
@@ -215,8 +215,8 @@ jobs:
           - build: macos-latest
             os: macos-latest
             rust: stable
-          - build: macos-11
-            os: macos-11
+          - build: macos-12
+            os: macos-12
             rust: stable
           - build: beta
             os: ubuntu-latest
@@ -234,7 +234,7 @@ jobs:
             qemu_target: aarch64-linux-user
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -291,7 +291,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -311,7 +311,7 @@ jobs:
             rust: stable
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -345,7 +345,7 @@ jobs:
       RUSTFLAGS: --cfg linux_raw
       RUSTDOCFLAGS: --cfg linux_raw
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -365,7 +365,7 @@ jobs:
             rust: 1.63
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -381,7 +381,7 @@ jobs:
     name: Fuzz Targets
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
