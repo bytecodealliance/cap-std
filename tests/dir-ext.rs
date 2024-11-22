@@ -39,8 +39,9 @@ fn remove_symlink_to_dir() {
     }
 
     let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
-    let target = tempdir.create_dir("target").expect("create target dir");
-    drop(target);
+    {
+        let _target = tempdir.create_dir("target").expect("create target dir");
+    }
     tempdir.symlink("target", "link").expect("create symlink");
     assert!(tempdir.exists("link"), "link exists");
     tempdir
@@ -53,8 +54,9 @@ fn remove_symlink_to_dir() {
 #[test]
 fn do_not_remove_dir() {
     let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
-    let subdir = tempdir.create_dir("subdir").expect("create dir");
-    drop(subdir);
+    {
+        let _subdir = tempdir.create_dir("subdir").expect("create dir");
+    }
     assert!(tempdir.exists("subdir"), "subdir created");
     tempdir
         .remove_file_or_symlink("subdir")

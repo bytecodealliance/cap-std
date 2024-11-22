@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 #[cfg(unix)]
 mod unix;
 
