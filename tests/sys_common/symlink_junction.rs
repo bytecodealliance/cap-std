@@ -54,6 +54,7 @@ pub fn symlink_junction_utf8<P: AsRef<Utf8Path>, Q: AsRef<Utf8Path>>(
 ///
 /// This is enough for almost all of the buffers we're likely to work with in
 /// the Windows APIs we use.
+#[cfg(windows)]
 #[repr(C, align(8))]
 #[derive(Copy, Clone)]
 struct Align8<T: ?Sized>(pub T);
