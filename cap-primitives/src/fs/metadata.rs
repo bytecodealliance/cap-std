@@ -443,6 +443,11 @@ impl std::os::windows::fs::MetadataExt for Metadata {
     fn file_index(&self) -> Option<u64> {
         self.ext.file_index()
     }
+
+    #[inline]
+    fn change_time(&self) -> Option<u64> {
+        self.ext.change_time()
+    }
 }
 
 /// Extension trait to allow `volume_serial_number` etc. to be exposed by

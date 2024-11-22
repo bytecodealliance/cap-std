@@ -5,6 +5,7 @@
 #![allow(stable_features)]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
 #![cfg_attr(all(windows, windows_by_handle), feature(windows_by_handle))]
+#![cfg_attr(all(windows, windows_change_time), feature(windows_change_time))]
 #![cfg_attr(all(windows, windows_file_type_ext), feature(windows_file_type_ext))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/bytecodealliance/cap-std/main/media/cap-std.svg"
