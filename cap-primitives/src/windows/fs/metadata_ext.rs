@@ -66,6 +66,7 @@ impl MetadataExt {
             if file_index.is_none() {
                 file_index = Some(fileinfo.file_index());
             }
+            change_time = None;
         }
 
         Ok(Self::from_parts(
@@ -125,6 +126,10 @@ impl MetadataExt {
         change_time: Option<u64>,
     ) -> Self {
         use std::os::windows::fs::MetadataExt;
+
+        #[cfg(not(windows_change_time))]
+        let _ = change_time;
+
         Self {
             file_attributes: std.file_attributes(),
             #[cfg(windows_by_handle)]
