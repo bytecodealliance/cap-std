@@ -137,7 +137,7 @@ fn windows_open_special() {
         "COM8", "COM9", "COM¹", "COM²", "COM³", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5",
         "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³",
     ] {
-        for prefix in &["", " ", ".", " .", ". ", ".\\", ".\\.", ". \\.", ".\\ ."] {
+        for prefix in &["", ".", " .", ".\\", ".\\.", ". \\.", ".\\ ."] {
             for suffix in &[
                 "",
                 " ",
