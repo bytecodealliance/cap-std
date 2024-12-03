@@ -152,7 +152,7 @@ fn windows_open_special() {
             ".ext.more. ",
             ".ext.more .",
         ] {
-            let name = format!("{}{}{}", device, suffix);
+            let name = format!("{}{}", device, suffix);
             eprintln!("testing '{}'", name);
 
             match tmpdir.open(&name).unwrap_err().kind() {
