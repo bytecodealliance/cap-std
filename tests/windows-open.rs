@@ -153,8 +153,11 @@ fn windows_open_special() {
                 ".ext.more. ",
                 ".ext.more .",
             ] {
+                let name = format!("{}{}{}", prefix, device, suffix);
+                eprintln!("testing '{}'", name);
+
                 match tmpdir
-                    .open(&format!("{}{}{}", prefix, device, suffix))
+                    .open(&name)
                     .unwrap_err()
                     .kind()
                 {
@@ -165,7 +168,7 @@ fn windows_open_special() {
                 let mut options = cap_std::fs::OpenOptions::new();
                 options.write(true);
                 match tmpdir
-                    .open_with(&format!("{}{}{}", prefix, device, suffix), &options)
+                    .open_with(&name, &options)
                     .unwrap_err()
                     .kind()
                 {
@@ -174,7 +177,7 @@ fn windows_open_special() {
                 }
 
                 match tmpdir
-                    .create(&format!("{}{}{}", prefix, device, suffix))
+                    .create(&name)
                     .unwrap_err()
                     .kind()
                 {
