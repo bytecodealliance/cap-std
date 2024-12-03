@@ -156,31 +156,19 @@ fn windows_open_special() {
                 let name = format!("{}{}{}", prefix, device, suffix);
                 eprintln!("testing '{}'", name);
 
-                match tmpdir
-                    .open(&name)
-                    .unwrap_err()
-                    .kind()
-                {
+                match tmpdir.open(&name).unwrap_err().kind() {
                     std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
                     kind => panic!("unexpected error: {:?}", kind),
                 }
 
                 let mut options = cap_std::fs::OpenOptions::new();
                 options.write(true);
-                match tmpdir
-                    .open_with(&name, &options)
-                    .unwrap_err()
-                    .kind()
-                {
+                match tmpdir.open_with(&name, &options).unwrap_err().kind() {
                     std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
                     kind => panic!("unexpected error: {:?}", kind),
                 }
 
-                match tmpdir
-                    .create(&name)
-                    .unwrap_err()
-                    .kind()
-                {
+                match tmpdir.create(&name).unwrap_err().kind() {
                     std::io::ErrorKind::NotFound | std::io::ErrorKind::PermissionDenied => {}
                     kind => panic!("unexpected error: {:?}", kind),
                 }
