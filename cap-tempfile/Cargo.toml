@@ -24,7 +24,7 @@ rand = "0.8.1"
 rustix = { version = "0.38.0", features = ["procfs"] }
 
 [target.'cfg(windows)'.dev-dependencies.windows-sys]
-version = "0.52.0"
+version = ">=0.52, <=0.59"
 features = [
     "Win32_Foundation",
 ]

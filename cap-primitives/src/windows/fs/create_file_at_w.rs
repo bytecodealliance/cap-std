@@ -95,10 +95,10 @@ pub unsafe fn CreateFileAtW(
     // sorry that I cannot give more details on these functions".
     //
     // [unofficial blog posts]: https://mecanik.dev/en/posts/convert-dos-and-nt-paths-using-rtl-functions/
-    assert!(dir != 0);
+    assert!(dir != 0 as HANDLE);
 
     // Extended attributes are not implemented yet.
-    if htemplatefile != 0 {
+    if htemplatefile != 0 as HANDLE {
         SetLastError(ERROR_NOT_SUPPORTED);
         return HandleOrInvalid::from_raw_handle(INVALID_HANDLE_VALUE as _);
     }
