@@ -58,7 +58,7 @@ fn open_at(start: &fs::File, path: &Path, opts: &OpenOptions) -> io::Result<fs::
         match component {
             Component::Prefix(_) | Component::RootDir => {
                 rebuilt.push(component);
-                dir = 0;
+                dir = 0 as HANDLE;
             }
             Component::Normal(_) => {
                 rebuilt.push(component);
@@ -70,7 +70,7 @@ fn open_at(start: &fs::File, path: &Path, opts: &OpenOptions) -> io::Result<fs::
                     // path by dropping the directory base. It's ok to do
                     // this because we're not sandboxing at this level of the
                     // code.
-                    if dir == 0 {
+                    if dir == 0 as HANDLE {
                         return Err(io::Error::from_raw_os_error(ERROR_ACCESS_DENIED as _));
                     }
                     rebuilt = match file_path(start) {
@@ -79,7 +79,7 @@ fn open_at(start: &fs::File, path: &Path, opts: &OpenOptions) -> io::Result<fs::
                             return Err(io::Error::from_raw_os_error(ERROR_ACCESS_DENIED as _));
                         }
                     };
-                    dir = 0;
+                    dir = 0 as HANDLE;
                     // And then pop the last component of that.
                     let _ = rebuilt.pop();
                 }
@@ -93,7 +93,7 @@ fn open_at(start: &fs::File, path: &Path, opts: &OpenOptions) -> io::Result<fs::
     // If we ended up re-rooting, use Windows' `CreateFileW` instead of our
     // own `CreateFileAtW` so that it does the requisite magic for absolute
     // paths.
-    if dir == 0 {
+    if dir == 0 as HANDLE {
         // We're calling the windows-sys `CreateFileW` which expects a
         // NUL-terminated filename, so add a NUL terminator.
         wide.push(0);

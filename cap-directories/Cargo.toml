@@ -20,7 +20,7 @@ directories-next = "2.0.0"
 rustix = { version = "0.38.0" }
 
 [target.'cfg(windows)'.dependencies.windows-sys]
-version = "0.52.0"
+version = ">=0.52, <=0.59"
 features = [
     "Win32_Foundation",
 ]
