@@ -123,13 +123,13 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
 }
 
 impl<'d> TempFile<'d> {
-    /// Crate a new temporary file in the provided directory.
+    /// Create a new temporary file in the provided directory.
     pub fn new(dir: &'d Dir) -> io::Result<Self> {
         let (fd, name) = new_tempfile(dir, false)?;
         Ok(Self { dir, fd, name })
     }
 
-    /// Crate a new temporary file in the provided directory that will not have
+    /// Create a new temporary file in the provided directory that will not have
     /// a name. This corresponds to [`tempfile::tempfile_in`].
     ///
     /// [`tempfile::tempfile_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile_in.html
