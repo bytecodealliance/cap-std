@@ -244,7 +244,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
 
         # Download and build qemu from source since the most recent release is
         # way faster at arm emulation than the current version github actions'
