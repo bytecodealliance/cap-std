@@ -258,19 +258,19 @@ fn open_dir_nofollow() {
             let name = format!("{}{}", symlink_dir, suffix);
             check!(tmpdir.open_dir(&name));
             // On Windows, a trailing dot is stripped early.
-            if cfg!(not(windows)) || suffix != &"/." {
-                check!(tmpdir.open_dir_nofollow(&name));
-            } else {
+            if cfg!(windows) || suffix == &"/." || cfg!(target_os = "linux") {
                 assert!(tmpdir.open_dir_nofollow(&name).is_err());
+            } else {
+                check!(tmpdir.open_dir_nofollow(&name));
             }
             for dir_name in &["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
                 check!(tmpdir.open_dir(&name));
                 // On Windows, a trailing dot is stripped early.
-                if cfg!(not(windows)) || suffix != &"/." {
-                    check!(tmpdir.open_dir_nofollow(&name));
-                } else {
+                if cfg!(windows) || suffix == &"/." || cfg!(target_os = "linux") {
                     assert!(tmpdir.open_dir_nofollow(&name).is_err());
+                } else {
+                    check!(tmpdir.open_dir_nofollow(&name));
                 }
             }
         }
@@ -296,7 +296,11 @@ fn open_dir_nofollow() {
             #[cfg(not(windows))]
             {
                 check!(tmpdir.open_dir(&name));
-                check!(tmpdir.open_dir_nofollow(&name));
+                if cfg!(target_os = "linux") {
+                    assert!(tmpdir.open_dir_nofollow(&name).is_err());
+                } else {
+                    check!(tmpdir.open_dir_nofollow(&name));
+                }
             }
             for dir_name in &["dir", "symlink_dir"] {
                 let name = format!("{}/../{}", dir_name, name);
@@ -308,7 +312,11 @@ fn open_dir_nofollow() {
                 #[cfg(not(windows))]
                 {
                     check!(tmpdir.open_dir(&name));
-                    check!(tmpdir.open_dir_nofollow(&name));
+                    if cfg!(target_os = "linux") {
+                        assert!(tmpdir.open_dir_nofollow(&name).is_err());
+                    } else {
+                        check!(tmpdir.open_dir_nofollow(&name));
+                    }
                 }
             }
         }
