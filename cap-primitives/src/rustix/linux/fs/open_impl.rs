@@ -9,6 +9,7 @@
 
 #[cfg(racy_asserts)]
 use crate::fs::is_same_file;
+use crate::fs::FollowSymlinks;
 use crate::fs::{manually, OpenOptions};
 use std::path::Path;
 use std::{fs, io};
@@ -82,13 +83,11 @@ pub(crate) fn open_beneath(
         // times, because there's no limit on how often this can happen. The actual
         // number here is currently an arbitrarily chosen guess.
         for _ in 0..4 {
-            match openat2(
-                start,
-                path_c_str,
-                oflags,
-                mode,
-                ResolveFlags::BENEATH | ResolveFlags::NO_MAGICLINKS,
-            ) {
+            let mut resolve_flags = ResolveFlags::BENEATH | ResolveFlags::NO_MAGICLINKS;
+            if options.follow == FollowSymlinks::No {
+                resolve_flags |= ResolveFlags::NO_SYMLINKS;
+            }
+            match openat2(start, path_c_str, oflags, mode, resolve_flags) {
                 Ok(file) => {
                     let file = fs::File::from_into_fd(file);
 
