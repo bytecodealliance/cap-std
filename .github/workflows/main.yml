@@ -371,6 +371,10 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
+
+    - name: Use specific dependency versions for Rust 1.63 compatibility.
+      run: cargo update --package=once_cell --precise=1.20.3
+
     # Don't use --all-features because some of the features have dependencies
     # that don't work on newer Rust versions.
     - run: cargo test --workspace --features=fs_utf8,arf_strings
