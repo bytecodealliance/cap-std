@@ -42,7 +42,13 @@ pub(crate) mod errors;
 //
 // On FreeBSD, use optimized implementations based on
 // `O_RESOLVE_BENEATH`/`AT_RESOLVE_BENEATH` and `O_PATH` when available.
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 pub(crate) use crate::rustix::darwin::fs::*;
 #[cfg(target_os = "freebsd")]
 pub(crate) use crate::rustix::freebsd::fs::*;
@@ -57,13 +63,22 @@ pub(crate) use crate::fs::{
     manually::canonicalize as canonicalize_impl,
     via_parent::set_times_nofollow as set_times_nofollow_impl,
 };
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 pub(super) use file_path::file_path_by_ttyname_or_seaching;
 #[cfg(not(any(
     target_os = "android",
     target_os = "linux",
     target_os = "macos",
-    target_os = "ios"
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
 )))]
 pub(crate) use file_path::file_path_by_ttyname_or_seaching as file_path;
 #[cfg(not(any(

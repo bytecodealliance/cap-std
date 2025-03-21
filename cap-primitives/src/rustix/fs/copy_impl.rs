@@ -5,7 +5,13 @@
 use crate::fs::{open, OpenOptions};
 #[cfg(any(target_os = "android", target_os = "linux"))]
 use rustix::fs::copy_file_range;
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 use rustix::fs::{
     copyfile_state_alloc, copyfile_state_free, copyfile_state_get_copied, copyfile_state_t,
     fclonefileat, fcopyfile, CloneFlags, CopyfileFlags,
@@ -78,7 +84,10 @@ fn open_to_and_set_permissions(
     target_os = "linux",
     target_os = "android",
     target_os = "macos",
-    target_os = "ios"
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
 )))]
 pub(crate) fn copy_impl(
     from_start: &fs::File,
@@ -159,7 +168,13 @@ pub(crate) fn copy_impl(
     Ok(written)
 }
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 #[allow(non_upper_case_globals)]
 #[allow(unsafe_code)]
 pub(crate) fn copy_impl(

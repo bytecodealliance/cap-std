@@ -144,7 +144,10 @@ impl ImplMetadataExt {
                 target_os = "freebsd",
                 target_os = "openbsd",
                 target_os = "macos",
-                target_os = "ios"
+                target_os = "ios",
+                target_os = "tvos",
+                target_os = "watchos",
+                target_os = "visionos",
             ))]
             created: system_time_from_rustix(
                 stat.st_birthtime.try_into().unwrap(),
@@ -163,6 +166,9 @@ impl ImplMetadataExt {
                 target_os = "openbsd",
                 target_os = "macos",
                 target_os = "ios",
+                target_os = "tvos",
+                target_os = "watchos",
+                target_os = "visionos",
                 target_os = "netbsd"
             )))]
             created: None,

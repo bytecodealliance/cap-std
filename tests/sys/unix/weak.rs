@@ -33,7 +33,13 @@ use std::sync::atomic::{self, AtomicUsize, Ordering};
 
 // We can use true weak linkage on ELF targets.
 #[macro_export]
-#[cfg(not(any(target_os = "macos", target_os = "ios")))]
+#[cfg(not(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+)))]
 macro_rules! weak {
     (fn $name:ident($($t:ty),*) -> $ret:ty) => (
         let ref $name: ExternWeak<unsafe extern "C" fn($($t),*) -> $ret> = {
@@ -48,7 +54,13 @@ macro_rules! weak {
 }
 
 // On non-ELF targets, use the dlsym approximation of weak linkage.
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 pub(crate) use crate::dlsym as weak;
 
 pub(crate) struct ExternWeak<F> {
