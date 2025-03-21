@@ -157,9 +157,6 @@ pub trait FileExt {
         Ok(())
     }
 
-    /// Returns the current position within the file.
-    fn tell(&self) -> io::Result<u64>;
-
     /// Adjust the flags associated with this file.
     fn fdstat_set_flags(&self, flags: u16) -> io::Result<()>;
 
