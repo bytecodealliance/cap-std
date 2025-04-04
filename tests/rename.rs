@@ -26,7 +26,17 @@ fn no_such_file_or_directory() -> String {
 
 /* // TODO: Platform-specific error code.
 cfg_if::cfg_if! {
-    if #[cfg(any(target_os = "macos", target_os = "netbsd", target_os = "freebsd", target_os = "openbsd", target_os = "ios", target_os = "dragonfly"))] {
+    if #[cfg(any(
+        target_os = "macos",
+        target_os = "netbsd",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+        target_os = "dragonfly"
+    ))] {
         fn rename_file_over_dir() -> String {
             rustix::io::Errno::ISDIR.into().to_string()
         }

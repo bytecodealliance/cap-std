@@ -571,7 +571,16 @@ fn file_with_trailing_slashdot_ambient() {
     assert!(Dir::open_ambient_dir(dir.path().join("file/..."), ambient_authority()).is_err());
 }
 
-#[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
+#[cfg(all(
+    unix,
+    not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+    ))
+))]
 #[test]
 fn dir_searchable_unreadable() {
     use cap_std::fs::{DirBuilder, DirBuilderExt};
@@ -593,7 +602,16 @@ fn dir_searchable_unreadable() {
 /// This test is the same as `dir_searchable_unreadable` but uses `std::fs`'
 /// ambient API instead of `cap_std`. The purpose of this test is to
 /// confirm fundamentally OS-specific differences.
-#[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
+#[cfg(all(
+    unix,
+    not(any(
+        target_os = "ios",
+        target_os = "macos",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+    ))
+))]
 #[test]
 fn dir_searchable_unreadable_ambient() {
     use std::fs;
@@ -615,7 +633,13 @@ fn dir_searchable_unreadable_ambient() {
 
 /// On Darwin, we don't have a race-free way to create a subdirectory within
 /// a directory that we don't have read access to.
-#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[cfg(any(
+    target_os = "ios",
+    target_os = "macos",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+))]
 #[test]
 fn dir_searchable_unreadable() {
     use cap_std::fs::{DirBuilder, DirBuilderExt};

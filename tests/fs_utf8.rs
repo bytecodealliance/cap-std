@@ -341,7 +341,16 @@ fn file_test_io_read_write_at() {
 // following symlinks.
 #[test]
 #[cfg(unix)]
-#[cfg_attr(any(target_os = "macos", target_os = "ios"), ignore)]
+#[cfg_attr(
+    any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
+    ),
+    ignore
+)]
 fn set_get_unix_permissions() {
     use cap_std::fs::PermissionsExt;
 

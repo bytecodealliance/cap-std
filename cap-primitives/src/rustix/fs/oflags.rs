@@ -27,6 +27,9 @@ pub(in super::super) fn compute_oflags(options: &OpenOptions) -> io::Result<OFla
     #[cfg(not(any(
         target_os = "ios",
         target_os = "macos",
+        target_os = "tvos",
+        target_os = "watchos",
+        target_os = "visionos",
         target_os = "freebsd",
         target_os = "fuchsia"
     )))]

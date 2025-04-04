@@ -655,6 +655,7 @@ fn socket_flags(blocking: Blocking) -> rustix::net::SocketFlags {
         target_os = "ios",
         target_os = "tvos",
         target_os = "watchos",
+        target_os = "visionos",
         target_os = "haiku"
     )))]
     {
@@ -668,6 +669,7 @@ fn socket_flags(blocking: Blocking) -> rustix::net::SocketFlags {
         target_os = "ios",
         target_os = "tvos",
         target_os = "watchos",
+        target_os = "visionos",
         target_os = "haiku"
     )))]
     match blocking {
@@ -688,7 +690,8 @@ fn set_socket_flags(fd: &OwnedFd, blocking: Blocking) -> io::Result<()> {
         target_os = "macos",
         target_os = "ios",
         target_os = "tvos",
-        target_os = "watchos"
+        target_os = "watchos",
+        target_os = "visionos",
     ))]
     {
         rustix::io::ioctl_fioclex(fd)?;
@@ -699,7 +702,8 @@ fn set_socket_flags(fd: &OwnedFd, blocking: Blocking) -> io::Result<()> {
         target_os = "macos",
         target_os = "ios",
         target_os = "tvos",
-        target_os = "watchos"
+        target_os = "watchos",
+        target_os = "visionos"
     ))]
     match blocking {
         Blocking::Yes => (),
