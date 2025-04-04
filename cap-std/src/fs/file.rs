@@ -524,11 +524,6 @@ impl crate::fs::FileExt for File {
     }
 
     #[inline]
-    fn tell(&self) -> std::result::Result<u64, io::Error> {
-        std::os::wasi::fs::FileExt::tell(&self.std)
-    }
-
-    #[inline]
     fn fdstat_set_flags(&self, flags: u16) -> std::result::Result<(), io::Error> {
         std::os::wasi::fs::FileExt::fdstat_set_flags(&self.std, flags)
     }
