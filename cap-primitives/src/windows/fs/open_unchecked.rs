@@ -205,12 +205,14 @@ fn handle_open_result(
             }
 
             // Windows truncates symlinks into normal files, so truncation
-            // may be disabled above; do it manually if needed.
+            // may be disabled above; do it manually if needed. Note that this
+            // is expected to always succeed for normal files, but this will
+            // fail if a directory was opened as directories don't support
+            // truncation.
             if manually_trunc {
-                // Unwrap is ok because 0 never overflows, and we'll only
-                // have `manually_trunc` set when the file is opened for
-                // writing.
-                f.set_len(0).unwrap();
+                if let Err(e) = f.set_len(0) {
+                    return Err(OpenUncheckedError::Other(e));
+                }
             }
             Ok(f)
         }
