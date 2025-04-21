@@ -87,7 +87,7 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
 fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
     use rustix::fd::AsFd;
     use rustix::fs::AtFlags;
-    let procself_fd = rustix::procfs::proc_self_fd()?;
+    let procself_fd = rustix_linux_procfs::proc_self_fd()?;
     let fdnum = rustix::path::DecInt::from_fd(f.as_fd());
     let fdnum = fdnum.as_c_str();
     super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {

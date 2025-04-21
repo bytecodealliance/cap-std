@@ -19,7 +19,7 @@ cap-std = { path = "../cap-std", optional = true, version = "^3.4.3" }
 iana-time-zone = "0.1.57"
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.38.0", features = ["time"] }
+rustix = { version = "1.0.0", features = ["time"] }
 
 [target.'cfg(windows)'.dependencies]
 once_cell = "1.5.2"

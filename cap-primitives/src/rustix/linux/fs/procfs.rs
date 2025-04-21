@@ -13,7 +13,7 @@ use crate::fs::{
 use io_lifetimes::{AsFd, AsFilelike};
 use rustix::fs::{chmodat, AtFlags, Mode, OFlags, RawMode};
 use rustix::path::DecInt;
-use rustix::procfs::proc_self_fd;
+use rustix_linux_procfs::proc_self_fd;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
