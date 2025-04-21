@@ -1,6 +1,6 @@
 [package]
 name = "cap-std-workspace"
-version = "3.4.3"
+version = "3.4.4"
 description = "Capability-based version of the Rust standard library"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -19,13 +19,13 @@ rust-version = "1.63"
 [dev-dependencies]
 async-std = { version = "1.13.0", features = ["attributes", "io_safety"] }
 anyhow = "1.0.37"
-cap-async-std = { path = "cap-async-std", version = "3.4.3" }
-cap-fs-ext = { path = "cap-fs-ext", version = "3.4.3" }
-cap-net-ext = { path = "cap-net-ext", version = "3.4.3" }
-cap-directories = { path = "cap-directories", version = "3.4.3" }
-cap-std = { path = "cap-std", version = "3.4.3" }
-cap-tempfile = { path = "cap-tempfile", version = "3.4.3" }
-cap-rand = { path = "cap-rand", version = "3.4.3" }
+cap-async-std = { path = "cap-async-std", version = "3.4.4" }
+cap-fs-ext = { path = "cap-fs-ext", version = "3.4.4" }
+cap-net-ext = { path = "cap-net-ext", version = "3.4.4" }
+cap-directories = { path = "cap-directories", version = "3.4.4" }
+cap-std = { path = "cap-std", version = "3.4.4" }
+cap-tempfile = { path = "cap-tempfile", version = "3.4.4" }
+cap-rand = { path = "cap-rand", version = "3.4.4" }
 rand = "0.8.1"
 tempfile = "3.1.0"
 camino = "1.0.5"
