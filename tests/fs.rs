@@ -1645,3 +1645,19 @@ fn create_dir_long_paths() {
         std::io::ErrorKind::NotFound
     );
 }
+
+/// Ensure that opening a directory with the truncation flag set is an error,
+/// not a panic inside of cap-std.
+#[test]
+fn open_directory_with_truncate_is_error() {
+    use cap_fs_ext::OpenOptionsMaybeDirExt;
+    let tmpdir = tmpdir();
+    let mut options = OpenOptions::new();
+    options
+        .truncate(true)
+        .maybe_dir(true)
+        .read(true)
+        .write(true);
+    tmpdir.create_dir("test").unwrap();
+    assert!(tmpdir.open_with("test", &options).is_err());
+}
