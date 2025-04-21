@@ -28,7 +28,7 @@ cap-tempfile = { path = "../cap-tempfile" }
 rustix = { version = "1.0.0", features = ["fs", "process", "termios", "time"] }
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
-rustix-linux-procfs = "0.1.0"
+rustix-linux-procfs = "0.1.1"
 
 [target.'cfg(windows)'.dependencies]
 winx = "0.36.0"

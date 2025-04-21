@@ -24,7 +24,7 @@ rand = "0.8.1"
 rustix = { version = "1.0.0" }
 
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
-rustix-linux-procfs = "0.1.0"
+rustix-linux-procfs = "0.1.1"
 
 [target.'cfg(windows)'.dev-dependencies.windows-sys]
 version = ">=0.52, <=0.59"
