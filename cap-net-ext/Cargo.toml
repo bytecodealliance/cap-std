@@ -15,5 +15,5 @@ edition = "2021"
 [dependencies]
 cap-std = { path = "../cap-std", version = "^3.4.3" }
 cap-primitives = { path = "../cap-primitives", version = "^3.4.3" }
-rustix = { version = "0.38.0", features = ["net"] }
+rustix = { version = "1.0.0", features = ["net"] }
 smallvec = "1.10"

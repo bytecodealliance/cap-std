@@ -158,11 +158,7 @@ impl TcpListenerExt for TcpListener {
         set_socket_flags(&stream, blocking)?;
 
         // We know have a TCP socket, so we know we'll get an IP address.
-        let addr = match addr {
-            Some(rustix::net::SocketAddrAny::V4(v4)) => SocketAddr::V4(v4),
-            Some(rustix::net::SocketAddrAny::V6(v6)) => SocketAddr::V6(v6),
-            _ => unreachable!(),
-        };
+        let addr = SocketAddr::try_from(addr.unwrap()).unwrap();
 
         Ok((TcpStream::from(stream), addr))
     }

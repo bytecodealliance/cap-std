@@ -17,7 +17,7 @@ cap-std = { path = "../cap-std", version = "^3.4.3" }
 directories-next = "2.0.0"
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.38.0" }
+rustix = { version = "1.0.0" }
 
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = ">=0.52, <=0.59"

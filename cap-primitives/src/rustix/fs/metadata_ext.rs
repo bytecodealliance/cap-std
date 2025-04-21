@@ -102,9 +102,6 @@ impl ImplMetadataExt {
     #[inline]
     #[allow(unused_comparisons)] // NB: rust-lang/rust#115823 requires this here instead of on `st_dev` processing below
     pub(crate) fn from_rustix(stat: Stat) -> Metadata {
-        #[cfg(not(target_os = "wasi"))]
-        use rustix::fs::StatExt;
-
         Metadata {
             file_type: ImplFileTypeExt::from_raw_mode(stat.st_mode as RawMode),
             len: u64::try_from(stat.st_size).unwrap(),
@@ -113,26 +110,15 @@ impl ImplMetadataExt {
             #[cfg(target_os = "wasi")]
             permissions: ImplPermissionsExt::default(),
 
-            #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
-            modified: system_time_from_rustix(
-                stat.mtime().try_into().unwrap(),
-                stat.st_mtime_nsec as _,
-            ),
-            #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
-            accessed: system_time_from_rustix(
-                stat.atime().try_into().unwrap(),
-                stat.st_atime_nsec as _,
-            ),
-
-            #[cfg(target_os = "netbsd")]
+            #[cfg(not(target_os = "wasi"))]
             modified: system_time_from_rustix(
                 stat.st_mtime.try_into().unwrap(),
-                stat.st_mtimensec as _,
+                stat.st_mtime_nsec as _,
             ),
-            #[cfg(target_os = "netbsd")]
+            #[cfg(not(target_os = "wasi"))]
             accessed: system_time_from_rustix(
                 stat.st_atime.try_into().unwrap(),
-                stat.st_atimensec as _,
+                stat.st_atime_nsec as _,
             ),
 
             #[cfg(target_os = "wasi")]
@@ -143,6 +129,7 @@ impl ImplMetadataExt {
             #[cfg(any(
                 target_os = "freebsd",
                 target_os = "openbsd",
+                target_os = "netbsd",
                 target_os = "macos",
                 target_os = "ios",
                 target_os = "tvos",
@@ -152,12 +139,6 @@ impl ImplMetadataExt {
             created: system_time_from_rustix(
                 stat.st_birthtime.try_into().unwrap(),
                 stat.st_birthtime_nsec as _,
-            ),
-
-            #[cfg(target_os = "netbsd")]
-            created: system_time_from_rustix(
-                stat.st_birthtime.try_into().unwrap(),
-                stat.st_birthtimensec as _,
             ),
 
             // `stat.st_ctime` is the latest status change; we want the creation.
@@ -200,23 +181,17 @@ impl ImplMetadataExt {
                 rdev: u64::try_from(stat.st_rdev).unwrap(),
                 size: u64::try_from(stat.st_size).unwrap(),
                 #[cfg(not(target_os = "wasi"))]
-                atime: i64::try_from(stat.atime()).unwrap(),
-                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
+                atime: i64::try_from(stat.st_atime).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 atime_nsec: stat.st_atime_nsec as _,
-                #[cfg(target_os = "netbsd")]
-                atime_nsec: stat.st_atimensec as _,
                 #[cfg(not(target_os = "wasi"))]
-                mtime: i64::try_from(stat.mtime()).unwrap(),
-                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
+                mtime: i64::try_from(stat.st_mtime).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 mtime_nsec: stat.st_mtime_nsec as _,
-                #[cfg(target_os = "netbsd")]
-                mtime_nsec: stat.st_mtimensec as _,
                 #[cfg(not(target_os = "wasi"))]
-                ctime: i64::try_from(stat.ctime()).unwrap(),
-                #[cfg(not(any(target_os = "netbsd", target_os = "wasi")))]
+                ctime: i64::try_from(stat.st_ctime).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 ctime_nsec: stat.st_ctime_nsec as _,
-                #[cfg(target_os = "netbsd")]
-                ctime_nsec: stat.st_ctimensec as _,
                 #[cfg(not(target_os = "wasi"))]
                 blksize: u64::try_from(stat.st_blksize).unwrap(),
                 #[cfg(not(target_os = "wasi"))]

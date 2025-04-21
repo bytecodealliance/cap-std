@@ -21,7 +21,7 @@ io-extras = { version = "0.18.3", features = ["use_async_std"] }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = { version = "0.38.0", features = ["fs"] }
+rustix = { version = "1.0.0", features = ["fs"] }
 
 [features]
 default = []
