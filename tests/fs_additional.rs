@@ -1380,3 +1380,97 @@ fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
         let _entry = check!(entry);
     }
 }
+
+#[test]
+fn unlink_trailing_slash() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create("file"));
+
+    let err = tmpdir.remove_file("file/").unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::ENOTDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY as _)
+    );
+}
+
+#[test]
+fn unlink_trailing_slash_ambient() {
+    let dir = tempfile::tempdir().unwrap();
+    check!(std::fs::File::create(dir.path().join("file")));
+
+    let err = std::fs::remove_file(dir.path().join("file/")).unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::ENOTDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY as _)
+    );
+}
+
+#[test]
+fn create_trailing_slash() {
+    let tmpdir = tmpdir();
+
+    let err = tmpdir.create("file/").unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::EISDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY_NOT_SUPPORTED as _)
+    );
+}
+
+#[test]
+fn create_trailing_slash_ambient() {
+    let dir = tempfile::tempdir().unwrap();
+
+    let err = std::fs::File::create(dir.path().join("file/")).unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::EISDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY_NOT_SUPPORTED as _)
+    );
+}
+
+#[test]
+fn open_trailing_slash() {
+    let tmpdir = tmpdir();
+    check!(tmpdir.create("file"));
+
+    let err = tmpdir.open("file/").unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::ENOTDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY as _)
+    );
+}
+
+#[test]
+fn open_trailing_slash_ambient() {
+    let dir = tempfile::tempdir().unwrap();
+    check!(std::fs::File::create(dir.path().join("file")));
+
+    let err = std::fs::File::open(dir.path().join("file/")).unwrap_err();
+
+    #[cfg(unix)]
+    assert_eq!(err.raw_os_error(), Some(libc::ENOTDIR));
+    #[cfg(windows)]
+    assert_eq!(
+        err.raw_os_error(),
+        Some(windows_sys::Win32::Foundation::ERROR_DIRECTORY as _)
+    );
+}
