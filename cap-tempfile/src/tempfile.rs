@@ -60,7 +60,7 @@ impl<'d> Debug for TempFile<'d> {
 }
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
-fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
+fn new_tempfile_linux(d: &Dir, anonymous: bool, mode: Option<u32>) -> io::Result<Option<File>> {
     use rustix::fs::{Mode, OFlags};
     // openat's API uses WRONLY. There may be use cases for reading too, so let's
     // support it.
@@ -70,7 +70,8 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     }
     // We default to 0o666, same as main rust when creating new files; this will be
     // modified by umask: <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
-    let mode = Mode::from_raw_mode(0o666);
+    let mode = Mode::from(mode.unwrap_or(0o666));
+
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
         Ok(r) => Ok(Some(File::from(r))),
@@ -100,10 +101,15 @@ fn generate_name_in(subdir: &Dir, f: &File) -> io::Result<String> {
 /// Create a new temporary file in the target directory, which may or may not
 /// have a (randomly generated) name at this point. If anonymous is specified,
 /// the file will be deleted
-fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> {
+fn new_tempfile(
+    d: &Dir,
+    anonymous: bool,
+    #[cfg(any(target_os = "android", target_os = "linux"))] unnamed_mode: Option<u32>,
+    #[cfg(unix)] named_mode: Option<u32>,
+) -> io::Result<(File, Option<String>)> {
     // On Linux, try O_TMPFILE
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    if let Some(f) = new_tempfile_linux(d, anonymous)? {
+    if let Some(f) = new_tempfile_linux(d, anonymous, unnamed_mode)? {
         return Ok((f, None));
     }
     // Otherwise, fall back to just creating a randomly named file.
@@ -111,6 +117,13 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
     opts.read(true);
     opts.write(true);
     opts.create_new(true);
+    #[cfg(unix)]
+    {
+        use cap_std::fs::OpenOptionsExt;
+        if let Some(mode) = named_mode {
+            opts.mode(mode);
+        }
+    }
     let (f, name) = super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
         d.open_with(name, &opts)
     })?;
@@ -125,7 +138,34 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
 impl<'d> TempFile<'d> {
     /// Create a new temporary file in the provided directory.
     pub fn new(dir: &'d Dir) -> io::Result<Self> {
-        let (fd, name) = new_tempfile(dir, false)?;
+        let (fd, name) = new_tempfile(
+            dir,
+            false,
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            None,
+            #[cfg(unix)]
+            None,
+        )?;
+        Ok(Self { dir, fd, name })
+    }
+
+    /// Create a new temporary file in the provided directory, with the provided modes.
+    /// `unnamed_mode` is used when the file is unnamed (created with `O_TMPFILE`).
+    /// `named_mode` is used when the file is named (fallback case).
+    /// Process umask is taken into account for the actual file mode.
+    #[cfg(unix)]
+    pub fn new_with_modes(
+        dir: &'d Dir,
+        #[cfg(any(target_os = "android", target_os = "linux"))] unnamed_mode: Option<u32>,
+        named_mode: Option<u32>,
+    ) -> io::Result<Self> {
+        let (fd, name) = new_tempfile(
+            dir,
+            false,
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            unnamed_mode,
+            named_mode,
+        )?;
         Ok(Self { dir, fd, name })
     }
 
@@ -134,7 +174,15 @@ impl<'d> TempFile<'d> {
     ///
     /// [`tempfile::tempfile_in`]: https://docs.rs/tempfile/latest/tempfile/fn.tempfile_in.html
     pub fn new_anonymous(dir: &'d Dir) -> io::Result<File> {
-        new_tempfile(dir, true).map(|v| v.0)
+        new_tempfile(
+            dir,
+            true,
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            None,
+            #[cfg(unix)]
+            Some(0o000),
+        )
+        .map(|v| v.0)
     }
 
     /// Get a reference to the underlying file.
@@ -145,6 +193,11 @@ impl<'d> TempFile<'d> {
     /// Get a mutable reference to the underlying file.
     pub fn as_file_mut(&mut self) -> &mut File {
         &mut self.fd
+    }
+
+    /// Returns whether the tempfile is named (visible in the folder)
+    pub fn is_named(&self) -> bool {
+        self.name.is_some()
     }
 
     fn impl_replace(mut self, destname: &OsStr) -> io::Result<()> {
@@ -264,13 +317,10 @@ mod test {
         // Test that we created with the right permissions
         #[cfg(any(target_os = "android", target_os = "linux"))]
         {
-            use cap_std::fs_utf8::MetadataExt;
-            use rustix::fs::Mode;
+            use cap_std::fs::MetadataExt;
             let umask = get_process_umask()?;
-            let metadata = tf.as_file().metadata().unwrap();
-            let mode = metadata.mode();
-            let mode = Mode::from_bits_truncate(mode);
-            assert_eq!(0o666 & !umask, mode.bits() & 0o777);
+            let mode = tf.as_file().metadata()?.mode();
+            assert_eq!(0o666 & !umask, mode & 0o777);
         }
         // And that we can write
         tf.write_all(b"hello world")?;
@@ -293,6 +343,29 @@ mod test {
             assert_eq!(&buf, "hello world, I'm anonymous");
         } else if cfg!(windows) {
             eprintln!("notice: Detected older Windows");
+        }
+
+        // Test that we can create with 0o000 mode
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        {
+            use cap_std::fs::MetadataExt;
+            let mut tf = TempFile::new_with_modes(&td, Some(0o000), Some(0o000))?;
+            assert_eq!(tf.as_file().metadata()?.mode() & 0o777, 0o000);
+            tf.write_all(b"mode 0")?;
+            tf.replace("testfile")?;
+            let metadata = td.metadata("testfile")?;
+            assert_eq!(metadata.len(), 6);
+            assert_eq!(metadata.mode() & 0o777, 0o000);
+        }
+
+        // Test that mode is limited by umask
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        {
+            use cap_std::fs::MetadataExt;
+            let tf = TempFile::new_with_modes(&td, Some(0o777), Some(0o777))?;
+            let umask = get_process_umask()?;
+            assert_ne!(umask & 0o777, 0o000);
+            assert_eq!(tf.as_file().metadata()?.mode() & 0o777, 0o777 & !umask);
         }
 
         td.close()
