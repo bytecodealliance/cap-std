@@ -815,7 +815,9 @@ fn copy_file_dst_dir() {
     let out = "out";
 
     check!(tmpdir.create(out));
-    if let Ok(..) = tmpdir.copy(out, &tmpdir, ".") { panic!() }
+    if let Ok(..) = tmpdir.copy(out, &tmpdir, ".") {
+        panic!()
+    }
 }
 
 #[test]
@@ -838,7 +840,9 @@ fn copy_file_src_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    if let Ok(..) = tmpdir.copy(".", &tmpdir, out) { panic!() }
+    if let Ok(..) = tmpdir.copy(".", &tmpdir, out) {
+        panic!()
+    }
     assert!(!tmpdir.exists(out));
 }
 
@@ -976,7 +980,9 @@ fn read_link() {
 #[test]
 fn readlink_not_symlink() {
     let tmpdir = tmpdir();
-    if tmpdir.read_link(".").is_ok() { panic!("wanted a failure") }
+    if tmpdir.read_link(".").is_ok() {
+        panic!("wanted a failure")
+    }
 }
 
 #[cfg(not(windows))]
@@ -1030,9 +1036,13 @@ fn links_work() {
     assert_eq!(v, b"foobar".to_vec());
 
     // can't link to yourself
-    if let Ok(..) = tmpdir.hard_link(input, &tmpdir, input) { panic!("wanted a failure") }
+    if let Ok(..) = tmpdir.hard_link(input, &tmpdir, input) {
+        panic!("wanted a failure")
+    }
     // can't link to something that doesn't exist
-    if tmpdir.hard_link("foo", &tmpdir, "bar").is_ok() { panic!("wanted a failure") }
+    if tmpdir.hard_link("foo", &tmpdir, "bar").is_ok() {
+        panic!("wanted a failure")
+    }
 }
 
 #[test]
@@ -1049,7 +1059,9 @@ fn chmod_works() {
     let attr = check!(tmpdir.metadata(file));
     assert!(attr.permissions().readonly());
 
-    if tmpdir.set_permissions("foo", p.clone()).is_ok() { panic!("wanted an error") }
+    if tmpdir.set_permissions("foo", p.clone()).is_ok() {
+        panic!("wanted an error")
+    }
 
     p.set_readonly(false);
     check!(tmpdir.set_permissions(file, p));

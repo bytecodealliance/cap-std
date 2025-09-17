@@ -45,7 +45,9 @@ async fn main() {
     println!("`mkdir a`");
 
     // Create a directory, returns `io::Result<()>`
-    if let Err(why) = cwd.create_dir("a") { println!("! {:?}", why.kind()) }
+    if let Err(why) = cwd.create_dir("a") {
+        println!("! {:?}", why.kind())
+    }
 
     println!("`echo hello > a/b.txt`");
     // The previous match can be simplified using the `unwrap_or_else` method
