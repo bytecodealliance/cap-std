@@ -51,11 +51,11 @@ fn paths_containing_nul() {
     tmpdir.create(dummy_file).expect("creating dummy_file");
 
     assert_invalid_input("rename1", tmpdir.rename("\0", &tmpdir, "a"));
-    assert_invalid_input("rename2", tmpdir.rename(&dummy_file, &tmpdir, "\0"));
+    assert_invalid_input("rename2", tmpdir.rename(dummy_file, &tmpdir, "\0"));
     assert_invalid_input("copy1", tmpdir.copy("\0", &tmpdir, "a"));
-    assert_invalid_input("copy2", tmpdir.copy(&dummy_file, &tmpdir, "\0"));
+    assert_invalid_input("copy2", tmpdir.copy(dummy_file, &tmpdir, "\0"));
     assert_invalid_input("hard_link1", tmpdir.hard_link("\0", &tmpdir, "a"));
-    assert_invalid_input("hard_link2", tmpdir.hard_link(&dummy_file, &tmpdir, "\0"));
+    assert_invalid_input("hard_link2", tmpdir.hard_link(dummy_file, &tmpdir, "\0"));
     //fixmeassert_invalid_input("soft_link1", tmpdir.soft_link("\0", &tmpdir,
     // "a")); fixmeassert_invalid_input("soft_link2",
     // tmpdir.soft_link(&dummy_file, &tmpdir, "\0"));

@@ -7,12 +7,12 @@ use std::path::Path;
 fn test_dir_entries() {
     let tmpdir = tempfile::tempdir().expect("construct tempdir");
 
-    let entries = dir_entries(&tmpdir.path());
+    let entries = dir_entries(tmpdir.path());
     assert_eq!(entries.len(), 0, "empty dir");
 
     let _f1 = std::fs::File::create(tmpdir.path().join("file1")).expect("create file1");
 
-    let entries = dir_entries(&tmpdir.path());
+    let entries = dir_entries(tmpdir.path());
     assert!(
         entries.get("file1").is_some(),
         "directory contains `file1`: {:?}",
@@ -21,7 +21,7 @@ fn test_dir_entries() {
     assert_eq!(entries.len(), 1);
 
     let _f2 = std::fs::File::create(tmpdir.path().join("file2")).expect("create file1");
-    let entries = dir_entries(&tmpdir.path());
+    let entries = dir_entries(tmpdir.path());
     assert!(
         entries.get("file1").is_some(),
         "directory contains `file1`: {:?}",

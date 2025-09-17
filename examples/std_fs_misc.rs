@@ -39,14 +39,11 @@ fn main() {
     println!("`mkdir a`");
 
     // Create a directory, returns `io::Result<()>`
-    match cwd.create_dir("a") {
-        Err(why) => println!("! {:?}", why.kind()),
-        Ok(_) => {}
-    }
+    if let Err(why) = cwd.create_dir("a") { println!("! {:?}", why.kind()) }
 
     println!("`echo hello > a/b.txt`");
     // The previous match can be simplified using the `unwrap_or_else` method
-    echo("hello", &mut cwd, &Path::new("a/b.txt")).unwrap_or_else(|why| {
+    echo("hello", &mut cwd, Path::new("a/b.txt")).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
 
@@ -57,7 +54,7 @@ fn main() {
     });
 
     println!("`touch a/c/e.txt`");
-    touch(&mut cwd, &Path::new("a/c/e.txt")).unwrap_or_else(|why| {
+    touch(&mut cwd, Path::new("a/c/e.txt")).unwrap_or_else(|why| {
         println!("! {:?}", why.kind());
     });
 
@@ -71,7 +68,7 @@ fn main() {
     }
 
     println!("`cat a/c/b.txt`");
-    match cat(&mut cwd, &Path::new("a/c/b.txt")) {
+    match cat(&mut cwd, Path::new("a/c/b.txt")) {
         Err(why) => println!("! {:?}", why.kind()),
         Ok(s) => println!("> {}", s),
     }

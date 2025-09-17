@@ -72,7 +72,7 @@ impl TcpListener {
     ///
     /// This corresponds to [`std::net::TcpListener::incoming`].
     #[inline]
-    pub fn incoming(&self) -> Incoming {
+    pub fn incoming(&self) -> Incoming<'_> {
         let incoming = self.std.incoming();
         Incoming::from_std(incoming)
     }

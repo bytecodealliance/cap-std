@@ -37,7 +37,7 @@ pub(super) fn open_parent<'path, 'borrow>(
 ///  - Append a `.` to a path with a trailing `..` to avoid requiring our
 ///    callers to special-case `..`.
 ///  - Bare absolute paths are ok.
-fn split_parent(path: &Path) -> Option<(&Path, Component)> {
+fn split_parent(path: &Path) -> Option<(&Path, Component<'_>)> {
     if path.as_os_str().is_empty() {
         return None;
     }

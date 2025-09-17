@@ -55,15 +55,15 @@ fn socket_smoke_test_ip4() {
         let _t = thread::spawn(move || {
             let client =
                 UdpSocket::new(AddressFamily::of_socket_addr(client_ip), Blocking::Yes).unwrap();
-            t!(client_pool.bind_existing_udp_socket(&client, &client_ip));
+            t!(client_pool.bind_existing_udp_socket(&client, client_ip));
             rx1.recv().unwrap();
-            t!(p.send_to_udp_socket_addr(&client, &[99], &server_ip));
+            t!(p.send_to_udp_socket_addr(&client, &[99], server_ip));
             tx2.send(()).unwrap();
         });
 
         let server =
             UdpSocket::new(AddressFamily::of_socket_addr(server_ip), Blocking::Yes).unwrap();
-        t!(server_pool.bind_existing_udp_socket(&server, &server_ip));
+        t!(server_pool.bind_existing_udp_socket(&server, server_ip));
         tx1.send(()).unwrap();
         let mut buf = [0];
         let (nread, src) = t!(server.recv_from(&mut buf));
@@ -81,7 +81,7 @@ fn socket_name() {
         pool.insert_socket_addr(addr, ambient_authority());
 
         let server = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-        t!(pool.bind_existing_udp_socket(&server, &addr));
+        t!(pool.bind_existing_udp_socket(&server, addr));
         assert_eq!(addr, t!(server.local_addr()));
     })
 }
@@ -95,12 +95,12 @@ fn socket_peer() {
         pool2.insert_socket_addr(addr2, ambient_authority());
 
         let server = UdpSocket::new(AddressFamily::of_socket_addr(addr1), Blocking::Yes).unwrap();
-        t!(pool1.bind_existing_udp_socket(&server, &addr1));
+        t!(pool1.bind_existing_udp_socket(&server, addr1));
         assert_eq!(
             server.peer_addr().unwrap_err().kind(),
             ErrorKind::NotConnected
         );
-        t!(pool2.connect_existing_udp_socket(&server, &addr2));
+        t!(pool2.connect_existing_udp_socket(&server, addr2));
         assert_eq!(addr2, t!(server.peer_addr()));
     })
 }
@@ -114,15 +114,15 @@ fn udp_clone_smoke() {
         pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = UdpSocket::new(AddressFamily::of_socket_addr(addr1), Blocking::Yes).unwrap();
-        t!(pool1.bind_existing_udp_socket(&sock1, &addr1));
+        t!(pool1.bind_existing_udp_socket(&sock1, addr1));
         let sock2 = UdpSocket::new(AddressFamily::of_socket_addr(addr2), Blocking::Yes).unwrap();
-        t!(pool2.bind_existing_udp_socket(&sock2, &addr2));
+        t!(pool2.bind_existing_udp_socket(&sock2, addr2));
 
         let _t = thread::spawn(move || {
             let mut buf = [0, 0];
             assert_eq!(sock2.recv_from(&mut buf).unwrap(), (1, addr1));
             assert_eq!(buf[0], 1);
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], addr1));
         });
 
         let sock3 = t!(sock1.try_clone());
@@ -132,7 +132,7 @@ fn udp_clone_smoke() {
         let p = pool2.clone();
         let _t = thread::spawn(move || {
             rx1.recv().unwrap();
-            t!(p.send_to_udp_socket_addr(&sock3, &[1], &addr2));
+            t!(p.send_to_udp_socket_addr(&sock3, &[1], addr2));
             tx2.send(()).unwrap();
         });
         tx1.send(()).unwrap();
@@ -151,16 +151,16 @@ fn udp_clone_two_read() {
         pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = UdpSocket::new(AddressFamily::of_socket_addr(addr1), Blocking::Yes).unwrap();
-        t!(pool1.bind_existing_udp_socket(&sock1, &addr1));
+        t!(pool1.bind_existing_udp_socket(&sock1, addr1));
         let sock2 = UdpSocket::new(AddressFamily::of_socket_addr(addr2), Blocking::Yes).unwrap();
-        t!(pool2.bind_existing_udp_socket(&sock2, &addr2));
+        t!(pool2.bind_existing_udp_socket(&sock2, addr2));
         let (tx1, rx) = channel();
         let tx2 = tx1.clone();
 
         let _t = thread::spawn(move || {
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[1], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[1], addr1));
             rx.recv().unwrap();
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], addr1));
             rx.recv().unwrap();
         });
 
@@ -190,9 +190,9 @@ fn udp_clone_two_write() {
         pool2.insert_socket_addr(addr2, ambient_authority());
 
         let sock1 = UdpSocket::new(AddressFamily::of_socket_addr(addr1), Blocking::Yes).unwrap();
-        t!(pool1.bind_existing_udp_socket(&sock1, &addr1));
+        t!(pool1.bind_existing_udp_socket(&sock1, addr1));
         let sock2 = UdpSocket::new(AddressFamily::of_socket_addr(addr2), Blocking::Yes).unwrap();
-        t!(pool2.bind_existing_udp_socket(&sock2, &addr2));
+        t!(pool2.bind_existing_udp_socket(&sock2, addr2));
 
         let (tx, rx) = channel();
         let (serv_tx, serv_rx) = channel();
@@ -210,12 +210,12 @@ fn udp_clone_two_write() {
         let tx2 = tx.clone();
         let p = pool2.clone();
         let _t = thread::spawn(move || {
-            if p.send_to_udp_socket_addr(&sock3, &[1], &addr2).is_ok() {
+            if p.send_to_udp_socket_addr(&sock3, &[1], addr2).is_ok() {
                 let _ = tx2.send(());
             }
             done.send(()).unwrap();
         });
-        if pool2.send_to_udp_socket_addr(&sock1, &[2], &addr2).is_ok() {
+        if pool2.send_to_udp_socket_addr(&sock1, &[2], addr2).is_ok() {
             let _ = tx.send(());
         }
         drop(tx);
@@ -254,7 +254,7 @@ fn timeouts() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&stream, &addr));
+    t!(pool.bind_existing_udp_socket(&stream, addr));
     let dur = Duration::new(15410, 0);
 
     assert_eq!(None, t!(stream.read_timeout()));
@@ -282,7 +282,7 @@ fn test_read_timeout() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&stream, &addr));
+    t!(pool.bind_existing_udp_socket(&stream, addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
 
     let mut buf = [0; 10];
@@ -291,8 +291,7 @@ fn test_read_timeout() {
     loop {
         let kind = stream
             .recv_from(&mut buf)
-            .err()
-            .expect("expected error")
+            .expect_err("expected error")
             .kind();
         if kind != ErrorKind::Interrupted {
             assert!(
@@ -314,10 +313,10 @@ fn test_read_with_timeout() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&stream, &addr));
+    t!(pool.bind_existing_udp_socket(&stream, addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
 
-    t!(pool.send_to_udp_socket_addr(&stream, b"hello world", &addr));
+    t!(pool.send_to_udp_socket_addr(&stream, b"hello world", addr));
 
     let mut buf = [0; 11];
     t!(stream.recv_from(&mut buf));
@@ -327,8 +326,7 @@ fn test_read_with_timeout() {
     loop {
         let kind = stream
             .recv_from(&mut buf)
-            .err()
-            .expect("expected error")
+            .expect_err("expected error")
             .kind();
         if kind != ErrorKind::Interrupted {
             assert!(
@@ -352,7 +350,7 @@ fn test_timeout_zero_duration() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let socket = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&socket, &addr));
+    t!(pool.bind_existing_udp_socket(&socket, addr));
 
     let result = socket.set_write_timeout(Some(Duration::new(0, 0)));
     let err = result.unwrap_err();
@@ -371,7 +369,7 @@ fn connect_send_recv() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let socket = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&socket, &addr));
+    t!(pool.bind_existing_udp_socket(&socket, addr));
     t!(pool.connect_existing_udp_socket(&socket, addr));
 
     t!(socket.send(b"hello world"));
@@ -388,7 +386,7 @@ fn connect_send_peek_recv() {
         pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-        t!(pool.bind_existing_udp_socket(&socket, &addr));
+        t!(pool.bind_existing_udp_socket(&socket, addr));
         t!(pool.connect_existing_udp_socket(&socket, addr));
 
         t!(socket.send(b"hello world"));
@@ -414,8 +412,8 @@ fn peek_from() {
         pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-        t!(pool.bind_existing_udp_socket(&socket, &addr));
-        t!(pool.send_to_udp_socket_addr(&socket, b"hello world", &addr));
+        t!(pool.bind_existing_udp_socket(&socket, addr));
+        t!(pool.send_to_udp_socket_addr(&socket, b"hello world", addr));
 
         for _ in 1..3 {
             let mut buf = [0; 11];
@@ -441,7 +439,7 @@ fn ttl() {
     pool.insert_socket_addr(addr, ambient_authority());
 
     let stream = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-    t!(pool.bind_existing_udp_socket(&stream, &addr));
+    t!(pool.bind_existing_udp_socket(&stream, addr));
 
     t!(stream.set_ttl(ttl));
     assert_eq!(ttl, t!(stream.ttl()));
@@ -454,7 +452,7 @@ fn set_nonblocking() {
         pool.insert_socket_addr(addr, ambient_authority());
 
         let socket = UdpSocket::new(AddressFamily::of_socket_addr(addr), Blocking::Yes).unwrap();
-        t!(pool.bind_existing_udp_socket(&socket, &addr));
+        t!(pool.bind_existing_udp_socket(&socket, addr));
 
         t!(socket.set_nonblocking(true));
         t!(socket.set_nonblocking(false));

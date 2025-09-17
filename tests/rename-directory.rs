@@ -23,14 +23,14 @@ use sys_common::io::tmpdir;
 fn rename_directory() {
     let tmpdir = tmpdir();
     let old_path = Path::new("foo/bar/baz");
-    tmpdir.create_dir_all(&old_path).unwrap();
+    tmpdir.create_dir_all(old_path).unwrap();
     let test_file = &old_path.join("temp.txt");
 
     tmpdir.create(test_file).unwrap();
 
     let new_path = Path::new("quux/blat");
-    tmpdir.create_dir_all(&new_path).unwrap();
-    tmpdir.rename(&old_path, &tmpdir, &new_path.join("newdir"));
+    tmpdir.create_dir_all(new_path).unwrap();
+    tmpdir.rename(old_path, &tmpdir, new_path.join("newdir"));
     assert!(tmpdir.is_dir(new_path.join("newdir")));
     assert!(tmpdir.exists(new_path.join("newdir/temp.txt")));
 }

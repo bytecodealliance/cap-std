@@ -233,16 +233,16 @@ fn optionally_recursive_mkdir() {
 #[test]
 fn try_exists() {
     let tmpdir = tmpdir();
-    assert_eq!(tmpdir.try_exists("somefile").unwrap(), false);
+    assert!(!tmpdir.try_exists("somefile").unwrap());
     let dir = Path::new("d1/d2");
     let parent = dir.parent().unwrap();
-    assert_eq!(tmpdir.try_exists(parent).unwrap(), false);
-    assert_eq!(tmpdir.try_exists(dir).unwrap(), false);
+    assert!(!tmpdir.try_exists(parent).unwrap());
+    assert!(!tmpdir.try_exists(dir).unwrap());
     check!(tmpdir.create_dir(parent));
-    assert_eq!(tmpdir.try_exists(parent).unwrap(), true);
-    assert_eq!(tmpdir.try_exists(dir).unwrap(), false);
+    assert!(tmpdir.try_exists(parent).unwrap());
+    assert!(!tmpdir.try_exists(dir).unwrap());
     check!(tmpdir.create_dir(dir));
-    assert_eq!(tmpdir.try_exists(dir).unwrap(), true);
+    assert!(tmpdir.try_exists(dir).unwrap());
 }
 
 #[test]
@@ -269,7 +269,7 @@ fn file_test_directoryinfo_readdir() {
     for n in 0..3 {
         let f = format!("{}.txt", n);
         let mut w = check!(tmpdir.create(&f));
-        let msg_str = format!("{}{}", prefix, n.to_string());
+        let msg_str = format!("{}{}", prefix, n);
         let msg = msg_str.as_bytes();
         check!(w.write(msg));
     }

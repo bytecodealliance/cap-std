@@ -89,7 +89,7 @@ fn able_to_not_follow_symlinks_while_hard_linking() -> bool {
 
 #[cfg(not(target_os = "macos"))]
 fn able_to_not_follow_symlinks_while_hard_linking() -> bool {
-    return true;
+    true
 }
 
 #[test]
@@ -172,7 +172,7 @@ fn file_test_io_non_positional_read() {
 fn file_test_io_seek_and_tell_smoke_test() {
     let message = "ten-four";
     let mut read_mem = [0; 4];
-    let set_cursor = 4 as u64;
+    let set_cursor = 4_u64;
     let tell_pos_pre_read;
     let tell_pos_post_read;
     let tmpdir = tmpdir();
@@ -184,9 +184,9 @@ fn file_test_io_seek_and_tell_smoke_test() {
     {
         let mut read_stream = check!(tmpdir.open(filename));
         check!(read_stream.seek(SeekFrom::Start(set_cursor)));
-        tell_pos_pre_read = check!(read_stream.seek(SeekFrom::Current(0)));
+        tell_pos_pre_read = check!(read_stream.stream_position());
         check!(read_stream.read(&mut read_mem));
-        tell_pos_post_read = check!(read_stream.seek(SeekFrom::Current(0)));
+        tell_pos_post_read = check!(read_stream.stream_position());
     }
     check!(tmpdir.remove_file(filename));
     let read_str = str::from_utf8(&read_mem).unwrap();
@@ -289,48 +289,48 @@ fn file_test_io_read_write_at() {
             .clone();
         let mut rw = check!(tmpdir.open_with(filename, &oo));
         assert_eq!(check!(rw.write_at(write1.as_bytes(), 5)), write1.len());
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 0);
+        assert_eq!(check!(rw.stream_position()), 0);
         assert_eq!(check!(rw.read_at(&mut buf, 5)), write1.len());
         assert_eq!(str::from_utf8(&buf[..write1.len()]), Ok(write1));
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 0);
+        assert_eq!(check!(rw.stream_position()), 0);
         assert_eq!(
             check!(rw.read_at(&mut buf[..write2.len()], 0)),
             write2.len()
         );
         assert_eq!(str::from_utf8(&buf[..write2.len()]), Ok("\0\0\0\0\0"));
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 0);
+        assert_eq!(check!(rw.stream_position()), 0);
         assert_eq!(check!(rw.write(write2.as_bytes())), write2.len());
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 5);
+        assert_eq!(check!(rw.stream_position()), 5);
         assert_eq!(check!(rw.read(&mut buf)), write1.len());
         assert_eq!(str::from_utf8(&buf[..write1.len()]), Ok(write1));
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 9);
+        assert_eq!(check!(rw.stream_position()), 9);
         assert_eq!(
             check!(rw.read_at(&mut buf[..write2.len()], 0)),
             write2.len()
         );
         assert_eq!(str::from_utf8(&buf[..write2.len()]), Ok(write2));
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 9);
+        assert_eq!(check!(rw.stream_position()), 9);
         assert_eq!(check!(rw.write_at(write3.as_bytes(), 9)), write3.len());
-        assert_eq!(check!(rw.seek(SeekFrom::Current(0))), 9);
+        assert_eq!(check!(rw.stream_position()), 9);
     }
     {
         let mut read = check!(tmpdir.open(filename));
         assert_eq!(check!(read.read_at(&mut buf, 0)), content.len());
         assert_eq!(str::from_utf8(&buf[..content.len()]), Ok(content));
-        assert_eq!(check!(read.seek(SeekFrom::Current(0))), 0);
+        assert_eq!(check!(read.stream_position()), 0);
         assert_eq!(check!(read.seek(SeekFrom::End(-5))), 9);
         assert_eq!(check!(read.read_at(&mut buf, 0)), content.len());
         assert_eq!(str::from_utf8(&buf[..content.len()]), Ok(content));
-        assert_eq!(check!(read.seek(SeekFrom::Current(0))), 9);
+        assert_eq!(check!(read.stream_position()), 9);
         assert_eq!(check!(read.read(&mut buf)), write3.len());
         assert_eq!(str::from_utf8(&buf[..write3.len()]), Ok(write3));
-        assert_eq!(check!(read.seek(SeekFrom::Current(0))), 14);
+        assert_eq!(check!(read.stream_position()), 14);
         assert_eq!(check!(read.read_at(&mut buf, 0)), content.len());
         assert_eq!(str::from_utf8(&buf[..content.len()]), Ok(content));
-        assert_eq!(check!(read.seek(SeekFrom::Current(0))), 14);
+        assert_eq!(check!(read.stream_position()), 14);
         assert_eq!(check!(read.read_at(&mut buf, 14)), 0);
         assert_eq!(check!(read.read_at(&mut buf, 15)), 0);
-        assert_eq!(check!(read.seek(SeekFrom::Current(0))), 14);
+        assert_eq!(check!(read.stream_position()), 14);
     }
     check!(tmpdir.remove_file(filename));
 }
@@ -499,7 +499,7 @@ fn file_test_directoryinfo_readdir() {
     for n in 0..3 {
         let f = format!("{}.txt", n);
         let mut w = check!(tmpdir.create(&f));
-        let msg_str = format!("{}{}", prefix, n.to_string());
+        let msg_str = format!("{}{}", prefix, n);
         let msg = msg_str.as_bytes();
         check!(w.write(msg));
     }
@@ -524,7 +524,7 @@ fn file_create_new_already_exists_error() {
     let file = "file_create_new_error_exists";
     check!(tmpdir.create(file));
     let e = tmpdir
-        .open_with(file, &fs::OpenOptions::new().write(true).create_new(true))
+        .open_with(file, fs::OpenOptions::new().write(true).create_new(true))
         .unwrap_err();
     assert_eq!(e.kind(), ErrorKind::AlreadyExists);
 }
@@ -552,10 +552,10 @@ fn recursive_mkdir_failure() {
     let dir = "d1";
     let file = "f1";
 
-    check!(tmpdir.create_dir_all(&dir));
-    check!(tmpdir.create(&file));
+    check!(tmpdir.create_dir_all(dir));
+    check!(tmpdir.create(file));
 
-    let result = tmpdir.create_dir_all(&file);
+    let result = tmpdir.create_dir_all(file);
 
     assert!(result.is_err());
 }
@@ -615,8 +615,8 @@ fn recursive_rmdir() {
     check!(tmpdir.create_dir_all(&dtt));
     check!(tmpdir.create_dir_all(&d2));
     check!(check!(tmpdir.create(&canary)).write(b"foo"));
-    check!(symlink_junction(d2, &tmpdir, &dt.join("d2")));
-    let _ = symlink_file(&canary, &tmpdir, &d1.join("canary"));
+    check!(symlink_junction(d2, &tmpdir, dt.join("d2")));
+    let _ = symlink_file(&canary, &tmpdir, d1.join("canary"));
     check!(tmpdir.remove_dir_all(&d1));
 
     assert!(!tmpdir.is_dir(d1));
@@ -632,9 +632,9 @@ fn recursive_rmdir_of_symlink() {
     let link = "d1";
     let dir = "d2";
     let canary = "do_not_delete";
-    check!(tmpdir.create_dir_all(&dir));
-    check!(check!(tmpdir.create(&canary)).write(b"foo"));
-    check!(symlink_junction(&dir, &tmpdir, link));
+    check!(tmpdir.create_dir_all(dir));
+    check!(check!(tmpdir.create(canary)).write(b"foo"));
+    check!(symlink_junction(dir, &tmpdir, link));
     check!(tmpdir.remove_dir_all(link));
 
     assert!(!tmpdir.is_dir(link));
@@ -769,7 +769,7 @@ fn copy_file_does_not_exist() {
     let from = Path::new("test/nonexistent-bogus-path");
     let to = Path::new("test/other-bogus-path");
 
-    match tmpdir.copy(&from, &tmpdir, &to) {
+    match tmpdir.copy(from, &tmpdir, to) {
         Ok(..) => panic!(),
         Err(..) => {
             assert!(!tmpdir.exists(from));
@@ -783,11 +783,11 @@ fn copy_src_does_not_exist() {
     let tmpdir = tmpdir();
     let from = Path::new("test/nonexistent-bogus-path");
     let to = "out.txt";
-    check!(check!(tmpdir.create(&to)).write(b"hello"));
-    assert!(tmpdir.copy(&from, &tmpdir, &to).is_err());
+    check!(check!(tmpdir.create(to)).write(b"hello"));
+    assert!(tmpdir.copy(from, &tmpdir, to).is_err());
     assert!(!tmpdir.exists(from));
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&to)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(to)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
 }
 
@@ -797,10 +797,10 @@ fn copy_file_ok() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(tmpdir.create(&input)).write(b"hello"));
-    check!(tmpdir.copy(&input, &tmpdir, &out));
+    check!(check!(tmpdir.create(input)).write(b"hello"));
+    check!(tmpdir.copy(input, &tmpdir, out));
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(out)).read_to_end(&mut v));
     assert_eq!(v, b"hello");
 
     assert_eq!(
@@ -814,11 +814,8 @@ fn copy_file_dst_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    check!(tmpdir.create(&out));
-    match tmpdir.copy(&*out, &tmpdir, ".") {
-        Ok(..) => panic!(),
-        Err(..) => {}
-    }
+    check!(tmpdir.create(out));
+    if let Ok(..) = tmpdir.copy(out, &tmpdir, ".") { panic!() }
 }
 
 #[test]
@@ -827,12 +824,12 @@ fn copy_file_dst_exists() {
     let input = "in";
     let output = "out";
 
-    check!(check!(tmpdir.create(&input)).write("foo".as_bytes()));
-    check!(check!(tmpdir.create(&output)).write("bar".as_bytes()));
-    check!(tmpdir.copy(&input, &tmpdir, &output));
+    check!(check!(tmpdir.create(input)).write("foo".as_bytes()));
+    check!(check!(tmpdir.create(output)).write("bar".as_bytes()));
+    check!(tmpdir.copy(input, &tmpdir, output));
 
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&output)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(output)).read_to_end(&mut v));
     assert_eq!(v, b"foo".to_vec());
 }
 
@@ -841,10 +838,7 @@ fn copy_file_src_dir() {
     let tmpdir = tmpdir();
     let out = "out";
 
-    match tmpdir.copy(".", &tmpdir, &out) {
-        Ok(..) => panic!(),
-        Err(..) => {}
-    }
+    if let Ok(..) = tmpdir.copy(".", &tmpdir, out) { panic!() }
     assert!(!tmpdir.exists(out));
 }
 
@@ -854,14 +848,14 @@ fn copy_file_preserves_perm_bits() {
     let input = "in.txt";
     let out = "out.txt";
 
-    let attr = check!(check!(tmpdir.create(&input)).metadata());
+    let attr = check!(check!(tmpdir.create(input)).metadata());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir.set_permissions(&input, p));
-    check!(tmpdir.copy(&input, &tmpdir, &out));
+    check!(tmpdir.set_permissions(input, p));
+    check!(tmpdir.copy(input, &tmpdir, out));
     assert!(check!(tmpdir.metadata(out)).permissions().readonly());
-    check!(tmpdir.set_permissions(&input, attr.permissions()));
-    check!(tmpdir.set_permissions(&out, attr.permissions()));
+    check!(tmpdir.set_permissions(input, attr.permissions()));
+    check!(tmpdir.set_permissions(out, attr.permissions()));
 }
 
 #[test]
@@ -881,10 +875,10 @@ fn copy_file_returns_metadata_len() {
     let tmp = tmpdir();
     let in_path = "in.txt";
     let out_path = "out.txt";
-    check!(check!(tmp.create(&in_path)).write(b"lettuce"));
+    check!(check!(tmp.create(in_path)).write(b"lettuce"));
     #[cfg(windows)]
     check!(check!(tmp.create("in.txt:bunny")).write(b"carrot"));
-    let copied_len = check!(tmp.copy(&in_path, &tmp, &out_path));
+    let copied_len = check!(tmp.copy(in_path, &tmp, out_path));
     assert_eq!(check!(tmp.metadata(out_path)).len(), copied_len);
 }
 
@@ -899,17 +893,17 @@ fn copy_file_follows_dst_symlink() {
     let out_path = "out.txt";
     let out_path_symlink = "out_symlink.txt";
 
-    check!(tmp.write(&in_path, "foo"));
-    check!(tmp.write(&out_path, "bar"));
-    check!(symlink_file(&out_path, &tmp, &out_path_symlink));
+    check!(tmp.write(in_path, "foo"));
+    check!(tmp.write(out_path, "bar"));
+    check!(symlink_file(out_path, &tmp, out_path_symlink));
 
-    check!(tmp.copy(&in_path, &tmp, &out_path_symlink));
+    check!(tmp.copy(in_path, &tmp, out_path_symlink));
 
     assert!(check!(tmp.symlink_metadata(out_path_symlink))
         .file_type()
         .is_symlink());
-    assert_eq!(check!(tmp.read(&out_path_symlink)), b"foo".to_vec());
-    assert_eq!(check!(tmp.read(&out_path)), b"foo".to_vec());
+    assert_eq!(check!(tmp.read(out_path_symlink)), b"foo".to_vec());
+    assert_eq!(check!(tmp.read(out_path)), b"foo".to_vec());
 }
 
 #[test]
@@ -922,17 +916,17 @@ fn symlinks_work() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(tmpdir.create(&input)).write("foobar".as_bytes()));
-    check!(symlink_file(&input, &tmpdir, &out));
+    check!(check!(tmpdir.create(input)).write("foobar".as_bytes()));
+    check!(symlink_file(input, &tmpdir, out));
     assert!(check!(tmpdir.symlink_metadata(out))
         .file_type()
         .is_symlink());
     assert_eq!(
-        check!(tmpdir.metadata(&out)).len(),
-        check!(tmpdir.metadata(&input)).len()
+        check!(tmpdir.metadata(out)).len(),
+        check!(tmpdir.metadata(input)).len()
     );
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(out)).read_to_end(&mut v));
     assert_eq!(v, b"foobar".to_vec());
 }
 
@@ -946,7 +940,7 @@ fn symlink_noexist() {
 
     // Use a relative path for testing. Symlinks get normalized by Windows,
     // so we might not get the same path back for absolute paths
-    check!(symlink_file(&"foo", &tmpdir, "bar"));
+    check!(symlink_file("foo", &tmpdir, "bar"));
     assert_eq!(check!(tmpdir.read_link("bar")).to_str().unwrap(), "foo");
 }
 
@@ -975,17 +969,14 @@ fn read_link() {
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_file(&"foo", &tmpdir, &link));
-    assert_eq!(check!(tmpdir.read_link(&link)).to_str().unwrap(), "foo");
+    check!(symlink_file("foo", &tmpdir, link));
+    assert_eq!(check!(tmpdir.read_link(link)).to_str().unwrap(), "foo");
 }
 
 #[test]
 fn readlink_not_symlink() {
     let tmpdir = tmpdir();
-    match tmpdir.read_link(".") {
-        Ok(..) => panic!("wanted a failure"),
-        Err(..) => {}
-    }
+    if tmpdir.read_link(".").is_ok() { panic!("wanted a failure") }
 }
 
 #[cfg(not(windows))]
@@ -996,9 +987,9 @@ fn read_link_contents() {
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_file(&"foo", &tmpdir, &link));
+    check!(symlink_file("foo", &tmpdir, link));
     assert_eq!(
-        check!(tmpdir.read_link_contents(&link)).to_str().unwrap(),
+        check!(tmpdir.read_link_contents(link)).to_str().unwrap(),
         "foo"
     );
 }
@@ -1011,9 +1002,9 @@ fn read_link_contents_absolute() {
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_contents(&"/foo", &tmpdir, &link));
+    check!(symlink_contents("/foo", &tmpdir, link));
     assert_eq!(
-        check!(tmpdir.read_link_contents(&link)).to_str().unwrap(),
+        check!(tmpdir.read_link_contents(link)).to_str().unwrap(),
         "/foo"
     );
 }
@@ -1024,30 +1015,24 @@ fn links_work() {
     let input = "in.txt";
     let out = "out.txt";
 
-    check!(check!(tmpdir.create(&input)).write("foobar".as_bytes()));
-    check!(tmpdir.hard_link(&input, &tmpdir, &out));
+    check!(check!(tmpdir.create(input)).write("foobar".as_bytes()));
+    check!(tmpdir.hard_link(input, &tmpdir, out));
     assert_eq!(
-        check!(tmpdir.metadata(&out)).len(),
-        check!(tmpdir.metadata(&input)).len()
+        check!(tmpdir.metadata(out)).len(),
+        check!(tmpdir.metadata(input)).len()
     );
     assert_eq!(
-        check!(tmpdir.metadata(&out)).len(),
+        check!(tmpdir.metadata(out)).len(),
         check!(tmpdir.metadata(input)).len()
     );
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&out)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(out)).read_to_end(&mut v));
     assert_eq!(v, b"foobar".to_vec());
 
     // can't link to yourself
-    match tmpdir.hard_link(&input, &tmpdir, &input) {
-        Ok(..) => panic!("wanted a failure"),
-        Err(..) => {}
-    }
+    if let Ok(..) = tmpdir.hard_link(input, &tmpdir, input) { panic!("wanted a failure") }
     // can't link to something that doesn't exist
-    match tmpdir.hard_link("foo", &tmpdir, "bar") {
-        Ok(..) => panic!("wanted a failure"),
-        Err(..) => {}
-    }
+    if tmpdir.hard_link("foo", &tmpdir, "bar").is_ok() { panic!("wanted a failure") }
 }
 
 #[test]
@@ -1055,22 +1040,19 @@ fn chmod_works() {
     let tmpdir = tmpdir();
     let file = "in.txt";
 
-    check!(tmpdir.create(&file));
-    let attr = check!(tmpdir.metadata(&file));
+    check!(tmpdir.create(file));
+    let attr = check!(tmpdir.metadata(file));
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
-    check!(tmpdir.set_permissions(&file, p.clone()));
-    let attr = check!(tmpdir.metadata(&file));
+    check!(tmpdir.set_permissions(file, p.clone()));
+    let attr = check!(tmpdir.metadata(file));
     assert!(attr.permissions().readonly());
 
-    match tmpdir.set_permissions("foo", p.clone()) {
-        Ok(..) => panic!("wanted an error"),
-        Err(..) => {}
-    }
+    if tmpdir.set_permissions("foo", p.clone()).is_ok() { panic!("wanted an error") }
 
     p.set_readonly(false);
-    check!(tmpdir.set_permissions(&file, p));
+    check!(tmpdir.set_permissions(file, p));
 }
 
 #[test]
@@ -1078,13 +1060,13 @@ fn fchmod_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let file = check!(tmpdir.create(&path));
-    let attr = check!(tmpdir.metadata(&path));
+    let file = check!(tmpdir.create(path));
+    let attr = check!(tmpdir.metadata(path));
     assert!(!attr.permissions().readonly());
     let mut p = attr.permissions();
     p.set_readonly(true);
     check!(file.set_permissions(p.clone()));
-    let attr = check!(tmpdir.metadata(&path));
+    let attr = check!(tmpdir.metadata(path));
     assert!(attr.permissions().readonly());
 
     p.set_readonly(false);
@@ -1096,7 +1078,7 @@ fn sync_doesnt_kill_anything() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let mut file = check!(tmpdir.create(&path));
+    let mut file = check!(tmpdir.create(path));
     check!(file.sync_all());
     check!(file.sync_data());
     check!(file.write(b"foo"));
@@ -1109,7 +1091,7 @@ fn truncate_works() {
     let tmpdir = tmpdir();
     let path = "in.txt";
 
-    let mut file = check!(tmpdir.create(&path));
+    let mut file = check!(tmpdir.create(path));
     check!(file.write(b"foo"));
     check!(file.sync_all());
 
@@ -1122,7 +1104,7 @@ fn truncate_works() {
     assert_eq!(check!(file.metadata()).len(), 10);
 
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&path)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(path)).read_to_end(&mut v));
     assert_eq!(v, b"foobar\0\0\0\0".to_vec());
 
     // Truncate to a smaller length, don't seek, and then write something.
@@ -1134,7 +1116,7 @@ fn truncate_works() {
     check!(file.sync_all());
     assert_eq!(check!(file.metadata()).len(), 9);
     let mut v = Vec::new();
-    check!(check!(tmpdir.open(&path)).read_to_end(&mut v));
+    check!(check!(tmpdir.open(path)).read_to_end(&mut v));
     assert_eq!(v, b"fo\0\0\0\0wut".to_vec());
 }
 
@@ -1295,7 +1277,7 @@ fn binary_file() {
     check!(check!(tmpdir.create("test")).write(&bytes));
     let mut v = Vec::new();
     check!(check!(tmpdir.open("test")).read_to_end(&mut v));
-    assert!(v == &bytes[..]);
+    assert!(v == bytes[..]);
 }
 
 #[test]
@@ -1307,9 +1289,9 @@ fn write_then_read() {
 
     check!(tmpdir.write("test", &bytes[..]));
     let v = check!(tmpdir.read("test"));
-    assert!(v == &bytes[..]);
+    assert!(v == bytes[..]);
 
-    check!(tmpdir.write("not-utf8", &[0xFF]));
+    check!(tmpdir.write("not-utf8", [0xFF]));
     error_contains!(
         tmpdir.read_to_string("not-utf8"),
         "stream did not contain valid UTF-8"
@@ -1347,26 +1329,26 @@ fn file_try_clone() {
 fn unlink_readonly() {
     let tmpdir = tmpdir();
     let path = "file";
-    check!(tmpdir.create(&path));
-    let mut perm = check!(tmpdir.metadata(&path)).permissions();
+    check!(tmpdir.create(path));
+    let mut perm = check!(tmpdir.metadata(path)).permissions();
     perm.set_readonly(true);
-    check!(tmpdir.set_permissions(&path, perm));
-    check!(tmpdir.remove_file(&path));
+    check!(tmpdir.set_permissions(path, perm));
+    check!(tmpdir.remove_file(path));
 }
 
 #[test]
 fn mkdir_trailing_slash() {
     let tmpdir = tmpdir();
     let path = PathBuf::from("file");
-    check!(tmpdir.create_dir_all(&path.join("a/")));
+    check!(tmpdir.create_dir_all(path.join("a/")));
 }
 
 #[test]
 fn canonicalize_works_simple() {
     let tmpdir = tmpdir();
     let file = Path::new("test");
-    tmpdir.create(&file).unwrap();
-    assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
+    tmpdir.create(file).unwrap();
+    assert_eq!(tmpdir.canonicalize(file).unwrap(), file);
 }
 
 #[test]
@@ -1396,7 +1378,7 @@ fn realpath_works() {
     assert_eq!(tmpdir.canonicalize(&file).unwrap(), file);
     assert_eq!(tmpdir.canonicalize(&link).unwrap(), file);
     assert_eq!(tmpdir.canonicalize(&linkdir).unwrap(), dir);
-    assert_eq!(tmpdir.canonicalize(&linkdir.join("link")).unwrap(), file);
+    assert_eq!(tmpdir.canonicalize(linkdir.join("link")).unwrap(), file);
 }
 
 #[test]
@@ -1488,9 +1470,9 @@ fn create_dir_all_with_junctions() {
     let link = PathBuf::from("link");
     let d = link.join("c/d");
 
-    tmpdir.create_dir(&target).unwrap();
+    tmpdir.create_dir(target).unwrap();
 
-    check!(symlink_junction(&target, &tmpdir, &junction));
+    check!(symlink_junction(target, &tmpdir, &junction));
     check!(tmpdir.create_dir_all(&b));
     // the junction itself is not a directory, but `is_dir()` on a Path
     // follows links
@@ -1500,7 +1482,7 @@ fn create_dir_all_with_junctions() {
     if !got_symlink_permission(&tmpdir) {
         return;
     };
-    check!(symlink_dir(&target, &tmpdir, &link));
+    check!(symlink_dir(target, &tmpdir, &link));
     check!(tmpdir.create_dir_all(&d));
     assert!(tmpdir.is_dir(link));
     assert!(tmpdir.exists(d));
@@ -1511,10 +1493,10 @@ fn metadata_access_times() {
     let tmpdir = tmpdir();
 
     let b = "b";
-    tmpdir.create(&b).unwrap();
+    tmpdir.create(b).unwrap();
 
     let a = check!(tmpdir.metadata("."));
-    let b = check!(tmpdir.metadata(&b));
+    let b = check!(tmpdir.metadata(b));
 
     assert_eq!(check!(a.accessed()), check!(a.accessed()));
     assert_eq!(check!(a.modified()), check!(a.modified()));

@@ -51,13 +51,13 @@ fn socket_smoke_test_ip4() {
 
         let p = server_pool.clone();
         let _t = thread::spawn(move || {
-            let client = t!(client_pool.bind_udp_socket(&client_ip));
+            let client = t!(client_pool.bind_udp_socket(client_ip));
             rx1.recv().unwrap();
-            t!(p.send_to_udp_socket_addr(&client, &[99], &server_ip));
+            t!(p.send_to_udp_socket_addr(&client, &[99], server_ip));
             tx2.send(()).unwrap();
         });
 
-        let server = t!(server_pool.bind_udp_socket(&server_ip));
+        let server = t!(server_pool.bind_udp_socket(server_ip));
         tx1.send(()).unwrap();
         let mut buf = [0];
         let (nread, src) = t!(server.recv_from(&mut buf));
@@ -74,7 +74,7 @@ fn socket_name() {
         let mut pool = Pool::new();
         pool.insert_socket_addr(addr, ambient_authority());
 
-        let server = t!(pool.bind_udp_socket(&addr));
+        let server = t!(pool.bind_udp_socket(addr));
         assert_eq!(addr, t!(server.local_addr()));
     })
 }
@@ -87,12 +87,12 @@ fn socket_peer() {
         let mut pool2 = Pool::new();
         pool2.insert_socket_addr(addr2, ambient_authority());
 
-        let server = t!(pool1.bind_udp_socket(&addr1));
+        let server = t!(pool1.bind_udp_socket(addr1));
         assert_eq!(
             server.peer_addr().unwrap_err().kind(),
             ErrorKind::NotConnected
         );
-        t!(pool2.connect_udp_socket(&server, &addr2));
+        t!(pool2.connect_udp_socket(&server, addr2));
         assert_eq!(addr2, t!(server.peer_addr()));
     })
 }
@@ -105,14 +105,14 @@ fn udp_clone_smoke() {
         let mut pool2 = Pool::new();
         pool2.insert_socket_addr(addr2, ambient_authority());
 
-        let sock1 = t!(pool1.bind_udp_socket(&addr1));
-        let sock2 = t!(pool2.bind_udp_socket(&addr2));
+        let sock1 = t!(pool1.bind_udp_socket(addr1));
+        let sock2 = t!(pool2.bind_udp_socket(addr2));
 
         let _t = thread::spawn(move || {
             let mut buf = [0, 0];
             assert_eq!(sock2.recv_from(&mut buf).unwrap(), (1, addr1));
             assert_eq!(buf[0], 1);
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], addr1));
         });
 
         let sock3 = t!(sock1.try_clone());
@@ -122,7 +122,7 @@ fn udp_clone_smoke() {
         let p = pool2.clone();
         let _t = thread::spawn(move || {
             rx1.recv().unwrap();
-            t!(p.send_to_udp_socket_addr(&sock3, &[1], &addr2));
+            t!(p.send_to_udp_socket_addr(&sock3, &[1], addr2));
             tx2.send(()).unwrap();
         });
         tx1.send(()).unwrap();
@@ -140,15 +140,15 @@ fn udp_clone_two_read() {
         let mut pool2 = Pool::new();
         pool2.insert_socket_addr(addr2, ambient_authority());
 
-        let sock1 = t!(pool1.bind_udp_socket(&addr1));
-        let sock2 = t!(pool2.bind_udp_socket(&addr2));
+        let sock1 = t!(pool1.bind_udp_socket(addr1));
+        let sock2 = t!(pool2.bind_udp_socket(addr2));
         let (tx1, rx) = channel();
         let tx2 = tx1.clone();
 
         let _t = thread::spawn(move || {
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[1], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[1], addr1));
             rx.recv().unwrap();
-            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], &addr1));
+            t!(pool1.send_to_udp_socket_addr(&sock2, &[2], addr1));
             rx.recv().unwrap();
         });
 
@@ -177,8 +177,8 @@ fn udp_clone_two_write() {
         let mut pool2 = Pool::new();
         pool2.insert_socket_addr(addr2, ambient_authority());
 
-        let sock1 = t!(pool1.bind_udp_socket(&addr1));
-        let sock2 = t!(pool2.bind_udp_socket(&addr2));
+        let sock1 = t!(pool1.bind_udp_socket(addr1));
+        let sock2 = t!(pool2.bind_udp_socket(addr2));
 
         let (tx, rx) = channel();
         let (serv_tx, serv_rx) = channel();
@@ -196,12 +196,12 @@ fn udp_clone_two_write() {
         let tx2 = tx.clone();
         let p = pool2.clone();
         let _t = thread::spawn(move || {
-            if p.send_to_udp_socket_addr(&sock3, &[1], &addr2).is_ok() {
+            if p.send_to_udp_socket_addr(&sock3, &[1], addr2).is_ok() {
                 let _ = tx2.send(());
             }
             done.send(()).unwrap();
         });
-        if pool2.send_to_udp_socket_addr(&sock1, &[2], &addr2).is_ok() {
+        if pool2.send_to_udp_socket_addr(&sock1, &[2], addr2).is_ok() {
             let _ = tx.send(());
         }
         drop(tx);
@@ -239,7 +239,7 @@ fn timeouts() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let stream = t!(pool.bind_udp_socket(&addr));
+    let stream = t!(pool.bind_udp_socket(addr));
     let dur = Duration::new(15410, 0);
 
     assert_eq!(None, t!(stream.read_timeout()));
@@ -266,7 +266,7 @@ fn test_read_timeout() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let stream = t!(pool.bind_udp_socket(&addr));
+    let stream = t!(pool.bind_udp_socket(addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
 
     let mut buf = [0; 10];
@@ -275,8 +275,7 @@ fn test_read_timeout() {
     loop {
         let kind = stream
             .recv_from(&mut buf)
-            .err()
-            .expect("expected error")
+            .expect_err("expected error")
             .kind();
         if kind != ErrorKind::Interrupted {
             assert!(
@@ -297,10 +296,10 @@ fn test_read_with_timeout() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let stream = t!(pool.bind_udp_socket(&addr));
+    let stream = t!(pool.bind_udp_socket(addr));
     t!(stream.set_read_timeout(Some(Duration::from_millis(1000))));
 
-    t!(pool.send_to_udp_socket_addr(&stream, b"hello world", &addr));
+    t!(pool.send_to_udp_socket_addr(&stream, b"hello world", addr));
 
     let mut buf = [0; 11];
     t!(stream.recv_from(&mut buf));
@@ -310,8 +309,7 @@ fn test_read_with_timeout() {
     loop {
         let kind = stream
             .recv_from(&mut buf)
-            .err()
-            .expect("expected error")
+            .expect_err("expected error")
             .kind();
         if kind != ErrorKind::Interrupted {
             assert!(
@@ -334,7 +332,7 @@ fn test_timeout_zero_duration() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let socket = t!(pool.bind_udp_socket(&addr));
+    let socket = t!(pool.bind_udp_socket(addr));
 
     let result = socket.set_write_timeout(Some(Duration::new(0, 0)));
     let err = result.unwrap_err();
@@ -352,7 +350,7 @@ fn connect_send_recv() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let socket = t!(pool.bind_udp_socket(&addr));
+    let socket = t!(pool.bind_udp_socket(addr));
     t!(pool.connect_udp_socket(&socket, addr));
 
     t!(socket.send(b"hello world"));
@@ -368,7 +366,7 @@ fn connect_send_peek_recv() {
         let mut pool = Pool::new();
         pool.insert_socket_addr(addr, ambient_authority());
 
-        let socket = t!(pool.bind_udp_socket(&addr));
+        let socket = t!(pool.bind_udp_socket(addr));
         t!(pool.connect_udp_socket(&socket, addr));
 
         t!(socket.send(b"hello world"));
@@ -393,8 +391,8 @@ fn peek_from() {
         let mut pool = Pool::new();
         pool.insert_socket_addr(addr, ambient_authority());
 
-        let socket = t!(pool.bind_udp_socket(&addr));
-        t!(pool.send_to_udp_socket_addr(&socket, b"hello world", &addr));
+        let socket = t!(pool.bind_udp_socket(addr));
+        t!(pool.send_to_udp_socket_addr(&socket, b"hello world", addr));
 
         for _ in 1..3 {
             let mut buf = [0; 11];
@@ -419,7 +417,7 @@ fn ttl() {
     let mut pool = Pool::new();
     pool.insert_socket_addr(addr, ambient_authority());
 
-    let stream = t!(pool.bind_udp_socket(&addr));
+    let stream = t!(pool.bind_udp_socket(addr));
 
     t!(stream.set_ttl(ttl));
     assert_eq!(ttl, t!(stream.ttl()));
@@ -431,7 +429,7 @@ fn set_nonblocking() {
         let mut pool = Pool::new();
         pool.insert_socket_addr(addr, ambient_authority());
 
-        let socket = t!(pool.bind_udp_socket(&addr));
+        let socket = t!(pool.bind_udp_socket(addr));
 
         t!(socket.set_nonblocking(true));
         t!(socket.set_nonblocking(false));

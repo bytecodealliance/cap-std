@@ -41,7 +41,7 @@ fn remove_symlink_to_dir() {
 
     let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     {
-        let _target = tempdir.create_dir("target").expect("create target dir");
+        tempdir.create_dir("target").expect("create target dir");
     }
     tempdir.symlink("target", "link").expect("create symlink");
     assert!(tempdir.exists("link"), "link exists");
@@ -56,7 +56,7 @@ fn remove_symlink_to_dir() {
 fn do_not_remove_dir() {
     let tempdir = TempDir::new(ambient_authority()).expect("create tempdir");
     {
-        let _subdir = tempdir.create_dir("subdir").expect("create dir");
+        tempdir.create_dir("subdir").expect("create dir");
     }
     assert!(tempdir.exists("subdir"), "subdir created");
     tempdir
@@ -86,7 +86,7 @@ fn test_set_symlink_permissions() {
     match tmpdir.set_symlink_permissions("symlink", permissions.clone()) {
         Ok(()) => {}
         Err(err) if err.raw_os_error() == Some(libc::EOPNOTSUPP) => return,
-        Err(err) => Err(err).unwrap(),
+        Err(err) => panic!("{:?}", err),
     }
     tmpdir
         .set_symlink_permissions("other", permissions.clone())
