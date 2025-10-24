@@ -18,13 +18,14 @@ pub(crate) fn stat_impl(
     use crate::fs::{stat_unchecked, OpenOptionsExt};
     use std::path::Component;
 
-    // Optimization: if path has exactly one component and it's not ".." and
-    // we're not following symlinks we can go straight to `stat_unchecked`,
-    // which is faster than doing an open with a separate fstat.
+    // Optimization: if path has exactly one component and it's not ".." or
+    // anything non-normal and we're not following symlinks we can go straight
+    // to `stat_unchecked`, which is faster than doing an open with a separate
+    // `fstat`.
     if follow == FollowSymlinks::No {
         let mut components = path.components();
-        if let Some(component) = components.next() {
-            if components.next().is_none() && component != Component::ParentDir {
+        if let Some(Component::Normal(component)) = components.next() {
+            if components.next().is_none() {
                 return stat_unchecked(start, component.as_ref(), FollowSymlinks::No);
             }
         }
