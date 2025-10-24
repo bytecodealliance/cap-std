@@ -75,9 +75,7 @@ pub struct REPARSE_MOUNTPOINT_DATA_BUFFER {
 
 #[cfg(windows)]
 #[allow(dead_code)]
-pub fn cvt(
-    i: windows_sys::Win32::Foundation::BOOL,
-) -> io::Result<windows_sys::Win32::Foundation::BOOL> {
+pub fn cvt(i: windows_sys::core::BOOL) -> io::Result<windows_sys::core::BOOL> {
     if i == 0 {
         Err(io::Error::last_os_error())
     } else {
