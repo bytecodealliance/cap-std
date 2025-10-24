@@ -1380,3 +1380,23 @@ fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
         let _entry = check!(entry);
     }
 }
+
+/// Ensure that a path of "/" is rejected.
+#[test]
+fn statat_slash() {
+    let tmpdir = tmpdir();
+
+    error!(tmpdir.metadata("/"), "a path led outside of the filesystem");
+    error!(
+        tmpdir.metadata("/foo"),
+        "a path led outside of the filesystem"
+    );
+    error!(
+        tmpdir.symlink_metadata("/"),
+        "a path led outside of the filesyste"
+    );
+    error!(
+        tmpdir.symlink_metadata("/foo"),
+        "a path led outside of the filesyste"
+    );
+}
