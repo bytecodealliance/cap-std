@@ -32,13 +32,15 @@
 #[doc(hidden)]
 pub use ambient_authority::ambient_authority_known_at_compile_time;
 pub use ambient_authority::{ambient_authority, AmbientAuthority};
-pub use rand::{distributions, seq, CryptoRng, Error, Fill, Rng, RngCore, SeedableRng};
+pub use rand::{
+    distr, rand_core, seq, CryptoRng, Fill, Rng, RngCore, SeedableRng, TryCryptoRng, TryRngCore,
+};
 
 /// Convenience re-export of common members.
 ///
 /// This corresponds to [`rand::prelude`].
 pub mod prelude {
-    pub use crate::distributions::Distribution;
+    pub use crate::distr::Distribution;
     #[cfg(feature = "small_rng")]
     pub use crate::rngs::SmallRng;
     pub use crate::rngs::{CapRng, StdRng};
@@ -52,7 +54,7 @@ pub mod prelude {
 pub mod rngs {
     use super::AmbientAuthority;
 
-    pub use rand::rngs::{adapter, mock, StdRng};
+    pub use rand::rngs::StdRng;
 
     #[cfg(feature = "small_rng")]
     pub use rand::rngs::SmallRng;
@@ -80,29 +82,26 @@ pub mod rngs {
         }
     }
 
-    impl crate::RngCore for OsRng {
+    impl crate::TryRngCore for OsRng {
+        type Error = crate::rand_core::OsError;
+
         #[inline]
-        fn next_u32(&mut self) -> u32 {
-            rand::rngs::OsRng.next_u32()
+        fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+            rand::rngs::OsRng.try_next_u32()
         }
 
         #[inline]
-        fn next_u64(&mut self) -> u64 {
-            rand::rngs::OsRng.next_u64()
+        fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+            rand::rngs::OsRng.try_next_u64()
         }
 
         #[inline]
-        fn fill_bytes(&mut self, bytes: &mut [u8]) {
-            rand::rngs::OsRng.fill_bytes(bytes)
-        }
-
-        #[inline]
-        fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), crate::Error> {
+        fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), Self::Error> {
             rand::rngs::OsRng.try_fill_bytes(bytes)
         }
     }
 
-    impl crate::CryptoRng for OsRng {}
+    impl crate::TryCryptoRng for OsRng {}
 
     /// The type returned by `thread_rng`, essentially just a reference to a
     /// PRNG in memory.
@@ -142,11 +141,6 @@ pub mod rngs {
         fn fill_bytes(&mut self, bytes: &mut [u8]) {
             self.inner.fill_bytes(bytes)
         }
-
-        #[inline]
-        fn try_fill_bytes(&mut self, bytes: &mut [u8]) -> Result<(), crate::Error> {
-            self.inner.try_fill_bytes(bytes)
-        }
     }
 
     impl crate::CryptoRng for CapRng {}
@@ -164,23 +158,21 @@ pub mod rngs {
 #[inline]
 pub fn thread_rng(ambient_authority: AmbientAuthority) -> rngs::CapRng {
     let _ = ambient_authority;
-    rngs::CapRng {
-        inner: rand::thread_rng(),
-    }
+    rngs::CapRng { inner: rand::rng() }
 }
 
 /// Retrieve the standard random number generator, seeded by the system.
 ///
-/// This corresponds to [`rand::rngs::StdRng::from_entropy`].
+/// This corresponds to [`rand::rngs::StdRng::from_os_rng`].
 ///
 /// # Ambient Authority
 ///
 /// This function makes use of ambient authority to access the platform entropy
 /// source.
 #[inline]
-pub fn std_rng_from_entropy(ambient_authority: AmbientAuthority) -> rngs::StdRng {
+pub fn std_rng_from_os_rng(ambient_authority: AmbientAuthority) -> rngs::StdRng {
     let _ = ambient_authority;
-    rand::rngs::StdRng::from_entropy()
+    rand::rngs::StdRng::from_os_rng()
 }
 
 /// Generates a random value using the thread-local random number generator.
@@ -194,7 +186,7 @@ pub fn std_rng_from_entropy(ambient_authority: AmbientAuthority) -> rngs::StdRng
 #[inline]
 pub fn random<T>(ambient_authority: AmbientAuthority) -> T
 where
-    crate::distributions::Standard: crate::distributions::Distribution<T>,
+    crate::distr::StandardUniform: crate::distr::Distribution<T>,
 {
     let _ = ambient_authority;
     rand::random()
