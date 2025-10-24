@@ -16,9 +16,10 @@ use windows_sys::Win32::Foundation::{
     GENERIC_WRITE, HANDLE, INVALID_HANDLE_VALUE, STATUS_OBJECT_NAME_COLLISION, STATUS_PENDING,
     STATUS_SUCCESS, SUCCESS, UNICODE_STRING,
 };
+use windows_sys::Win32::Foundation::{OBJ_CASE_INSENSITIVE, OBJ_INHERIT};
 use windows_sys::Win32::Security::{
-    SECURITY_ATTRIBUTES, SECURITY_DYNAMIC_TRACKING, SECURITY_QUALITY_OF_SERVICE,
-    SECURITY_STATIC_TRACKING,
+    SECURITY_ATTRIBUTES, SECURITY_DESCRIPTOR, SECURITY_DYNAMIC_TRACKING,
+    SECURITY_QUALITY_OF_SERVICE, SECURITY_STATIC_TRACKING,
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CREATE_ALWAYS, CREATE_NEW, DELETE, FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_COMPRESSED,
@@ -36,7 +37,6 @@ use windows_sys::Win32::Storage::FileSystem::{
     OPEN_ALWAYS, OPEN_EXISTING, SECURITY_CONTEXT_TRACKING, SECURITY_EFFECTIVE_ONLY,
     SECURITY_SQOS_PRESENT, SYNCHRONIZE, TRUNCATE_EXISTING,
 };
-use windows_sys::Win32::System::Kernel::{OBJ_CASE_INSENSITIVE, OBJ_INHERIT};
 use windows_sys::Win32::System::WindowsProgramming::{
     FILE_OPENED, FILE_OPEN_NO_RECALL, FILE_OPEN_REMOTE_INSTANCE, FILE_OVERWRITTEN,
 };
@@ -159,7 +159,9 @@ pub unsafe fn CreateFileAtW(
     objectattributes.ObjectName = &mut unicode_string;
     objectattributes.Attributes = attributes;
     if !lpsecurityattributes.is_null() {
-        objectattributes.SecurityDescriptor = (*lpsecurityattributes).lpSecurityDescriptor;
+        objectattributes.SecurityDescriptor = (*lpsecurityattributes)
+            .lpSecurityDescriptor
+            .cast::<SECURITY_DESCRIPTOR>();
     }
 
     // If needed, set `objectattributes`' `SecurityQualityOfService` field.
@@ -172,7 +174,7 @@ pub unsafe fn CreateFileAtW(
             SECURITY_DYNAMIC_TRACKING
         } else {
             SECURITY_STATIC_TRACKING
-        };
+        } as u8;
         qos.EffectiveOnly = ((dwflagsandattributes & SECURITY_EFFECTIVE_ONLY) != 0) as _;
 
         objectattributes.SecurityQualityOfService =
