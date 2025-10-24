@@ -39,22 +39,6 @@ impl DirEntryExt for cap_std::fs::DirEntry {
     }
 }
 
-#[cfg(all(not(windows), feature = "async_std"))]
-impl DirEntryExt for cap_async_std::fs::DirEntry {
-    #[inline]
-    fn full_metadata(&self) -> io::Result<Metadata> {
-        self.metadata()
-    }
-}
-
-#[cfg(all(windows, feature = "async_std"))]
-impl DirEntryExt for cap_async_std::fs::DirEntry {
-    #[inline]
-    fn full_metadata(&self) -> io::Result<Metadata> {
-        _WindowsDirEntryExt::full_metadata(self)
-    }
-}
-
 #[cfg(all(not(windows), feature = "std", feature = "fs_utf8"))]
 impl DirEntryExt for cap_std::fs_utf8::DirEntry {
     #[inline]
@@ -65,22 +49,6 @@ impl DirEntryExt for cap_std::fs_utf8::DirEntry {
 
 #[cfg(all(windows, feature = "std", feature = "fs_utf8"))]
 impl DirEntryExt for cap_std::fs_utf8::DirEntry {
-    #[inline]
-    fn full_metadata(&self) -> io::Result<Metadata> {
-        _WindowsDirEntryExt::full_metadata(self)
-    }
-}
-
-#[cfg(all(not(windows), feature = "async_std", feature = "fs_utf8"))]
-impl DirEntryExt for cap_async_std::fs_utf8::DirEntry {
-    #[inline]
-    fn full_metadata(&self) -> io::Result<Metadata> {
-        self.metadata()
-    }
-}
-
-#[cfg(all(windows, feature = "async_std", feature = "fs_utf8"))]
-impl DirEntryExt for cap_async_std::fs_utf8::DirEntry {
     #[inline]
     fn full_metadata(&self) -> io::Result<Metadata> {
         _WindowsDirEntryExt::full_metadata(self)
