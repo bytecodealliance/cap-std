@@ -19,8 +19,8 @@ rustdoc-args = ["--cfg=docsrs"]
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
 cap-primitives = { path = "../cap-primitives", version = "^3.4.5" }
-io-extras = "0.18.3"
-io-lifetimes = { version = "2.0.0", default-features = false }
+io-extras = "0.19.0"
+io-lifetimes = { version = "3.0.1", default-features = false }
 camino = { version = "1.0.5", optional = true }
 
 [target.'cfg(not(windows))'.dependencies]
