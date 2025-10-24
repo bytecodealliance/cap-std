@@ -69,7 +69,7 @@ impl UnixListener {
     ///
     /// [`async_std::os::unix::net::UnixListener::incoming`]: https://docs.rs/async-std/latest/async_std/os/unix/net/struct.UnixListener.html#method.incoming
     #[inline]
-    pub fn incoming(&self) -> Incoming {
+    pub fn incoming(&self) -> Incoming<'_> {
         let incoming = self.std.incoming();
         Incoming::from_std(incoming)
     }
