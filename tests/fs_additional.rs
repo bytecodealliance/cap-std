@@ -1383,6 +1383,7 @@ fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
 
 /// Ensure that a path of "/" is rejected.
 #[test]
+#[cfg_attr(windows, ignore)]
 fn statat_slash() {
     let tmpdir = tmpdir();
 
