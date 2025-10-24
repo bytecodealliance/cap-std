@@ -21,11 +21,7 @@ mod open_options_sync_ext;
 mod reopen;
 
 pub use dir_entry_ext::DirEntryExt;
-#[cfg(feature = "async_std")]
-pub use dir_ext::AsyncDirExt;
-#[cfg(all(feature = "async_std", feature = "fs_utf8"))]
-pub use dir_ext::AsyncDirExtUtf8;
-#[cfg(all(any(feature = "std", feature = "async_std"), feature = "fs_utf8"))]
+#[cfg(all(feature = "std", feature = "fs_utf8"))]
 pub use dir_ext::DirExtUtf8;
 pub use dir_ext::{AccessType, DirExt, SystemTimeSpec};
 pub use file_type_ext::FileTypeExt;

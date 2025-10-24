@@ -71,7 +71,7 @@ impl MetadataExt for std::fs::Metadata {
     }
 }
 
-#[cfg(all(not(windows), any(feature = "std", feature = "async_std")))]
+#[cfg(all(not(windows), feature = "std"))]
 impl MetadataExt for cap_primitives::fs::Metadata {
     #[inline]
     fn dev(&self) -> u64 {
@@ -89,7 +89,7 @@ impl MetadataExt for cap_primitives::fs::Metadata {
     }
 }
 
-#[cfg(all(windows, any(feature = "std", feature = "async_std")))]
+#[cfg(all(windows, feature = "std"))]
 impl MetadataExt for cap_primitives::fs::Metadata {
     fn dev(&self) -> u64 {
         _WindowsByHandle::volume_serial_number(self)

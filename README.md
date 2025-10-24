@@ -17,7 +17,6 @@ The `cap-std` project is organized around the eponymous [`cap-std`] crate, and
 develops libraries to make it easy to write capability-based code, including:
 
  - [`cap-std`] itself, which provides capability-based versions of `std` APIs
- - [`cap-async-std`], which is to [`async-std`] what `cap-std` is to `std`
  - [`cap-directories`] which provides capability-based access to
    [standard application directories]
  - [`cap-tempfile`], which provides capability-based access to
@@ -45,7 +44,6 @@ Linux.
 [CWE-22]: https://cwe.mitre.org/data/definitions/22.html
 [2021 CWE Top 25 Most Dangerous Software Weaknesses]: https://cwe.mitre.org/top25/archive/2021/2021_cwe_top25.html
 [`cap-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-std/README.md
-[`cap-async-std`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-async-std/README.md
 [`cap-directories`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-directories/README.md
 [`cap-tempfile`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-tempfile/README.md
 [`cap-fs-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-fs-ext/README.md
@@ -53,7 +51,6 @@ Linux.
 [`cap-rand`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-rand/README.md
 [`cap-net-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-net-ext/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
-[`async-std`]: https://docs.rs/async-std/
 [standard application directories]: https://docs.rs/directories-next/
 [temporary directories]: https://docs.rs/tempfile/
 [random number generators]: https://docs.rs/rand/

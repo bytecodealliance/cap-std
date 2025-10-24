@@ -63,7 +63,7 @@ impl FileTypeExt for std::fs::FileType {
     }
 }
 
-#[cfg(all(not(windows), any(feature = "std", feature = "async_std")))]
+#[cfg(all(not(windows), feature = "std"))]
 impl FileTypeExt for cap_primitives::fs::FileType {
     #[inline]
     fn is_block_device(&self) -> bool {
@@ -86,7 +86,7 @@ impl FileTypeExt for cap_primitives::fs::FileType {
     }
 }
 
-#[cfg(all(windows, any(feature = "std", feature = "async_std")))]
+#[cfg(all(windows, feature = "std"))]
 impl FileTypeExt for cap_primitives::fs::FileType {
     #[inline]
     fn is_block_device(&self) -> bool {

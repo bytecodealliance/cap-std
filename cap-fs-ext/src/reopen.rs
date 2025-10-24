@@ -1,8 +1,6 @@
 use cap_primitives::fs::{reopen, OpenOptions};
-#[cfg(any(feature = "std", feature = "async_std"))]
+#[cfg(feature = "std")]
 use io_lifetimes::AsFilelike;
-#[cfg(feature = "async_std")]
-use io_lifetimes::FromFilelike;
 use std::io;
 
 /// A trait for the `reopen` function.
@@ -53,34 +51,5 @@ impl Reopen for cap_std::fs_utf8::File {
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
         Ok(Self::from_std(file))
-    }
-}
-
-#[cfg(feature = "async_std")]
-impl Reopen for async_std::fs::File {
-    #[inline]
-    fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
-        Ok(async_std::fs::File::from_into_filelike(file))
-    }
-}
-
-#[cfg(feature = "async_std")]
-impl Reopen for cap_async_std::fs::File {
-    #[inline]
-    fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
-        let std = async_std::fs::File::from_into_filelike(file);
-        Ok(Self::from_std(std))
-    }
-}
-
-#[cfg(all(feature = "async_std", feature = "fs_utf8"))]
-impl Reopen for cap_async_std::fs_utf8::File {
-    #[inline]
-    fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
-        let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
-        let std = async_std::fs::File::from_into_filelike(file);
-        Ok(Self::from_std(std))
     }
 }

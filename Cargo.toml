@@ -17,9 +17,7 @@ exclude = ["/.*"]
 rust-version = "1.63"
 
 [dev-dependencies]
-async-std = { version = "1.13.0", features = ["attributes", "io_safety"] }
 anyhow = "1.0.37"
-cap-async-std = { path = "cap-async-std", version = "3.4.5" }
 cap-fs-ext = { path = "cap-fs-ext", version = "3.4.5" }
 cap-net-ext = { path = "cap-net-ext", version = "3.4.5" }
 cap-directories = { path = "cap-directories", version = "3.4.5" }
@@ -56,23 +54,14 @@ fs_utf8 = [
     "cap-fs-ext/fs_utf8",
     "cap-tempfile/fs_utf8",
 ]
-async_std_fs_utf8 = [
-    "cap-async-std/fs_utf8",
-    "cap-fs-ext/async_std_fs_utf8"
-]
 arf_strings = [
     "cap-std/arf_strings",
     "cap-fs-ext/arf_strings",
     "cap-tempfile/arf_strings",
 ]
-async_std_arf_strings = [
-    "cap-async-std/arf_strings",
-    "cap-fs-ext/async_std_arf_strings"
-]
 
 [workspace]
 members = [
-  "cap-async-std",
   "cap-fs-ext",
   "cap-net-ext",
   "cap-directories",
