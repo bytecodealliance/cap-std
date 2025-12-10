@@ -14,7 +14,7 @@ edition = "2021"
 publish = false
 exclude = ["/.*"]
 # This is also checked in CI.
-rust-version = "1.63"
+rust-version = "1.70"
 
 [dev-dependencies]
 anyhow = "1.0.37"
