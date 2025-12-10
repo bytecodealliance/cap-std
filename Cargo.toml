@@ -24,7 +24,7 @@ cap-directories = { path = "cap-directories", version = "3.4.5" }
 cap-std = { path = "cap-std", version = "3.4.5" }
 cap-tempfile = { path = "cap-tempfile", version = "3.4.5" }
 cap-rand = { path = "cap-rand", version = "3.4.5" }
-rand = "0.8.1"
+rand = "0.9.2"
 tempfile = "3.1.0"
 camino = "1.0.5"
 libc = "0.2.100"
