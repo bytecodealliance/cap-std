@@ -35,27 +35,3 @@ impl IsFileReadWrite for cap_std::fs_utf8::File {
         is_file_read_write(&self.as_filelike_view::<std::fs::File>())
     }
 }
-
-#[cfg(feature = "async_std")]
-impl IsFileReadWrite for async_std::fs::File {
-    #[inline]
-    fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
-    }
-}
-
-#[cfg(feature = "async_std")]
-impl IsFileReadWrite for cap_async_std::fs::File {
-    #[inline]
-    fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
-    }
-}
-
-#[cfg(all(feature = "async_std", feature = "fs_utf8"))]
-impl IsFileReadWrite for cap_async_std::fs_utf8::File {
-    #[inline]
-    fn is_file_read_write(&self) -> io::Result<(bool, bool)> {
-        is_file_read_write(&self.as_filelike_view::<std::fs::File>())
-    }
-}
