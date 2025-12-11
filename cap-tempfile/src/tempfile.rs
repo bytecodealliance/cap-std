@@ -248,7 +248,7 @@ mod test {
     fn get_process_umask() -> io::Result<u32> {
         use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 
-        let d = tempfile::tempdir().unwrap();
+        let d = ::tempfile::tempdir().unwrap();
         let p = d.path().join("file");
 
         let mut opts = std::fs::OpenOptions::new();
