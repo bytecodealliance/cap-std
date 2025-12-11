@@ -291,7 +291,7 @@ mod test {
             let umask = get_process_umask()?;
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
-            let mode = Mode::from_bits_truncate(mode);
+            let mode = Mode::from_bits_truncate(mode as _);
             assert_eq!(0o666 & !umask, mode.bits() & 0o777);
         }
         // And that we can write
