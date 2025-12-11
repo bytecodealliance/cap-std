@@ -292,7 +292,7 @@ mod test {
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
             let mode = Mode::from_bits_truncate(mode as _);
-            assert_eq!(0o666 & !umask, mode.bits() & 0o777);
+            assert_eq!(0o666 & !umask, (mode.bits() & 0o777) as _);
         }
         // And that we can write
         tf.write_all(b"hello world")?;
@@ -321,7 +321,7 @@ mod test {
                 use rustix::fs::Mode;
                 let metadata = tf.metadata().unwrap();
                 let mode = metadata.mode();
-                let mode = Mode::from_bits_truncate(mode);
+                let mode = Mode::from_bits_truncate(mode as _);
                 assert_eq!(0o000, mode.bits() & 0o777);
             }
         } else if cfg!(windows) {
