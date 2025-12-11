@@ -68,9 +68,17 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     if anonymous {
         oflags |= OFlags::EXCL;
     }
-    // We default to 0o666, same as main rust when creating new files; this will be
-    // modified by umask: <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
-    let mode = Mode::from_raw_mode(0o666);
+    // For anonymous files, open with no permissions to discourage other
+    // processes from opening them.
+    //
+    // For named files, default to 0o666, same as main rust when creating new
+    // files; this will be modified by umask:
+    // <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
+    let mode = if anonymous {
+        Mode::from_raw_mode(0o000)
+    } else {
+        Mode::from_raw_mode(0o666)
+    };
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
         Ok(r) => Ok(Some(File::from(r))),
@@ -111,6 +119,16 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
     opts.read(true);
     opts.write(true);
     opts.create_new(true);
+    #[cfg(unix)]
+    if anonymous {
+        use cap_std::fs::OpenOptionsExt;
+        opts.mode(0);
+    }
+    #[cfg(windows)]
+    if anonymous {
+        use cap_std::fs::OpenOptionsExt;
+        opts.share_mode(0);
+    }
     let (f, name) = super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
         d.open_with(name, &opts)
     })?;
@@ -262,7 +280,7 @@ mod test {
 
         let mut tf = TempFile::new(&td)?;
         // Test that we created with the right permissions
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(unix)]
         {
             use cap_std::fs_utf8::MetadataExt;
             use rustix::fs::Mode;
@@ -291,6 +309,17 @@ mod test {
             let mut buf = String::new();
             tf.read_to_string(&mut buf).unwrap();
             assert_eq!(&buf, "hello world, I'm anonymous");
+
+            // Test that we created with the right permissions
+            #[cfg(unix)]
+            {
+                use cap_std::fs_utf8::MetadataExt;
+                use rustix::fs::Mode;
+                let metadata = tf.metadata().unwrap();
+                let mode = metadata.mode();
+                let mode = Mode::from_bits_truncate(mode);
+                assert_eq!(0o000, mode.bits() & 0o777);
+            }
         } else if cfg!(windows) {
             eprintln!("notice: Detected older Windows");
         }
