@@ -68,9 +68,17 @@ fn new_tempfile_linux(d: &Dir, anonymous: bool) -> io::Result<Option<File>> {
     if anonymous {
         oflags |= OFlags::EXCL;
     }
-    // We default to 0o666, same as main rust when creating new files; this will be
-    // modified by umask: <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
-    let mode = Mode::from_raw_mode(0o666);
+    // For anonymous files, open with no permissions to discourage other
+    // processes from opening them.
+    //
+    // For named files, default to 0o666, same as main rust when creating new
+    // files; this will be modified by umask:
+    // <https://github.com/rust-lang/rust/blob/44628f7273052d0bb8e8218518dacab210e1fe0d/library/std/src/sys/unix/fs.rs#L762>
+    let mode = if anonymous {
+        Mode::from_raw_mode(0o000)
+    } else {
+        Mode::from_raw_mode(0o666)
+    };
     // Happy path - Linux with O_TMPFILE
     match rustix::fs::openat(d, ".", oflags, mode) {
         Ok(r) => Ok(Some(File::from(r))),
@@ -111,11 +119,29 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
     opts.read(true);
     opts.write(true);
     opts.create_new(true);
+    #[cfg(unix)]
+    if anonymous {
+        use cap_std::fs::OpenOptionsExt;
+        opts.mode(0);
+    }
+    #[cfg(windows)]
+    if anonymous {
+        use cap_std::fs::OpenOptionsExt;
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_TEMPORARY, FILE_FLAG_DELETE_ON_CLOSE,
+        };
+        opts.share_mode(0);
+        opts.custom_flags(FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE);
+    }
     let (f, name) = super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
         d.open_with(name, &opts)
     })?;
     if anonymous {
-        d.remove_file(name)?;
+        // On Windows we use `FILE_FLAG_DELETE_ON_CLOSE` instead.
+        #[cfg(not(windows))]
+        {
+            d.remove_file(name)?;
+        }
         Ok((f, None))
     } else {
         Ok((f, Some(name)))
@@ -217,26 +243,22 @@ mod test {
     use super::*;
 
     /// On Unix, calling `umask()` actually *mutates* the process global state.
-    /// This uses Linux `/proc` to read the current value.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    /// This uses a temporary file instead.
+    #[cfg(unix)]
     fn get_process_umask() -> io::Result<u32> {
-        use io::BufRead;
-        let status = std::fs::File::open("/proc/self/status")?;
-        let bufr = io::BufReader::new(status);
-        for line in bufr.lines() {
-            let line = line?;
-            let l = if let Some(v) = line.split_once(':') {
-                v
-            } else {
-                continue;
-            };
-            let (k, v) = l;
-            if k != "Umask" {
-                continue;
-            }
-            return Ok(u32::from_str_radix(v.trim(), 8).unwrap());
-        }
-        panic!("Could not determine process umask")
+        use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+
+        let d = ::tempfile::tempdir().unwrap();
+        let p = d.path().join("file");
+
+        let mut opts = std::fs::OpenOptions::new();
+        opts.read(true);
+        opts.write(true);
+        opts.create_new(true);
+        opts.mode(0o777);
+        let f = opts.open(p).unwrap();
+        let m = f.metadata().unwrap();
+        Ok(!m.mode() & 0o777)
     }
 
     /// Older Windows versions don't support removing open files
@@ -262,15 +284,15 @@ mod test {
 
         let mut tf = TempFile::new(&td)?;
         // Test that we created with the right permissions
-        #[cfg(any(target_os = "android", target_os = "linux"))]
+        #[cfg(unix)]
         {
             use cap_std::fs_utf8::MetadataExt;
             use rustix::fs::Mode;
             let umask = get_process_umask()?;
             let metadata = tf.as_file().metadata().unwrap();
             let mode = metadata.mode();
-            let mode = Mode::from_bits_truncate(mode);
-            assert_eq!(0o666 & !umask, mode.bits() & 0o777);
+            let mode = Mode::from_bits_truncate(mode as _);
+            assert_eq!(0o666 & !umask, (mode.bits() & 0o777) as _);
         }
         // And that we can write
         tf.write_all(b"hello world")?;
@@ -291,6 +313,17 @@ mod test {
             let mut buf = String::new();
             tf.read_to_string(&mut buf).unwrap();
             assert_eq!(&buf, "hello world, I'm anonymous");
+
+            // Test that we created with the right permissions
+            #[cfg(unix)]
+            {
+                use cap_std::fs_utf8::MetadataExt;
+                use rustix::fs::Mode;
+                let metadata = tf.metadata().unwrap();
+                let mode = metadata.mode();
+                let mode = Mode::from_bits_truncate(mode as _);
+                assert_eq!(0o000, mode.bits() & 0o777);
+            }
         } else if cfg!(windows) {
             eprintln!("notice: Detected older Windows");
         }

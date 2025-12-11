@@ -19,7 +19,7 @@ use uuid::Uuid;
 pub mod utf8;
 
 mod tempfile;
-pub use tempfile::*;
+pub use crate::tempfile::*;
 
 /// Re-export because we use this in our public API.
 pub use cap_std;
