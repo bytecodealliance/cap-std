@@ -552,25 +552,6 @@ impl crate::fs::FileExt for File {
     }
 
     #[inline]
-    fn read_link<P: AsRef<Path>>(
-        &self,
-        path: P,
-    ) -> std::result::Result<std::path::PathBuf, io::Error> {
-        let path = path.as_ref();
-        self.cap_std.read_link(path)
-    }
-
-    #[inline]
-    fn metadata_at<P: AsRef<Path>>(
-        &self,
-        lookup_flags: u32,
-        path: P,
-    ) -> std::result::Result<std::fs::Metadata, io::Error> {
-        let path = path.as_ref();
-        self.cap_std.metadata_at(lookup_flags, path)
-    }
-
-    #[inline]
     fn remove_file<P: AsRef<Path>>(&self, path: P) -> std::result::Result<(), io::Error> {
         let path = path.as_ref();
         self.cap_std.remove_file(path)
