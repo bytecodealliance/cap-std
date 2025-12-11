@@ -32,6 +32,9 @@ features = [
     "Win32_Foundation",
 ]
 
+[dev-dependencies]
+tempfile = "3.23.0"
+
 [features]
 default = []
 fs_utf8 = ["cap-std/fs_utf8", "camino"]

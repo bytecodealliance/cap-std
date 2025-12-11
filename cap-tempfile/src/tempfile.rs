@@ -243,26 +243,22 @@ mod test {
     use super::*;
 
     /// On Unix, calling `umask()` actually *mutates* the process global state.
-    /// This uses Linux `/proc` to read the current value.
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    /// This uses a temporary file instead.
+    #[cfg(unix)]
     fn get_process_umask() -> io::Result<u32> {
-        use io::BufRead;
-        let status = std::fs::File::open("/proc/self/status")?;
-        let bufr = io::BufReader::new(status);
-        for line in bufr.lines() {
-            let line = line?;
-            let l = if let Some(v) = line.split_once(':') {
-                v
-            } else {
-                continue;
-            };
-            let (k, v) = l;
-            if k != "Umask" {
-                continue;
-            }
-            return Ok(u32::from_str_radix(v.trim(), 8).unwrap());
-        }
-        panic!("Could not determine process umask")
+        use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+
+        let d = tempfile::tempdir().unwrap();
+        let p = d.path().join("file");
+
+        let mut opts = std::fs::OpenOptions::new();
+        opts.read(true);
+        opts.write(true);
+        opts.create_new(true);
+        opts.mode(0o777);
+        let f = opts.open(p).unwrap();
+        let m = f.metadata().unwrap();
+        Ok(!m.mode() & 0o777)
     }
 
     /// Older Windows versions don't support removing open files
