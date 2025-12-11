@@ -127,13 +127,21 @@ fn new_tempfile(d: &Dir, anonymous: bool) -> io::Result<(File, Option<String>)> 
     #[cfg(windows)]
     if anonymous {
         use cap_std::fs::OpenOptionsExt;
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_ATTRIBUTE_TEMPORARY, FILE_FLAG_DELETE_ON_CLOSE,
+        };
         opts.share_mode(0);
+        opts.custom_flags(FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE);
     }
     let (f, name) = super::retry_with_name_ignoring(io::ErrorKind::AlreadyExists, |name| {
         d.open_with(name, &opts)
     })?;
     if anonymous {
-        d.remove_file(name)?;
+        // On Windows we use `FILE_FLAG_DELETE_ON_CLOSE` instead.
+        #[cfg(not(windows))]
+        {
+            d.remove_file(name)?;
+        }
         Ok((f, None))
     } else {
         Ok((f, Some(name)))

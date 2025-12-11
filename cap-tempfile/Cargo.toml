@@ -26,7 +26,7 @@ rustix = { version = "1.0.0" }
 [target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
 rustix-linux-procfs = "0.1.1"
 
-[target.'cfg(windows)'.dev-dependencies.windows-sys]
+[target.'cfg(windows)'.dependencies.windows-sys]
 version = ">=0.60, <0.62"
 features = [
     "Win32_Foundation",
