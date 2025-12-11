@@ -27,7 +27,7 @@ rustix = { version = "1.0.0" }
 rustix-linux-procfs = "0.1.1"
 
 [target.'cfg(windows)'.dev-dependencies.windows-sys]
-version = ">=0.52, <=0.59"
+version = ">=0.60, <0.62"
 features = [
     "Win32_Foundation",
 ]

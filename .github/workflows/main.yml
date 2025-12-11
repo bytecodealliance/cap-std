@@ -362,7 +362,7 @@ jobs:
         include:
           - build: msrv
             os: ubuntu-latest
-            rust: 1.63
+            rust: "1.70"
 
     steps:
     - uses: actions/checkout@v4
@@ -372,7 +372,7 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
-    - name: Use specific dependency versions for Rust 1.63 compatibility.
+    - name: Use specific dependency versions for Rust 1.70 compatibility.
       run: |
         cargo update --package=once_cell --precise=1.20.3
 
