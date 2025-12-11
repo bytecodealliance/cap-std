@@ -131,7 +131,7 @@ impl TempDir {
         #[cfg(target_os = "emscripten")]
         {
             use rand::RngCore;
-            let mut r = rand::thread_rng();
+            let mut r = rand::rng();
             format!("cap-primitives.{}", r.next_u32())
         }
     }
