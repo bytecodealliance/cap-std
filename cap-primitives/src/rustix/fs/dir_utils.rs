@@ -111,12 +111,9 @@ pub(crate) fn open_ambient_dir_impl(
     let mut options = fs::OpenOptions::new();
     options.read(true);
 
-    #[cfg(not(target_os = "wasi"))]
     // This is for `std::fs`, so we don't have `dir_required`, so set
     // `O_DIRECTORY` manually.
     options.custom_flags((OFlags::DIRECTORY | target_o_path()).bits() as i32);
-    #[cfg(target_os = "wasi")]
-    options.directory(true);
 
     options.open(path)
 }

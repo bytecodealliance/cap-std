@@ -250,14 +250,6 @@ pub trait MetadataExt {
     fn ino(&self) -> u64;
     /// Returns the number of hard links pointing to this file.
     fn nlink(&self) -> u64;
-    /// Returns the total size of this file in bytes.
-    fn size(&self) -> u64;
-    /// Returns the last access time of the file, in seconds since Unix Epoch.
-    fn atim(&self) -> u64;
-    /// Returns the last modification time of the file, in seconds since Unix Epoch.
-    fn mtim(&self) -> u64;
-    /// Returns the last status change time of the file, in seconds since Unix Epoch.
-    fn ctim(&self) -> u64;
 }
 
 /// Windows-specific extensions to [`Metadata`].
@@ -384,26 +376,6 @@ impl MetadataExt for Metadata {
     #[inline]
     fn nlink(&self) -> u64 {
         crate::fs::MetadataExt::nlink(&self.ext)
-    }
-
-    #[inline]
-    fn size(&self) -> u64 {
-        crate::fs::MetadataExt::size(&self.ext)
-    }
-
-    #[inline]
-    fn atim(&self) -> u64 {
-        crate::fs::MetadataExt::atim(&self.ext)
-    }
-
-    #[inline]
-    fn mtim(&self) -> u64 {
-        crate::fs::MetadataExt::mtim(&self.ext)
-    }
-
-    #[inline]
-    fn ctim(&self) -> u64 {
-        crate::fs::MetadataExt::ctim(&self.ext)
     }
 }
 

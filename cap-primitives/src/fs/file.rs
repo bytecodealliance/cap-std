@@ -172,16 +172,6 @@ pub trait FileExt {
     /// Create a directory.
     fn create_directory<P: AsRef<std::path::Path>>(&self, dir: P) -> io::Result<()>;
 
-    /// Read the contents of a symbolic link.
-    fn read_link<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<std::path::PathBuf>;
-
-    /// Return the attributes of a file or directory.
-    fn metadata_at<P: AsRef<std::path::Path>>(
-        &self,
-        lookup_flags: u32,
-        path: P,
-    ) -> io::Result<std::fs::Metadata>;
-
     /// Unlink a file.
     fn remove_file<P: AsRef<std::path::Path>>(&self, path: P) -> io::Result<()>;
 
