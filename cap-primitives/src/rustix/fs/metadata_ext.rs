@@ -20,6 +20,7 @@ pub(crate) struct ImplMetadataExt {
     gid: u32,
     #[cfg(not(target_os = "wasi"))]
     rdev: u64,
+    #[cfg(not(target_os = "wasi"))]
     size: u64,
     #[cfg(not(target_os = "wasi"))]
     atime: i64,
@@ -37,12 +38,6 @@ pub(crate) struct ImplMetadataExt {
     blksize: u64,
     #[cfg(not(target_os = "wasi"))]
     blocks: u64,
-    #[cfg(target_os = "wasi")]
-    atim: u64,
-    #[cfg(target_os = "wasi")]
-    mtim: u64,
-    #[cfg(target_os = "wasi")]
-    ctim: u64,
 }
 
 impl ImplMetadataExt {
@@ -72,6 +67,7 @@ impl ImplMetadataExt {
             gid: std.gid(),
             #[cfg(not(target_os = "wasi"))]
             rdev: std.rdev(),
+            #[cfg(not(target_os = "wasi"))]
             size: std.size(),
             #[cfg(not(target_os = "wasi"))]
             atime: std.atime(),
@@ -89,12 +85,6 @@ impl ImplMetadataExt {
             blksize: std.blksize(),
             #[cfg(not(target_os = "wasi"))]
             blocks: std.blocks(),
-            #[cfg(target_os = "wasi")]
-            atim: std.atim(),
-            #[cfg(target_os = "wasi")]
-            mtim: std.mtim(),
-            #[cfg(target_os = "wasi")]
-            ctim: std.ctim(),
         }
     }
 
@@ -179,6 +169,7 @@ impl ImplMetadataExt {
                 gid: stat.st_gid,
                 #[cfg(not(target_os = "wasi"))]
                 rdev: u64::try_from(stat.st_rdev).unwrap(),
+                #[cfg(not(target_os = "wasi"))]
                 size: u64::try_from(stat.st_size).unwrap(),
                 #[cfg(not(target_os = "wasi"))]
                 atime: i64::try_from(stat.st_atime).unwrap(),
@@ -196,21 +187,6 @@ impl ImplMetadataExt {
                 blksize: u64::try_from(stat.st_blksize).unwrap(),
                 #[cfg(not(target_os = "wasi"))]
                 blocks: u64::try_from(stat.st_blocks).unwrap(),
-                #[cfg(target_os = "wasi")]
-                atim: u64::try_from(
-                    stat.st_atim.tv_sec as u64 * 1000000000 + stat.st_atim.tv_nsec as u64,
-                )
-                .unwrap(),
-                #[cfg(target_os = "wasi")]
-                mtim: u64::try_from(
-                    stat.st_mtim.tv_sec as u64 * 1000000000 + stat.st_mtim.tv_nsec as u64,
-                )
-                .unwrap(),
-                #[cfg(target_os = "wasi")]
-                ctim: u64::try_from(
-                    stat.st_ctim.tv_sec as u64 * 1000000000 + stat.st_ctim.tv_nsec as u64,
-                )
-                .unwrap(),
             },
         }
     }
@@ -319,6 +295,7 @@ impl crate::fs::MetadataExt for ImplMetadataExt {
         self.rdev
     }
 
+    #[cfg(not(target_os = "wasi"))]
     #[inline]
     fn size(&self) -> u64 {
         self.size
@@ -370,21 +347,6 @@ impl crate::fs::MetadataExt for ImplMetadataExt {
     #[inline]
     fn blocks(&self) -> u64 {
         self.blocks
-    }
-
-    #[cfg(target_os = "wasi")]
-    fn atim(&self) -> u64 {
-        self.atim
-    }
-
-    #[cfg(target_os = "wasi")]
-    fn mtim(&self) -> u64 {
-        self.mtim
-    }
-
-    #[cfg(target_os = "wasi")]
-    fn ctim(&self) -> u64 {
-        self.ctim
     }
 }
 
