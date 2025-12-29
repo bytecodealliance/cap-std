@@ -6,31 +6,31 @@ use std::io;
 /// `UserDirs` provides paths of user-facing standard directories, following
 /// the conventions of the operating system the library is running on.
 ///
-/// This corresponds to [`directories_next::UserDirs`], except that the
+/// This corresponds to [`directories::UserDirs`], except that the
 /// functions open the directories and returns `Dir`s instead of returning
 /// `Path`s.
 ///
-/// Unlike `directories_next::UserDirs`, the `*_dir` functions return `Dir`s
+/// Unlike `directories::UserDirs`, the `*_dir` functions return `Dir`s
 /// rather than `Path`s, because absolute paths don't interoperate well with
 /// the capability model.
 #[derive(Clone)]
 pub struct UserDirs {
-    inner: directories_next::UserDirs,
+    inner: directories::UserDirs,
 }
 
 impl UserDirs {
     /// Creates a `UserDirs` struct which holds the paths to user-facing
     /// directories for audio, font, video, etc. data on the system.
     ///
-    /// This corresponds to [`directories_next::UserDirs::new`].
+    /// This corresponds to [`directories::UserDirs::new`].
     pub fn new() -> Option<Self> {
-        let inner = directories_next::UserDirs::new()?;
+        let inner = directories::UserDirs::new()?;
         Some(Self { inner })
     }
 
     /// Returns the user's home directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::home_dir`].
+    /// This corresponds to [`directories::UserDirs::home_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -42,7 +42,7 @@ impl UserDirs {
 
     /// Returns the user's audio directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::audio_dir`].
+    /// This corresponds to [`directories::UserDirs::audio_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -57,7 +57,7 @@ impl UserDirs {
 
     /// Returns the user's desktop directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::desktop_dir`].
+    /// This corresponds to [`directories::UserDirs::desktop_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -72,7 +72,7 @@ impl UserDirs {
 
     /// Returns the user's document directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::document_dir`].
+    /// This corresponds to [`directories::UserDirs::document_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -87,7 +87,7 @@ impl UserDirs {
 
     /// Returns the user's download directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::download_dir`].
+    /// This corresponds to [`directories::UserDirs::download_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -102,7 +102,7 @@ impl UserDirs {
 
     /// Returns the user's font directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::font_dir`].
+    /// This corresponds to [`directories::UserDirs::font_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -117,7 +117,7 @@ impl UserDirs {
 
     /// Returns the user's picture directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::picture_dir`].
+    /// This corresponds to [`directories::UserDirs::picture_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -132,7 +132,7 @@ impl UserDirs {
 
     /// Returns the user's public directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::public_dir`].
+    /// This corresponds to [`directories::UserDirs::public_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -147,7 +147,7 @@ impl UserDirs {
 
     /// Returns the user's template directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::template_dir`].
+    /// This corresponds to [`directories::UserDirs::template_dir`].
     ///
     /// # Ambient Authority
     ///
@@ -162,7 +162,7 @@ impl UserDirs {
 
     /// Returns the user's video directory.
     ///
-    /// This corresponds to [`directories_next::UserDirs::video_dir`].
+    /// This corresponds to [`directories::UserDirs::video_dir`].
     ///
     /// # Ambient Authority
     ///

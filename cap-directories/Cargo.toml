@@ -14,7 +14,7 @@ edition = "2021"
 
 [dependencies]
 cap-std = { path = "../cap-std", version = "^4.0.0" }
-directories-next = "2.0.0"
+directories = "6.0.0"
 
 [target.'cfg(not(windows))'.dependencies]
 rustix = { version = "1.0.0" }

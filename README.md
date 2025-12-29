@@ -51,7 +51,7 @@ Linux.
 [`cap-rand`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-rand/README.md
 [`cap-net-ext`]: https://github.com/bytecodealliance/cap-std/blob/main/cap-net-ext/README.md
 [`cap_std::fs`]: https://docs.rs/cap-std/latest/cap_std/fs/index.html
-[standard application directories]: https://docs.rs/directories-next/
+[standard application directories]: https://docs.rs/directories/
 [temporary directories]: https://docs.rs/tempfile/
 [random number generators]: https://docs.rs/rand/
 
