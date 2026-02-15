@@ -1,6 +1,6 @@
 [package]
 name = "cap-fs-ext"
-version = "4.0.0"
+version = "4.0.1"
 description = "Extension traits for `Dir`, `File`, etc."
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -14,8 +14,8 @@ edition = "2021"
 
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
-cap-std = { path = "../cap-std", optional = true, version = "4.0.0" }
-cap-primitives = { path = "../cap-primitives", version = "4.0.0" }
+cap-std = { path = "../cap-std", optional = true, version = "4.0.1" }
+cap-primitives = { path = "../cap-primitives", version = "4.0.1" }
 io-lifetimes = { version = "3.0.1", default-features = false }
 camino = { version = "1.0.5", optional = true }
 
