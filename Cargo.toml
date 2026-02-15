@@ -1,6 +1,6 @@
 [package]
 name = "cap-std-workspace"
-version = "4.0.1"
+version = "4.0.2"
 description = "Capability-based version of the Rust standard library"
 authors = [
     "Dan Gohman <dev@sunfishcode.online>",
@@ -18,12 +18,12 @@ rust-version = "1.70"
 
 [dev-dependencies]
 anyhow = "1.0.37"
-cap-fs-ext = { path = "cap-fs-ext", version = "4.0.1" }
-cap-net-ext = { path = "cap-net-ext", version = "4.0.1" }
-cap-directories = { path = "cap-directories", version = "4.0.1" }
-cap-std = { path = "cap-std", version = "4.0.1" }
-cap-tempfile = { path = "cap-tempfile", version = "4.0.1" }
-cap-rand = { path = "cap-rand", version = "4.0.1" }
+cap-fs-ext = { path = "cap-fs-ext", version = "4.0.2" }
+cap-net-ext = { path = "cap-net-ext", version = "4.0.2" }
+cap-directories = { path = "cap-directories", version = "4.0.2" }
+cap-std = { path = "cap-std", version = "4.0.2" }
+cap-tempfile = { path = "cap-tempfile", version = "4.0.2" }
+cap-rand = { path = "cap-rand", version = "4.0.2" }
 rand = "0.9.2"
 tempfile = "3.1.0"
 camino = "1.0.5"
