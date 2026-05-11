@@ -18,6 +18,8 @@ rust-version = "1.70"
 
 [dev-dependencies]
 anyhow = "1.0.37"
+cap-tokio = { path = "cap-tokio", version = "4.0.2" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 cap-fs-ext = { path = "cap-fs-ext", version = "4.0.2" }
 cap-net-ext = { path = "cap-net-ext", version = "4.0.2" }
 cap-directories = { path = "cap-directories", version = "4.0.2" }
@@ -54,14 +56,23 @@ fs_utf8 = [
     "cap-fs-ext/fs_utf8",
     "cap-tempfile/fs_utf8",
 ]
+async_std_fs_utf8 = [
+    "cap-tokio/fs_utf8",
+    "cap-fs-ext/async_std_fs_utf8"
+]
 arf_strings = [
     "cap-std/arf_strings",
     "cap-fs-ext/arf_strings",
     "cap-tempfile/arf_strings",
 ]
+async_std_arf_strings = [
+    "cap-tokio/arf_strings",
+    "cap-fs-ext/async_std_arf_strings"
+]
 
 [workspace]
 members = [
+  "cap-tokio",
   "cap-fs-ext",
   "cap-net-ext",
   "cap-directories",
