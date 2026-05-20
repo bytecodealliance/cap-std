@@ -282,7 +282,6 @@ impl TryFrom<File> for OwnedHandle {
     type Error = io::Error;
     #[inline]
     fn try_from(file: File) -> io::Result<OwnedHandle> {
-        use std::os::windows::io::IntoRawHandle;
         let raw = TryIntoRawHandle::try_into_raw_handle(file)?;
         Ok(unsafe { std::os::windows::io::OwnedHandle::from_raw_handle(raw) })
     }
@@ -302,7 +301,9 @@ impl TryFrom<File> for io_extras::os::windows::OwnedHandleOrSocket {
     type Error = io::Error;
     fn try_from(file: File) -> io::Result<io_extras::os::windows::OwnedHandleOrSocket> {
         let handle: OwnedHandle = file.try_into()?;
-        Ok(handle.into())
+        Ok(io_extras::os::windows::OwnedHandleOrSocket::from_handle(
+            handle,
+        ))
     }
 }
 

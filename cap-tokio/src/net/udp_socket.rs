@@ -341,7 +341,7 @@ impl TryFrom<UdpSocket> for OwnedSocket {
     type Error = io::Error;
     #[inline]
     fn try_from(val: UdpSocket) -> io::Result<OwnedSocket> {
-        use std::os::windows::io::{FromRawSocket, IntoRawSocket};
+        use std::os::windows::io::FromRawSocket;
         let raw = TryIntoRawSocket::try_into_raw_socket(val)?;
         Ok(unsafe { OwnedSocket::from_raw_socket(raw) })
     }
@@ -354,9 +354,7 @@ impl TryIntoRawHandleOrSocket for UdpSocket {
     ) -> std::io::Result<io_extras::os::windows::RawHandleOrSocket> {
         use TryIntoRawSocket;
         let raw = self.try_into_raw_socket()?;
-        Ok(io_extras::os::windows::RawHandleOrSocket::from_raw_socket(
-            raw,
-        ))
+        Ok(io_extras::os::windows::RawHandleOrSocket::unowned_from_raw_socket(raw))
     }
 }
 
@@ -365,7 +363,9 @@ impl TryFrom<UdpSocket> for io_extras::os::windows::OwnedHandleOrSocket {
     type Error = io::Error;
     fn try_from(val: UdpSocket) -> io::Result<io_extras::os::windows::OwnedHandleOrSocket> {
         let socket: OwnedSocket = val.try_into()?;
-        Ok(socket.into())
+        Ok(io_extras::os::windows::OwnedHandleOrSocket::from_socket(
+            socket,
+        ))
     }
 }
 

@@ -123,7 +123,7 @@ pub trait AsyncDirExt {
     /// This corresponds to [`filetime::set_file_atime`].
     ///
     /// [`filetime::set_file_atime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_atime.html
-    async fn set_atime<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_atime<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: SystemTimeSpec,
@@ -134,7 +134,7 @@ pub trait AsyncDirExt {
     /// This corresponds to [`filetime::set_file_mtime`].
     ///
     /// [`filetime::set_file_mtime`]: https://docs.rs/filetime/latest/filetime/fn.set_file_mtime.html
-    async fn set_mtime<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_mtime<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         mtime: SystemTimeSpec,
@@ -145,7 +145,7 @@ pub trait AsyncDirExt {
     /// This corresponds to [`filetime::set_file_times`].
     ///
     /// [`filetime::set_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_file_times.html
-    async fn set_times<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_times<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -158,7 +158,7 @@ pub trait AsyncDirExt {
     /// This corresponds to [`filetime::set_symlink_file_times`].
     ///
     /// [`filetime::set_symlink_file_times`]: https://docs.rs/filetime/latest/filetime/fn.set_symlink_file_times.html
-    async fn set_symlink_times<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_symlink_times<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -172,10 +172,7 @@ pub trait AsyncDirExt {
     /// to be atomic.
     ///
     /// [`std::os::unix::fs::symlink`]: https://doc.rust-lang.org/std/os/unix/fs/fn.symlink.html
-    async fn symlink<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -188,10 +185,7 @@ pub trait AsyncDirExt {
     /// guaranteed to fail if the target is not a file.
     ///
     /// [`std::os::windows::fs::symlink_file`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
-    async fn symlink_file<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_file<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -204,10 +198,7 @@ pub trait AsyncDirExt {
     /// guaranteed to fail if the target is not a directory.
     ///
     /// [`std::os::windows::fs::symlink_dir`]: https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_dir.html
-    async fn symlink_dir<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_dir<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -215,7 +206,7 @@ pub trait AsyncDirExt {
 
     /// Similar to `cap_std::fs::Dir::open_dir`, but fails if the path names a
     /// symlink.
-    async fn open_dir_nofollow<P: AsRef<async_std::path::Path> + Send>(
+    async fn open_dir_nofollow<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
     ) -> io::Result<Self>
@@ -227,13 +218,13 @@ pub trait AsyncDirExt {
     /// Removal of symlinks has different behavior under Windows - if a symlink
     /// points to a directory, it cannot be removed with the `remove_file`
     /// operation. This method will remove files and all symlinks.
-    async fn remove_file_or_symlink<P: AsRef<async_std::path::Path> + Send>(
+    async fn remove_file_or_symlink<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
     ) -> io::Result<()>;
 
     /// Test for accessibility or existence of a filesystem object.
-    async fn access<P: AsRef<async_std::path::Path> + Send>(
+    async fn access<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         type_: AccessType,
@@ -241,7 +232,7 @@ pub trait AsyncDirExt {
 
     /// Test for accessibility or existence of a filesystem object, without
     /// following symbolic links.
-    async fn access_symlink<P: AsRef<async_std::path::Path> + Send>(
+    async fn access_symlink<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         type_: AccessType,
@@ -249,7 +240,7 @@ pub trait AsyncDirExt {
 
     /// Changes the permissions found on a file or a directory, without following
     /// symbolic links.
-    async fn set_symlink_permissions<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_symlink_permissions<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         perm: Permissions,
@@ -678,7 +669,7 @@ impl DirExt for cap_std::fs::Dir {
 #[async_trait]
 impl AsyncDirExt for cap_tokio::fs::Dir {
     #[inline]
-    async fn set_atime<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_atime<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: SystemTimeSpec,
@@ -697,7 +688,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
     }
 
     #[inline]
-    async fn set_mtime<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_mtime<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         mtime: SystemTimeSpec,
@@ -716,7 +707,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
     }
 
     #[inline]
-    async fn set_times<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_times<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -736,7 +727,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
     }
 
     #[inline]
-    async fn set_symlink_times<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_symlink_times<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         atime: Option<SystemTimeSpec>,
@@ -757,10 +748,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -780,10 +768,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink_file<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_file<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -803,10 +788,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn symlink_dir<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_dir<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -826,10 +808,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -860,10 +839,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink_file<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_file<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -883,10 +859,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn symlink_dir<
-        P: AsRef<async_std::path::Path> + Send,
-        Q: AsRef<async_std::path::Path> + Send,
-    >(
+    async fn symlink_dir<P: AsRef<std::path::Path> + Send, Q: AsRef<std::path::Path> + Send>(
         &self,
         src: P,
         dst: Q,
@@ -905,7 +878,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
     }
 
     #[inline]
-    async fn open_dir_nofollow<P: AsRef<async_std::path::Path> + Send>(
+    async fn open_dir_nofollow<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
     ) -> io::Result<Self> {
@@ -922,7 +895,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(not(windows))]
     #[inline]
-    async fn remove_file_or_symlink<P: AsRef<async_std::path::Path> + Send>(
+    async fn remove_file_or_symlink<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
     ) -> io::Result<()> {
@@ -931,7 +904,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     #[cfg(windows)]
     #[inline]
-    async fn remove_file_or_symlink<P: AsRef<async_std::path::Path> + Send>(
+    async fn remove_file_or_symlink<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
     ) -> io::Result<()> {
@@ -969,7 +942,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
     }
 
     /// Test for accessibility or existence of a filesystem object.
-    async fn access<P: AsRef<async_std::path::Path> + Send>(
+    async fn access<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         type_: AccessType,
@@ -989,7 +962,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     /// Test for accessibility or existence of a filesystem object, without
     /// following symbolic links.
-    async fn access_symlink<P: AsRef<async_std::path::Path> + Send>(
+    async fn access_symlink<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         type_: AccessType,
@@ -1009,7 +982,7 @@ impl AsyncDirExt for cap_tokio::fs::Dir {
 
     /// Changes the permissions found on a file or a directory, without following
     /// symbolic links.
-    async fn set_symlink_permissions<P: AsRef<async_std::path::Path> + Send>(
+    async fn set_symlink_permissions<P: AsRef<std::path::Path> + Send>(
         &self,
         path: P,
         perm: Permissions,

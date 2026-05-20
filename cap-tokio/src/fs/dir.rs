@@ -997,7 +997,7 @@ impl AsHandleOrSocket for Dir {
 impl TryIntoRawFd for Dir {
     fn try_into_raw_fd(self) -> std::io::Result<RawFd> {
         let file = std::sync::Arc::try_unwrap(self.std_file)
-            .map_err(|_| std::io::Error::other("Dir has other clones"))?;
+            .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "Dir has other clones"))?;
         Ok(file.into_raw_fd())
     }
 }
@@ -1018,7 +1018,7 @@ impl TryFrom<Dir> for OwnedFd {
 impl TryIntoRawHandle for Dir {
     fn try_into_raw_handle(self) -> std::io::Result<RawHandle> {
         let file = std::sync::Arc::try_unwrap(self.std_file)
-            .map_err(|_| std::io::Error::other("Dir has other clones"))?;
+            .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "Dir has other clones"))?;
         Ok(file.into_raw_handle())
     }
 }
@@ -1042,9 +1042,7 @@ impl TryIntoRawHandleOrSocket for Dir {
     ) -> io::Result<io_extras::os::windows::RawHandleOrSocket> {
         use TryIntoRawHandle;
         let raw = self.try_into_raw_handle()?;
-        Ok(io_extras::os::windows::RawHandleOrSocket::from_raw_handle(
-            raw,
-        ))
+        Ok(io_extras::os::windows::RawHandleOrSocket::unowned_from_raw_handle(raw))
     }
 }
 
@@ -1054,7 +1052,9 @@ impl TryFrom<Dir> for io_extras::os::windows::OwnedHandleOrSocket {
     #[inline]
     fn try_from(dir: Dir) -> io::Result<io_extras::os::windows::OwnedHandleOrSocket> {
         let handle: OwnedHandle = dir.try_into()?;
-        Ok(handle.into())
+        Ok(io_extras::os::windows::OwnedHandleOrSocket::from_handle(
+            handle,
+        ))
     }
 }
 

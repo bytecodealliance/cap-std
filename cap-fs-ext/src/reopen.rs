@@ -70,8 +70,7 @@ impl Reopen for cap_tokio::fs::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
-        let std = async_std::fs::File::from_into_filelike(file);
-        Ok(Self::from_std(std))
+        Ok(Self::from_std(cap_tokio::tokio::fs::File::from_std(file)))
     }
 }
 
@@ -80,7 +79,6 @@ impl Reopen for cap_tokio::fs_utf8::File {
     #[inline]
     fn reopen(&self, options: &OpenOptions) -> io::Result<Self> {
         let file = reopen(&self.as_filelike_view::<std::fs::File>(), options)?;
-        let std = async_std::fs::File::from_into_filelike(file);
-        Ok(Self::from_std(std))
+        Ok(Self::from_std(cap_tokio::tokio::fs::File::from_std(file)))
     }
 }
