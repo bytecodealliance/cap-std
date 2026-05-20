@@ -14,9 +14,12 @@ edition = "2021"
 
 [dependencies]
 arf-strings = { version = "0.7.0", optional = true }
+cap-tokio = { path = "../cap-tokio", optional = true, version = "4.0.2" }
 cap-std = { path = "../cap-std", optional = true, version = "4.0.2" }
 cap-primitives = { path = "../cap-primitives", version = "4.0.2" }
 io-lifetimes = { version = "3.0.1", default-features = false }
+async-std = { version = "1.13.0", features = ["io_safety", "attributes"], optional = true }
+async-trait = { version = "0.1.42", optional = true }
 camino = { version = "1.0.5", optional = true }
 
 [features]
@@ -24,6 +27,9 @@ default = ["std"]
 fs_utf8 = ["cap-std/fs_utf8", "camino"]
 arf_strings = ["cap-std/arf_strings", "fs_utf8", "arf-strings"]
 std = ["cap-std"]
+async_std = ["cap-tokio", "async-std", "io-lifetimes/async-std", "async-trait"]
+async_std_fs_utf8 = ["cap-tokio/fs_utf8", "camino"]
+async_std_arf_strings = ["cap-tokio/arf_strings", "async_std_fs_utf8", "arf-strings"]
 
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = ">=0.60, <0.62"
