@@ -176,3 +176,56 @@ fn rename_basics() {
     assert!(!tmpdir.exists("file.txt"));
     assert!(tmpdir.exists("existing.txt"));
 }
+
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+#[test]
+fn rename_exclusive_basics() {
+    let tmpdir = tmpdir();
+
+    let dir1 = "foo";
+    tmpdir.create_dir_all(dir1).unwrap();
+    let dir2 = "bar";
+    tmpdir.create_dir_all(dir2).unwrap();
+
+    // Empty directory to empty directory
+    tmpdir.rename_exclusive(dir1, &tmpdir, dir2).unwrap_err();
+
+    // File to directory
+    let file1 = "foo/baz";
+    tmpdir.create(file1).unwrap();
+    tmpdir.rename_exclusive(file1, &tmpdir, dir2).unwrap_err();
+
+    // Directory to file
+    tmpdir.rename_exclusive(dir2, &tmpdir, file1).unwrap_err();
+
+    // File to file
+    let file2 = "bar/mane";
+    tmpdir.create(file2).unwrap();
+    tmpdir.rename_exclusive(file1, &tmpdir, file2).unwrap_err();
+
+    assert!(tmpdir.exists(dir1));
+    assert!(tmpdir.exists(dir2));
+    assert!(tmpdir.exists(file1));
+    assert!(tmpdir.exists(file2));
+
+    // Now let's test successful renames!
+    let dir3 = "bar/quux";
+    let file3 = "bar/quux/baz";
+    tmpdir.create_dir_all(dir3).unwrap();
+
+    // File to file
+    tmpdir.rename_exclusive(file1, &tmpdir, file3).unwrap();
+
+    // Directory to directory
+    let dir4 = "foo/bar";
+    tmpdir.rename_exclusive(dir2, &tmpdir, dir4).unwrap();
+    assert!(tmpdir.exists(dir1));
+    assert!(!tmpdir.exists(dir2));
+    assert!(tmpdir.exists(dir4));
+    assert!(tmpdir.exists("foo/bar/quux/baz"));
+}

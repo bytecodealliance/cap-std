@@ -1,7 +1,15 @@
 use super::open_parent;
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+use crate::fs::rename_excl_unchecked;
 #[cfg(unix)]
 use crate::fs::{append_dir_suffix, path_has_trailing_slash};
 use crate::fs::{rename_unchecked, strip_dir_suffix, MaybeOwnedFile};
+
 use std::path::Path;
 use std::{fs, io};
 
@@ -12,6 +20,39 @@ pub(crate) fn rename(
     old_path: &Path,
     new_start: &fs::File,
     new_path: &Path,
+) -> io::Result<()> {
+    do_rename(old_start, old_path, new_start, new_path, rename_unchecked)
+}
+
+/// Implement `rename_exclusive` by `open`ing up the parent component of the path and then
+/// calling `rename_excl_unchecked` on the last component.
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+pub(crate) fn rename_exclusive(
+    old_start: &fs::File,
+    old_path: &Path,
+    new_start: &fs::File,
+    new_path: &Path,
+) -> io::Result<()> {
+    do_rename(
+        old_start,
+        old_path,
+        new_start,
+        new_path,
+        rename_excl_unchecked,
+    )
+}
+
+fn do_rename(
+    old_start: &fs::File,
+    old_path: &Path,
+    new_start: &fs::File,
+    new_path: &Path,
+    rename_impl: impl Fn(&fs::File, &Path, &fs::File, &Path) -> io::Result<()>,
 ) -> io::Result<()> {
     let old_start = MaybeOwnedFile::borrowed(old_start);
     let new_start = MaybeOwnedFile::borrowed(new_start);
@@ -41,7 +82,7 @@ pub(crate) fn rename(
         old_basename
     };
 
-    rename_unchecked(
+    rename_impl(
         &old_dir,
         old_basename.as_ref(),
         &new_dir,

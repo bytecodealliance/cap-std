@@ -29,6 +29,13 @@ pub(crate) use read_link::read_link;
 pub(crate) use remove_dir::remove_dir;
 pub(crate) use remove_file::remove_file;
 pub(crate) use rename::rename;
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+pub(crate) use rename::rename_exclusive;
 #[cfg(windows)]
 pub(crate) use set_permissions::set_permissions;
 #[cfg(not(target_os = "wasi"))]

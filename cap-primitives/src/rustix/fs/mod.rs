@@ -23,6 +23,8 @@ mod remove_dir_all_impl;
 mod remove_dir_unchecked;
 mod remove_file_unchecked;
 mod remove_open_dir_by_searching;
+#[cfg(any(target_os = "macos", target_os = "linux", target_os = "redox"))]
+mod rename_excl_unchecked;
 mod rename_unchecked;
 mod reopen_impl;
 #[cfg(not(any(target_os = "android", target_os = "linux", target_os = "wasi")))]
@@ -106,6 +108,8 @@ pub(crate) use crate::fs::{
     via_parent::symlink as symlink_impl,
     remove_open_dir_by_searching as remove_open_dir_impl,
 };
+#[cfg(any(target_os = "macos", target_os = "linux", target_os = "redox"))]
+pub(crate) use crate::fs::via_parent::rename_exclusive as rename_excl_impl;
 #[cfg(not(target_os = "wasi"))]
 pub(crate) use crate::fs::via_parent::set_symlink_permissions as set_symlink_permissions_impl;
 #[cfg(not(target_os = "freebsd"))]
@@ -138,6 +142,8 @@ pub(crate) use remove_dir_all_impl::{remove_dir_all_impl, remove_open_dir_all_im
 pub(crate) use remove_dir_unchecked::remove_dir_unchecked;
 pub(crate) use remove_file_unchecked::remove_file_unchecked;
 pub(crate) use remove_open_dir_by_searching::remove_open_dir_by_searching;
+#[cfg(any(target_os = "macos", target_os = "linux", target_os = "redox"))]
+pub(crate) use rename_excl_unchecked::rename_excl_unchecked;
 pub(crate) use rename_unchecked::rename_unchecked;
 pub(crate) use reopen_impl::reopen_impl;
 pub(crate) use stat_unchecked::stat_unchecked;

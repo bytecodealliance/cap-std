@@ -22,6 +22,7 @@ mod remove_dir_all_impl;
 mod remove_dir_unchecked;
 mod remove_file_unchecked;
 mod remove_open_dir_impl;
+mod rename_excl_unchecked;
 mod rename_unchecked;
 mod reopen_impl;
 mod set_permissions_unchecked;
@@ -39,6 +40,7 @@ pub(crate) use crate::fs::{
     via_parent::hard_link as hard_link_impl,
     via_parent::create_dir as create_dir_impl,
     via_parent::rename as rename_impl,
+    via_parent::rename_exclusive as rename_excl_impl,
     via_parent::remove_dir as remove_dir_impl,
     via_parent::set_permissions as set_permissions_impl,
     via_parent::set_symlink_permissions as set_symlink_permissions_impl,
@@ -69,6 +71,7 @@ pub(crate) use remove_dir_all_impl::*;
 pub(crate) use remove_dir_unchecked::*;
 pub(crate) use remove_file_unchecked::*;
 pub(crate) use remove_open_dir_impl::*;
+pub(crate) use rename_excl_unchecked::*;
 pub(crate) use rename_unchecked::*;
 pub(crate) use reopen_impl::reopen_impl;
 pub(crate) use set_permissions_unchecked::*;

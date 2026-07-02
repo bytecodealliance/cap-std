@@ -1,6 +1,6 @@
-use cap_primitives::fs::Metadata;
 #[cfg(windows)]
 use cap_primitives::fs::_WindowsDirEntryExt;
+use cap_primitives::fs::Metadata;
 use std::io;
 
 /// Extension trait for `DirEntry`.
