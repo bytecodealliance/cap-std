@@ -5,7 +5,7 @@ use crate::fs::{FollowSymlinks, ImplOpenOptionsExt};
 /// This corresponds to [`std::fs::OpenOptions`].
 ///
 /// This `OpenOptions` has no `open` method. To open a file with an
-/// `OptionOptions`, first obtain a [`Dir`] containing the path, and then call
+/// `OpenOptions`, first obtain a [`Dir`] containing the path, and then call
 /// [`Dir::open_with`].
 ///
 /// [`Dir`]: https://docs.rs/cap-std/latest/cap_std/fs/struct.Dir.html
