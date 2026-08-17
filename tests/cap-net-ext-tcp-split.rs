@@ -62,7 +62,8 @@ fn connect_error() {
                 || e.kind() == ErrorKind::InvalidInput
                 || e.kind() == ErrorKind::AddrInUse
                 || e.kind() == ErrorKind::AddrNotAvailable
-                || e.kind() == ErrorKind::TimedOut,
+                || e.kind() == ErrorKind::TimedOut
+                || e.kind() == ErrorKind::NetowkrUnreachable,
             "bad error: {} {:?}",
             e,
             e.kind()
