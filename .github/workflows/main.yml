@@ -276,6 +276,34 @@ jobs:
         RUST_BACKTRACE: 1
       if: matrix.target != ''
 
+  test_freebsd:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - freebsd_version: "14.4"
+          - freebsd_version: "15.0"
+    name: FreeBSD ${{ matrix.freebsd_version }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Start VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: ${{ matrix.freebsd_version }}
+          usesh: true
+      - name: Install dependencies
+        shell: freebsd {0}
+        run: |
+          pkg install -y curl
+          fetch https://sh.rustup.rs -o rustup.sh
+          sh rustup.sh -y --profile=minimal
+      - name: Test
+        shell: freebsd {0}
+        run: |
+          . $HOME/.cargo/env
+          cargo test --features=fs_utf8 --workspace
+
   test_nightly:
     name: Test with Rust nightly
     runs-on: ${{ matrix.os }}
