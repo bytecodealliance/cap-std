@@ -54,7 +54,8 @@ fn connect_error() {
                 || e.kind() == ErrorKind::AddrNotAvailable
                 || e.kind() == ErrorKind::TimedOut
                 // Rust >=1.83 adds `ErrorKind::NetworkUnreachable`.
-                || e.to_string().contains("network unreachable"),
+                || e.to_string().contains("network unreachable")
+                || e.to_string().contains("Network is unreachable"),
             "bad error: {} {:?}",
             e,
             e.kind()
