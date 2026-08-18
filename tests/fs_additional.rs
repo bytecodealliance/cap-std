@@ -1386,17 +1386,29 @@ fn dotdot_slashdot_at_end_of_symlink_all_inside_dir() {
 fn statat_slash() {
     let tmpdir = tmpdir();
 
-    error_contains!(tmpdir.metadata("/"), "a path led outside of the filesystem");
-    error_contains!(
-        tmpdir.metadata("/foo"),
-        "a path led outside of the filesystem"
-    );
-    error_contains!(
-        tmpdir.symlink_metadata("/"),
-        "a path led outside of the filesyste"
-    );
-    error_contains!(
-        tmpdir.symlink_metadata("/foo"),
-        "a path led outside of the filesyste"
-    );
+    // FreeBSD 14+ uses `O_RESOLVE_BENEATH` which issues different errors.
+    #[cfg(target_os = "freebsd")]
+    {
+        error_contains!(tmpdir.metadata("/"), "Capabilities insufficient");
+        error_contains!(tmpdir.metadata("/foo"), "Capabilities insufficient");
+        error_contains!(tmpdir.symlink_metadata("/"), "Capabilities insufficient");
+        error_contains!(tmpdir.symlink_metadata("/foo"), "Capabilities insufficient");
+    }
+
+    #[cfg(not(target_os = "freebsd"))]
+    {
+        error_contains!(tmpdir.metadata("/"), "a path led outside of the filesystem");
+        error_contains!(
+            tmpdir.metadata("/foo"),
+            "a path led outside of the filesystem"
+        );
+        error_contains!(
+            tmpdir.symlink_metadata("/"),
+            "a path led outside of the filesyste"
+        );
+        error_contains!(
+            tmpdir.symlink_metadata("/foo"),
+            "a path led outside of the filesyste"
+        );
+    }
 }
