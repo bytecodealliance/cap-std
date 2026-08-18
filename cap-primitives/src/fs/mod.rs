@@ -64,16 +64,16 @@ pub use canonicalize::canonicalize;
 pub use copy::copy;
 pub use create_dir::create_dir;
 pub use dir_builder::*;
-pub use dir_entry::DirEntry;
 #[cfg(windows)]
 pub use dir_entry::_WindowsDirEntryExt;
+pub use dir_entry::DirEntry;
 pub use dir_options::DirOptions;
 pub use file::FileExt;
+#[cfg(windows)]
+pub use file_type::_WindowsFileTypeExt;
 pub use file_type::FileType;
 #[cfg(any(unix, target_os = "vxworks", all(windows, windows_file_type_ext)))]
 pub use file_type::FileTypeExt;
-#[cfg(windows)]
-pub use file_type::_WindowsFileTypeExt;
 pub use follow_symlinks::FollowSymlinks;
 pub use hard_link::hard_link;
 pub use is_file_read_write::is_file_read_write;
