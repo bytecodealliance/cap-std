@@ -222,23 +222,12 @@ impl<'start> Context<'start> {
             dir_options()
         };
 
-        // If the last path component ended in a slash, re-add the slash,
-        // as Rust's `Path` will have removed it, and we need it to get the
-        // same behavior from the OS.
-        let use_path: Cow<OsStr> = if self.components.is_empty() && self.trailing_slash {
-            let mut p = one.to_os_string();
-            p.push("/");
-            Cow::Owned(p)
-        } else {
-            Cow::Borrowed(one)
-        };
-
         let dir_required = self.dir_required || use_options.dir_required;
 
         #[allow(clippy::redundant_clone)]
         match open_unchecked(
             &self.base,
-            use_path.as_ref(),
+            one.as_ref(),
             use_options
                 .clone()
                 .follow(FollowSymlinks::No)
