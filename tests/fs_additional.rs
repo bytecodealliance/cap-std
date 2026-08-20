@@ -5,6 +5,7 @@
 #[macro_use]
 mod sys_common;
 
+use cap_std::ambient_authority;
 use cap_std::fs::{Dir, DirBuilder, OpenOptions};
 use cap_std::time::SystemClock;
 use std::io::{self, Read, Write};
@@ -1409,6 +1410,102 @@ fn statat_slash() {
         error_contains!(
             tmpdir.symlink_metadata("/foo"),
             "a path led outside of the filesyste"
+        );
+    }
+}
+
+/// Test interactions between symlinks and trailing slashes.
+#[test]
+fn trailing_slash_symlink() {
+    let tmpdir = tmpdir();
+
+    check!(tmpdir.create_dir("sandbox"));
+    check!(symlink_dir("../outside", &tmpdir, "sandbox/hidden"));
+    check!(symlink_dir("hidden/", &tmpdir, "sandbox/indirect"));
+
+    let sandbox = check!(tmpdir.open_dir("sandbox"));
+
+    for path in ["hidden", "hidden/", "indirect", "indirect/"] {
+        error!(
+            sandbox.open_dir(path),
+            "a path led outside of the filesystem"
+        );
+        error!(
+            sandbox.read_dir(path),
+            "a path led outside of the filesystem"
+        );
+        error!(
+            sandbox.canonicalize(path),
+            "a path led outside of the filesystem"
+        );
+    }
+}
+
+/// Similar to `trailing_slash_symlink`, but populates the test directory
+/// outside the sandbox, so it can cover more cases.
+#[test]
+fn trailing_slash_symlink_more() {
+    let tmpdir = tempfile::tempdir().unwrap();
+
+    check!(std::fs::create_dir(tmpdir.path().join("sandbox")));
+    #[cfg(unix)]
+    {
+        check!(std::os::unix::fs::symlink(
+            "../outside",
+            tmpdir.path().join("sandbox/hidden")
+        ));
+        check!(std::os::unix::fs::symlink(
+            "hidden/",
+            tmpdir.path().join("sandbox/indirect")
+        ));
+        check!(std::os::unix::fs::symlink(
+            "/.",
+            tmpdir.path().join("sandbox/root_link")
+        ));
+    }
+    #[cfg(windows)]
+    {
+        check!(std::os::windows::fs::symlink_dir(
+            "../outside",
+            tmpdir.path().join("sandbox/hidden")
+        ));
+        check!(std::os::windows::fs::symlink_dir(
+            "hidden/",
+            tmpdir.path().join("sandbox/indirect")
+        ));
+        check!(std::os::windows::fs::symlink_dir(
+            "/.",
+            tmpdir.path().join("sandbox/root_link")
+        ));
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        compile_error!("not implemented yet");
+    }
+
+    let tmpdir = check!(Dir::open_ambient_dir(tmpdir.path(), ambient_authority()));
+
+    let sandbox = check!(tmpdir.open_dir("sandbox"));
+
+    for path in [
+        "hidden",
+        "hidden/",
+        "indirect",
+        "indirect/",
+        "root_link",
+        "root_link/",
+    ] {
+        error!(
+            sandbox.open_dir(path),
+            "a path led outside of the filesystem"
+        );
+        error!(
+            sandbox.read_dir(path),
+            "a path led outside of the filesystem"
+        );
+        error!(
+            sandbox.canonicalize(path),
+            "a path led outside of the filesystem"
         );
     }
 }
