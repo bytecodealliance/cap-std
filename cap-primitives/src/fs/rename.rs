@@ -2,6 +2,13 @@
 
 #[cfg(all(racy_asserts, not(windows)))]
 use crate::fs::append_dir_suffix;
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+use crate::fs::rename_excl_impl;
 use crate::fs::rename_impl;
 use std::path::Path;
 use std::{fs, io};
@@ -13,6 +20,17 @@ use {
     },
     std::path::PathBuf,
 };
+
+#[cfg(all(
+    racy_asserts,
+    any(
+        target_os = "macos",
+        target_os = "linux",
+        target_os = "redox",
+        target_os = "windows"
+    )
+))]
+use crate::fs::rename_excl_unchecked;
 
 /// Perform a `renameat`-like operation, ensuring that the resolution of both
 /// the old and new paths never escape the directory tree rooted at their
@@ -51,6 +69,59 @@ pub fn rename(
         &result,
         &old_metadata_after,
         &new_metadata_after,
+        rename_unchecked,
+    );
+
+    result
+}
+
+/// Perform a `renameat`-like operation, ensuring that the resolution of both
+/// the old and new paths never escape the directory tree rooted at their
+/// respective starts.
+///
+/// Unlike [`rename`], the rename fails if the target exists. The check is atomic on supported
+/// platform which mitigates potential races (TOCTOU).
+#[cfg_attr(not(racy_asserts), allow(clippy::let_and_return))]
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+#[inline]
+pub fn rename_exclusive(
+    old_start: &fs::File,
+    old_path: &Path,
+    new_start: &fs::File,
+    new_path: &Path,
+) -> io::Result<()> {
+    #[cfg(racy_asserts)]
+    let (old_metadata_before, new_metadata_before) = (
+        stat_unchecked(old_start, old_path, FollowSymlinks::No),
+        stat_unchecked(new_start, new_path, FollowSymlinks::No),
+    );
+
+    // Call the underlying implementation.
+    let result = rename_excl_impl(old_start, old_path, new_start, new_path);
+
+    #[cfg(racy_asserts)]
+    let (old_metadata_after, new_metadata_after) = (
+        stat_unchecked(old_start, old_path, FollowSymlinks::No),
+        stat_unchecked(new_start, new_path, FollowSymlinks::No),
+    );
+
+    #[cfg(racy_asserts)]
+    check_rename(
+        old_start,
+        old_path,
+        new_start,
+        new_path,
+        &old_metadata_before,
+        &new_metadata_before,
+        &result,
+        &old_metadata_after,
+        &new_metadata_after,
+        rename_excl_unchecked,
     );
 
     result
@@ -69,6 +140,7 @@ fn check_rename(
     result: &io::Result<()>,
     old_metadata_after: &io::Result<Metadata>,
     new_metadata_after: &io::Result<Metadata>,
+    rename_impl: impl Fn(&fs::File, &Path, &fs::File, &Path) -> io::Result<()>,
 ) {
     use io::ErrorKind::*;
 
@@ -97,20 +169,20 @@ fn check_rename(
             map_result(&canonicalize_for_rename(old_start, old_path)),
             map_result(&canonicalize_for_rename(new_start, new_path)),
         ) {
-            (Ok(old_canon), Ok(new_canon)) => match map_result(&rename_unchecked(
-                old_start, &old_canon, new_start, &new_canon,
-            )) {
-                Err((_unchecked_kind, _unchecked_message)) => {
-                    /* TODO: Check error messages.
-                    assert_eq!(kind, unchecked_kind);
-                    assert_eq!(message, unchecked_message);
-                    */
+            (Ok(old_canon), Ok(new_canon)) => {
+                match map_result(&rename_impl(old_start, &old_canon, new_start, &new_canon)) {
+                    Err((_unchecked_kind, _unchecked_message)) => {
+                        /* TODO: Check error messages.
+                        assert_eq!(kind, unchecked_kind);
+                        assert_eq!(message, unchecked_message);
+                        */
+                    }
+                    other => panic!(
+                        "unsandboxed rename success:\n{:#?}\n{:?} {:?}",
+                        other, kind, message
+                    ),
                 }
-                other => panic!(
-                    "unsandboxed rename success:\n{:#?}\n{:?} {:?}",
-                    other, kind, message
-                ),
-            },
+            }
             (Err((_old_canon_kind, _old_canon_message)), _) => {
                 /* TODO: Check error messages.
                 assert_eq!(kind, old_canon_kind);

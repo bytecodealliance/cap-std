@@ -43,6 +43,7 @@ version = ">=0.60, <0.62"
 features = [
     "Win32_Storage_FileSystem",
     "Win32_Foundation",
+    "Win32_Security_Authorization",
     "Win32_System_Ioctl",
     "Win32_System_SystemServices",
 ]

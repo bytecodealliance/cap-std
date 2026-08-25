@@ -5,6 +5,13 @@ use crate::fs::{DirBuilder, File, Metadata, OpenOptions, ReadDir};
 use crate::fs_utf8::Dir as DirUtf8;
 #[cfg(unix)]
 use crate::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+use cap_primitives::fs::rename_exclusive;
 #[cfg(not(target_os = "wasi"))]
 use cap_primitives::fs::set_permissions;
 use cap_primitives::fs::{
@@ -395,6 +402,23 @@ impl Dir {
         to: Q,
     ) -> io::Result<()> {
         rename(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
+    }
+
+    /// Rename a file or a directory to a new name but only if the target does not exist.
+    #[cfg(any(
+        target_os = "macos",
+        target_os = "linux",
+        target_os = "redox",
+        target_os = "windows"
+    ))]
+    #[inline]
+    pub fn rename_exclusive<P: AsRef<Path>, Q: AsRef<Path>>(
+        &self,
+        from: P,
+        to_dir: &Self,
+        to: Q,
+    ) -> io::Result<()> {
+        rename_exclusive(&self.std_file, from.as_ref(), &to_dir.std_file, to.as_ref())
     }
 
     /// Changes the permissions found on a file or a directory.

@@ -94,6 +94,13 @@ pub use remove_dir_all::remove_dir_all;
 pub use remove_file::remove_file;
 pub use remove_open_dir::{remove_open_dir, remove_open_dir_all};
 pub use rename::rename;
+#[cfg(any(
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "redox",
+    target_os = "windows"
+))]
+pub use rename::rename_exclusive;
 pub use reopen::reopen;
 #[cfg(not(target_os = "wasi"))]
 pub use set_permissions::{set_permissions, set_symlink_permissions};
