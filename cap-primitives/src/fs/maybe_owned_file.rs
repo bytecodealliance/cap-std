@@ -1,5 +1,4 @@
 use crate::fs::{open_unchecked, OpenOptions};
-use maybe_owned::MaybeOwned;
 use std::ops::Deref;
 use std::path::Component;
 use std::{fmt, fs, io, mem};
@@ -25,6 +24,28 @@ pub(super) struct MaybeOwnedFile<'borrow> {
 
     #[cfg(racy_asserts)]
     path: Option<PathBuf>,
+}
+
+enum MaybeOwned<'a, T: 'a> {
+    Owned(T),
+    Borrowed(&'a T),
+}
+
+impl<T> Deref for MaybeOwned<'_, T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        match self {
+            Self::Owned(v) => v,
+            Self::Borrowed(v) => v,
+        }
+    }
+}
+
+impl<T> AsRef<T> for MaybeOwned<'_, T> {
+    fn as_ref(&self) -> &T {
+        self
+    }
 }
 
 impl<'borrow> MaybeOwnedFile<'borrow> {
